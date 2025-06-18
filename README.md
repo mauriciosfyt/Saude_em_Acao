@@ -22,7 +22,7 @@
   - [Documentação Adicional](#-documentação-adicional)
 
 - [Backend Login](#-backend-login)
-  - [Tecnologias Aplicadas -](#️-tecnologias-aplicadas)
+  - [Tecnologias Aplicadas](#️-tecnologias-aplicadas)
   - [Pré-requisitos](#-pré-requisitos)
   - [Configuração do Ambiente](#-configuração-do-ambiente)
   - [Link da API de Login](#-link-da-api-de-login)
