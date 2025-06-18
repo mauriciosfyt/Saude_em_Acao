@@ -11,7 +11,7 @@
 
 ## 📚 Sumário
 
-- [Front-End](#frontend)
+- [Front-End](#️-front-end)
   - [Descrição](#-descrição)
   - [Funcionalidades](#-funcionalidades)
   - [Tecnologias Utilizadas](#-tecnologias-utilizadas)
