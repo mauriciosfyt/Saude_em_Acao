@@ -28,7 +28,6 @@
   - [Configuração do Ambiente](#-configuração-do-ambiente-1)
   - [Funcionalidades Principais](#-funcionalidades-principais)
 - [Resumo Técnico](#-resumo-técnico)
-- [Diferenciais](#-diferenciais)
 - [Contribuindo](#-contribuindo)
 - [Contato](#-contato)
 - [Licença](#-licença)
