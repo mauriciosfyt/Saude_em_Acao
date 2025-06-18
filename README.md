@@ -31,7 +31,7 @@
   - [Estrutura do Projeto](#-estrutura-do-projeto)
 
 - [Backend Administrativo](#-backend-administrativo)
-  - [Tecnologias Utilizadas](#-tecnologias-utilizadas-2)
+  - [Tecnologias Utilizadas](#tecnologias-utilizadas)
   - [Pré-requisitos](#-pré-requisitos-1)
   - [Configuração do Ambiente](#-configuração-do-ambiente-1)
   - [Link da API e Documentação](#-link-da-api-e-documentação)
