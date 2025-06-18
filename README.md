@@ -1,6 +1,6 @@
 # Saúde em Ação
 
-> **Resumo:**  
+> **Sobre o Projeto:**  
   O Saúde em Ação é uma plataforma web completa e moderna voltada à saúde, bem-estar e à gestão da academia.
 > O sistema oferece soluções personalizadas e integradas para alunos, professores e administradores, contemplando desde o acompanhamento de treinos até o gerenciamento administrativo,
  com interfaces intuitivas e tecnologias atuais.
@@ -11,18 +11,13 @@
 
 ## 📚 Sumário
 
-- [Sobre o Projeto](#sobre-o-projeto)  
-- [Arquitetura & Estrutura de Pastas](#arquitetura--estrutura-de-pastas)  
-- [Funcionalidades Detalhadas](#funcionalidades-detalhadas)  
-- [Tecnologias Utilizadas](#tecnologias-utilizadas)  
-- [Guia de Instalação (Passo a Passo)](#guia-de-instalação-passo-a-passo)  
-- [Como Usar](#como-usar)  
-- [Configuração de Ambiente](#configuração-de-ambiente)  
-- [Principais Endpoints da API](#principais-endpoints-da-api)  
-- [Fluxo de Desenvolvimento & Contribuição](#fluxo-de-desenvolvimento--contribuição)  
-- [Licença](#licença)  
-- [Contato](#contato)  
-- [Protótipo](#protótipo)  
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Front-End](#️-front-end)
+- [Backend Login](#-backend-login)
+- [Backend Administrativo](#-backend-administrativo)
+- [Contribuindo](#-contribuindo)
+- [Contato](#-contato)
+- [Licença](#-licença)
 ---
 
 ## 🖥️ Front-End
