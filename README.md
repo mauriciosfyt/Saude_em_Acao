@@ -11,7 +11,7 @@
 
 ## 📚 Sumário
 
-- [Frontend](#-frontend)
+- [Front-End](#frontend)
   - [Descrição](#-descrição)
   - [Funcionalidades](#-funcionalidades)
   - [Tecnologias Utilizadas](#-tecnologias-utilizadas)
@@ -43,7 +43,7 @@
 
 ---
 
-## 🖥️ Frontend
+## 🖥️ Front-End
 
 O Front-End do **Saúde em Ação** é uma aplicação web que oferece uma experiência intuitiva para usuários de diferentes perfis.
 
