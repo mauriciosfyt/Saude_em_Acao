@@ -11,7 +11,6 @@
 
 ## 📚 Sumário
 
-## 📚 Sumário
 
 - [Front-End](#️-front-end)
   - [Descrição](#-descrição)
