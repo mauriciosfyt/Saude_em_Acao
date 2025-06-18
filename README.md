@@ -153,7 +153,7 @@ API RESTful desenvolvida com Spring Boot para autenticação, gerenciamento de u
 
 - JDK 17 ou superior
 - Maven
-- MySQL
+- MongoDB
 - Docker (opcional)
 
 ---
@@ -230,10 +230,8 @@ src/
 ├── main/
 │   ├── java/
 │   │   └── br/com/saudeemacao/
-│   │       ├── config/
 │   │       ├── controller/
 │   │       ├── dto/
-│   │       ├── entity/
 │   │       ├── repository/
 │   │       ├── service/
 │   │       └── Security/
@@ -263,7 +261,7 @@ API RESTful desenvolvida em Spring Boot para gerenciamento administrativo da aca
 
 - Java 21 ou superior
 - Maven
-- MySQL
+- MongoDB
 - IDE (IntelliJ IDEA ou Eclipse recomendado)
 
 ---
