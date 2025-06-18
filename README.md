@@ -9,37 +9,37 @@
 ---
 
 
-## 📚 Sumário
-
-## Sumario
+# 📚 Sumário
 
 - [Front-End](#front-end)
-  - [Descricao](#descricao)
+  - [Descrição](#descrição)
   - [Funcionalidades](#funcionalidades)
   - [Tecnologias Utilizadas](#tecnologias-utilizadas)
-  - [Instalacao](#instalacao)
-  - [Paginas Principais](#paginas-principais)
-  - [Documentacao Adicional](#documentacao-adicional)
+  - [Instalação](#instalação)
+  - [Páginas Principais](#páginas-principais)
+  - [Documentação Adicional](#documentação-adicional)
 - [Backend Login](#backend-login)
   - [Tecnologias Utilizadas](#tecnologias-utilizadas-1)
-  - [Pre-requisitos](#pre-requisitos)
-  - [Configuracao do Ambiente](#configuracao-do-ambiente)
+  - [Pré-requisitos](#pré-requisitos)
+  - [Configuração do Ambiente](#configuração-do-ambiente)
   - [Link da API de Login](#link-da-api-de-login)
   - [Executando com Docker](#executando-com-docker)
-  - [Documentacao da API](#documentacao-da-api)
-  - [Seguranca](#seguranca)
+  - [Documentação da API](#documentação-da-api)
+  - [Segurança](#segurança)
   - [Funcionalidades](#funcionalidades-1)
   - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Backend Administrativo](#backend-administrativo)
   - [Tecnologias Utilizadas](#tecnologias-utilizadas-2)
-  - [Pre-requisitos](#pre-requisitos-1)
-  - [Configuracao do Ambiente](#configuracao-do-ambiente-1)
-  - [Link da API e Documentacao](#link-da-api-e-documentacao)
+  - [Pré-requisitos](#pré-requisitos-1)
+  - [Configuração do Ambiente](#configuração-do-ambiente-1)
+  - [Link da API e Documentação](#link-da-api-e-documentação)
   - [Funcionalidades Principais](#funcionalidades-principais)
   - [Estrutura do Projeto](#estrutura-do-projeto-1)
 - [Contribuindo](#contribuindo)
 - [Contato](#contato)
-- [Licenca](#licenca)
+- [Licença](#licença)
+
+---
 ---
 
 ## 🖥️ Front-End
