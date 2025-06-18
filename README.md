@@ -12,16 +12,17 @@
 ## 📚 Sumário
 
 
+
 - [Front-End](#️-front-end)
   - [Descrição](#-descrição)
   - [Funcionalidades](#-funcionalidades)
-  - [Tecnologias Utilizadas](#🛠️-tecnologias-utilizadas)
+  - [Tecnologias Utilizadas](#tecnologias-utilizadas)
   - [Instalação](#-instalação)
   - [Páginas Principais](#-páginas-principais)
   - [Documentação Adicional](#-documentação-adicional)
 
 - [Backend Login](#-backend-login)
-  - [Tecnologias Utilizadas](#🚀-tecnologias-utilizadas)
+  - [Tecnologias Utilizadas](#-tecnologias-utilizadas-1)
   - [Pré-requisitos](#-pré-requisitos)
   - [Configuração do Ambiente](#-configuração-do-ambiente)
   - [Link da API de Login](#-link-da-api-de-login)
@@ -29,18 +30,18 @@
   - [Documentação da API](#-documentação-da-api)
   - [Segurança](#-segurança)
   - [Funcionalidades](#-funcionalidades-1)
-  - [Estrutura do Projeto](#🛠️-estrutura-do-projeto)
+  - [Estrutura do Projeto](#-estrutura-do-projeto)
 
 - [Backend Administrativo](#-backend-administrativo)
-  - [Tecnologias Utilizadas](#🚀-tecnologias-utilizadas-1)
+  - [Tecnologias Utilizadas](#tecnologias-utilizadas)
   - [Pré-requisitos](#-pré-requisitos-1)
   - [Configuração do Ambiente](#-configuração-do-ambiente-1)
   - [Link da API e Documentação](#-link-da-api-e-documentação)
-  - [Estrutura do Projeto](#📦-estrutura-do-projeto)
+  - [Estrutura do Projeto](#-estrutura-do-projeto-1)
 
-- [Contribuindo](#🤝-contribuindo)
-- [Contato](#📬-contato)
-- [Licença](#📝-licença)
+- [Contribuindo](#-contribuindo)
+- [Contato](#-contato)
+- [Licença](#-licença)
 
 
 
