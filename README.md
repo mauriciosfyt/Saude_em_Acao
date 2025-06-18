@@ -79,7 +79,7 @@ O Front-End do **Saúde em Ação** é uma aplicação web que oferece uma exper
 
 ---
 
-### 🛠️ Tecnologias Aplicadas
+### 🛠️ Tecnologias Utilizadas
 
 - HTML5, CSS3, JavaScript
 - Bootstrap
@@ -141,7 +141,7 @@ API RESTful desenvolvida com Spring Boot para autenticação, gerenciamento de u
 
 ---
 
-### 🚀 Tecnologias Utilizadas
+### 🚀 Tecnologias Aplicadas
 
 - Java 17, Spring Boot 3.4.4
 - Spring Security, JWT Authentication (Autenticação JWT)
