@@ -27,7 +27,6 @@
   - [Tecnologias Utilizadas](#-tecnologias-utilizadas-2)
   - [Configuração do Ambiente](#-configuração-do-ambiente-1)
   - [Funcionalidades Principais](#-funcionalidades-principais)
-- [Resumo Técnico](#-resumo-técnico)
 - [Contribuindo](#-contribuindo)
 - [Contato](#-contato)
 - [Licença](#-licença)
