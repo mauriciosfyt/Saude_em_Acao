@@ -10,7 +10,6 @@
 
 ## 📚 Sumário
 
-
 - [Front-End](#️-front-end)
   - [Descrição](#-descrição)
   - [Funcionalidades](#-funcionalidades)
@@ -40,8 +39,6 @@
 - [Contribuindo](#-contribuindo)
 - [Contato](#-contato)
 - [Licença](#-licença)
-
-
 
 ---
 
@@ -143,7 +140,7 @@ API RESTful desenvolvida com Spring Boot para autenticação, gerenciamento de u
 
 - Java 17, Spring Boot 3.4.4
 - Spring Security, JWT Authentication (Autenticação JWT)
-- Spring Data JPA, MySQL, Maven
+- Spring Data JPA, **MongoDB**, Maven
 - Lombok, MapStruct
 - WebSocket, Spring Mail
 
@@ -153,7 +150,7 @@ API RESTful desenvolvida com Spring Boot para autenticação, gerenciamento de u
 
 - JDK 17 ou superior
 - Maven
-- MongoDB
+- **MongoDB**
 - Docker (opcional)
 
 ---
@@ -164,9 +161,9 @@ API RESTful desenvolvida com Spring Boot para autenticação, gerenciamento de u
    ```bash
    git clone https://api-login-lt52.onrender.com
    ```
-2. Configure o MySQL:
-   - Crie o banco de dados
-   - Ajuste as credenciais em `application.properties`
+2. Configure o **MongoDB**:
+   - Crie o banco de dados no MongoDB
+   - Ajuste as credenciais de conexão ao MongoDB em `application.properties`
 3. Instale as dependências:
    ```bash
    mvn clean install
@@ -250,7 +247,7 @@ API RESTful desenvolvida em Spring Boot para gerenciamento administrativo da aca
 ### 🚀 Tecnologias Usadas
 
 - Java 21, Spring Boot 3.2.0
-- Spring Data JPA, MySQL
+- Spring Data JPA, **MongoDB**
 - Lombok, Swagger/OpenAPI
 - Cloudinary (upload de imagens)
 - Maven
@@ -261,7 +258,7 @@ API RESTful desenvolvida em Spring Boot para gerenciamento administrativo da aca
 
 - Java 21 ou superior
 - Maven
-- MongoDB
+- **MongoDB**
 - IDE (IntelliJ IDEA ou Eclipse recomendado)
 
 ---
@@ -272,9 +269,9 @@ API RESTful desenvolvida em Spring Boot para gerenciamento administrativo da aca
    ```bash
    git clone [URL_DO_REPOSITÓRIO]
    ```
-2. Configure o MySQL:
-   - Crie o banco de dados
-   - Ajuste as credenciais em `application.properties`
+2. Configure o **MongoDB**:
+   - Crie o banco de dados no MongoDB
+   - Ajuste as credenciais de conexão ao MongoDB em `application.properties`
 3. Instale as dependências:
    ```bash
    mvn clean install
