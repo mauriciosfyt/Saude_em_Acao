@@ -35,7 +35,6 @@
   - [Pré-requisitos](#-pré-requisitos-1)
   - [Configuração do Ambiente](#-configuração-do-ambiente-1)
   - [Link da API e Documentação](#-link-da-api-e-documentação)
-  - [Funcionalidades Principais](#-funcionalidades-principais)
   - [Estrutura do Projeto](#-estrutura-do-projeto-1)
 
 - [Contribuindo](#-contribuindo)
