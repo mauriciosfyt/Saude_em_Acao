@@ -8,9 +8,7 @@
 
 ---
 
-
 ## 📚 Sumário
-
 
 
 - [Front-End](#️-front-end)
