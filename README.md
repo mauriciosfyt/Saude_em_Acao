@@ -16,7 +16,7 @@
 - [Front-End](#️-front-end)
   - [Descrição](#-descrição)
   - [Funcionalidades](#-funcionalidades)
-  - [Tecnologias Utilizadas](#tecnologias-utilizadas)
+  - [Tecnologias Utilizadas](#https://github.com/mauriciosfyt/Saude_em_Acao/blob/main/README.md#%EF%B8%8F-tecnologias-utilizadas)
   - [Instalação](#-instalação)
   - [Páginas Principais](#-páginas-principais)
   - [Documentação Adicional](#-documentação-adicional)
