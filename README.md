@@ -14,7 +14,7 @@
 - [Front-End](#️-front-end)
   - [Descrição](#-descrição)
   - [Funcionalidades](#-funcionalidades)
-  - [Tecnologias Utilizadas](#-tecnologias-utilizadas)
+  - [Tecnologias Utilizadas](#tecnologias-utilizadas)
   - [Instalação](#-instalação)
   - [Páginas Principais](#-páginas-principais)
   - [Documentação Adicional](#-documentação-adicional)
