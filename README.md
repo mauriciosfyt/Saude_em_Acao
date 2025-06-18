@@ -22,7 +22,7 @@
   - [Documentação Adicional](#-documentação-adicional)
 
 - [Backend Login](#-backend-login)
-  - [Tecnologias Utilizadas -](#️-tecnologias-aplicadas)
+  - [Tecnologias Aplicadas -](#️-tecnologias-aplicadas)
   - [Pré-requisitos](#-pré-requisitos)
   - [Configuração do Ambiente](#-configuração-do-ambiente)
   - [Link da API de Login](#-link-da-api-de-login)
@@ -33,7 +33,7 @@
   - [Estrutura do Projeto](#-estrutura-do-projeto)
 
 - [Backend Administrativo](#-backend-administrativo)
-  - [Tecnologias Utilizadas](#️-tecnologias-usadas)
+  - [Tecnologias Usadas](#️-tecnologias-usadas)
   - [Pré-requisitos](#-pré-requisitos-1)
   - [Configuração do Ambiente](#-configuração-do-ambiente-1)
   - [Link da API e Documentação](#-link-da-api-e-documentação)
