@@ -23,36 +23,15 @@ function Home() {
         </div>
       </header>
 
-      {/* Onde o restante do conteúdo da Home será adicionado */}
-      {/* A tag <main> deve envolver o conteúdo principal que não é header nem footer. */}
-      {/* Pode estar vazia aqui se suas seções são <section> diretas como abaixo. */}
+   
       <main>
         {/* BANNER */}
         <div className="banner-gradient">
           <section className="banner">
             <img src={banner_home} alt="Banner" />
             {/* Se quiser texto sobre o banner, adicione aqui */}
-          </section>
+          </section>      
         </div>
-
-        {/* INSTAGRAM */}
-        <section className="instagram">
-          <h2>Um pouco sobre nosso Instagram:</h2>
-          <div className="insta-images">
-            <div>
-              <img src={academia1} alt="Academia 1" />
-              <p>Academia 1</p>
-            </div>
-            <div>
-              <img src={academia2} alt="Academia 2" />
-              <p>Academia 2</p>
-            </div>
-            <div>
-              <img src={academia3} alt="Academia 3" />
-              <p>Academia 3</p>
-            </div>
-          </div>
-        </section>
 
         {/* PLANOS */}
         <section className="planos">
@@ -89,22 +68,49 @@ function Home() {
               <button>Assinar</button>
             </div>
           </div>
+        </section>
 
-          <div className="parcerias">
-            <p>ACEITAMOS</p>
-            <strong>Gympass</strong>   <strong>Total Pass</strong>
+        {/* INSTAGRAM */}
+        <section className="instagram">
+          <h2>UM POUCO SOBRE NOSSO INSTAGRAM</h2>
+          <div className="insta-images">
+
+          <a href="src/pages/Professores/index.jsx">
+            <div>
+              <img src={academia2} alt="Academia 2" />
+              <p>Professores</p>
+            </div>
+          </a>
+
+           <a href="src/pages/Loja/index.jsx">
+            <div>
+              <img src={academia1} alt="Academia 1" />
+              <p>Loja</p>
+            </div>
+            </a>
+
+
+            <div>
+              <img src={academia3} alt="Academia 3" />
+              <p>Suporte</p>
+            </div>
+
+
+            <div>
+              <img src={academia3} alt="Academia 3" />
+              <p>Suporte</p>
+            </div>
           </div>
         </section>
 
+
         {/* LOCALIZAÇÃO */}
         <section className="localizacao">
-          <h2>Nossa Localização</h2>
+          <h2>NOSSA LOCALIZAÇÃO</h2>
           {/* CORRIGIDO: Use uma URL válida para incorporar o Google Maps. */}
           {/* Esta URL é um exemplo de incorporação da localização que você forneceu. */}
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3656.326372076211!2d-46.77259468502127!3d-23.59374098466657!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce55a2c2b7e127%3A0x6b8f170c8a6f4e6e!2sR.%20Jos%C3%A9%20Pereira%20Bueno%2C%2068%20-%20Vila%20Franca%2C%20S%C3%A3o%20Paulo%20-%20SP%2C%2005776-430!5e0!3m2!1spt-BR!2sbr!4v1719702206781!5m2!1spt-BR!2sbr"
-            width="100%"
-            height="300"
             style={{ border: 0 }}
             allowFullScreen=""
             loading="lazy"
@@ -115,6 +121,7 @@ function Home() {
             R. José Pereira Bueno, 68 - Vila Franca - São Paulo - SP, 05776-430
           </p>
         </section>
+        
       </main>
 
       {/* FOOTER */}
