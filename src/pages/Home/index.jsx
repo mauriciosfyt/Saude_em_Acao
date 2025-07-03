@@ -4,13 +4,34 @@ import "./styles.css"; // Este caminho está correto se styles.css estiver em sr
 // Corrija os caminhos das imagens aqui:
 import logo from "../../assets/logo_dia.png"; // CORRIGIDO
 import banner_home from "../../assets/banner_home.jpeg"; // CORRIGIDO
+import img_abaixo_banner from "../../assets/img_home.jpeg"; // CORRIGIDO
+import Footer from "../../components/footer";
 import academia1 from "../../assets/academia.jpeg"; // CORRIGIDO
 import academia2 from "../../assets/academia2.jpeg"; // CORRIGIDO
 import academia3 from "../../assets/academia3.jpeg"; // CORRIGIDO
 
-// ... (o restante do seu código Home.jsx)
+import { Link } from 'react-router-dom';
+
+
+import React, { useRef, useEffect, useState } from "react";
+
+
 
 function Home() {
+  const historiaRef = useRef(null);
+  const [showHistoria, setShowHistoria] = useState(false);
+
+  useEffect(() => {
+    const observer = new window.IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setShowHistoria(true);
+      },
+      { threshold: 0.3 }
+    );
+    if (historiaRef.current) observer.observe(historiaRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     // ESTE É O ÚNICO E PRINCIPAL home-container QUE DEVE ENVOLVER TODO O SEU CONTEÚDO
     <div className="home-container">
@@ -23,85 +44,136 @@ function Home() {
         </div>
       </header>
 
-   
       <main>
         {/* BANNER */}
         <div className="banner-gradient">
           <section className="banner">
             <img src={banner_home} alt="Banner" />
-            {/* Se quiser texto sobre o banner, adicione aqui */}
-          </section>      
+          </section>
+
+          {/* Imagem em preto e branco + box de texto ao lado, abaixo do banner */}
+          <div className="linha-abaixo-banner">
+            <img
+              src={img_abaixo_banner}
+              alt="Destaque"
+              className="img-abaixo-banner"
+            />
+            <div
+              className={`historia-box${showHistoria ? " show" : ""}`}
+              ref={historiaRef}
+            >
+              <h2>CONHEÇA NOSSA HISTÓRIA</h2>
+              <p>
+                A Saúde em Ação nasceu com um propósito: transformar vidas
+                através do movimento.
+                <br />
+                Aqui, cada treino é um passo rumo à sua melhor versão.
+              </p>
+              <button className="historia-btn">saiba mais sobre nós</button>
+            </div>
+          </div>
+
+          {/* TÍTULO FINAL DO BANNER */}
+          <div className="banner-titulo-final">
+            <h2>
+              <span className="bold">
+                Venha treinar na{" "}
+                <span className="azul">
+                  Saúde em Ação, a academia
+                  <br />
+                  que mais cresce na região!
+                </span>
+              </span>
+            </h2>
+            <p className="subtitulo-final">
+              ambiente motivador e planos que cabem no seu bolso
+            </p>
+          </div>
         </div>
 
         {/* PLANOS */}
         <section className="planos">
           <h2>PLANOS</h2>
           <div className="plano-cards">
-            <div className="card">
+            <div className="plano-card">
               <h3>BÁSICO</h3>
-              <p>R$ 99,00</p>
+              <div className="linha-azul"></div>
+              <p className="preco">
+                <b>R$ 120,00</b>
+              </p>
+              <span className="modalidade-titulo">
+                ESCOLHA UMA DAS MODALIDADES:
+              </span>
               <ul>
-                <li>Funcional</li>
-                <li>Musculação</li>
-                <li>Aula de ritmos</li>
+                <li>FUNCIONAL</li>
+                <li>THAY FIT</li>
+                <li>PILATES</li>
               </ul>
-              <button>Assinar</button>
+              <button className="plano-btn">Saiba Mais</button>
             </div>
-            <div className="card">
+            <div className="plano-card">
               <h3>ESSENCIAL</h3>
-              <p>R$ 150,00</p>
+              <div className="linha-azul"></div>
+              <p className="preco">
+                <b>R$ 159,90</b>
+              </p>
+              <span className="modalidade-titulo">TODAS AS MODALIDADES:</span>
               <ul>
-                <li>Funcional</li>
-                <li>Musculação</li>
-                <li>Ritmos + Pilates</li>
+                <li>FUNCIONAL</li>
+                <li>THAY FIT</li>
+                <li>PILATES</li>
               </ul>
-              <button>Assinar</button>
+              <button className="plano-btn">Saiba Mais</button>
             </div>
-            <div className="card">
+            <div className="plano-card">
               <h3>GOLD</h3>
-              <p>R$ 200,00</p>
+              <div className="linha-azul"></div>
+              <p className="preco">
+                <b>R$ 300,00</b>
+              </p>
+              <span className="modalidade-titulo">TODAS AS MODALIDADES:</span>
               <ul>
-                <li>Funcional</li>
-                <li>Musculação</li>
-                <li>Pilates</li>
+                <li>FUNCIONAL</li>
+                <li>THAY FIT</li>
+                <li>PILATES</li>
               </ul>
-              <button>Assinar</button>
+              <button className="plano-btn">Saiba Mais</button>
             </div>
           </div>
         </section>
 
-        {/* INSTAGRAM */}
-        <section className="instagram">
-          <h2>UM POUCO SOBRE NOSSO INSTAGRAM</h2>
-          <div className="insta-images">
+    
+    <section className="instagram">
+  <div className="insta-images">
+    <Link to="/professores">
+      <div>
+        <img src={academia2} alt="Academia 2" />
+        <p>Professores</p>
+      </div>
+    </Link>
 
-          <a href="src/pages/Professores/index.jsx">
-            <div>
-              <img src={academia2} alt="Academia 2" />
-              <p>Professores</p>
-            </div>
-          </a>
+    <Link to="/Loja">
+      <div>
+        <img src={academia1} alt="Academia 1" />
+        <p>Loja</p>
+      </div>
+    </Link>
 
-           <a href="src/pages/Loja/index.jsx">
-            <div>
-              <img src={academia1} alt="Academia 1" />
-              <p>Loja</p>
-            </div>
-            </a>
+    <Link to="/suporte">
+      <div>
+        <img src={academia3} alt="Academia 3" />
+        <p>Suporte</p>
+      </div>
+    </Link>
 
-
-            <div>
-              <img src={academia3} alt="Academia 3" />
-              <p>Suporte</p>
-            </div>
-
-
-            <div>
-              <img src={academia3} alt="Academia 3" />
-              <p>Suporte</p>
-            </div>
-          </div>
-        </section>
+    <Link to="/suporte">
+      <div>
+        <img src={academia3} alt="Academia 3" />
+        <p>Suporte</p>
+      </div>
+    </Link>
+  </div>
+</section>
 
 
         {/* LOCALIZAÇÃO */}
@@ -121,13 +193,10 @@ function Home() {
             R. José Pereira Bueno, 68 - Vila Franca - São Paulo - SP, 05776-430
           </p>
         </section>
-        
       </main>
 
       {/* FOOTER */}
-      <footer className="footer">
-        <p>Saúde em Ação © 2025</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
