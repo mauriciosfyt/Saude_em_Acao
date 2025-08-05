@@ -1,4 +1,3 @@
-// AuthController.java (updated)
 package br.com.saudeemacao.api.controller;
 
 import br.com.saudeemacao.api.dto.TokenSolicitacaoDTO;
@@ -112,7 +111,9 @@ public class AuthController {
 
         try {
             TokenAcesso tokenAcesso = tokenAcessoService.gerarToken(dto.getEmail());
-            emailService.enviarToken(dto.getEmail(), tokenAcesso.getToken());
+            // **** ALTERAÇÃO PRINCIPAL AQUI ****
+            // Chamando o método específico para redefinição de senha
+            emailService.enviarTokenRedefinicaoSenha(dto.getEmail(), tokenAcesso.getToken());
             return ResponseEntity.ok("Se o e-mail estiver cadastrado, um token de redefinição de senha será enviado.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao enviar token de redefinição de senha: " + e.getMessage());
