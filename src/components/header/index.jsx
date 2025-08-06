@@ -68,7 +68,7 @@ const HeaderUser = () => {
         <div className="nav-center">
           <Link to="/">Home</Link>
           <Link to="/Loja">Loja</Link>
-          <Link to="/planos">Planos</Link>
+          <Link to="/Planos">Planos</Link>
           <Link to="/personal">Personal</Link>
           <Link to="/SobreNos">Sobre nós</Link>
         </div>
