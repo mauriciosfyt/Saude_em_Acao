@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Slider from "react-slick";
 import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
@@ -36,6 +36,34 @@ const SobreNos = () => {
     ]
   };
 
+  const imagemRef = useRef(null);
+  const [showImagem, setShowImagem] = useState(false);
+
+  useEffect(() => {
+    const observer = new window.IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setShowImagem(true);
+      },
+      { threshold: 0.3 }
+    );
+    if (imagemRef.current) observer.observe(imagemRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const imagemRef2 = useRef(null);
+  const [showImagem2, setShowImagem2] = useState(false);
+
+  useEffect(() => {
+    const observer2 = new window.IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setShowImagem2(true);
+      },
+      { threshold: 0.3 }
+    );
+    if (imagemRef2.current) observer2.observe(imagemRef2.current);
+    return () => observer2.disconnect();
+  }, []);
+
   return (
     <div className="sobre-nos">
       <HeaderUser />
@@ -64,7 +92,12 @@ const SobreNos = () => {
               </p>
             </div>
             <div className="imagem">
-              <img src={img1} alt="Academia moderna" />
+              <img
+                src={img1}
+                alt="Academia moderna"
+                ref={imagemRef}
+                className={`img-animada-sobre ${showImagem ? "show" : ""}`}
+              />
             </div>
           </div>
         </section>
@@ -73,7 +106,12 @@ const SobreNos = () => {
         <section className="bloco sobre-azul">
           <div className="conteudo-bloco invertido">
             <div className="imagem">
-              <img src={img2} alt="Equipamentos de ponta" />
+              <img
+                src={img2}
+                alt="Equipamentos de ponta"
+                ref={imagemRef2}
+                className={`img-animada-sobre-direita ${showImagem2 ? "show" : ""}`}
+              />
             </div>
             <div className="texto texto-claro">
               <p>
