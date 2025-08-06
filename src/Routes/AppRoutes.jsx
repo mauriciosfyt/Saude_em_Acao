@@ -11,6 +11,7 @@ import LojaProduto from '../pages/LojaProduto/index.jsx';
 import SobrenosLoja from '../pages/SobreNos_loja/index.jsx';
 import Carrinho from '../pages/Carrinho/index.jsx';
 import CategoriaCreatina from '../pages/CategoriaCreatina/index.jsx';
+import Planos from '../pages/Planos/index.jsx';
 
 
 const AppRoutes = () => {
@@ -27,6 +28,7 @@ const AppRoutes = () => {
         <Route path="/SobrenosLoja" element={<SobrenosLoja />} />
         <Route path="/Carrinho" element={<Carrinho />} />
         <Route path="/CategoriaCreatina" element={<CategoriaCreatina />} />
+        <Route path="/Planos" element={<Planos />} />
 
       </Routes>
     </Router>
