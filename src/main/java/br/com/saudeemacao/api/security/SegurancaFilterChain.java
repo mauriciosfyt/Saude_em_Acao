@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,6 +23,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SegurancaFilterChain {
 
     @Autowired
@@ -53,6 +55,9 @@ public class SegurancaFilterChain {
                         .requestMatchers(HttpMethod.GET, "/api/produtos/semtamanho").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/produtos/comtamanho").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/produtos/{id}").permitAll()
+
+                        // Adicionada esta linha para permitir o acesso ao endpoint do WebSocket.
+                        .requestMatchers("/ws-chat/**").permitAll()
 
                         // Acesso ao perfil do usuário logado (qualquer usuário autenticado)
                         .requestMatchers("/api/usuario/meu-perfil").authenticated()
