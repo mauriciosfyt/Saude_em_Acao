@@ -1,46 +1,27 @@
 /* Header principal */
-.header-container {
+.header-user-container {
   width: 100%;
   padding: 12px 24px;
-  background: #004DFF;
+  background: #fff;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  color: #ffffff;
+  color: #000;
   position: sticky;
- 
 }
 
+
 .logo-area {
-  flex: 1;
   display: flex;
   align-items: center;
 }
 
 .logo-img {
   height: 60px;
+  padding-right: 70px;
 }
 
-.search-bar {
-  flex: 2;
-  display: flex;
-  max-width: 600px;
-  margin: 8px 16px;
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #ffffff;
-}
-
-.search-bar input {
-  flex: 1;
-  padding: 8px 12px;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  background-color: #ffffff;
-  color: #000;
-}
 
 .search-button {
   background-color: #fff;
@@ -53,11 +34,11 @@
 }
 
 .header-actions {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 16px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 28px;
+    padding: 0px 18px;
 }
 
 .icon_navegacao {
@@ -75,6 +56,23 @@ color: #000;
   transform: scale(1.1);
 }
 
+.login-button_loja {
+    background-color: #fff;
+    color: #000;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 12px 0px 12px 0;
+    /* Apenas duas pontas arredondadas */
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: background 0.2s;
+    box-shadow: none;
+}
+
+.login-button_loja:hover {
+    background-color: #0047b3;
+}
 /* Navegação secundária */
 .nav-links {
   position: relative;
@@ -178,41 +176,32 @@ color: #004DFF;
   }
 }
 
-@media (max-width: 768px) {
-  .search-bar {
-    flex: 1 1 100%;
-    max-width: 100%;
-    margin: 8px 0;
-  }
 
-  .search-bar input {
-    font-size: 13px;
-    padding: 8px 10px;
-  }
-
-  .search-button {
-    padding: 0 12px;
-  }
-}
 
 @media (max-width: 480px) {
-  .search-bar {
-    flex-direction: row;
-    flex: 1 1 100%;
-    max-width: 100%;
-    margin: 8px 0;
-  }
-
-  .search-bar input {
-    font-size: 12px;
-    padding: 6px 10px;
-  }
-
-  .search-button {
-    padding: 0 10px;
-  }
 
   .icon_navegacao {
     font-size: 16px;
   }
 }
+
+
+
+
+
+/* Por padrão, top-row não muda nada */
+.top-row {
+  width: 100%;
+}
+
+/* Em telas até 799px, coloca logo e botão lado a lado */
+@media (max-width: 799px) {
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+

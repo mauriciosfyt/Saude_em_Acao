@@ -3,13 +3,31 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Home from '../pages/Home';
 import Loja from '../pages/Loja';
+import ScrollToTop from '../components/ScrollToTop/ScrollToTop.jsx'; // importe aqui
+import Perfil from '../pages/Perfil/index.jsx';
+import PerfilAdm from '../pages/PerfilAdm/index.jsx';
+import SobreNos from '../pages/SobreNos/index.jsx';
+import LojaProduto from '../pages/LojaProduto/index.jsx';
+import SobrenosLoja from '../pages/SobreNos_loja/index.jsx';
+import Carrinho from '../pages/Carrinho/index.jsx';
+import CategoriaCreatina from '../pages/CategoriaCreatina/index.jsx';
+
 
 const AppRoutes = () => {
   return (
     <Router>
+      <ScrollToTop /> {/* adicione aqui */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/Loja" element={<Loja />} />
+        <Route path="/Perfil" element={<Perfil />} />
+        <Route path="/PerfilAdm" element={<PerfilAdm />} />
+        <Route path="/SobreNos" element={<SobreNos />} />
+        <Route path="/LojaProduto" element={<LojaProduto />} />
+        <Route path="/SobrenosLoja" element={<SobrenosLoja />} />
+        <Route path="/Carrinho" element={<Carrinho />} />
+        <Route path="/CategoriaCreatina" element={<CategoriaCreatina />} />
+
       </Routes>
     </Router>
   );

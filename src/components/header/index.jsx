@@ -1,11 +1,13 @@
-import React, { useState, useEffect, } from 'react';
-import "../header_loja_nLogin/Header_Login.css";
+import React, { useState, useEffect,} from 'react';
+
+import "./HeaderUser.css";
 
 import { FaShoppingCart, FaUser, FaSearch } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
 import logo from "../../assets/logo_dia.png";
+import { Link } from "react-router-dom";
 
-const Header = () => {
+const HeaderUser = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 799);
 
   useEffect(() => {
@@ -19,7 +21,7 @@ const Header = () => {
   return (
     <>
       {/* Cabeçalho principal */}
-      <header className="header-container">
+      <header className="header-user-container">
         {isMobile ? (
           // JSX para telas menores
           <div className="top-row">
@@ -28,20 +30,15 @@ const Header = () => {
             </div>
 
             <div className="header-actions">
-              <FaUser className="icon" />
+              <Link to="/Perfil">
+                <FaUser className="icon" />
+              </Link>
+
+              <Link to="/Carrinho">
               <FaShoppingCart className="icon" />
+              </Link>
             </div>
-
-            <div className="search-bar">
-              <input
-                type="text"
-                placeholder="Buscar por nome ou tipo de produto"
-              />
-              <button className="search-button">
-                <FaSearch className="icon_navegacao" />
-              </button>
-            </div>
-
+            
           </div>
         ) : (
           // JSX para telas maiores
@@ -49,20 +46,15 @@ const Header = () => {
             <div className="logo-area">
               <img src={logo} alt="Logo da Empresa" className="logo-img" />
             </div>
-
-            <div className="search-bar">
-              <input
-                type="text"
-                placeholder="Buscar por nome ou tipo de produto"
-              />
-              <button className="search-button">
-                <FaSearch className="icon_navegacao" />
-              </button>
-            </div>
-
             <div className="header-actions">
-              <FaUser className="icon" />
+
+              <Link to="/Perfil">
+                <FaUser className="icon" />
+              </Link>
+
+              <Link to="/Carrinho">
               <FaShoppingCart className="icon" />
+              </Link>
             </div>
           </>
         )}
@@ -74,14 +66,15 @@ const Header = () => {
           <GiHamburgerMenu className="menu-icon" />
         </div>
         <div className="nav-center">
-          <a href="#">Whey Protein</a>
-          <a href="#">Creatina</a>
-          <a href="#">Vitaminas</a>
-          <a href="#">Camisetas</a>
+          <Link to="/">Home</Link>
+          <Link to="/Loja">Loja</Link>
+          <Link to="/planos">Planos</Link>
+          <Link to="/personal">Personal</Link>
+          <Link to="/SobreNos">Sobre nós</Link>
         </div>
       </nav>
     </>
   );
 };
 
-export default Header;
+export default HeaderUser;

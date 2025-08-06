@@ -1,25 +1,34 @@
 // src/pages/Home/index.jsx
-
-import "./styles.css"; // Este caminho está correto se styles.css estiver em src/pages/Home ou em src/ e você o importa de outra forma no App.js
-// Corrija os caminhos das imagens aqui:
-import logo from "../../assets/logo_dia.png"; // CORRIGIDO
-import banner_home from "../../assets/banner_home.jpeg"; // CORRIGIDO
-import img_abaixo_banner from "../../assets/img_home.jpeg"; // CORRIGIDO
+import "../../components/modal_login/modal_login.css";
+import "./styles.css";
+import logo from "../../assets/logo_dia.png";
+import banner_home from "../../assets/banner_home.jpeg";
+import img_abaixo_banner from "../../assets/img_home.jpeg";
 import Footer from "../../components/footer";
-import academia1 from "../../assets/academia.jpeg"; // CORRIGIDO
-import academia2 from "../../assets/academia2.jpeg"; // CORRIGIDO
-import academia3 from "../../assets/academia3.jpeg"; // CORRIGIDO
-
-import { Link } from 'react-router-dom';
-
-
+import navegacao_ntem from "../../assets/navegacao_Ntem.png";
+import navegacao_suporte from "../../assets/navegacao_suporte.png";
+import navegacao_prof from "../../assets/navegacao_professores.png";
+import navegacao_loja from "../../assets/navegacao_loja.png";
+import tela_app from "../../assets/tela_app.png";
+import { Link } from "react-router-dom";
 import React, { useRef, useEffect, useState } from "react";
 
-
+// Importando os modais refatorados (nomes corrigidos sem espaços)
+import ModalLogin from "../../components/modal_login/ModalLogin";
+import ModalCodigo from "../../components/modal_login/ModalCodigo";
+import ModalRecuperarSenha from "../../components/modal_login/ModalRecuperarSenha";
+import ModalCodigoRecuperacao from "../../components/modal_login/ModalCodigoRecuperacao";
+import ModalAlterarSenha from "../../components/modal_login/ModalAlterarSenha";
 
 function Home() {
   const historiaRef = useRef(null);
   const [showHistoria, setShowHistoria] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [showRecoverModal, setShowRecoverModal] = useState(false);
+  const [showRecoverCodeModal, setShowRecoverCodeModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [code, setCode] = useState(["", "", "", ""]);
 
   useEffect(() => {
     const observer = new window.IntersectionObserver(
@@ -32,17 +41,97 @@ function Home() {
     return () => observer.disconnect();
   }, []);
 
+  const handleCodeChange = (value, idx) => {
+    if (value.length > 1) return;
+    const newCode = [...code];
+    newCode[idx] = value.replace(/[^0-9]/g, "");
+    setCode(newCode);
+    if (value && idx < 3) {
+      document.getElementById(`code-input-${idx + 1}`)?.focus();
+    }
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setShowModal(false);
+    setShowCodeModal(true);
+  };
+
+  const handleRecover = (e) => {
+    e.preventDefault();
+    setShowRecoverModal(false);
+    setShowRecoverCodeModal(true);
+    setCode(["", "", "", ""]);
+  };
+
+  const handleValidateRecoverCode = (e) => {
+    e.preventDefault();
+    setShowRecoverCodeModal(false);
+    setShowChangePasswordModal(true);
+  };
+
+  const closeAllModals = () => {
+    setShowModal(false);
+    setShowCodeModal(false);
+    setShowRecoverModal(false);
+    setShowRecoverCodeModal(false);
+    setShowChangePasswordModal(false);
+    setCode(["", "", "", ""]);
+  };
+
   return (
-    // ESTE É O ÚNICO E PRINCIPAL home-container QUE DEVE ENVOLVER TODO O SEU CONTEÚDO
     <div className="home-container">
-      {/* HEADER */}
       <header className="header">
         <div className="logo-container">
-          {/* Corrigido o src da imagem para usar a variável importada 'logo' */}
           <img src={logo} alt="Logo da Empresa" className="logo" />
-          <button className="login-button">Fazer login</button>
+          <button className="login-button" onClick={() => setShowModal(true)}>
+            Fazer login
+          </button>
         </div>
       </header>
+
+      {/* Modais separados */}
+      {showModal && (
+        <ModalLogin
+          onClose={closeAllModals}
+          onLogin={handleLogin}
+          onRecover={() => {
+            setShowModal(false);
+            setShowRecoverModal(true);
+          }}
+        />
+      )}
+
+      {showCodeModal && (
+        <ModalCodigo
+          code={code}
+          onClose={() => setShowCodeModal(false)}
+          onChange={handleCodeChange}
+        />
+      )}
+
+      {showRecoverModal && (
+        <ModalRecuperarSenha
+          onClose={() => setShowRecoverModal(false)}
+          onSend={handleRecover}
+        />
+      )}
+
+      {showRecoverCodeModal && (
+        <ModalCodigoRecuperacao
+          code={code}
+          onClose={() => setShowRecoverCodeModal(false)}
+          onChange={handleCodeChange}
+          onValidate={handleValidateRecoverCode}
+        />
+      )}
+
+      {showChangePasswordModal && (
+        <ModalAlterarSenha
+          onClose={() => setShowChangePasswordModal(false)}
+          onChangePassword={() => {}}
+        />
+      )}
 
       <main>
         {/* BANNER */}
@@ -64,12 +153,14 @@ function Home() {
             >
               <h2>CONHEÇA NOSSA HISTÓRIA</h2>
               <p>
-                A Saúde em Ação nasceu com um propósito: transformar vidas
+                A Saúde em Ação nasceu com um propósito de transformar vidas
                 através do movimento.
                 <br />
                 Aqui, cada treino é um passo rumo à sua melhor versão.
               </p>
+              <Link to="/SobreNos" style={{ alignSelf: "flex-end" }}>
               <button className="historia-btn">saiba mais sobre nós</button>
+              </Link>
             </div>
           </div>
 
@@ -142,39 +233,81 @@ function Home() {
           </div>
         </section>
 
-    
-    <section className="instagram">
-  <div className="insta-images">
-    <Link to="/professores">
-      <div>
-        <img src={academia2} alt="Academia 2" />
-        <p>Professores</p>
-      </div>
-    </Link>
+        {/* Navegação */}
 
-    <Link to="/Loja">
-      <div>
-        <img src={academia1} alt="Academia 1" />
-        <p>Loja</p>
-      </div>
-    </Link>
+        <section className="navegacao">
+          <h2 className="navegacao-titulo">
+            Experiência <span className="azul">Saúde em ação</span>
+          </h2>
+          <div className="navegacao-links">
+            <Link to="/LojaProduto">
+              <div>
+                <img src={navegacao_prof} alt="Tela professor" />
+                <p>Loja Produto</p>
+              </div>
+            </Link>
 
-    <Link to="/suporte">
-      <div>
-        <img src={academia3} alt="Academia 3" />
-        <p>Suporte</p>
-      </div>
-    </Link>
+            <Link to="/Loja">
+              <div>
+                <img src={navegacao_loja} alt="Tela loja" />
+                <p>Loja</p>
+              </div>
+            </Link>
 
-    <Link to="/suporte">
-      <div>
-        <img src={academia3} alt="Academia 3" />
-        <p>Suporte</p>
-      </div>
-    </Link>
-  </div>
-</section>
+            <Link to="/SobreNos">
+              <div>
+                <img src={navegacao_suporte} alt="Academia" />
+                <p>Sobre Nós</p>
+              </div>
+            </Link>
 
+            <Link to="/SobrenosLoja">
+              <div>
+                <img src={navegacao_ntem} alt="Academia 3" />
+                <p>Sobre nos loja</p>
+              </div>
+            </Link>
+          </div>
+        </section>
+
+        {/*App saude em acão*/}
+    <section className="banner-app">
+      <div className="banner-app-container">
+        {/* COLUNA ESQUERDA */}
+        <div className="banner-text">
+          <h2>Saúde em ação app</h2>
+          <h3>Seu aliado nos treinos!</h3>
+          <ul>
+            <li><span className="check"></span> Confira seu treino personalizado completo</li>
+            <li><span className="check"></span> Veja a execução dos exercícios em vídeo</li>
+            <li><span className="check"></span> Acompanhe o progresso de carga</li>
+            <li><span className="check"></span> Acesse 60 treinos mesmo se não for nosso aluno</li>
+            <li><span className="check"></span> Compre ou faça upgrade de plano</li>
+          </ul>
+          <div className="qr-section">
+            <img src='' alt="QR Code" />
+            <p>@EQUIPESAUDEEMACAO</p>
+          </div>
+        </div>
+
+        {/* COLUNA DIREITA */}
+        <div className="banner-image-box ">
+          <img src={tela_app} alt="App Celulares" />
+        </div>
+      </div>
+    </section>
+
+        {/* Instagram */}
+        {/* <section className="instagram">
+            <h2>UM POUCO SOBRE NOSSO INSTAGRAM</h2>
+  
+            <div className="insta-embeds">
+              <InstagramEmbed url="https://www.instagram.com/reel/DHgXrSLOyd0/?igsh=MW9wZDN4b3JoeTlnZQ" />
+              <InstagramEmbed url="https://www.instagram.com/reel/CxfdL6JOEhJ/?igsh=MTFnZ3Q5YzAwczMxdw" />
+              <InstagramEmbed url="https://www.instagram.com/p/DCl7YH1uBvr/?igsh=MWRoZDN2M2YwNWRiMA" />
+              <InstagramEmbed url="https://www.instagram.com/reel/DJl5gxMxNc3/?igsh=ODUyZzM2cHRkNzdq" />
+            </div>
+          </section> */}
 
         {/* LOCALIZAÇÃO */}
         <section className="localizacao">

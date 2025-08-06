@@ -42,8 +42,8 @@ const Footer = () => {
       </div>
       <div className="footer-site-links">
         <div>
-          <div><a href="#" className="footer-link">Home</a></div>
-          <div><a href="#" className="footer-link">Loja</a></div>
+          <div><a href="/" className="footer-link">Home</a></div>
+          <div><a href="/Loja" className="footer-link">Loja</a></div>
           <div><a href="#" className="footer-link">Reservas</a></div>
         </div>
         <div>

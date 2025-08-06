@@ -1,6 +1,8 @@
 /* src/pages/Home/styles.css */
 
 /* Classes globais de layout (do seu styles.css original) */
+
+/* 1. CONTAINER PRINCIPAL */
 .home-container {
     width: 100%;
     background-color: #e0e0e0;
@@ -8,7 +10,8 @@
 
 }
 
-/* Estilos para a header (do seu styles.css original) */
+
+/* 2. HEADER */
 .header {
     background: #fafafa;
     padding: 0;
@@ -26,7 +29,6 @@
 /* Contêiner principal para o logo e o botão dentro da header */
 .logo-container {
     width: 100%;
-    max-width: 1200px;
     height: 100%;
     display: flex;
     justify-content: space-between;
@@ -71,7 +73,7 @@
     }
 }
 
-/* Estilos para as seções do conteúdo (do seu styles.css original) */
+/* 3. BANNER */
 .banner {
     position: relative;
     display: flex;
@@ -83,7 +85,7 @@
 }
 
 .banner-gradient {
-    height: 240vh;
+    height: 100%;
     /* Banner ocupa toda a tela do PC */
     min-height: 500px;
     background: linear-gradient(180deg,
@@ -125,54 +127,250 @@
     }
 }
 
-.instagram {
-    padding: 30px;
-    text-align: center;
-    background-color: #e2e8f0;
-}
+/* 4. LINHA ABAIXO DO BANNER */
 
-.insta-images {
+.linha-abaixo-banner {
     display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 20px;
-    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    position: relative;
+    margin-top: 32px;
+    width: 100%;
+    padding-top: 5%
 }
 
-
-.insta-images div {
-    text-align: center;
-}
-
-.insta-images img {
-    width: 300px;
-    height: 300px;
+.img-abaixo-banner {
+    width: 62vw;
+    max-width: 950px;
+    min-width: 320px;
     object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+    border-radius: 0;
+    filter: grayscale(1);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+    margin-left: 0;
+    display: block;
 }
 
-@media (max-width: 600px) {
-    .insta-images img {
-        width: 150px;
-        height: 150px;
+.historia-box {
+    position: absolute;
+    top: 32px;
+    right: 8vw;
+    /* mais próximo da borda */
+    background: #000;
+    color: #fff;
+    border: 3px solid #004dff;
+    border-radius: 18px 0px 18px 0;
+    padding: 38px 32px;
+    width: 600px;
+    /* aumentada */
+    min-height: 240px;
+    /* aumentada */
+    box-shadow: 0 8px 32px rgba(0, 77, 255, 0.18), 0 4px 24px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    z-index: 2;
+    margin-top: 10%;
+    opacity: 0;
+    transform: translateX(80px) scale(0.98);
+    transition:
+        box-shadow 0.3s cubic-bezier(.4, 2, .6, 1),
+        transform 1.6s cubic-bezier(.4, 2, .6, 1),
+        /* aumentada */
+        border-color 0.3s,
+        opacity 1.6s cubic-bezier(.4, 2, .6, 1);
+    /* aumentada */
+}
+
+.historia-box.show {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    transition:
+        box-shadow 0.3s cubic-bezier(.4, 2, .6, 1),
+        transform 1.6s cubic-bezier(.4, 2, .6, 1),
+        /* aumentada */
+        border-color 0.3s,
+        opacity 1.6s cubic-bezier(.4, 2, .6, 1);
+    /* aumentada */
+}
+
+@keyframes historiaBoxIn {
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
     }
 }
 
-@media (max-width: 900px) {
-    .insta-images img {
-        width: 150px;
-        height: 150px;
+.historia-box:hover {
+    box-shadow: 0 16px 48px rgba(0, 77, 255, 0.28), 0 8px 32px rgba(0, 0, 0, 0.22);
+    transform: translateY(-8px) scale(1.03);
+    border-color: #1062fe;
+}
+
+.historia-box h2 {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.historia-btn {
+    background: #0057ff;
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-end;
+    transition: background 0.2s;
+    font-size: 0.95rem;
+    border-radius: 12px 0px 12px 0;
+    /* Apenas duas pontas arredondadas */
+
+}
+
+.historia-btn:hover {
+    background: #003399;
+}
+
+@media (max-width: 728px) {
+    .linha-abaixo-banner {
+        flex-direction: column;
+        align-items: center;
+        position: static;
+        margin-bottom: 0;
+        padding-top: 0;
+    }
+
+    .img-abaixo-banner {
+        width: 98vw;
+        max-width: 98vw;
+        min-width: 0;
+        height: 180px;
+        /* Aumente aqui para deixar maior */
+        margin: 0 auto;
+        display: block;
+        border-radius: 0;
+    }
+
+    .historia-box {
+        position: relative;
+        width: 94vw;
+        max-width: 98vw;
+        margin: -32px auto 0 auto;
+        z-index: 2;
+        border-radius: 12px;
+        right: 0;
+        top: 0;
+        padding: 18px 10px;
+    }
+
+    .historia-box h2 {
+        font-size: 1rem;
+    }
+
+    .historia-btn {
+        font-size: 0.9rem;
+        padding: 7px 12px;
     }
 }
 
 
-.insta-images p {
-    margin-top: 5px;
-    font-size: 14px;
-    color: #555;
+@media (min-width: 1600px) {
+    .linha-abaixo-banner {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        position: relative;
+        margin-top: 32px;
+        padding-top: 5%;
+        flex-direction: row;
+    }
+
+    .img-abaixo-banner {
+        width: 62vw;
+        max-width: 1400px;
+        min-width: 320px;
+        height: auto;
+        object-fit: cover;
+        border-radius: 0;
+        filter: grayscale(1);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+        margin-left: 0;
+    }
+
+    .historia-box {
+        position: absolute;
+        top: 32px;
+        right: 8vw;
+        width: 800px;
+        min-height: 240px;
+        padding: 38px 32px;
+        border-radius: 18px 0px 18px 0;
+        background: #000;
+        color: #fff;
+        border: 3px solid #004dff;
+        box-shadow: 0 8px 32px rgba(0, 77, 255, 0.18), 0 4px 24px rgba(0, 0, 0, 0.18);
+        transform: translateX(80px) scale(0.98);
+        opacity: 0;
+        transition:
+            box-shadow 0.3s cubic-bezier(.4, 2, .6, 1),
+            transform 1.6s cubic-bezier(.4, 2, .6, 1),
+            border-color 0.3s,
+            opacity 1.6s cubic-bezier(.4, 2, .6, 1);
+            font-size: 20px;
+    }
+
+    .historia-box.show {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
 }
 
+
+
+
+
+/* 5. BANNER TÍTULO FINAL */
+.banner-titulo-final {
+    width: 100%;
+    text-align: center;
+    margin: 150px 0 0 0;
+    /* Só um espacinho acima */
+    padding: 0;
+}
+
+.banner-titulo-final h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-style: italic;
+    color: #222;
+    margin-bottom: 8px;
+}
+
+.banner-titulo-final .azul {
+    color: #fff;
+    font-style: italic;
+    font-weight: 700;
+}
+
+.banner-titulo-final .bold {
+    font-weight: 700;
+}
+
+.subtitulo-final {
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-style: italic;
+    color: #111;
+    margin-top: 0;
+}
+
+.banner-titulo-final {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* 6. PLANOS */
 .planos {
     padding: 30px;
     background-color: #e2e8f0;
@@ -201,15 +399,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: 
-        box-shadow 0.3s cubic-bezier(.4,2,.6,1),
-        transform 0.3s cubic-bezier(.4,2,.6,1),
+    transition:
+        box-shadow 0.3s cubic-bezier(.4, 2, .6, 1),
+        transform 0.3s cubic-bezier(.4, 2, .6, 1),
         border-color 0.3s;
     border-radius: 12px 0px 12px 0;
 }
 
 .plano-card:hover {
-    box-shadow: 0 8px 32px rgba(0, 112, 243, 0.18), 0 2px 8px rgba(0,0,0,0.10);
+    box-shadow: 0 8px 32px rgba(0, 112, 243, 0.18), 0 2px 8px rgba(0, 0, 0, 0.10);
     transform: translateY(-10px) scale(1.04);
     border-color: #0070f3;
 }
@@ -297,40 +495,260 @@
     background: #0057c2;
 }
 
-.parcerias {
-    margin-top: 40px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
+/* 7. NAVEGAÇÃO */
+.navegacao {
+    padding: 10% 30px;
     text-align: center;
+    background-color: #e2e8f0;
 }
 
-.parcerias p {
-    margin-bottom: 10px;
-}
-
-.parcerias-logos {
+.navegacao-links {
     display: flex;
     justify-content: center;
     gap: 30px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.navegacao-links div {
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Remova ou comente o bloco abaixo:
+.navegacao-links div:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 12px 36px rgba(0, 77, 255, 0.18), 0 2px 8px rgba(0,0,0,0.12);
+    border: 1.5px solid #1062fe;
+}
+*/
+
+.navegacao-links img {
+    height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    transition:
+        transform 0.2s cubic-bezier(.4, 2, .6, 1),
+        box-shadow 0.2s cubic-bezier(.4, 2, .6, 1),
+        border-color 0.2s;
+    cursor: pointer;
+}
+
+.navegacao-links img:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 12px 36px rgba(0, 77, 255, 0.18), 0 2px 8px rgba(0, 0, 0, 0.12);
+    border-color: #1062fe;
+}
+
+.navegacao-links p {
+    margin-top: 12px;
+    font-size: 1.18rem;
+    color: #222;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: center;
+    transition:
+        color 0.2s cubic-bezier(.4, 2, .6, 1),
+        transform 0.2s cubic-bezier(.4, 2, .6, 1),
+        text-shadow 0.2s cubic-bezier(.4, 2, .6, 1);
+}
+
+.navegacao-links div:hover p {
+    color: #1062fe;
+    transform: scale(1.08);
+    text-shadow: 0 2px 8px rgba(16, 98, 254, 0.10);
+}
+
+.navegacao-titulo {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-style: italic;
+    color: #222;
+    margin-bottom: 5%;
+    margin-top: 5%;
+}
+
+.navegacao-titulo .azul {
+    color: #1062fe;
+    font-style: italic;
+    font-weight: 700;
+}
+
+/* 8. APP */
+.banner-app {
+    background-color: #60A5FA;
+    /* Azul claro */
+    padding: 60px 20px;
+}
+
+.banner-app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+/* TEXTOS */
+.banner-text {
+    flex: 1;
+    min-width: 320px;
+    color: #000;
+}
+
+.banner-text h2 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.banner-text h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 10px 0 20px;
+}
+
+.banner-text ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 20px;
+}
+
+.banner-text li {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    display: flex;
     align-items: center;
 }
 
-.parcerias-logos img {
-    max-height: 80px;
-    width: auto;
-    object-fit: contain;
-    cursor: pointer;
-    transition: transform 0.3s ease;
+.check {
+    width: 20px;
+    height: 20px;
+    background-image: url("https://cdn-icons-png.flaticon.com/512/190/190411.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    display: inline-block;
+    margin-right: 10px;
 }
 
-.parcerias-logos img:hover {
-    transform: scale(1.1);
+/* QR CODE */
+.qr-section {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.qr-section img {
+    width: 120px;
+    height: auto;
+    margin-bottom: 8px;
+}
+
+.qr-section p {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+/* CAIXA COM OS CELULARES */
+.banner-image-box {
+    flex: 1;
+    min-width: 320px;
+    padding: 8zz0px;
+    border-radius: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+   
+}
+
+.banner-image-box img {
+    width: 320px;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 16px 40px rgba(1, 87, 155, 0.8);
+    background-color: rgba(0, 77, 255, 0.7);;
+
 }
 
 
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+    .banner-app-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .banner-image-box {
+        margin-top: 30px;
+    }
+}
+
+
+@media (max-width: 350px) {
+    .banner-app {
+        padding: 30px 10px;
+    }
+
+    .banner-app-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .banner-text h2 {
+        font-size: 1.4rem;
+    }
+
+    .banner-text h3 {
+        font-size: 1rem;
+        margin-bottom: 16px;
+    }
+
+    .banner-text ul {
+        padding-left: 0;
+    }
+
+    .banner-text li {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .check {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+    }
+
+    .qr-section img {
+        width: 80px;
+    }
+
+    .qr-section p {
+        font-size: 0.85rem;
+    }
+
+    .banner-image-box {
+        margin-top: 30px;
+        padding: 20px;
+    }
+
+    .banner-image-box img {
+        width: 160px;
+    }
+}
+
+/* 9. LOCALIZAÇÃO */
 .localizacao {
-    padding: 30px;
+    padding: 15% 0px;
     text-align: center;
     background-color: #e2e8f0;
 }
@@ -368,273 +786,68 @@
     color: #555;
 }
 
+/* Instagram */
 
-.footer {
+/* .instagram {
+    padding: 30px;
     text-align: center;
-    padding: 15px;
-    background-color: #002f6c;
-    color: white;
+    background-color: #e2e8f0;
 }
 
-.linha-abaixo-banner {
+.insta-images {
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    position: relative;
-    margin-top: 32px;
-    width: 100%;
-    padding-top: 5%
-}
-
-.img-abaixo-banner {
-    width: 62vw;
-    max-width: 950px;
-    min-width: 320px;
-    object-fit: cover;
-    border-radius: 0;
-    filter: grayscale(1);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
-    margin-left: 0;
-    display: block;
-}
-
-.historia-box {
-    position: absolute;
-    top: 32px;
-    right: 8vw; /* mais próximo da borda */
-    background: #000;
-    color: #fff;
-    border: 3px solid #004dff;
-    border-radius: 18px 0px 18px 0;
-    padding: 38px 32px;
-    width: 480px;           /* aumentada */
-    min-height: 240px;      /* aumentada */
-    box-shadow: 0 8px 32px rgba(0, 77, 255, 0.18), 0 4px 24px rgba(0,0,0,0.18);
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
     justify-content: center;
-    z-index: 2;
-    margin-top: 10%;
-    opacity: 0;
-    transform: translateX(80px) scale(0.98);
-    transition: 
-        box-shadow 0.3s cubic-bezier(.4,2,.6,1),
-        transform 1.6s cubic-bezier(.4,2,.6,1), /* aumentada */
-        border-color 0.3s,
-        opacity 1.6s cubic-bezier(.4,2,.6,1);   /* aumentada */
+    gap: 30px;
+    margin-top: 20px;
+    flex-wrap: wrap;
 }
 
-.historia-box.show {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-    transition:
-        box-shadow 0.3s cubic-bezier(.4,2,.6,1),
-        transform 1.6s cubic-bezier(.4,2,.6,1), /* aumentada */
-        border-color 0.3s,
-        opacity 1.6s cubic-bezier(.4,2,.6,1);   /* aumentada */
-}
 
-@keyframes historiaBoxIn {
-    to {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
-.historia-box:hover {
-    box-shadow: 0 16px 48px rgba(0, 77, 255, 0.28), 0 8px 32px rgba(0,0,0,0.22);
-    transform: translateY(-8px) scale(1.03);
-    border-color: #1062fe;
-}
-
-.historia-box h2 {
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-
-.historia-btn {
-    background: #0057ff;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 18px;
-    font-weight: 600;
-    cursor: pointer;
-    align-self: flex-end;
-    transition: background 0.2s;
-    font-size: 0.95rem;
-    border-radius: 12px 0px 12px 0;
-    /* Apenas duas pontas arredondadas */
-
-}
-
-.historia-btn:hover {
-    background: #003399;
-}
-
-/* Novas regras para responsividade */
-@media (max-width: 1000px) {
-    .banner-gradient {
-        height: 100vh;
-        min-height: 400px;
-        padding-top: 3%;
-    }
-}
-
-@media (max-width: 768px) {
-    .banner-gradient {
-        height: 130vh;
-        min-height: 320px;
-        padding-top: 2%;
-    }
-}
-
-@media (max-width: 728px) {
-    .banner-gradient {
-        height: 135%;
-        min-height: 320px;
-        padding-top: 2%;
-    }
-}
-
-@media (max-width: 375px) {
-    .banner-gradient {
-        height: 154%;
-        min-height: 400px;
-        padding-top: 3%;
-    }
-}
-
-@media (max-width: 370px) {
-    .banner-gradient {
-        height: 225%;
-        min-height: 400px;
-        padding-top: 3%;
-    }
-}
-
-@media (max-width: 728px) {
-    .linha-abaixo-banner {
-        flex-direction: column;
-        align-items: center;
-        position: static;
-        margin-bottom: 0;
-        padding-top: 0;
-    }
-
-    .img-abaixo-banner {
-        width: 98vw;
-        max-width: 98vw;
-        min-width: 0;
-        height: 180px;
-        /* Aumente aqui para deixar maior */
-        margin: 0 auto;
-        display: block;
-        border-radius: 0;
-    }
-
-    .historia-box {
-        position: relative;
-        width: 94vw;
-        max-width: 98vw;
-        margin: -32px auto 0 auto;
-        z-index: 2;
-        border-radius: 12px;
-        right: 0;
-        top: 0;
-        padding: 18px 10px;
-    }
-
-    .historia-box h2 {
-        font-size: 1rem;
-    }
-
-    .historia-btn {
-        font-size: 0.9rem;
-        padding: 7px 12px;
-    }
-}
-
-@media (max-width: 1000px) {
-    .linha-abaixo-banner {
-        flex-direction: column;
-        align-items: center;
-        position: static;
-        margin-bottom: 0;
-        padding-top: 0;
-    }
-
-    .img-abaixo-banner {
-        width: 98vw;
-        max-width: 98vw;
-        min-width: 0;
-        height: 200px;
-        margin: 0 auto;
-        display: block;
-        border-radius: 0;
-    }
-
-    .historia-box {
-        position: relative;
-        width: 92vw;
-        max-width: 98vw;
-        margin: -36px auto 0 auto;
-        z-index: 2;
-        border-radius: 12px;
-        right: 0;
-        top: 0;
-        padding: 18px 10px;
-    }
-}
-
-.banner-titulo-final {
-    width: 100%;
+.insta-images div {
     text-align: center;
-    margin: 150px 0 0 0;
-    /* Só um espacinho acima */
-    padding: 0;
 }
 
-.banner-titulo-final h2 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    font-style: italic;
-    color: #222;
-    margin-bottom: 8px;
+.insta-images img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ccc;
 }
 
-.banner-titulo-final .azul {
-    color: #fff;
-    font-style: italic;
-    font-weight: 700;
+@media (max-width: 600px) {
+    .insta-images img {
+        width: 150px;
+        height: 150px;
+    }
 }
 
-.banner-titulo-final .bold {
-    font-weight: 700;
+@media (max-width: 900px) {
+    .insta-images img {
+        width: 150px;
+        height: 150px;
+    }
 }
 
-.subtitulo-final {
-    font-size: 1.1rem;
-    font-weight: 700;
-    font-style: italic;
-    color: #111;
-    margin-top: 0;
-}
 
-.banner-titulo-final {
-    margin-bottom: 0;
-    padding-bottom: 0;
+.insta-images p {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #555;
 }
 
 .insta-embeds {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 24px;
 }
 
-@media (min-width: 768px) {
-  .insta-embeds {
-    grid-template-columns: 1fr 1fr;
-  }
-}
+@media (max-width: 900px) {
+    .insta-embeds {
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+    }
+} */
