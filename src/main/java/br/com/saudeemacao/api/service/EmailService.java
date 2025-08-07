@@ -54,7 +54,7 @@ public class EmailService {
                 <body>
                   <div class="container">
                     <div class="logo">
-                      <img src="https://res.cloudinary.com/dkbmbgtf0/image/upload/v1754183893/logo_gq4bis.png" alt="Logo Saúde em Ação" />
+                      <img src="https://res.cloudinary.com/dyd0bit5s/image/upload/v1754490738/logo_fw2pnp.png" alt="Logo Saúde em Ação" />
                     </div>
                     <div class="welcome">
                       <p class="welcome-title">Seja muito bem-vindo(a) à <strong>Saúde em Ação</strong>, o lugar onde sua transformação começa</p>
@@ -112,7 +112,7 @@ public class EmailService {
                 <body>
                   <div class="container">
                     <div class="logo">
-                        <img src="https://res.cloudinary.com/dkbmbgtf0/image/upload/v1754183893/logo_gq4bis.png" alt="Logo Saúde em Ação" />
+                        <img src="https://res.cloudinary.com/dyd0bit5s/image/upload/v1754490738/logo_fw2pnp.png" alt="Logo Saúde em Ação" />
                     </div>
                     <h1>Redefinição de Senha</h1>
                     <p>Recebemos uma solicitação para redefinir sua senha. Utilize o código abaixo para criar uma nova senha.</p>
