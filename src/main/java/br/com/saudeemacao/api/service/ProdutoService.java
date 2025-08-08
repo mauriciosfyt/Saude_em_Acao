@@ -1,4 +1,4 @@
-// ProdutoService.java
+// src/main/java/br/com/saudeemacao/api/service/ProdutoService.java
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.ProdutoDTO;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -75,7 +74,7 @@ public class ProdutoService {
 
         Map<Produto.Tamanho, Integer> estoqueTamanho = dto.getEstoquePorTamanho().entrySet().stream()
                 .collect(Collectors.toMap(
-                        e -> Produto.Tamanho.valueOf(e.getKey()),
+                        e -> Produto.Tamanho.valueOf(e.getKey().toUpperCase()),
                         Map.Entry::getValue
                 ));
 
@@ -118,13 +117,14 @@ public class ProdutoService {
             validarEstoquePorTamanho(dto.getEstoquePorTamanho());
             Map<Produto.Tamanho, Integer> estoqueTamanho = dto.getEstoquePorTamanho().entrySet().stream()
                     .collect(Collectors.toMap(
-                            e -> Produto.Tamanho.valueOf(e.getKey()),
+                            e -> Produto.Tamanho.valueOf(e.getKey().toUpperCase()),
                             Map.Entry::getValue
                     ));
             produto.setEstoquePorTamanho(estoqueTamanho);
         }
 
         if (dto.getImg() != null && !dto.getImg().isEmpty()) {
+            deletarImagem(produto.getImg()); // Opcional: deletar imagem antiga
             String imgUrl = uploadImagem(dto.getImg());
             produto.setImg(imgUrl);
         }
@@ -133,11 +133,53 @@ public class ProdutoService {
     }
 
     public void delete(String id) {
-        if (!repository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("Produto não encontrado com ID: " + id);
-        }
+        Produto produto = getById(id);
+        deletarImagem(produto.getImg()); // Opcional: deletar imagem do Cloudinary
         repository.deleteById(id);
     }
+
+    // --- MÉTODOS ADICIONADOS PARA GERENCIAR ESTOQUE EM RESERVAS ---
+
+    public void decrementarEstoque(String produtoId, String tamanhoStr) {
+        Produto produto = getById(produtoId);
+
+        if (produto.getTipo() == Produto.TipoProduto.SEMTAMANHO) {
+            if (produto.getEstoque() <= 0) {
+                throw new IllegalStateException("Produto sem estoque.");
+            }
+            produto.setEstoque(produto.getEstoque() - 1);
+        } else {
+            if (tamanhoStr == null || tamanhoStr.isBlank()) {
+                throw new IllegalArgumentException("É necessário especificar o tamanho para este produto.");
+            }
+            Produto.Tamanho tamanho = Produto.Tamanho.valueOf(tamanhoStr.toUpperCase());
+            int estoqueAtual = produto.getEstoquePorTamanho().getOrDefault(tamanho, 0);
+            if (estoqueAtual <= 0) {
+                throw new IllegalStateException("Produto sem estoque para o tamanho " + tamanhoStr);
+            }
+            produto.getEstoquePorTamanho().put(tamanho, estoqueAtual - 1);
+        }
+        repository.save(produto);
+    }
+
+    public void incrementarEstoque(String produtoId, String tamanhoStr) {
+        Produto produto = getById(produtoId);
+
+        if (produto.getTipo() == Produto.TipoProduto.SEMTAMANHO) {
+            produto.setEstoque(produto.getEstoque() + 1);
+        } else {
+            if (tamanhoStr == null || tamanhoStr.isBlank()) {
+                // Não faz nada se o tamanho for nulo para produto com tamanho
+                return;
+            }
+            Produto.Tamanho tamanho = Produto.Tamanho.valueOf(tamanhoStr.toUpperCase());
+            int estoqueAtual = produto.getEstoquePorTamanho().getOrDefault(tamanho, 0);
+            produto.getEstoquePorTamanho().put(tamanho, estoqueAtual + 1);
+        }
+        repository.save(produto);
+    }
+
+    // --- MÉTODOS PRIVADOS AUXILIARES ---
 
     private void validarCamposObrigatorios(ProdutoDTO dto, boolean isCreate) {
         if (isCreate) {
@@ -161,7 +203,7 @@ public class ProdutoService {
 
         estoquePorTamanho.forEach((tamanhoStr, quantidade) -> {
             try {
-                Produto.Tamanho.valueOf(tamanhoStr);
+                Produto.Tamanho.valueOf(tamanhoStr.toUpperCase());
                 if (quantidade < 0) {
                     throw new IllegalArgumentException("Estoque não pode ser negativo para o tamanho " + tamanhoStr);
                 }
@@ -175,13 +217,23 @@ public class ProdutoService {
         try {
             Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap(
-                            "format", "jpg",
-                            "quality", "auto",
-                            "fetch_format", "auto"
+                            "folder", "produtos", // Organiza em uma pasta
+                            "resource_type", "image"
                     ));
-            return uploadResult.get("url").toString();
+            return uploadResult.get("secure_url").toString();
         } catch (IOException e) {
             throw new RuntimeException("Falha ao fazer upload da imagem: " + e.getMessage());
+        }
+    }
+
+    private void deletarImagem(String imageUrl) {
+        try {
+            // Extrai o public_id da URL
+            String publicId = imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf("."));
+            cloudinary.uploader().destroy("produtos/" + publicId, ObjectUtils.emptyMap());
+        } catch (Exception e) {
+            // Log do erro, mas não interrompe a execução
+            System.err.println("Falha ao deletar imagem antiga: " + e.getMessage());
         }
     }
 }

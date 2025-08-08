@@ -1,15 +1,22 @@
+// src/main/java/br/com/saudeemacao/api/service/EmailService.java
 package br.com.saudeemacao.api.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
+
 @Service
 public class EmailService {
+
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     @Autowired
     private JavaMailSender mailSender;
@@ -17,120 +24,127 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String from;
 
-    /**
-     * E-mail para login por token (acesso geral).
-     */
-    public void enviarToken(String email, String token) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(from);
-            helper.setTo(email);
-            helper.setSubject("Seu Código de Acesso - Saúde em Ação");
-
-            String corpoHtml = """
-                <!DOCTYPE html>
-                <html lang="pt-BR">
-                <head>
-                  <meta charset="UTF-8" />
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                  <title>Código de Acesso - Saúde em Ação</title>
-                  <style>
-                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #f0f0f0; margin: 0; padding: 20px; }
-                    .container { max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #0d1b2a, #1b263b); border-radius: 12px; padding: 40px 20px; box-shadow: 0 0 20px rgba(0, 123, 255, 0.25); }
-                    .logo { text-align: center; margin-bottom: 20px; }
-                    .logo img { max-width: 120px; height: auto; }
-                    .welcome { text-align: center; margin-bottom: 30px; }
-                    .welcome-title { font-size: 18px; color: #e5e7eb; font-weight: 500; margin-bottom: 8px; }
-                    .welcome-title strong { color: #3b82f6; }
-                    .welcome-phrase { font-size: 15px; color: #9ca3af; font-style: italic; }
-                    h1 { text-align: center; font-size: 26px; color: #3b82f6; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; }
-                    .code-container { text-align: center; margin: 30px 0; }
-                    .codigo { display: inline-block; font-size: 36px; font-weight: bold; color: #ffffff; letter-spacing: 12px; background-color: rgba(0, 0, 0, 0.2); padding: 15px 25px; border-radius: 8px; }
-                    .footer { text-align: center; margin-top: 40px; font-size: 13px; color: #7a7a7a; }
-                  </style>
-                </head>
-                <body>
-                  <div class="container">
-                    <div class="logo">
-                      <img src="https://res.cloudinary.com/dyd0bit5s/image/upload/v1754490738/logo_fw2pnp.png" alt="Logo Saúde em Ação" />
+    private String criarBaseTemplate(String titulo, String preHeader, String conteudoPrincipal) {
+        return String.format("""
+            <!DOCTYPE html>
+            <html lang="pt-BR">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta http-equiv="X-UA-Compatible" content="ie=edge">
+                <title>%s</title>
+                <style>
+                    body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+                    .email-container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+                    .header { background-color: #111827; padding: 20px; text-align: center; }
+                    .header img { max-width: 120px; }
+                    .content { padding: 30px; color: #333333; line-height: 1.6; }
+                    .content h1 { font-size: 24px; color: #111827; margin-top: 0; }
+                    .content p { font-size: 16px; margin: 1em 0; }
+                    .code-box { background-color: #f0f0f0; border: 1px dashed #cccccc; border-radius: 6px; padding: 15px 20px; text-align: center; margin: 25px 0; }
+                    .code { font-size: 32px; font-weight: bold; color: #000000; letter-spacing: 8px; }
+                    .footer { background-color: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; border-top: 1px solid #e0e0e0; }
+                    .hidden-preheader { display: none; max-height: 0; overflow: hidden; }
+                </style>
+            </head>
+            <body>
+                <div class="hidden-preheader">%s</div>
+                <div class="email-container">
+                    <div class="header">
+                        <img src="https://res.cloudinary.com/dyd0bit5s/image/upload/v1754490738/logo_fw2pnp.png" alt="Logo Saúde em Ação">
                     </div>
-                    <div class="welcome">
-                      <p class="welcome-title">Seja muito bem-vindo(a) à <strong>Saúde em Ação</strong>, o lugar onde sua transformação começa</p>
-                      <p class="welcome-phrase">Prepare-se para viver sua melhor versão.</p>
+                    <div class="content">
+                        %s
                     </div>
-                    <h1>Seu Código de Acesso</h1>
-                    <div class="code-container"><span class="codigo">${token}</span></div>
                     <div class="footer">
-                      <p>Este código expirará em 15 minutos. Se você não solicitou este código, apenas ignore este e-mail.</p>
+                        © %d Saúde em Ação. Todos os direitos reservados.
                     </div>
-                  </div>
-                </body>
-                </html>
-                """.replace("${token}", token);
-
-            helper.setText(corpoHtml, true);
-            mailSender.send(message);
-
-        } catch (MessagingException e) {
-            throw new RuntimeException("Falha ao enviar e-mail com token de acesso: " + e.getMessage(), e);
-        }
+                </div>
+            </body>
+            </html>
+            """, titulo, preHeader, conteudoPrincipal, java.time.Year.now().getValue());
     }
 
-    /**
-     * NOVO MÉTODO: E-mail específico para redefinição de senha.
-     */
+    public void enviarToken(String email, String token) {
+        String titulo = "Seu Código de Acesso";
+        String preHeader = "Use este código para acessar sua conta Saúde em Ação.";
+        String conteudo = String.format("""
+            <h1>Seu Código de Acesso</h1>
+            <p>Olá,</p>
+            <p>Use o código abaixo para fazer login na sua conta. Este código é válido por 15 minutos.</p>
+            <div class="code-box">
+                <span class="code">%s</span>
+            </div>
+            <p>Se você não solicitou este código, por favor, ignore este e-mail.</p>
+            <p>Atenciosamente,<br>Equipe Saúde em Ação</p>
+            """, token);
+
+        String corpoHtml = criarBaseTemplate(titulo, preHeader, conteudo);
+        enviarEmail(email, titulo, corpoHtml);
+    }
+
     public void enviarTokenRedefinicaoSenha(String email, String token) {
+        String titulo = "Redefinição de Senha";
+        String preHeader = "Recebemos uma solicitação para redefinir sua senha.";
+        String conteudo = String.format("""
+            <h1>Redefinição de Senha</h1>
+            <p>Olá,</p>
+            <p>Recebemos uma solicitação para redefinir a senha da sua conta. Utilize o código abaixo para prosseguir.</p>
+            <div class="code-box">
+                <span class="code">%s</span>
+            </div>
+            <p>Este código expirará em 15 minutos. Se você não fez esta solicitação, pode ignorar este e-mail com segurança.</p>
+            <p>Atenciosamente,<br>Equipe Saúde em Ação</p>
+            """, token);
+
+        String corpoHtml = criarBaseTemplate(titulo, preHeader, conteudo);
+        enviarEmail(email, titulo, corpoHtml);
+    }
+
+    public void notificarAdminNovaReserva(String adminEmail, String nomeAluno, String nomeProduto) {
+        String titulo = "Nova Solicitação de Reserva";
+        String preHeader = String.format("O aluno %s solicitou um novo produto.", nomeAluno);
+        String conteudo = String.format("""
+            <h1>Nova Solicitação de Reserva</h1>
+            <p>Uma nova solicitação de reserva foi feita e requer sua atenção.</p>
+            <ul>
+                <li><strong>Aluno:</strong> %s</li>
+                <li><strong>Produto:</strong> %s</li>
+            </ul>
+            <p>Por favor, acesse o painel administrativo para aprovar ou rejeitar a solicitação.</p>
+            """, nomeAluno, nomeProduto);
+
+        String corpoHtml = criarBaseTemplate(titulo, preHeader, conteudo);
+        enviarEmail(adminEmail, titulo, corpoHtml);
+    }
+
+    public void notificarAlunoStatusReserva(String alunoEmail, String nomeProduto, String status, String motivoHtml) {
+        String titulo = "Atualização da sua Reserva";
+        String preHeader = String.format("Sua reserva do produto %s foi atualizada.", nomeProduto);
+        String conteudo = String.format("""
+            <h1>Sua reserva foi %s</h1>
+            <p>Olá,</p>
+            <p>Temos uma atualização sobre a sua solicitação de reserva para o produto <strong>%s</strong>.</p>
+            <p><strong>Status: %s</strong></p>
+            %s
+            <p>Atenciosamente,<br>Equipe Saúde em Ação</p>
+            """, status, nomeProduto, status, motivoHtml);
+
+        String corpoHtml = criarBaseTemplate(titulo, preHeader, conteudo);
+        enviarEmail(alunoEmail, titulo, corpoHtml);
+    }
+
+    private void enviarEmail(String para, String assunto, String corpoHtml) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(from);
-            helper.setTo(email);
-            helper.setSubject("Redefinição de Senha - Saúde em Ação");
-
-            String corpoHtml = """
-                <!DOCTYPE html>
-                <html lang="pt-BR">
-                <head>
-                  <meta charset="UTF-8" />
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                  <title>Redefinição de Senha - Saúde em Ação</title>
-                  <style>
-                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #f0f0f0; margin: 0; padding: 20px; }
-                    .container { max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #0d1b2a, #1b263b); border-radius: 12px; padding: 40px 20px; box-shadow: 0 0 20px rgba(255, 100, 100, 0.25); }
-                    .logo { text-align: center; margin-bottom: 20px; }
-                    .logo img { max-width: 120px; }
-                    h1 { text-align: center; font-size: 26px; color: #f87171; text-transform: uppercase; letter-spacing: 1px; }
-                    p { text-align: center; color: #e5e7eb; font-size: 16px; line-height: 1.5; }
-                    .code-container { text-align: center; margin: 30px 0; }
-                    .codigo { display: inline-block; font-size: 36px; font-weight: bold; color: #ffffff; letter-spacing: 12px; background-color: rgba(0, 0, 0, 0.2); padding: 15px 25px; border-radius: 8px; }
-                    .footer { text-align: center; margin-top: 40px; font-size: 13px; color: #7a7a7a; }
-                  </style>
-                </head>
-                <body>
-                  <div class="container">
-                    <div class="logo">
-                        <img src="https://res.cloudinary.com/dyd0bit5s/image/upload/v1754490738/logo_fw2pnp.png" alt="Logo Saúde em Ação" />
-                    </div>
-                    <h1>Redefinição de Senha</h1>
-                    <p>Recebemos uma solicitação para redefinir sua senha. Utilize o código abaixo para criar uma nova senha.</p>
-                    <div class="code-container"><span class="codigo">${token}</span></div>
-                    <div class="footer">
-                      <p>Este código expirará em 15 minutos.</p>
-                      <p>Se você não solicitou a redefinição de senha, por favor, ignore este e-mail com segurança.</p>
-                    </div>
-                  </div>
-                </body>
-                </html>
-                """.replace("${token}", token);
-
+            helper.setFrom(from, "Saúde em Ação");
+            helper.setTo(para);
+            helper.setSubject(assunto);
             helper.setText(corpoHtml, true);
             mailSender.send(message);
-
-        } catch (MessagingException e) {
-            throw new RuntimeException("Falha ao enviar e-mail de redefinição de senha: " + e.getMessage(), e);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            log.error("Falha ao enviar e-mail para {}: {}", para, e.getMessage());
         }
     }
 }

@@ -1,8 +1,9 @@
-// UsuarioService.java (updated)
+// src/main/java/br/com/saudeemacao/api/service/UsuarioService.java
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.UsuarioSaidaDTO;
 import br.com.saudeemacao.api.dto.UsuarioPerfilDTO;
+import br.com.saudeemacao.api.model.EPerfil;
 import br.com.saudeemacao.api.model.Usuario;
 import br.com.saudeemacao.api.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
@@ -107,6 +109,13 @@ public class UsuarioService {
 
     public Optional<Usuario> buscarPorEmail(String email) {
         return repo.findByEmail(email);
+    }
+
+    // --- MÉTODO ADICIONADO PARA O SISTEMA DE RESERVAS ---
+    public List<Usuario> buscarTodosAdmins() {
+        return repo.findAll().stream()
+                .filter(u -> u.getPerfil() == EPerfil.ADMIN)
+                .collect(Collectors.toList());
     }
 
     public UsuarioPerfilDTO buscarPerfilDoUsuarioLogado(UserDetails userDetails) {

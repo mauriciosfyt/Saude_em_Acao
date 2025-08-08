@@ -1,3 +1,4 @@
+// src/main/java/br/com/saudeemacao/api/security/SegurancaFilterChain.java
 package br.com.saudeemacao.api.security;
 
 import br.com.saudeemacao.api.model.EPerfil;
@@ -15,9 +16,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.cors.CorsConfiguration;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,45 +38,30 @@ public class SegurancaFilterChain {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Permita requests OPTIONS para todas as rotas (pre-flight requests)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // Endpoints públicos (não exigem autenticação)
-                        .requestMatchers(HttpMethod.POST, "/api/auth/solicitar-token").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login-token").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/usuario").permitAll() // Cadastro de novo usuário
-                        .requestMatchers(HttpMethod.POST, "/setup/admin").permitAll() // Endpoint para setup inicial
-
-                        // Endpoints para redefinição de senha
-                        .requestMatchers(HttpMethod.POST, "/api/auth/esqueci-senha/solicitar").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/esqueci-senha/confirmar").permitAll()
-
-                        // Endpoints públicos para produtos (apenas leitura)
-                        .requestMatchers(HttpMethod.GET, "/api/produtos").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/produtos/semtamanho").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/produtos/comtamanho").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/produtos/{id}").permitAll()
-
-                        // Adicionada esta linha para permitir o acesso ao endpoint do WebSocket.
+                        .requestMatchers(HttpMethod.POST, "/api/auth/**", "/api/login", "/api/usuario", "/setup/admin").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
-
-                        // Acesso ao perfil do usuário logado (qualquer usuário autenticado)
                         .requestMatchers("/api/usuario/meu-perfil").authenticated()
-
-                        // Endpoints de produtos que exigem autenticação e perfil ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.PUT, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
 
-                        // Exemplo de rotas que exigem autenticação e/ou role específica
-                        .requestMatchers(HttpMethod.GET, "/api/usuario").hasRole(EPerfil.ADMIN.name()) // Listar todos os usuários, apenas para ADMIN
+                        // --- REGRAS ATUALIZADAS PARA RESERVAS ---
+                        .requestMatchers(HttpMethod.POST, "/api/reservas").hasAnyRole(EPerfil.ALUNO.name(), EPerfil.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/reservas/minhas").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/cancelar").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/reservas").hasRole(EPerfil.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/reservas/stats").hasRole(EPerfil.ADMIN.name()) // <-- REGRA ADICIONADA
+                        .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/aprovar").hasRole(EPerfil.ADMIN.name())
+                        .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/rejeitar").hasRole(EPerfil.ADMIN.name())
+
+                        .requestMatchers(HttpMethod.GET, "/api/usuario").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers("/api/alunos/**").hasAnyRole(EPerfil.ADMIN.name(), EPerfil.PROFESSOR.name())
                         .requestMatchers("/api/professores/**").hasRole(EPerfil.ADMIN.name())
 
-                        .anyRequest().authenticated() // Qualquer outra requisição DEVE ser autenticada
+                        .anyRequest().authenticated()
                 )
-                // Adiciona seu filtro JWT antes do filtro padrão de autenticação de usuário/senha
                 .addFilterBefore(segurancaFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -99,7 +86,7 @@ public class SegurancaFilterChain {
                 "http://127.0.0.1:5500",
                 "https://dploy.netlify.app"
         ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

@@ -21,12 +21,12 @@ public class SetupController {
     public ResponseEntity<String> criarAdmin() {
         Usuario admin = new Usuario();
         admin.setNome("Admin");
-        admin.setEmail("feliperottnerrodrigues@gmail.com");
-        admin.setCpf("539.799.528-27");
-        admin.setSenha(new BCryptPasswordEncoder().encode("Corinthians13@&"));
+        admin.setEmail("saudeemacao.academia@gmail.com");
+        admin.setCpf("123.456.789-27");
+        admin.setSenha(new BCryptPasswordEncoder().encode("Saude@2025"));
         admin.setTelefone("(11) 91349-2849");
         admin.setPerfil(EPerfil.ADMIN);
-        admin.setPlano(EPlano.PREMIUM);
+        admin.setPlano(EPlano.GOLD);
 
         usuarioService.gravar(admin);
         return ResponseEntity.ok("Admin criado com sucesso!");
