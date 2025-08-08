@@ -200,7 +200,9 @@ function Home() {
                 <li>THAY FIT</li>
                 <li>PILATES</li>
               </ul>
+               <Link to={"/Planos"}>
               <button className="plano-btn">Saiba Mais</button>
+              </Link>
             </div>
             <div className="plano-card">
               <h3>ESSENCIAL</h3>
@@ -214,7 +216,9 @@ function Home() {
                 <li>THAY FIT</li>
                 <li>PILATES</li>
               </ul>
+              <Link to={"/Planos"}>
               <button className="plano-btn">Saiba Mais</button>
+              </Link>
             </div>
             <div className="plano-card">
               <h3>GOLD</h3>
@@ -228,7 +232,9 @@ function Home() {
                 <li>THAY FIT</li>
                 <li>PILATES</li>
               </ul>
+              <Link to={"/Planos"}>
               <button className="plano-btn">Saiba Mais</button>
+              </Link>
             </div>
           </div>
         </section>
