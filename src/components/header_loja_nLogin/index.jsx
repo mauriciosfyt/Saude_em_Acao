@@ -170,10 +170,10 @@ const Header_nLogin = () => {
     {/* Navegação secundária */}
       <nav className="nav-links">
         <div className="nav-center">
-          <a href="#">Whey Protein</a>
+          <a href="/CategoriaCreatina">Whey Protein</a>
           <a href="/CategoriaCreatina">Creatina</a>
-          <a href="#">Vitaminas</a>
-          <a href="#">Camisetas</a>
+          <a href="/CategoriaCreatina">Vitaminas</a>
+          <a href="/CategoriaCreatina">Camisetas</a>
         </div>
       </nav>
     </>

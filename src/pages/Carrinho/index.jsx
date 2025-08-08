@@ -5,15 +5,21 @@ import Header_nLogin from '../../components/header_loja_nLogin';
 import produto1 from "../../assets/IMG PRODUTO.jpg";
 import produto2 from "../../assets/IMG PRODUTO2.jpg";
 import produto3 from "../../assets/IMG PRODUTO3.jpg";
+import ProdutosSection from '../../components/produtos';
 
 const Carrinho = () => {
   const [produtos, setProdutos] = useState([
     { id: 1, nome: 'xxxxxxxxxxxxxxxxxxxx', preco: 50.99, quantidade: 1, imagem: produto1, selecionado: true },
     { id: 2, nome: 'xxxxxxxxxxxxxxxxxxxx', preco: 50.99, quantidade: 1, imagem: produto2, selecionado: true },
+
+
+
+
   ]);
 
   const handleToggleTodos = () => {
     const allSelecionados = produtos.every((p) => p.selecionado);
+
     const atualizados = produtos.map((p) => ({ ...p, selecionado: !allSelecionados }));
     setProdutos(atualizados);
   };
@@ -46,8 +52,7 @@ const Carrinho = () => {
   const selecionados = produtos.filter((p) => p.selecionado).length;
 
   return (
-    <>
-
+    <div className="carrinho-background">
     <Header_nLogin/>
 
     <div className="container-carrinho">
@@ -93,42 +98,13 @@ const Carrinho = () => {
       </div>
     </div>
 
-  <section className="products-section">
-  <h2 className="section-title">Destaques da Loja</h2>
-  <div className="cards-container">
-    <div className="product-card">
-      <img src={produto1} alt="Produto 1" />
-      <h3>Produto 1</h3>
-      <p>R$ 199,90</p>
-      <div className="botoes-produto">
-        <button className="buy-button">Comprar</button>
-        <button className="detalhes-button">Detalhes</button>
-      </div>
-    </div>
-    <div className="product-card">
-      <img src={produto2} alt="Produto 2" />
-      <h3>Produto 2</h3>
-      <p>R$ 299,90</p>
-      <div className="botoes-produto">
-        <button className="buy-button">Comprar</button>
-        <button className="detalhes-button">Detalhes</button>
-      </div>
-    </div>
-    <div className="product-card">
-      <img src={produto3} alt="Produto 3" />
-      <h3>Produto 3</h3>
-      <p>R$ 399,90</p>
-      <div className="botoes-produto">
-        <button className="buy-button">Comprar</button>
-        <button className="detalhes-button">Detalhes</button>
-      </div>
-    </div>
-  </div>
-</section>
+    <ProdutosSection/>
+
+
 
 
       <Footer/>
-    </>
+    </div>
   );
 };
 

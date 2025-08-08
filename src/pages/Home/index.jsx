@@ -200,7 +200,7 @@ function Home() {
                 <li>THAY FIT</li>
                 <li>PILATES</li>
               </ul>
-               <Link to={"/Planos"}>
+                <Link to={"/Planos"}>
               <button className="plano-btn">Saiba Mais</button>
               </Link>
             </div>

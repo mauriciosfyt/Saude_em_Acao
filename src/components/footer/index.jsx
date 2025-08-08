@@ -48,8 +48,8 @@ const Footer = () => {
         </div>
         <div>
           <div><a href="#" className="footer-link">Personal</a></div>
-          <div><a href="#" className="footer-link">Planos</a></div>
-          <div><a href="#" className="footer-link">Sobre nós</a></div>
+          <div><a href="/Planos" className="footer-link">Planos</a></div>
+          <div><a href="/SobreNos" className="footer-link">Sobre nós</a></div>
         </div>
       </div>
       {/* Linha separadora */}
