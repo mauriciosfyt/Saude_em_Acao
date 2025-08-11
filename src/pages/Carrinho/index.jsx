@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Carrinho.css';
 import Footer from '../../components/footer';
-import Header_nLogin from '../../components/header_loja_nLogin';
+import Header from '../../components/header_loja';
 import produto1 from "../../assets/IMG PRODUTO.jpg";
 import produto2 from "../../assets/IMG PRODUTO2.jpg";
 import produto3 from "../../assets/IMG PRODUTO3.jpg";
@@ -53,7 +53,7 @@ const Carrinho = () => {
 
   return (
     <div className="carrinho-background">
-    <Header_nLogin/>
+    <Header/>
 
     <div className="container-carrinho">
       <div className="carrinho-esquerda">

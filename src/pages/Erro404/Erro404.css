@@ -1,0 +1,99 @@
+/* Banner com degradê igual ao SobreNos */
+.banner-gradient-erro {
+  min-height: 100%;
+  background: linear-gradient(180deg, #000000 31%, #004dff 69%, #d9d9d9 100%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 5%;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding-bottom: 5%;
+}
+
+.banner_erro {
+  width: 100%;
+}
+
+.banner_erro img {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  display: block;
+  border-radius: 32px;
+}
+
+/* Mensagem centralizada com fundo cinza */
+.mensagem-erro {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: #d9d9d9;
+}
+
+.mensagem-erro h1 {
+  font-size: clamp(28px, 5vw, 42px);
+  margin-bottom: 20px;
+}
+
+.mensagem-erro p {
+  font-size: clamp(16px, 2vw, 20px);
+  margin-bottom: 30px;
+}
+
+/* Botão no padrão SobreNos */
+.btn-voltar {
+  background: #004dff;
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 12px 0 12px 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.btn-voltar:hover {
+  background: #003bbd;
+}
+
+/* Responsividade igual ao SobreNos */
+@media (max-width: 1024px) {
+  .banner_erro img {
+    max-height: 400px;
+  }
+
+  .mensagem-erro {
+    padding: 40px 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .banner_erro img {
+    max-height: 250px;
+  }
+
+  .mensagem-erro h1 {
+    font-size: 22px;
+  }
+
+  .mensagem-erro p {
+    font-size: 14px;
+  }
+
+  .btn-voltar {
+    display: inline-block;
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+/* Ajuste extra para telas grandes */
+@media (min-width: 1100px) {
+  .banner_erro img {
+    max-height: 700px;
+  }
+}

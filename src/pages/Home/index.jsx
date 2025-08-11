@@ -2,7 +2,7 @@
 import "../../components/modal_login/modal_login.css";
 import "./styles.css";
 import logo from "../../assets/logo_dia.png";
-import banner_home from "../../assets/banner_home.jpeg";
+import banner_home from "../../assets/banners/banner_home.jpeg";
 import img_abaixo_banner from "../../assets/img_home.jpeg";
 import Footer from "../../components/footer";
 import navegacao_ntem from "../../assets/navegacao_Ntem.png";

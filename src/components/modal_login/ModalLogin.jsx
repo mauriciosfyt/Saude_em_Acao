@@ -2,6 +2,13 @@ import React from "react";
 import logo from "../../assets/logo1.png";
 
 export default function LoginModal({ onClose, onLogin, onRecover }) {
+  React.useEffect(() => {
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, []);
+
   return (
     <div className="modal-bg" onClick={onClose}>
       <div className="modal-login" onClick={(e) => e.stopPropagation()}>

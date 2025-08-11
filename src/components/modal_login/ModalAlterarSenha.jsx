@@ -2,6 +2,16 @@ import React from "react";
 import logo from "../../assets/logo1.png";
 
 export default function ChangePasswordModal({ onClose, onChangePassword }) {
+  // Adiciona a classe 'modal-open' ao body do documento quando o componente é montado
+  React.useEffect(() => {
+    document.body.classList.add('modal-open');
+
+    // Remove a classe 'modal-open' do body do documento quando o componente é desmontado
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, []);
+
   return (
     <div className="modal-bg" onClick={onClose}>
       <div className="modal-login" onClick={(e) => e.stopPropagation()}>

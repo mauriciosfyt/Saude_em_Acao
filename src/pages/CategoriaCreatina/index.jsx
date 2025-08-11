@@ -1,7 +1,7 @@
 import React from "react";
 import "./CategoriaCreatina.css";
 import creatinaImg from "../../assets/IMG PRODUTO.jpg";
-import bannerImg from "../../assets/banner_loja.jpeg"; // substitua pelo caminho real da imagem
+import bannerImg from "../../assets/banners/banner_loja.jpeg"; // substitua pelo caminho real da imagem
 import Footer from '../../components/footer';
 import Header_nLogin from '../../components/header_loja_nLogin';
 const CategoriaCreatina = () => {

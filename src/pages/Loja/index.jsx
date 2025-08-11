@@ -1,6 +1,6 @@
 import './Loja.css';
 
-import banner from "../../assets/banner_loja.jpeg";
+import banner from "../../assets/banners/banner_loja.jpeg";
 import iconeCamisa from "../../assets/icones/Camisa.png";
 import iconePote from "../../assets/icones/Vitamina.png";
 import iconeWhey from "../../assets/icones/Whey protain.png";

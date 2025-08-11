@@ -8,7 +8,7 @@ import "./SobreNos.css";
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 
-import banner from "../../assets/banner_sobreNos.jpeg";
+import banner from "../../assets/banners/banner_sobreNos.jpeg";
 import img1 from "../../assets/academia.jpeg";
 import img2 from "../../assets/academia2.jpeg";
 import img4 from "../../assets/navegacao_loja.png";
