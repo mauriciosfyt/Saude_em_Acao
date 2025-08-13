@@ -4,6 +4,7 @@ import "../header_loja_nLogin/Header_Login.css";
 import { FaShoppingCart, FaUser, FaSearch } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
 import logo from "../../assets/logo_dia.png";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 799);
@@ -28,8 +29,14 @@ const Header = () => {
             </div>
 
             <div className="header-actions">
-              <FaUser className="icon" />
+              
+              <Link to="/Perfil">
+                <FaUser className="icon" />
+              </Link>
+
+              <Link to="/Carrinho">
               <FaShoppingCart className="icon" />
+              </Link>
             </div>
 
             <div className="search-bar">
@@ -61,8 +68,14 @@ const Header = () => {
             </div>
 
             <div className="header-actions">
-              <FaUser className="icon" />
+            
+              <Link to="/Perfil">
+                <FaUser className="icon" />
+              </Link>
+
+              <Link to="/Carrinho">
               <FaShoppingCart className="icon" />
+              </Link>
             </div>
           </>
         )}
