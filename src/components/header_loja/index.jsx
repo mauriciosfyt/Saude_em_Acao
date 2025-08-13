@@ -87,9 +87,9 @@ const Header = () => {
           <GiHamburgerMenu className="menu-icon" />
         </div>
         <div className="nav-center">
-          <a href="/CategoriaCreatina">Whey Protein</a>
+          <a href="/CategoriaWhey">Whey Protein</a>
           <a href="/CategoriaCreatina">Creatina</a>
-          <a href="/CategoriaCreatina">Vitaminas</a>
+          <a href="/CategoriaVitaminas">Vitaminas</a>
           <a href="/CategoriaCamisa">Camisetas</a>
         </div>
       </nav>
