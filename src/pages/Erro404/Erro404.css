@@ -60,40 +60,15 @@
   background: #003bbd;
 }
 
-/* Responsividade igual ao SobreNos */
-@media (max-width: 1024px) {
-  .banner_erro img {
-    max-height: 400px;
-  }
-
-  .mensagem-erro {
-    padding: 40px 10px;
-  }
-}
-
-@media (max-width: 600px) {
-  .banner_erro img {
-    max-height: 250px;
-  }
-
-  .mensagem-erro h1 {
-    font-size: 22px;
-  }
-
-  .mensagem-erro p {
-    font-size: 14px;
-  }
-
-  .btn-voltar {
-    display: inline-block;
-    width: 100%;
-    max-width: 300px;
-  }
-}
 
 /* Ajuste extra para telas grandes */
-@media (min-width: 1100px) {
+@media (min-width: 1000px) {
   .banner_erro img {
     max-height: 700px;
+  }
+}
+@media (min-width: 1300px) {
+  .banner_erro img {
+    max-height: 1080px;
   }
 }

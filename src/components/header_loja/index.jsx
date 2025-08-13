@@ -74,10 +74,10 @@ const Header = () => {
           <GiHamburgerMenu className="menu-icon" />
         </div>
         <div className="nav-center">
-          <a href="#">Whey Protein</a>
-          <a href="#">Creatina</a>
-          <a href="#">Vitaminas</a>
-          <a href="#">Camisetas</a>
+          <a href="/CategoriaCreatina">Whey Protein</a>
+          <a href="/CategoriaCreatina">Creatina</a>
+          <a href="/CategoriaCreatina">Vitaminas</a>
+          <a href="/CategoriaCamisa">Camisetas</a>
         </div>
       </nav>
     </>

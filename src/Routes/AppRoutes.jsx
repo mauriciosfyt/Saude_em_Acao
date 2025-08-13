@@ -11,9 +11,9 @@ import LojaProduto from '../pages/LojaProduto/index.jsx';
 import SobrenosLoja from '../pages/SobreNos_loja/index.jsx';
 import Carrinho from '../pages/Carrinho/index.jsx';
 import CategoriaCreatina from '../pages/CategoriaCreatina/index.jsx';
+import CategoriaCamisa from '../pages/CategoriaCamisa/index.jsx';
 import Planos from '../pages/Planos/index.jsx';
 import Erro404 from '../pages/Erro404/erro_404.jsx';
-
 
 
 const AppRoutes = () => {
@@ -30,6 +30,7 @@ const AppRoutes = () => {
         <Route path="/SobrenosLoja" element={<SobrenosLoja />} />
         <Route path="/Carrinho" element={<Carrinho />} />
         <Route path="/CategoriaCreatina" element={<CategoriaCreatina />} />
+        <Route path="/CategoriaCamisa" element={<CategoriaCamisa />} />
         <Route path="/Planos" element={<Planos />} />
         <Route path="*" element={<Erro404 />} /> {/* Adicione esta linha */}
       </Routes>
