@@ -13,11 +13,14 @@ import Carrinho from '../pages/Carrinho/index.jsx';
 import Planos from '../pages/Planos/index.jsx';
 import Erro404 from '../pages/Erro404/erro_404.jsx';
 import ReservasEfetuadas from '../pages/Tela Adm/Reservas_Efetuada/index.jsx';
+import GerenciarProduto from '../pages/Tela Adm/GerenciarProduto/index.jsx';
 
 import CategoriaCreatina from '../pages/CategoriaCreatina/index.jsx';
 import CategoriaCamisa from '../pages/CategoriaCamisa/index.jsx';
 import CategoriaVitaminas from '../pages/CategoriaVitaminas/index.jsx';
 import CategoriaWhey from '../pages/CategoriaWhey/index.jsx';
+import CadastroProduto from '../pages/Tela Adm/Adicionar_Produto/index.jsx';
+
 
 const AppRoutes = () => {
   return (
@@ -39,7 +42,12 @@ const AppRoutes = () => {
         <Route path="/CategoriaCamisa" element={<CategoriaCamisa />} />
         <Route path="/CategoriaWhey" element={<CategoriaWhey />} />
         <Route path="/CategoriaVitaminas" element={<CategoriaVitaminas />} />
+        
         <Route path="/ReservasEfetuadas" element={<ReservasEfetuadas />} /> {/* Adicione esta linha */}
+        <Route path="/CadastrarProduto" element={<CadastroProduto />} /> {/* Adicione esta linha */}
+        <Route path="/GerenciarProduto" element={<GerenciarProduto />} /> {/* Adicione esta linha */}
+
+        
         
         {/* Adicione outras rotas conforme necessário */}
       </Routes>

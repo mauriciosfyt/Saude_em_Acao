@@ -1,38 +1,7 @@
-.container-admin {
-  font-family: Arial, sans-serif;
-  background-color: #e2e8f0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-   padding: 0; /* ou padding horizontal mínimo */
-}
 
-.admin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px; /* ajuste interno do header */
-  width: 100%; /* melhor que 100vw */
-  box-sizing: border-box; /* inclui o padding dentro da largura */
-  background-color: #d9d9d9; /* ou a cor que quiser */
-}
-
-
-.logo-reserva {
-     max-width: 50px;
-    /* Aumente aqui conforme desejar, ex: 60px ou 80px */
-    height: auto;
-    margin-right: 12px;
-    margin-top: 5px;
-}
-
-.menu-icon {
-  font-size: 30px;
-  cursor: pointer;
-}
 
 .content {
-  background: white;
+  background: #d9d9d9;
   padding: 20px;
   border-radius: 8px;
   width: 100%;
@@ -49,7 +18,7 @@
 .barra-pesquisa {
   display: flex;
   align-items: center;
-  background: #d9d9d9;
+  background: #ffffff;
   padding: 8px 12px;
   border-radius: 8px;
   margin: 20px 0;
@@ -76,7 +45,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #ffffff;
   padding: 10px 0;
 }
 

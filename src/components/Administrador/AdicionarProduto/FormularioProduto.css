@@ -1,0 +1,47 @@
+/* ... todos os estilos anteriores permanecem os mesmos ... */
+
+/* NOVOS ESTILOS PARA O CONTROLE DE ESTOQUE */
+
+.container-estoque {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.resumo-estoque {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.resumo-item {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.resumo-estoque-vazio {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.btn-definir-estoque {
+  align-self: flex-start; /* Alinha o botão à esquerda */
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-definir-estoque:hover {
+  background-color: #218838;
+}

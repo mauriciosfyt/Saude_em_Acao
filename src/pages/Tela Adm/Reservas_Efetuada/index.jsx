@@ -1,12 +1,12 @@
 import React from "react";
 import { FaSearch, FaBars } from "react-icons/fa";
 import "./ReservasEfetuadas.css";
+import HeaderAdmin from "../../../components/header_admin";
 
 // Importando imagens específicas
 import camiseta from "../../../assets/IMG PRODUTO.jpg";
 import shake from "../../../assets/IMG PRODUTO.jpg";
 import shorts from "../../../assets/IMG PRODUTO.jpg";
-import logo from '../../../assets/logo_dia.png'
 import Footer from "../../../components/footer";
 
 export default function ReservasEfetuadas() {
@@ -100,15 +100,9 @@ export default function ReservasEfetuadas() {
 
   return (
   
-    <div className="container-admin">
-      {/* Header */}
-      <header className="admin-header">
-        <div className="logo">
-          <img src={logo} alt="logo" className="logo-reserva" />
-          </div>
-        <FaBars className="menu-icon" />
-      </header>
-
+    <div >
+     
+     <HeaderAdmin/>
       <main className="content">
         <h1 className="titulo">RESERVAS EFETUADAS</h1>
 
