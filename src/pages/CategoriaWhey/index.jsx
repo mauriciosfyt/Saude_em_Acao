@@ -2,9 +2,9 @@
 import React from "react";
 import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
-import banner from "../../assets/banners/banner_catCreatina.jpeg";
+import banner from "../../assets/banners/banner_catWhey.png";
 import camisaImg from "../../assets/IMG PRODUTO.jpg";
-import "./CategoriaCreatina.css";
+import "./CategoriaWhey.css";
 import Header_nLogin from "../../components/header_loja_nLogin";
 import Header_Login from "../../components/header_loja";
 
