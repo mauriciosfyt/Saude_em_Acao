@@ -1,0 +1,89 @@
+.modal-termos-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-termos-container {
+  background: #fff;
+  border-radius: 20px;
+  max-width: 600px; /* largura aumentada */
+  width: 95%;
+  padding: 32px 24px 24px 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-termos-title {
+  background: #002b8a;
+  color: #fff;
+  text-align: center;
+  border-radius: 12px 12px 0 0; /* borda superior arredondada */
+  padding: 10px 0; /* header mais achatado */
+  font-size: 1.2rem;
+  margin: -18px -18px 12px -18px; /* acompanha novo padding */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* sombra leve no header */
+  letter-spacing: 1px;
+}
+
+.modal-termos-content {
+  color: #222;
+  font-size: 1rem;
+  margin-bottom: 18px;
+  overflow-y: auto;
+  max-height: 50vh; /* altura do conteúdo aumentada */
+}
+
+.modal-termos-button {
+  width: 100%;
+  background: #002b8a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-size: 1.1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.modal-termos-button:hover {
+  background: #001f5c;
+}
+
+.body-modal-open {
+  overflow: hidden;
+}
+
+.modal-termos-notification {
+  position: fixed;
+  top: 32px;
+  right: 32px;
+  background: #fff;
+  color: #16a34a; /* verde */
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  z-index: 9999;
+  animation: toastSlideIn 0.5s;
+  border: 2px solid #16a34a;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(120px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
