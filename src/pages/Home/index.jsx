@@ -246,10 +246,10 @@ function Home() {
             Experiência <span className="azul">Saúde em ação</span>
           </h2>
           <div className="navegacao-links">
-            <Link to="/LojaProduto">
+            <Link to="/ReservasEfetuadas">
               <div>
                 <img src={navegacao_prof} alt="Tela professor" />
-                <p>Loja Produto</p>
+                <p>ReservasEfetuadas</p>
               </div>
             </Link>
 
