@@ -20,7 +20,13 @@ import CategoriaCamisa from '../pages/CategoriaCamisa/index.jsx';
 import CategoriaVitaminas from '../pages/CategoriaVitaminas/index.jsx';
 import CategoriaWhey from '../pages/CategoriaWhey/index.jsx';
 import CadastroProduto from '../pages/Tela Adm/Adicionar_Produto/index.jsx';
+import Professores from '../pages/Professores/index.jsx';
 
+import CadastroProduto from '../pages/Tela Adm/Adicionar_Produto/index.jsx';
+import GerenciarPersonal from '../pages/Tela Adm/GerenciarPersonal/GerenciarPersonal.jsx';
+import AdicionarPersonal from '../pages/Tela Adm/AdicionarProfessor/AdicionarPersonal.jsx';
+import Dashboard from '../pages/Tela Adm/Dashboard/index.jsx';
+import GerenciarAlunos from '../pages/Tela Adm/GerenciarAluno/GerenciarAlunos.jsx';
 
 const AppRoutes = () => {
   return (
@@ -36,6 +42,7 @@ const AppRoutes = () => {
         <Route path="/SobrenosLoja" element={<SobrenosLoja />} />
         <Route path="/Carrinho" element={<Carrinho />} />
         <Route path="/Planos" element={<Planos />} />
+        <Route path="/Professores" element={<Professores />} />
         <Route path="*" element={<Erro404 />} /> {/* Adicione esta linha */}
 
         <Route path="/CategoriaCreatina" element={<CategoriaCreatina />} />
@@ -46,6 +53,10 @@ const AppRoutes = () => {
         <Route path="/ReservasEfetuadas" element={<ReservasEfetuadas />} /> {/* Adicione esta linha */}
         <Route path="/CadastrarProduto" element={<CadastroProduto />} /> {/* Adicione esta linha */}
         <Route path="/GerenciarProduto" element={<GerenciarProduto />} /> {/* Adicione esta linha */}
+        <Route path="/GerenciarPersonal" element={<GerenciarPersonal />} /> {/* Adicione esta linha */}
+        <Route path="/AdicionarPersonal" element={<AdicionarPersonal />} /> {/* Adicione esta linha */}
+        <Route path="/Dashboard" element={<Dashboard />} /> {/* Adicione esta linha */}
+        <Route path="/GerenciarAlunos" element={<GerenciarAlunos />} /> {/* Adicione esta linha */}
 
         
         
