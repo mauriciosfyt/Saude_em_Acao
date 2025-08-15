@@ -167,3 +167,8 @@
 body.modal-open {
   overflow: hidden;
 }
+
+.modal-close-btn:focus {
+  outline: none;
+  box-shadow: none;
+}

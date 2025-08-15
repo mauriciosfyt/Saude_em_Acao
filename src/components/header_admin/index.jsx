@@ -31,10 +31,11 @@ export default function AdminHeader() {
           <li><Link to="/"><FaHome /> Home</Link></li>
           <li><Link to="/ReservasEfetuadas"><FaCalendarAlt /> Reservas</Link></li>
           <li><Link to="/GerenciarProduto"><FaChartBar /> Produtos</Link></li>
-          <li><Link to="#"><FaUserFriends /> Alunos</Link></li>
-          <li><Link to="#"><FaUserTie /> Professores</Link></li>
-        
+          <li><Link to="/GerenciarAlunos"><FaUserFriends /> Alunos</Link></li>
+          <li><Link to="/GerenciarPersonal"><FaUserTie /> Professores</Link></li>
           <li><Link to="/CadastrarProduto"><FaPlusCircle /> Adicionar Produtos</Link></li>
+          <li><Link to="/Dashboard"><FaPlusCircle />Dashboard</Link></li>
+
         </ul>
       </nav>
     </>

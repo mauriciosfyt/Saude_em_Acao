@@ -19,6 +19,31 @@ export default function RecoverCodeModal({
   return (
     <div className="modal-bg" onClick={onClose}>
       <div className="modal-login" onClick={(e) => e.stopPropagation()}>
+        <button
+          className="modal-close-btn"
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: "16px",
+            right: "-13px",
+            background: "transparent",
+            border: "none",
+            fontSize: "2.5rem",
+            width: "48px",
+            height: "48px",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            color: "#fff",
+            outline: "none",
+            boxShadow: "none",
+          }}
+          aria-label="Fechar modal"
+        >
+          &times;
+        </button>
         <img src={logo} alt="Logo" className="modal-logo" />
         <h4
           className="modal-boasvindas"
