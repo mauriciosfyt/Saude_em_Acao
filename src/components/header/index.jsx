@@ -69,7 +69,7 @@ const HeaderUser = () => {
           <Link to="/">Home</Link>
           <Link to="/Loja">Loja</Link>
           <Link to="/Planos">Planos</Link>
-          <Link to="/personal">Personal</Link>
+          <Link to="/Professores">Personal</Link>
           <Link to="/SobreNos">Sobre nós</Link>
         </div>
       </nav>

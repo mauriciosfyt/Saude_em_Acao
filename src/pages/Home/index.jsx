@@ -291,7 +291,7 @@ function Home() {
             <li><span className="check"></span> Compre ou faça upgrade de plano</li>
           </ul>
           <div className="qr-section">
-            <img src='' alt="QR Code" />
+            {/* <img src='' alt="QR Code" /> */}
             <p>@EQUIPESAUDEEMACAO</p>
           </div>
         </div>

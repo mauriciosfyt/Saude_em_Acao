@@ -32,7 +32,7 @@ const GerenciarPersonal = () => {
         
         <input
           type="text"
-          className="search-bar"
+          className="input-busca"
           value={termoBusca}
           onChange={(e) => setTermoBusca(e.target.value)}
           placeholder="Buscar"

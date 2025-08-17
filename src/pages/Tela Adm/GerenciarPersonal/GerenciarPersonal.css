@@ -25,7 +25,7 @@
   margin-bottom: 30px;
 }
 
-.search-bar {
+.search-bar-personal {
   width: 100%;
   padding: 16px 20px;
   border: 1px solid #DFE1E6;
@@ -35,7 +35,7 @@
   margin-left: 10px;
 }
 
-.search-bar::placeholder {
+.search-bar-personal::placeholder {
   color: #AAB2BD;
 }
 

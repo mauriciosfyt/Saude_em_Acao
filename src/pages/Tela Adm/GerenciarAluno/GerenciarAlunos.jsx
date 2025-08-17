@@ -51,7 +51,7 @@ const GerenciarAlunos = () => {
           <FaSearch className="search-icon" />
           <input
             type="text"
-            className="search-bar"
+            className="input-busca"
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
             placeholder="Buscar"

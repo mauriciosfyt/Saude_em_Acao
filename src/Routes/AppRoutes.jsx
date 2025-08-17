@@ -19,7 +19,6 @@ import CategoriaCreatina from '../pages/CategoriaCreatina/index.jsx';
 import CategoriaCamisa from '../pages/CategoriaCamisa/index.jsx';
 import CategoriaVitaminas from '../pages/CategoriaVitaminas/index.jsx';
 import CategoriaWhey from '../pages/CategoriaWhey/index.jsx';
-import CadastroProduto from '../pages/Tela Adm/Adicionar_Produto/index.jsx';
 import Professores from '../pages/Professores/index.jsx';
 
 import CadastroProduto from '../pages/Tela Adm/Adicionar_Produto/index.jsx';
