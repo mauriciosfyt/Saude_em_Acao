@@ -1,0 +1,105 @@
+/* Estilos para o efeito de "virar a carta" */
+.cards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  margin: 50px auto;
+}
+
+.card-dica {
+  width: 100%;              /* ocupa toda a largura do slot no carrossel */
+  max-width: 260px;         /* limite para não ficar gigante */
+  height: 360px;            /* altura proporcional */
+  perspective: 1000px;
+  cursor: pointer;
+  border-radius: 18px;
+  margin: 0 auto;           /* centraliza dentro do carrossel */
+}
+
+@media (max-width: 768px) {
+  .card-dica {
+    max-width: 220px;
+    height: 320px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-dica {
+    max-width: 200px;
+    height: 300px;
+  }
+}
+
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+/* Hover só em telas maiores (PC) */
+@media (min-width: 1024px) {
+  .card-dica:hover .card-inner {
+    transform: rotateY(180deg);
+  }
+}
+
+/* Clique: mantém virada enquanto o estado estiver ativo */
+.card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-front {
+  background-color: #ffffff;
+  color: black;
+  /* Alinha a imagem no centro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-back {
+  background-color: white;
+  color: black;
+  transform: rotateY(180deg);
+}
+
+.card-image {
+  /* A imagem agora ocupa toda a frente da carta */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
+.card-text {
+  font-size: 18px;
+  line-height: 1.5;
+  padding: 0 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .card-dica {
+    width: 250px;
+    height: 350px;
+  }
+}

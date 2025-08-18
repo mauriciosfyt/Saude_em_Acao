@@ -159,7 +159,7 @@
   }
 
   .product-card {
-    width: 98vw;
+    width: 80vw;
     min-width: 0;
     max-width: 99vw;
     padding: 0 0 18px 0;
@@ -200,4 +200,5 @@
     margin-top: 80px;
     font-size: 30px;
   }
+
 }
