@@ -11,9 +11,7 @@ const Carrinho = () => {
   const [produtos, setProdutos] = useState([
     { id: 1, nome: 'xxxxxxxxxxxxxxxxxxxx', preco: 50.99, quantidade: 1, imagem: produto1, selecionado: true },
     { id: 2, nome: 'xxxxxxxxxxxxxxxxxxxx', preco: 50.99, quantidade: 1, imagem: produto2, selecionado: true },
-
-
-
+   
 
   ]);
 

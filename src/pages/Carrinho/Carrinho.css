@@ -16,8 +16,10 @@ body {
   flex-wrap: wrap;
   justify-content: space-between;
   padding: 40px;
-  min-height: 100vh;
+  /* evita que o contêiner fique maior que o conteúdo quando há poucos itens */
+  min-height: auto;
   margin-bottom: 0;
+  align-items: flex-start; /* garante que a coluna sticky tenha base no topo */
 }
 
 .carrinho-esquerda {
@@ -95,6 +97,9 @@ body {
   flex-direction: column;
   gap: 25px;
   height: fit-content;
+  position: sticky;
+  top: 140px; /* distancia do topo para não cobrir o header/navegação */
+  align-self: flex-start; /* garante que o sticky funcione dentro do flex */
 }
 
 .total {
@@ -182,6 +187,11 @@ body {
     height: auto;
     margin-top: 10px;
     margin-bottom: 80px;
+    /* desativa sticky no mobile */
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   .total {
@@ -200,6 +210,8 @@ body {
     display: flex;
     justify-content: space-between;
     gap: 30px;
+    flex-wrap: nowrap; /* evita quebra de linha para o sticky funcionar melhor */
+    align-items: flex-start;
   }
 
   .carrinho-esquerda {
@@ -222,6 +234,9 @@ body {
     gap: 25px;
     margin: 0 auto;
     /* <- centraliza horizontalmente */
+    position: sticky;
+    top: 140px;
+    align-self: flex-start;
   }
 
 
@@ -287,6 +302,8 @@ body {
     display: flex;
     justify-content: space-between;
     gap: 30px;
+    flex-wrap: nowrap; /* evita quebra de linha para o sticky funcionar melhor */
+    align-items: flex-start;
   }
 
   .carrinho-esquerda {
@@ -298,6 +315,9 @@ body {
     max-width: 400px;
     height: fit-content;
     padding: 60px;
+    position: sticky;
+    top: 140px;
+    align-self: flex-start;
   }
 
   .carrinho-produto-card {
