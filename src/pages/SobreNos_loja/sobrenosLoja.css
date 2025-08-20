@@ -195,7 +195,7 @@
   .sobrenos-circle {
     width: 100%;
     max-width: none;
-    border-radius: 0 0 12px 12px; /* leve arredondado embaixo */
+    border-radius: 0 0 40px 40px; /* muito mais arredondado embaixo */
     padding: 16px 18px 120px; /* mais respiro e curva menor */
     left: 0;
     transform: none;
@@ -265,7 +265,7 @@
     left: 0;
     transform: none;
     padding: 20px 24px 150px;
-    border-radius: 0 0 16px 16px; /* leve arredondado embaixo */
+    border-radius: 0 0 175px 175px; /* muito mais arredondado embaixo */
   }
 
   .sobrenos-circle::before {

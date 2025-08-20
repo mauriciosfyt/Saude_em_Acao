@@ -1,10 +1,14 @@
-/* -------- SEÇÃO SOBRE NÓS -------- */
+/* -------- SEÇÃO PLANOS -------- */
 .planos-container {
   background: linear-gradient(to bottom, #000000 21%, #002E99 72%);
-  padding: 60px 20px;
+  padding: 60px 20px 120px;
   color: #fff;
   text-align: center;
-  margin-bottom: 80px;
+  margin-bottom: 0;
+  position: relative;
+  overflow: hidden;
+  /* Formato V diretamente no container */
+  clip-path: polygon(0 0, 0 95%, 50% 100%, 100% 95%, 100% 0);
 }
 
 .planos-content {
@@ -16,6 +20,8 @@
   text-align: center;
   color: white;
   margin-bottom: 30px;
+  position: relative;
+  z-index: 2; /* garante que o header fique acima da transição */
 }
 
 .planos-header h2 {
@@ -32,6 +38,8 @@
   justify-content: center;
   gap: 24px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 2; /* garante que os cards fiquem acima da transição */
 }
 
 .plano-card {
@@ -44,6 +52,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  z-index: 3; /* garante que os cards fiquem acima da transição */
 }
 
 .plano-card.destaque {
@@ -67,6 +76,7 @@
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 8px;
+  z-index: 4; /* garante que a tag fique acima de tudo */
 }
 
 .plano-card .descricao {
@@ -128,5 +138,36 @@
   font-size: 14px;
   margin: 6px 0;
   text-align: center;
+}
+
+/* -------- RESPONSIVIDADE -------- */
+
+/* Celulares pequenos */
+@media (max-width: 480px) {
+  .planos-container {
+    padding: 40px 15px 80px;
+    clip-path: polygon(0 0, 0 90%, 50% 100%, 100% 90%, 100% 0);
+  }
+  
+  .plano-card {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .plano-cards {
+    gap: 16px;
+  }
+}
+
+/* Tablets médios */
+@media (max-width: 900px) {
+  .planos-container {
+    padding: 50px 20px 100px;
+    clip-path: polygon(0 0, 0 88%, 50% 100%, 100% 88%, 100% 0);
+  }
+  
+  .plano-cards {
+    gap: 20px;
+  }
 }
 
