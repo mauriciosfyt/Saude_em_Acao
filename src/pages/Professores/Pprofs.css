@@ -63,6 +63,8 @@
     background: none;
     margin-top: -100px;
     line-height: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .professores-wave svg {
@@ -96,11 +98,49 @@
 /* Grade */
 .equipe-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     padding: 20px;
     background-color: #d9d9d9;
     margin: 5% 0;
+    position: relative;
+    z-index: 2;
+}
+
+/* Eleva apenas os 3 primeiros acima da onda no desktop */
+@media (min-width: 901px) {
+    .equipe-grid {
+        margin-top: -120px; /* puxa a grade para cima, sobre a onda */
+        padding-top: 160px; /* mantém espaçamento para as linhas seguintes */
+        background: linear-gradient(to bottom, transparent 160px, #d9d9d9 160px);
+    }
+
+    .equipe-grid .equipe-card:nth-child(-n+3) {
+        transform: translateY(-160px);
+        position: relative;
+        z-index: 3; /* acima da onda */
+    }
+}
+
+/* Garante que no tablet/mobile não haja sobreposição */
+@media (max-width: 900px) {
+    .equipe-grid .equipe-card:nth-child(-n+3) {
+        transform: none;
+    }
+}
+
+/* 2 colunas em tablets */
+@media (max-width: 900px) {
+    .equipe-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 1 coluna em mobile */
+@media (max-width: 600px) {
+    .equipe-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Card */
@@ -110,8 +150,8 @@
 }
 
 .equipe-foto {
-    width: 120px;
-    height: 120px;
+    width: 140px;
+    height: 140px;
     margin: 0 auto;
     border-radius: 50%;
     overflow: hidden;
@@ -168,7 +208,7 @@
     }
 
     .equipe-foto {
-        width: 90px;
-        height: 90px;
+        width: 100px;
+        height: 100px;
     }
 }
