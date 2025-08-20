@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import "./Footer.css";
 import logo from "../../assets/logo1.png";
 import tiktokIcon from "../../assets/icones/Email.png";
@@ -12,6 +13,27 @@ const Footer = () => {
   const [showModalPrivacidade, setShowModalPrivacidade] = useState(false);
   const [showToastTermos, setShowToastTermos] = useState(false);
   const [showToastPrivacidade, setShowToastPrivacidade] = useState(false);
+  
+  const location = useLocation();
+  
+  // Função para determinar se estamos em uma página da loja
+  const isLojaPage = () => {
+    const lojaRoutes = [
+      '/Loja',
+      '/LojaProduto',
+      '/CategoriaCreatina',
+      '/CategoriaCamisa',
+      '/CategoriaVitaminas',
+      '/CategoriaWhey',
+      '/Carrinho'
+    ];
+    return lojaRoutes.includes(location.pathname);
+  };
+  
+  // Função para obter o link correto do "Sobre nós"
+  const getSobreNosLink = () => {
+    return isLojaPage() ? '/SobrenosLoja' : '/SobreNos';
+  };
 
   const handleConcordoTermos = () => {
     setShowModalTermos(false);
@@ -85,7 +107,7 @@ const Footer = () => {
               <a href="/Planos" className="footer-link">Planos</a>
             </div>
             <div>
-              <a href="/SobreNos" className="footer-link">Sobre nós</a>
+              <a href={getSobreNosLink()} className="footer-link">Sobre nós</a>
             </div>
           </div>
         </div>
