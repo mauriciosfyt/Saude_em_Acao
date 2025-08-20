@@ -146,7 +146,7 @@
 @media (max-width: 480px) {
   .planos-container {
     padding: 40px 15px 80px;
-    clip-path: polygon(0 0, 0 90%, 50% 100%, 100% 90%, 100% 0);
+    clip-path: polygon(0 0, 0 85%, 50% 100%, 100% 85%, 100% 0);
   }
   
   .plano-card {
@@ -163,7 +163,7 @@
 @media (max-width: 900px) {
   .planos-container {
     padding: 50px 20px 100px;
-    clip-path: polygon(0 0, 0 88%, 50% 100%, 100% 88%, 100% 0);
+    clip-path: polygon(0 0, 0 95%, 50% 100%, 100% 95%, 100% 0);
   }
   
   .plano-cards {
