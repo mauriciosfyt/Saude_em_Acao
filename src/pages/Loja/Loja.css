@@ -1,3 +1,17 @@
+.banner-gradient-loja {
+    background: linear-gradient(180deg,
+            #000000 31%,
+            #004dff 69%,
+            #d9d9d9 100%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 5%;
+    position: relative;
+    overflow: hidden;
+    display: block;
+}
+
 .home-container {
   font-family: Arial, sans-serif;
   background-color: #ffffff;
@@ -57,7 +71,7 @@
   margin-bottom: 1.5rem;
   text-align: center;
   margin-top: 30px;
-  color: #000000;
+  color: #fff;
 }
 
 .categorias-grid {
@@ -77,7 +91,7 @@
 }
 
 .categoria-icon {
-  background: #000b9d;
+  background: radial-gradient(circle, #60A5FA 38%, #0072ff 91%);
   border-radius: 50%;
   width: 100px;
   height: 100px;
@@ -87,6 +101,7 @@
   margin-bottom: 0.7rem;
   box-shadow: 0 2px 12px #0002;
 }
+
 
 .categoria-icon img {
   width: 60px;
@@ -103,7 +118,6 @@
 
 @media (max-width: 600px) {
   .categorias-grid {
-    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem 1.5rem;
     max-width: 98vw;
   }

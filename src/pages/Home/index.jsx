@@ -159,7 +159,7 @@ function Home() {
                 Aqui, cada treino é um passo rumo à sua melhor versão.
               </p>
               <Link to="/SobreNos" style={{ alignSelf: "flex-end" }}>
-              <button className="historia-btn">saiba mais sobre nós</button>
+                <button className="historia-btn">saiba mais sobre nós</button>
               </Link>
             </div>
           </div>
@@ -200,8 +200,8 @@ function Home() {
                 <li>THAY FIT</li>
                 <li>PILATES</li>
               </ul>
-                <Link to={"/Planos"}>
-              <button className="plano-btn">Saiba Mais</button>
+              <Link to={"/Planos"}>
+                <button className="plano-btn">Saiba Mais</button>
               </Link>
             </div>
             <div className="plano-card">
@@ -217,7 +217,7 @@ function Home() {
                 <li>PILATES</li>
               </ul>
               <Link to={"/Planos"}>
-              <button className="plano-btn">Saiba Mais</button>
+                <button className="plano-btn">Saiba Mais</button>
               </Link>
             </div>
             <div className="plano-card">
@@ -233,7 +233,7 @@ function Home() {
                 <li>PILATES</li>
               </ul>
               <Link to={"/Planos"}>
-              <button className="plano-btn">Saiba Mais</button>
+                <button className="plano-btn">Saiba Mais</button>
               </Link>
             </div>
           </div>
@@ -277,31 +277,45 @@ function Home() {
         </section>
 
         {/*App saude em acão*/}
-    <section className="banner-app">
-      <div className="banner-app-container">
-        {/* COLUNA ESQUERDA */}
-        <div className="banner-text">
-          <h2>Saúde em ação app</h2>
-          <h3>Seu aliado nos treinos!</h3>
-          <ul>
-            <li><span className="check"></span> Confira seu treino personalizado completo</li>
-            <li><span className="check"></span> Veja a execução dos exercícios em vídeo</li>
-            <li><span className="check"></span> Acompanhe o progresso de carga</li>
-            <li><span className="check"></span> Acesse 60 treinos mesmo se não for nosso aluno</li>
-            <li><span className="check"></span> Compre ou faça upgrade de plano</li>
-          </ul>
-          <div className="qr-section">
-            {/* <img src='' alt="QR Code" /> */}
-            <p>@EQUIPESAUDEEMACAO</p>
-          </div>
-        </div>
+        <section className="banner-app">
+          <div className="banner-app-container">
+            {/* COLUNA ESQUERDA */}
+            <div className="banner-text">
+              <h2>Saúde em ação app</h2>
+              <h3>Seu aliado nos treinos!</h3>
+              <ul>
+                <li>
+                  <span className="check"></span> Confira seu treino
+                  personalizado completo
+                </li>
+                <li>
+                  <span className="check"></span> Veja a execução dos exercícios
+                  em vídeo
+                </li>
+                <li>
+                  <span className="check"></span> Acompanhe o progresso de carga
+                </li>
+                <li>
+                  <span className="check"></span> Acesse 60 treinos mesmo se não
+                  for nosso aluno
+                </li>
+                <li>
+                  <span className="check"></span> Compre ou faça upgrade de
+                  plano
+                </li>
+              </ul>
+              <div className="qr-section">
+                <img src="" alt="QR Code" />
+                <p>@EQUIPESAUDEEMACAO</p>
+              </div>
+            </div>
 
-        {/* COLUNA DIREITA */}
-        <div className="banner-image-box ">
-          <img src={tela_app} alt="App Celulares" />
-        </div>
-      </div>
-    </section>
+            {/* COLUNA DIREITA */}
+            <div className="banner-image-box ">
+              <img src={tela_app} alt="App Celulares" />
+            </div>
+          </div>
+        </section>
 
         {/* Instagram */}
         {/* <section className="instagram">

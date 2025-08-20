@@ -90,6 +90,21 @@ body {
   line-height: 1.6;
 }
 
+.card-text {
+  font-size: 18px;
+  line-height: 1.5;
+  padding: 0px 15px;
+  font-weight: 600;
+  text-align: center;
+}
+#card-text {
+  font-size: 18px;
+  line-height: 1.5;
+  padding: 0px 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
 .imagem img {
   width: 100%;
   height: auto;
@@ -155,7 +170,6 @@ body {
 
   /* Força altura menor para as imagens dentro do slick */
   .carrossel-wrapper .slick-slide img {
-    height: 300px !important;
     width: 100% !important;
     object-fit: cover;
   }
@@ -213,11 +227,15 @@ body {
   border-radius: 12px 0 12px 0;
   cursor: pointer;
   transition: background 0.3s ease;
-  margin-top: 20px;
-  display: flex; /* Adicionado para alinhar o texto e o SVG */
-  align-items: center; /* Alinha verticalmente */
-  gap: 10px; /* Adiciona espaçamento entre o texto e o SVG */
+  margin: 20px auto 0;
+  /* 🔹 auto nas laterais para centralizar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 🔹 centraliza o conteúdo dentro do botão */
+  gap: 10px;
 }
+
 
 .btn-sobre:hover {
   background: #003bbd;
@@ -234,20 +252,16 @@ body {
 }
 
 .carrossel-item {
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 25px 20px;
-  text-align: center;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 250px;   /* altura maior em todas as telas */
-  max-width: 500px;    /* largura padrão em telas grandes */
+  padding: 10px;
 }
 
-.slick-slide > div {
-  margin: 0 15px;  /* espaço entre os cards */
+
+.slick-slide>div {
+  margin: 0 15px;
+  /* espaço entre os cards */
 }
 
 .carrossel-legend {
@@ -260,22 +274,27 @@ body {
 /* Responsividade */
 @media (max-width: 768px) {
   .carrossel-item {
-    max-width: 90%;   /* diminui largura no celular */
-    min-height: 300px; /* aumenta altura no celular */
+    max-width: 90%;
+    /* diminui largura no celular */
+    min-height: 300px;
+    /* aumenta altura no celular */
   }
 
   .carrossel-legend {
-    font-size: 18px;  /* texto um pouco menor pra caber bem */
+    font-size: 18px;
+    /* texto um pouco menor pra caber bem */
   }
 }
 
 @media (min-width: 1024px) {
   .carrossel-item {
-    min-height: 320px; /* ainda mais alto em telas grandes */
+    min-height: 320px;
+    /* ainda mais alto em telas grandes */
   }
 
   .carrossel-legend {
-    font-size: 22px;  /* texto maior em telas grandes */
+    font-size: 22px;
+    /* texto maior em telas grandes */
   }
 }
 

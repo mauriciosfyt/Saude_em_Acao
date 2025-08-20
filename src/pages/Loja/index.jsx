@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"; 
 import './Loja.css';
 
 import banner from "../../assets/banners/banner_loja.jpeg";
@@ -12,36 +13,37 @@ import ProdutosSection from "../../components/produtos";
 
 const Loja = () => {
   const categorias = [
-    { icon: iconeCamisa, label: 'Camisetas' },
-    { icon: iconePote, label: 'Suplementos' },
-    { icon: iconeWhey, label: 'Whey Protein' },
-    { icon: iconeEnergia, label: 'Pré-Treino' },
+    { icon: iconeCamisa, link: "/CategoriaCamisa" },
+    { icon: iconePote, link: "/CategoriaVitaminas" },
+    { icon: iconeWhey, link: "/CategoriaWhey" },
+    { icon: iconeEnergia, link: "/CategoriaCreatina" },
   ];
 
   return (
     <>
       <Header_nLogin />
 
-      <div className="faixa-gradiente">
-        <section className="hero-banner faixa-gradiente">
-          <img src={banner} alt="Banner Saúde em Ação" className="banner-img" />
+      <div className="banner-gradient-loja">
+        <section className="banner">
+          <img src={banner} alt="Banner" />
         </section>
+
         <section className="categorias-section">
           <h2 className="categorias-title">Categorias</h2>
           <div className="categorias-grid">
             {categorias.map((item, idx) => (
-              <div key={idx} className="categoria-grid-item">
+              <Link to={item.link} key={idx} className="categoria-grid-item">
                 <div className="categoria-icon">
                   <img src={item.icon} alt={item.label} />
                 </div>
                 <p>{item.label}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
       </div>
 
- <ProdutosSection/>
+      <ProdutosSection />
 
       <Footer />
     </>

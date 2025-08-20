@@ -9,7 +9,7 @@ const CardFlip = ({ data, isFlipped, onFlip }) => {
           <img src={data.imagem} alt="Dica de treino" className="card-image" />
         </div>
         <div className="card-face card-back">
-          <p className="card-text">{data.verso}</p>
+          <p id="card-text" className="card-text">{data.verso}</p>
         </div>
       </div>
     </div>
