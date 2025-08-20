@@ -1,4 +1,6 @@
-/* Header principal */
+/* =================================================================== */
+/* --- SEU HEADER E MENU HORIZONTAL ORIGINAL --- */
+/* =================================================================== */
 .header-user-container {
   width: 100%;
   padding: 12px 24px;
@@ -11,7 +13,6 @@
   position: sticky;
 }
 
-
 .logo-area {
   display: flex;
   align-items: center;
@@ -22,65 +23,26 @@
   padding-right: 70px;
 }
 
-
-.search-button {
-  background-color: #fff;
-  border: none;
-  padding: 0 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .header-actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 28px;
-    padding: 0px 18px;
-}
-
-.icon_navegacao {
-color: #000;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 28px;
+  padding: 0px 18px;
 }
 
 .icon {
   font-size: 30px;
   cursor: pointer;
-  transition: transform 0.2s ease;
   color: #000;
 }
 
-.icon:hover {
-  transform: scale(1.1);
-}
-
-.login-button_loja {
-    background-color: #fff;
-    color: #000;
-    border: none;
-    padding: 8px 24px;
-    border-radius: 12px 0px 12px 0;
-    /* Apenas duas pontas arredondadas */
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: 500;
-    transition: background 0.2s;
-    box-shadow: none;
-}
-
-.login-button_loja:hover {
-    background-color: #0047b3;
-}
-/* Navegação secundária */
 .nav-links {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #f8f8f8;
-
   padding: 12px 24px;
 }
 
@@ -91,37 +53,109 @@ color: #000;
   transform: translateY(-50%);
 }
 
-.menu-icon {
-  font-size: 24px;
-  cursor: pointer;
-  color: #000;
-}
-
 .nav-center {
   display: flex;
   gap: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .nav-center a {
   color: #000;
   text-decoration: none;
   font-weight: 500;
-  transition: 0.3s;
 }
 
-.nav-center a:hover {
-color: #004DFF;
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
+
+/* =================================================================== */
+/* --- LÓGICA DO MENU LATERAL (SAINDO DA ESQUERDA) --- */
+/* =================================================================== */
+
+/* Ícone de hambúrguer sempre visível */
+.user-menu-icon {
+  display: block;
+  font-size: 24px;
+  cursor: pointer;
+  color: #000;
+}
+
+/* Estiliza o menu lateral */
+.user-sidebar {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100%;
+  background: linear-gradient(to bottom, #004DFF, #000000);
+  transition: left 0.35s ease;
+  z-index: 1000;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-sidebar.is-open {
+  left: 0;
+}
+
+.user-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  /* LINHA REMOVIDA DAQUI */
+}
+
+.user-sidebar-logo {
+  height: 50px;
+}
+
+.user-sidebar-close-btn {
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+}
+
+.user-sidebar-navlist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-sidebar-navlist li a {
+  display: block;
+  padding: 18px 24px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  /* LINHA REMOVIDA DAQUI */
+}
+
+/* SEUS MEDIA QUERIES ORIGINAIS PARA AJUSTES FINOS */
 @media (max-width: 768px) {
-
   .logo-img {
-    height: 40px; /* Reduz a altura da logo em telas menores */
+    height: 40px;
   }
 
   .icon {
     font-size: 20px;
   }
+
+  .user-menu-icon {
+    font-size: 20px;
+  }
+
+  .nav-links {
+    padding: 20px 16px;
+  }
+
   .nav-center {
     gap: 20px;
   }
@@ -129,79 +163,26 @@ color: #004DFF;
   .nav-center a {
     font-size: 13px;
   }
-
-  .menu-icon {
-    font-size: 20px;
-    margin-top: 6px;
-    margin-left: 10px;        /* zera margem à esquerda */
-  }
-
-
-  .nav-links {
-    padding: 20px 16px;
-  }
 }
 
-/* Celulares pequenos: até 480px */
 @media (max-width: 480px) {
-
   .logo-img {
-    height: 40px; /* Reduz a altura da logo em telas menores */
+    height: 40px;
   }
 
   .icon {
     font-size: 20px;
   }
-  
-  .nav-center {
-    gap: 8px;
-    flex-wrap: wrap; /* Se não couber, quebra para linha de baixo */
-    justify-content: center;
-  }
 
-  .nav-center a {
-    font-size: 12px;
-  }
-
-  .menu-icon {
+  .user-menu-icon {
     font-size: 18px;
   }
 
   .nav-left {
-    left: 1px;
+    left: 16px;
   }
 
   .nav-links {
     padding: 10px 12px;
   }
 }
-
-
-
-@media (max-width: 480px) {
-
-  .icon_navegacao {
-    font-size: 16px;
-  }
-}
-
-
-
-
-
-/* Por padrão, top-row não muda nada */
-.top-row {
-  width: 100%;
-}
-
-/* Em telas até 799px, coloca logo e botão lado a lado */
-@media (max-width: 799px) {
-  .top-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    flex-wrap: wrap;
-  }
-}
-
