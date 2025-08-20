@@ -94,6 +94,7 @@ color: #000;
 }
 
 .menu-icon {
+  display: block;
   font-size: 24px;
   cursor: pointer;
   color: #000;
@@ -113,6 +114,71 @@ color: #000;
 
 .nav-center a:hover {
 color: #004DFF;
+}
+
+/* =================================================================== */
+/* --- LÓGICA DO MENU LATERAL (SAINDO DA ESQUERDA) --- */
+/* =================================================================== */
+
+/* Ícone de hambúrguer sempre visível */
+.user-menu-icon {
+  display: block;
+  font-size: 24px;
+  cursor: pointer;
+  color: #000;
+}
+
+/* Estiliza o menu lateral */
+.user-sidebar {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100%;
+  background: linear-gradient(to bottom, #004DFF, #000000);
+  transition: left 0.35s ease;
+  z-index: 1000;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-sidebar.is-open {
+  left: 0;
+}
+
+.user-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+}
+
+.user-sidebar-logo {
+  height: 50px;
+}
+
+.user-sidebar-close-btn {
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+}
+
+.user-sidebar-navlist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-sidebar-navlist li a {
+  display: block;
+  padding: 18px 24px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.user-sidebar-navlist li a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 768px) {
@@ -138,6 +204,9 @@ color: #004DFF;
     margin-left: 10px;        /* zera margem à esquerda */
   }
 
+  .user-menu-icon {
+    font-size: 20px;
+  }
 
   .nav-links {
     padding: 20px 16px;
@@ -166,6 +235,10 @@ color: #004DFF;
   }
 
   .menu-icon {
+    font-size: 18px;
+  }
+
+  .user-menu-icon {
     font-size: 18px;
   }
 

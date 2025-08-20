@@ -58,7 +58,7 @@ const GerenciarAlunos = () => {
           />
         </div>
 
-        <div className="header-actions">
+        <div className="header-actions_aluno">
           <div className="count-display">
             TOTAL DE ALUNOS: <strong>{alunos.length}</strong>
           </div>
