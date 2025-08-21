@@ -85,10 +85,10 @@ const Header = () => {
 
       {/* Navegação secundária */}
       <nav className="nav-links">
+        <div className="nav-center">
         <div className="nav-left">
           <GiHamburgerMenu className="user-menu-icon" onClick={() => setMenuLateralAberto(true)} />
         </div>
-        <div className="nav-center">
           <a href="/CategoriaWhey">Whey Protein</a>
           <a href="/CategoriaCreatina">Creatina</a>
           <a href="/CategoriaVitaminas">Vitaminas</a>

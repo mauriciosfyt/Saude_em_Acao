@@ -1,5 +1,3 @@
-/* ====== PÁGINA CATEGORIA VITAMINAS ====== */
-
 /* Banner com degradê para categoria camisa e creatina */
 .banner-gradient-categoria-camisa,
 .banner-gradient-categoria-creatina {
@@ -40,7 +38,7 @@
   align-items: stretch;
   width: 100%;
   max-width: 1200px;
-  margin: 5% 0;
+  margin: 5% 0 ;
 }
 
 .produto-card {
@@ -125,7 +123,6 @@
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
 }
 
-/* Lista inferior de produtos */
 .lista-produtos {
   background-color: #D9D9D9;
   width: 100%;
@@ -185,24 +182,48 @@
   transform: scale(1.03);
 }
 
-/* ====== BREAKPOINTS RESPONSIVOS ====== */
+.produto-lista-card {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 20px;
+}
 
+.produto-lista-img {
+  width: 160px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.produto-lista-info {
+  flex: 1;
+}
+
+.produto-lista-nome {
+  font-size: 1.2rem;
+  margin: 0 0 8px 0;
+}
+
+.produto-lista-preco {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: black;
+}
+
+/* ====== Breakpoints (do menor para o maior) ====== */
 /* Celulares XS: até 480px */
 @media (max-width: 480px) {
   .produtos-grid {
-    display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    max-width: 95vw;
-    justify-items: center;
   }
 
   .produto-card {
     padding: 8px 4px;
-    width: 100%;
-    max-width: unset;
-    min-width: 0;
-    min-height: 0;
   }
 
   .produto-img {
@@ -240,8 +261,9 @@
 
 /* Celulares SM: até 600px */
 @media (max-width: 600px) and (max-height: 950px) {
+
   .categoria-container {
-    margin-bottom: 80px;
+    min-height: 0vh;
   }
 
   .lista-produtos {
@@ -265,7 +287,6 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     max-width: 97vw;
-    justify-items: center;
   }
 
   .produto-card {
@@ -304,6 +325,7 @@
 
 /* Tablets MD: entre 601px e 900px */
 @media (min-width: 601px) and (max-width: 900px) {
+
   .banner-gradient-categoria-camisa,
   .banner-gradient-categoria-creatina {
     min-height: unset;
@@ -367,7 +389,7 @@
   }
 }
 
-/* Desktops LG: 1280px+ */
+/* Desktops LG: até 1280px */
 @media (min-width: 1280px) {
   .produtos-grid {
     display: flex;
@@ -390,10 +412,10 @@
     background: #f6f6f6;
   }
 
-  .categoria-container {
+  /* .categoria-container {
     margin-bottom: 150px;
     min-height: 50vh;
-  }
+  } */
 
   .lista-produtos {
     padding: 10px 0 22px 0;

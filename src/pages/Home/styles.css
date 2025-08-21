@@ -348,7 +348,7 @@
 }
 
 .banner-titulo-final .azul {
-    color: #000;
+    color: #fff;
     font-style: italic;
     font-weight: 700;
 }
@@ -502,12 +502,6 @@
     background-color: #e2e8f0;
 }
 
-@media (min-width: 1024px) {
-    .navegacao {
-        padding: 5% 10px;
-    }
-}
-
 .navegacao-links {
     display: flex;
     justify-content: center;
@@ -584,7 +578,7 @@
 }
 
 .navegacao-titulo .azul {
-    color: #000;
+    color: #1062fe;
     font-style: italic;
     font-weight: 700;
 }
