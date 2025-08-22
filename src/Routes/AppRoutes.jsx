@@ -27,6 +27,7 @@ import AdicionarPersonal from '../pages/Tela Adm/AdicionarProfessor/AdicionarPer
 import Dashboard from '../pages/Tela Adm/Dashboard/index.jsx';
 import GerenciarAlunos from '../pages/Tela Adm/GerenciarAluno/GerenciarAlunos.jsx';
 import Reservas from '../pages/Reservas/Reservas.jsx';
+import AdicionarAluno from '../pages/Tela Adm/AdicionarAluno/AdicionarAluno.jsx';
 
 const AppRoutes = () => {
   return (
@@ -43,6 +44,7 @@ const AppRoutes = () => {
         <Route path="/Carrinho" element={<Carrinho />} />
         <Route path="/Planos" element={<Planos />} />
         <Route path="/Professores" element={<Professores />} />
+        <Route path="/Reservas" element={<Reservas />} /> {/* Adicione esta linha */}
         <Route path="*" element={<Erro404 />} /> {/* Adicione esta linha */}
 
         <Route path="/CategoriaCreatina" element={<CategoriaCreatina />} />
@@ -57,7 +59,7 @@ const AppRoutes = () => {
         <Route path="/AdicionarPersonal" element={<AdicionarPersonal />} /> {/* Adicione esta linha */}
         <Route path="/Dashboard" element={<Dashboard />} /> {/* Adicione esta linha */}
         <Route path="/GerenciarAlunos" element={<GerenciarAlunos />} /> {/* Adicione esta linha */}
-        <Route path="/Reservas" element={<Reservas />} /> {/* Adicione esta linha */}
+        <Route path="/AdicionarAluno" element={<AdicionarAluno />} /> {/* Adicione esta linha */}
 
         
         
