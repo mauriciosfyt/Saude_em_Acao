@@ -47,7 +47,7 @@
   background: #333333;
   color: #fff;
   border-radius: 12px;
-  padding: 20px;
+  padding: 70px;
   flex: 1 1 300px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   text-align: left;
@@ -117,10 +117,20 @@
   background: #333333;
   color: #ffffff;
   border-radius: 10px;
-  padding: 20px;
+  padding: 40px;
   width: 100%;
-  max-width: 500px;
-  margin-bottom: 20px;
+  max-width: 800px;
+  margin-bottom: 30px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dados-box p {
+  font-size: 20px;
+  margin: 15px 0;
+  line-height: 1.5;
 }
 
 .logout-btn {
