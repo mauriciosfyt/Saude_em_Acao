@@ -1,4 +1,3 @@
-// Produto.java
 package br.com.saudeemacao.api.model;
 
 import jakarta.validation.constraints.*;
@@ -15,43 +14,38 @@ import java.util.Map;
 @AllArgsConstructor
 @Document(collection = "produtos")
 public class Produto {
-
     @Id
     private String id;
-
     @NotBlank(message = "Nome é obrigatório")
     @Size(min = 1, max = 100, message = "Nome deve ter entre 1 e 100 caracteres")
     private String nome;
-
     @NotBlank(message = "Descrição é obrigatória")
     @Size(min = 1, max = 200, message = "Descrição deve ter entre 1 e 200 caracteres")
     private String descricao;
-
     @NotNull(message = "Preço é obrigatório")
     @Positive(message = "Preço deve ser maior que zero")
     private Double preco;
+    @NotBlank(message = "Imagem é obrigatória")
+    private String img;
 
-    @NotNull(message = "Tipo de produto é obrigatório")
+    // --- NOVOS CAMPOS PARA ATENDER AOS REQUISITOS ---
+    private ESabor sabor;
     private TipoProduto tipo;
 
     @PositiveOrZero(message = "Estoque não pode ser negativo")
     private Integer estoque;
-
     private Map<Tamanho, Integer> estoquePorTamanho;
-
-    @NotBlank(message = "Imagem é obrigatória")
-    private String img;
 
     public enum Tamanho {
         PP, P, M, G, GG, XG, XGG
     }
 
     public enum TipoProduto {
-        COMTAMANHO, SEMTAMANHO
+        COMTAMANHO, SEMTAMANHO, SUPLEMENTO, VESTUARIO
     }
 
     public Integer getEstoqueTotal() {
-        if (tipo == TipoProduto.COMTAMANHO) {
+        if (tipo == TipoProduto.COMTAMANHO || tipo == TipoProduto.VESTUARIO) {
             return estoquePorTamanho != null ?
                     estoquePorTamanho.values().stream().mapToInt(Integer::intValue).sum() :
                     0;

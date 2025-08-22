@@ -1,4 +1,3 @@
-// src/main/java/br/com/saudeemacao/api/security/SegurancaFilterChain.java
 package br.com.saudeemacao.api.security;
 
 import br.com.saudeemacao.api.model.EPerfil;
@@ -19,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,25 +40,40 @@ public class SegurancaFilterChain {
                         .requestMatchers(HttpMethod.POST, "/api/auth/**", "/api/login", "/api/usuario", "/setup/admin").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
+
+                        // --- REGRAS OAuth2 para Google ---
+                        .requestMatchers(HttpMethod.GET, "/login/oauth2/code/google").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/google").permitAll()
+
+                        // --- REGRAS NOVAS PARA TREINOS ---
+                        .requestMatchers(HttpMethod.POST, "/api/treino").hasAnyRole(EPerfil.ADMIN.name(), EPerfil.PROFESSOR.name())
+                        .requestMatchers(HttpMethod.PUT, "/api/treino/**").hasAnyRole(EPerfil.ADMIN.name(), EPerfil.PROFESSOR.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/treino/**").hasRole(EPerfil.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/treino/meu-treino/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/treino/finalizar").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/treino/historico/**").authenticated()
+
+                        // --- Outras regras existentes ---
                         .requestMatchers("/api/usuario/meu-perfil").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.PUT, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
-
-                        // --- REGRAS ATUALIZADAS PARA RESERVAS ---
                         .requestMatchers(HttpMethod.POST, "/api/reservas").hasAnyRole(EPerfil.ALUNO.name(), EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.GET, "/api/reservas/minhas").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/cancelar").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/reservas").hasRole(EPerfil.ADMIN.name())
-                        .requestMatchers(HttpMethod.GET, "/api/reservas/stats").hasRole(EPerfil.ADMIN.name()) // <-- REGRA ADICIONADA
+                        .requestMatchers(HttpMethod.GET, "/api/reservas/stats").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/aprovar").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/rejeitar").hasRole(EPerfil.ADMIN.name())
-
                         .requestMatchers(HttpMethod.GET, "/api/usuario").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers("/api/alunos/**").hasAnyRole(EPerfil.ADMIN.name(), EPerfil.PROFESSOR.name())
                         .requestMatchers("/api/professores/**").hasRole(EPerfil.ADMIN.name())
 
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("/login/sucesso", true)
+                        .failureUrl("/login?error=oauth_failed")
                 )
                 .addFilterBefore(segurancaFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
