@@ -58,19 +58,19 @@ const ModalPrivacidade = ({ onConcordo, onClose }) => {
             Enviar notificações e comunicados;<br />
             Cumprir obrigações legais.<br /><br />
             <strong>3. Compartilhamento de dados</strong><br />
-            Não vendemos seus dados. Prestadores de serviço de tecnologia e autoridades legais, quando necessário.<br /><br />
+            Não vendemos seus dados. Compartilhamos apenas com prestadores de serviço de tecnologia e autoridades legais, quando necessário.<br /><br />
             <strong>4. Segurança</strong><br />
             Implementamos medidas para proteger suas informações, mas o usuário também deve manter sua conta segura, evitando compartilhar sua senha.<br /><br />
             <strong>5. Armazenamento e retenção</strong><br />
             Seus dados são armazenados em servidores seguros e mantidos pelo tempo necessário para cumprir os propósitos desta política ou exigências legais.<br /><br />
             <strong>6. Direitos do usuário</strong><br />
-            Você pode solicitar acesso, correção ou exclusão dos seus dados, bem como limitar ou contestar seu uso.<br /><br />
+            Você pode solicitar acesso, correção ou exclusão dos seus dados, bem como limitar ou contestar o uso deles.<br /><br />
             <strong>7. Cookies e tecnologias semelhantes</strong><br />
             Utilizamos cookies para melhorar sua experiência. Você pode gerenciar suas preferências no navegador.<br /><br />
             <strong>8. Alterações na política</strong><br />
             Podemos atualizar esta política de privacidade periodicamente. O uso contínuo da plataforma indica sua aceitação das mudanças.<br /><br />
             <strong>9. Contato</strong><br />
-            Se tiver dúvidas sobre esta política, entre em contato pelo e-mail: <span style={{color: "#1062fe"}}>otavio.personal@hotmail.com</span>.
+            Se você tiver dúvidas sobre esta política, entre em contato pelo e-mail: <span style={{color: "#1062fe"}}>otavio.personal@hotmail.com</span>.
           </p>
         </div>
 

@@ -48,18 +48,18 @@ const ModalTermos = ({ onConcordo, onClose }) => {
           <p>
             Ao usar a aplicação web Equipe Saúde em Ação, você concorda com os seguintes termos:<br /><br />
             <strong>Aceitação:</strong> Ao acessar a plataforma, você concorda com estes Termos de Uso. Caso não concorde, não utilize a aplicação.<br />
-            <strong>Uso da Aplicação:</strong> A plataforma oferece serviços relacionados a treinos, agendamento de aulas e acompanhamento de desempenho. Use-a apenas para fins pessoais e dentro da lei.<br />
-            <strong>Cadastro e Conta:</strong> Para algumas funcionalidades, será necessário criar uma conta. Você é responsável pela segurança da sua conta.<br />
-            <strong>Privacidade:</strong> Seus dados são protegidos conforme nossa Política de Privacidade.<br />
-            <strong>Responsabilidades do Usuário:</strong> Não use a aplicação para fins ilegais, ofensivos ou prejudiciais.<br />
+            <strong>Uso da aplicação:</strong> A plataforma oferece serviços relacionados a treinos, agendamento de aulas e acompanhamento de desempenho. Use-a apenas para fins pessoais e dentro da lei.<br />
+            <strong>Cadastro e conta:</strong> Para algumas funcionalidades, será necessário criar uma conta. Você é responsável pela segurança da sua conta.<br />
+            <strong>Privacidade:</strong> Seus dados são protegidos conforme nossa política de privacidade.<br />
+            <strong>Responsabilidades do usuário:</strong> Não use a aplicação para fins ilegais, ofensivos ou prejudiciais.<br />
             <strong>Modificações:</strong> Podemos alterar ou descontinuar funcionalidades da aplicação a qualquer momento.<br />
-            <strong>Isenção de Responsabilidade:</strong> Não nos responsabilizamos por danos à saúde ou problemas técnicos decorrentes do uso da plataforma.<br />
-            <strong>Terminação de Conta:</strong> Podemos suspender ou encerrar sua conta em caso de violação dos Termos.<br />
-            <strong>Propriedade Intelectual:</strong> O conteúdo da aplicação é protegido por direitos autorais. Não é permitido utilizá-lo sem autorização.<br />
-            <strong>Limitação de Responsabilidade:</strong> Não somos responsáveis por danos indiretos ou incidentais relacionados ao uso da aplicação.<br />
-            <strong>Alterações:</strong> Podemos atualizar os Termos de Uso periodicamente. O uso contínuo da aplicação após as alterações implica sua aceitação.<br />
-            <strong>Lei Aplicável:</strong> Este acordo segue as leis do Brasil e qualquer disputa será resolvida no foro de São Paulo.<br />
-            Para dúvidas, entre em contato: otavio.personal@hotmail.com.
+            <strong>Isenção de responsabilidade:</strong> Não nos responsabilizamos por danos à saúde ou problemas técnicos decorrentes do uso da plataforma.<br />
+            <strong>Terminação de conta:</strong> Podemos suspender ou encerrar sua conta em caso de violação dos termos.<br />
+            <strong>Propriedade intelectual:</strong> O conteúdo da aplicação é protegido por direitos autorais. Não é permitido utilizá-los sem autorização.<br />
+            <strong>Limitação de responsabilidade:</strong> Não somos responsáveis por danos indiretos ou incidentais relacionados ao uso da aplicação.<br />
+            <strong>Alterações:</strong> Podemos atualizar os termos de uso periodicamente. O uso contínuo da aplicação após as alterações implica sua aceitação.<br />
+            <strong>Lei aplicável:</strong> Este acordo segue as leis do Brasil e qualquer disputa será resolvida no foro de São Paulo.<br />
+            Para dúvidas, entre em contato através do e-mail: <span style={{color: "#1062fe"}}>otavio.personal@hotmail.com</span>.
           </p>
         </div>
 
