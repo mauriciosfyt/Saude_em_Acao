@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaSearch } from 'react-icons/fa';
 import './GerenciarAlunos.css';
 import AlunoCard from '../../../components/Administrador/AlunoCard/AlunoCard'; // Ajuste o caminho conforme sua estrutura
@@ -8,13 +9,14 @@ import Footer from "../../../components/footer";
 
 // Dados de exemplo
 const mockAlunos = [
-  { id: 1, nome: 'Ana Beatriz Costa', email: 'ana.costa@email.com', senha: '', numero: '(11) 98765-4321' },
-  { id: 2, nome: 'Bruno Dias Lima', email: 'bruno.lima@email.com', senha: '', numero: '(21) 91234-5678' },
-  { id: 3, nome: 'Carla Martins', email: 'carla.martins@email.com', senha: '', numero: '(31) 95555-4444' },
-  { id: 4, nome: 'Daniel Fogaça', email: 'daniel.fogaca@email.com', senha: '', numero: '(41) 93333-2222' },
+  { id: 1, nome: 'Ana Beatriz Costa', email: 'ana.costa@email.com', cpf: '123.456.789-00', senha: '', numero: '(11) 98765-4321' },
+  { id: 2, nome: 'Bruno Dias Lima', email: 'bruno.lima@email.com', cpf: '987.654.321-00', senha: '', numero: '(21) 91234-5678' },
+  { id: 3, nome: 'Carla Martins', email: 'carla.martins@email.com', cpf: '456.789.123-00', senha: '', numero: '(31) 95555-4444' },
+  { id: 4, nome: 'Daniel Fogaça', email: 'daniel.fogaca@email.com', cpf: '789.123.456-00', senha: '', numero: '(41) 93333-2222' },
 ];
 
 const GerenciarAlunos = () => {
+  const navigate = useNavigate();
   const [alunos, setAlunos] = useState(mockAlunos);
   const [termoBusca, setTermoBusca] = useState('');
 
@@ -37,7 +39,7 @@ const GerenciarAlunos = () => {
   };
 
   const handleAdicionar = () => {
-    alert('Implementar tela para adicionar novo aluno.');
+    navigate('/AdicionarAluno');
   };
 
   return (

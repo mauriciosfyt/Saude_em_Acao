@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaPlus } from 'react-icons/fa'; // Importe o ícone se for usar no botão
+import { FaPlus, FaSearch } from 'react-icons/fa'; // Importe o ícone se for usar no botão
 import PersonalCard from '../../../components/Administrador/GerenciarPersonal/PersonalCard';
 import './GerenciarPersonal.css'; // Importa o CSS corrigido
 import AdminHeader from '../../../components/header_admin';
@@ -30,13 +30,16 @@ const GerenciarPersonal = () => {
       <main className="gerenciamento-content">
         <h1>Gerenciamento de Professores</h1>
         
-        <input
-          type="text"
-          className="input-busca"
-          value={termoBusca}
-          onChange={(e) => setTermoBusca(e.target.value)}
-          placeholder="Buscar"
-        />
+        <div className="search-bar-wrapper-personal">
+          <FaSearch className="search-icon-personal" />
+          <input
+            type="text"
+            className="input-busca-personal"
+            value={termoBusca}
+            onChange={(e) => setTermoBusca(e.target.value)}
+            placeholder="Buscar"
+          />
+        </div>
 
         <div className="header-actions">
           <div className="professor-count">

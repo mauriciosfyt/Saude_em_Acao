@@ -25,6 +25,43 @@
   margin-bottom: 30px;
 }
 
+.search-bar-wrapper-personal {
+  position: relative;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  background: #FAFBFC;
+  border: 1px solid #DFE1E6;
+  border-radius: 8px;
+  padding: 0;
+}
+
+.search-icon-personal {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #AAB2BD;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.input-busca-personal {
+  width: 100%;
+  padding: 16px 20px 16px 50px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: transparent;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.input-busca-personal::placeholder {
+  color: #AAB2BD;
+}
+
 .search-bar-personal {
   width: 100%;
   padding: 16px 20px;
