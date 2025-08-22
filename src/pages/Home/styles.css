@@ -506,6 +506,7 @@
     .navegacao {
         padding: 1% 10px 5%;
     }
+    
 }
 
 .navegacao-links {
@@ -757,6 +758,12 @@
     padding: 15% 0px;
     text-align: center;
     background-color: #e2e8f0;
+}
+
+@media (min-width: 1920px) {
+    .localizacao {
+        padding: 5% 0px;
+    }
 }
 
 .localizacao iframe {
