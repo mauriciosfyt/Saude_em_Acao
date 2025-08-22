@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom"; // IMPORTA useNavigate
 import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
 import banner from "../../assets/banners/banner_catCamisetas.png";
@@ -9,8 +10,9 @@ import "../../pages/CategoriaVitaminas/Categorias.css";
 import Header_nLogin from "../../components/header_loja_nLogin";
 import Header_Login from "../../components/header_loja";
 
-
 const CategoriaCamisa = () => {
+  const navigate = useNavigate(); // inicializa o navigate
+
   const produtos = [
     {
       id: 1,
@@ -59,6 +61,10 @@ const CategoriaCamisa = () => {
     },
   ];
 
+  const irParaDetalhes = () => {
+    navigate("/LojaProduto");
+  };
+
   return (
     <div className="categoria-camisa">
       <Header_Login />
@@ -71,7 +77,16 @@ const CategoriaCamisa = () => {
         <div className="categoria-container">
           <div className="produtos-grid">
             {produtos.map((produto) => (
-              <div className="produto-card" key={produto.id}>
+              <div
+                className="produto-card"
+                key={produto.id}
+                onClick={(e) => {
+                  // Se clicou no botão "Reservar", não navega
+                  if (e.target.closest(".btn-reservar")) return;
+                  irParaDetalhes();
+                }}
+                style={{ cursor: "pointer" }}
+              >
                 <img src={produto.imagem} alt={produto.nome} className="produto-img" />
                 <div className="produto-card-content">
                   <h3 className="produto-nome">{produto.nome}</h3>
@@ -84,14 +99,18 @@ const CategoriaCamisa = () => {
             ))}
           </div>
         </div>
-
       </div>
 
-      {/* Lista inferior no estilo da imagem fornecida */}
+      {/* Lista inferior */}
       <section className="lista-produtos">
         <div className="lista-wrapper">
           {listaProdutos.map((produto, idx) => (
-            <div className={`lista-linha${idx !== listaProdutos.length - 1 ? " com-divisor" : ""}`} key={produto.id}>
+            <div
+              className={`lista-linha${idx !== listaProdutos.length - 1 ? " com-divisor" : ""}`}
+              key={produto.id}
+              onClick={irParaDetalhes}
+              style={{ cursor: "pointer" }}
+            >
               <img src={produto.imagem} alt={produto.nome} className="lista-img" />
               <div className="lista-info">
                 <h4 className="lista-nome">{produto.nome}</h4>
