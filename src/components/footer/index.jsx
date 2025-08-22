@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import "./Footer.css";
 import logo from "../../assets/logo1.png";
-import tiktokIcon from "../../assets/icones/Email.png";
-import facebookIcon from "../../assets/icones/icons8-instagram-50.png";
-import instagramIcon from "../../assets/icones/icons8-whatsapp-50.png";
+import emailIcon from "../../assets/icones/Email.png";
+import instagramIcon from "../../assets/icones/icons8-instagram-50.png";
+import whatsappIcon from "../../assets/icones/icons8-whatsapp-50.png";
 import ModalTermos from "../modal_termos/ModalTermos";
 import ModalPrivacidade from "../modal_privacidade/ModalPrivacidade";
 
@@ -13,9 +13,9 @@ const Footer = () => {
   const [showModalPrivacidade, setShowModalPrivacidade] = useState(false);
   const [showToastTermos, setShowToastTermos] = useState(false);
   const [showToastPrivacidade, setShowToastPrivacidade] = useState(false);
-  
+
   const location = useLocation();
-  
+
   // Função para determinar se estamos em uma página da loja
   const isLojaPage = () => {
     const lojaRoutes = [
@@ -29,7 +29,7 @@ const Footer = () => {
     ];
     return lojaRoutes.includes(location.pathname);
   };
-  
+
   // Função para obter o link correto do "Sobre nós"
   const getSobreNosLink = () => {
     return isLojaPage() ? '/SobrenosLoja' : '/SobreNos';
@@ -63,20 +63,20 @@ const Footer = () => {
 
         {/* Social Icons */}
         <div className="footer-social-icons">
-          <a href="#" className="footer-icon-link" aria-label="TikTok">
-            <img src={tiktokIcon} alt="TikTok" className="footer-icon-img" />
+          <a href="mailto:otavio.personal@hotmail.com" className="footer-icon-link" aria-label="Email">
+            <img src={emailIcon} alt="Email" className="footer-icon-img" />
           </a>
-          <a href="#" className="footer-icon-link" aria-label="Facebook">
-            <img
-              src={facebookIcon}
-              alt="Facebook"
-              className="footer-icon-img"
-            />
-          </a>
-          <a href="#" className="footer-icon-link" aria-label="Instagram">
+          <a href="https://www.instagram.com/ctsaudeemacao/?hl=zh-cn" className="footer-icon-link" aria-label="Instagram">
             <img
               src={instagramIcon}
               alt="Instagram"
+              className="footer-icon-img"
+            />
+          </a>
+          <a href="https://api.whatsapp.com/message/7SFQMRX2M76KG1?autoload=1&app_absent=0" className="footer-icon-link" aria-label="Whatsapp">
+            <img
+              src={whatsappIcon}
+              alt="Whatsapp"
               className="footer-icon-img"
             />
           </a>
@@ -96,12 +96,12 @@ const Footer = () => {
               <a href="/Loja" className="footer-link">Loja</a>
             </div>
             <div>
-              <a href="#" className="footer-link">Reservas</a>
+              <a href="/Reservas" className="footer-link">Reservas</a>
             </div>
           </div>
           <div>
             <div>
-              <a href="#" className="footer-link">Personal</a>
+              <a href="/Professores" className="footer-link">Personal</a>
             </div>
             <div>
               <a href="/Planos" className="footer-link">Planos</a>
@@ -126,14 +126,14 @@ const Footer = () => {
           <div>
             Instagram:{" "}
             <a
-              href="https://instagram.com/equipesaudeemacao"
+              href="https://www.instagram.com/ctsaudeemacao/?hl=zh-cn"
               className="footer-link"
             >
               @equipesaudeemacao
             </a>
           </div>
           <div>
-            Contato: <a href="tel:00123456789" className="footer-link">(00) 12345-6789</a>
+            Contato: <a href="https://api.whatsapp.com/message/7SFQMRX2M76KG1?autoload=1&app_absent=0" className="footer-link">(11) 96025-6144</a>
           </div>
         </div>
 
