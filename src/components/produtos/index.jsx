@@ -1,15 +1,21 @@
-
+import { useNavigate } from 'react-router-dom'; // ⬅️ Importa o hook
 import produto1 from "../../assets/IMG PRODUTO.jpg";
 import produto2 from "../../assets/IMG PRODUTO2.jpg";
 import produto3 from "../../assets/IMG PRODUTO3.jpg";
-import './produto.css'
+import './produto.css';
 
 const ProdutosSection = () => {
+  const navigate = useNavigate(); // ⬅️ Inicializa o hook
+
   const produtos = [
     { imgSrc: produto1, nome: 'Camiseta Preta', preco: 'R$ 199,90', formaDePagamento: 'Boleto ou PIX para alunos Black, ou 6x de R$24,58' },
     { imgSrc: produto2, nome: 'Camiseta Dark Lab', preco: 'R$ 299,90', formaDePagamento: 'Boleto ou PIX para alunos Black, ou 6x de R$37,48' },
     { imgSrc: produto3, nome: 'Whey', preco: 'R$ 399,90', formaDePagamento: 'Boleto ou PIX para alunos Black, ou 6x de R$49,98' },
   ];
+
+  const irParaDetalhes = () => {
+    navigate('/LojaProduto'); // ⬅️ Redireciona para a página
+  };
 
   return (
     <section className="products-section">
@@ -24,7 +30,9 @@ const ProdutosSection = () => {
             <div className="pagamento-produto">{produto.formaDePagamento}</div>
             <div className="botoes-produto">
               <button className="buy-button">Adicionar ao carrinho</button>
-              <button className="detalhes-button">Detalhes</button>
+              <button className="detalhes-button" onClick={irParaDetalhes}>
+                Detalhes
+              </button>
             </div>
           </div>
         ))}
