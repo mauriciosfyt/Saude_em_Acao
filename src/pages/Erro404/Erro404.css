@@ -12,6 +12,12 @@
   padding-bottom: 5%;
 }
 
+@media (min-width: 1020px) {
+  .banner-gradient-erro {
+    padding-top: 3%;
+  }
+}
+
 .banner_erro {
   width: 100%;
 }
@@ -23,6 +29,25 @@
   object-fit: cover;
   display: block;
   border-radius: 32px;
+  height: 80vh;
+
+}
+
+/* Responsividade para tablets e celulares */
+@media (max-width: 1024px) {
+
+    .banner_erro img {
+        height: 400px;
+        min-height: 200px;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .banner_erro img {
+        height: 200px;
+        min-height: 120px;
+    }
 }
 
 /* Mensagem centralizada com fundo cinza */
@@ -67,6 +92,7 @@
     max-height: 700px;
   }
 }
+
 @media (min-width: 1300px) {
   .banner_erro img {
     max-height: 1080px;

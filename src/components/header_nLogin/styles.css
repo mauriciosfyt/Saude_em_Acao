@@ -1,0 +1,60 @@
+.header {
+  background: #fafafa;
+  padding: 0;
+  width: 100%;
+  height: 56px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 1000;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: none;
+}
+
+/* Contêiner principal para o logo e o botão dentro da header */
+.logo-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+}
+
+/* Estilos para a imagem do logo (que está dentro do .logo-container) */
+.logo {
+  max-width: 60px;
+  /* Aumente aqui conforme desejar, ex: 60px ou 80px */
+  height: auto;
+  margin-right: 12px;
+}
+
+/* Estilos para o botão "Fazer login" (do seu styles.css original) */
+.login-button {
+  background-color: #1062fe;
+  color: #fff;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 12px 0px 12px 0;
+  /* Apenas duas pontas arredondadas */
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 0.2s;
+  box-shadow: none;
+}
+
+.login-button:hover {
+  background-color: #0047b3;
+}
+
+/* MEDIA QUERIES (PARA RESPONSIVIDADE) */
+@media (max-width: 768px) {
+  .header::after {
+      background: linear-gradient(to right,
+              #0000FF 0%, #0000FF 40%,
+              transparent 40%, transparent 60%,
+              #0000FF 60%, #0000FF 100%);
+  }
+}

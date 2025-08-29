@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom"; 
 import './Loja.css';
 
-import banner from "../../assets/banners/banner_loja.jpeg";
+import banner from "../../assets/banners/banner_loja.png";
 import iconeCamisa from "../../assets/icones/Camisa.png";
 import iconePote from "../../assets/icones/Vitamina.png";
 import iconeWhey from "../../assets/icones/Whey protain.png";

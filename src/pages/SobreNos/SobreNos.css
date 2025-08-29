@@ -16,6 +16,12 @@
   padding-bottom: 5%;
 }
 
+@media (min-width: 1080px) {
+    .banner-gradient-sobrenos {
+        padding-top: 3%;
+    }
+}
+
 .sobre-nos {
   font-family: Arial, sans-serif;
   overflow-x: hidden;

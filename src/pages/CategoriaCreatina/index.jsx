@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";  // <-- Importa useNavigate
 import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
-import banner from "../../assets/banners/banner_catCreatina.jpeg";
+import banner from "../../assets/banners/banner_creatina.svg";
 import product1 from "../../assets/IMG PRODUTO.jpg";
 import product2 from "../../assets/IMG PRODUTO2.jpg";
 import product3 from "../../assets/IMG PRODUTO3.jpg";

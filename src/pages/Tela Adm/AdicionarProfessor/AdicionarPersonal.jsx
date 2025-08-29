@@ -9,10 +9,10 @@ const AdicionarPersonal = () => {
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
+    cpf: '',
     numero: '',
     senha: '',
     confirmarSenha: '',
-    // status: 'Ativo', <-- Removido do estado
   });
 
   const handleChange = (e) => {
@@ -25,12 +25,52 @@ const AdicionarPersonal = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validações básicas
+    if (!formData.nome || !formData.email || !formData.cpf || !formData.senha || !formData.numero) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
     if (formData.senha !== formData.confirmarSenha) {
       alert('As senhas não coincidem!');
       return;
     }
-    console.log('Dados do formulário para salvar:', formData);
+
+    if (formData.senha.length < 6) {
+      alert('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
+    // Validação básica de CPF (formato)
+    const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+    if (!cpfRegex.test(formData.cpf)) {
+      alert('Por favor, insira um CPF válido no formato 000.000.000-00');
+      return;
+    }
+
+    // Salvar o novo personal no localStorage
+    const personalAtuais = JSON.parse(localStorage.getItem('personal') || '[]');
+    const novoPersonal = {
+      id: Date.now(), // Gerar ID único
+      ...formData
+    };
+    
+    const personalAtualizados = [...personalAtuais, novoPersonal];
+    localStorage.setItem('personal', JSON.stringify(personalAtualizados));
+    
+    console.log('Novo personal:', novoPersonal);
     alert(`Personal "${formData.nome}" salvo com sucesso!`);
+    
+    // Limpar formulário
+    setFormData({
+      nome: '',
+      email: '',
+      cpf: '',
+      numero: '',
+      senha: '',
+      confirmarSenha: '',
+    });
   };
 
   return (
@@ -65,6 +105,19 @@ const AdicionarPersonal = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Ex: joao.silva@uni.com"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="cpf">CPF</label>
+              <input
+                type="text"
+                id="cpf"
+                name="cpf"
+                value={formData.cpf}
+                onChange={handleChange}
+                placeholder="000.000.000-00"
                 required
               />
             </div>

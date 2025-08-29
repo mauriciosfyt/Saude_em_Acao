@@ -40,7 +40,10 @@ const mockProdutos = [
 
 const GerenciarProduto = () => {
   const navigate = useNavigate();
-  const [produtos] = useState(mockProdutos);
+  const [produtos, setProdutos] = useState(() => {
+    const salvos = localStorage.getItem('produtos');
+    return salvos ? JSON.parse(salvos) : mockProdutos;
+  });
   const [termoBusca, setTermoBusca] = useState('');
   const [categoria, setCategoria] = useState('');
   const [produtosFiltrados, setProdutosFiltrados] = useState(produtos);
@@ -63,12 +66,29 @@ const GerenciarProduto = () => {
     setProdutosFiltrados(resultado);
   }, [termoBusca, categoria, produtos]);
 
+  // Persistir lista ao alterar
+  useEffect(() => {
+    localStorage.setItem('produtos', JSON.stringify(produtos));
+  }, [produtos]);
+
   const handleEditClick = (produtoId) => {
-    alert(`Funcionalidade para editar o produto ID: ${produtoId} a ser implementada.`);
+    const produto = produtos.find(p => p.id === produtoId);
+    if (produto) {
+      localStorage.setItem('produtoParaEditar', JSON.stringify(produto));
+      navigate('/EditarProduto');
+    }
   };
 
   const handleAdicionarProduto = () => {
     navigate('/CadastrarProduto');
+  };
+
+  const handleDeleteClick = (produtoId) => {
+    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
+      const atualizados = produtos.filter((p) => p.id !== produtoId);
+      setProdutos(atualizados);
+      alert('Produto excluído com sucesso!');
+    }
   };
 
   return (
@@ -134,6 +154,9 @@ const GerenciarProduto = () => {
                 <td>
                   <button className="btn-editar" onClick={() => handleEditClick(produto.id)}>
                     Editar
+                  </button>
+                  <button className="btn-excluir" style={{ marginLeft: 8 }} onClick={() => handleDeleteClick(produto.id)}>
+                    Excluir
                   </button>
                 </td>
               </tr>

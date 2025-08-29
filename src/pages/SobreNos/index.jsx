@@ -9,7 +9,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-import banner from "../../assets/banners/banner_sobreNos.jpeg";
+import banner from "../../assets/banners/banner_sobreNos.svg";
 import img1 from "../../assets/academia.jpeg";
 import img2 from "../../assets/academia2.jpeg";
 import cardImg1 from "../../assets/academia.jpeg";

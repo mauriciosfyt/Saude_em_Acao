@@ -103,11 +103,17 @@
 
 .banner img {
     width: 100vw;
-    height: 90vh;
+    height: 80vh;
     object-fit: cover;
     display: block;
     border-radius: 32px;
     /* mantém o arredondamento na imagem */
+}
+
+@media (min-width: 1080px) {
+    .banner-gradient {
+        padding-top: 3%;
+    }
 }
 
 /* Responsividade para tablets e celulares */
@@ -497,7 +503,7 @@
 
 /* 7. NAVEGAÇÃO */
 .navegacao {
-    padding: 10% 30px;
+    padding: 1% 30px 5%;
     text-align: center;
     background-color: #e2e8f0;
 }
@@ -755,7 +761,7 @@
 
 /* 9. LOCALIZAÇÃO */
 .localizacao {
-    padding: 15% 0px;
+    padding: 5% 0px;
     text-align: center;
     background-color: #e2e8f0;
 }

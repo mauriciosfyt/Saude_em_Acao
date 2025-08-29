@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaSearch } from 'react-icons/fa';
 import './GerenciarAlunos.css';
@@ -17,8 +17,19 @@ const mockAlunos = [
 
 const GerenciarAlunos = () => {
   const navigate = useNavigate();
-  const [alunos, setAlunos] = useState(mockAlunos);
+  
+  // Carregar alunos do localStorage ou usar dados mock
+  const [alunos, setAlunos] = useState(() => {
+    const savedAlunos = localStorage.getItem('alunos');
+    return savedAlunos ? JSON.parse(savedAlunos) : mockAlunos;
+  });
+  
   const [termoBusca, setTermoBusca] = useState('');
+
+  // Salvar alunos no localStorage sempre que a lista mudar
+  useEffect(() => {
+    localStorage.setItem('alunos', JSON.stringify(alunos));
+  }, [alunos]);
 
   // Lógica de filtro (pode ser por nome ou email)
   const alunosFiltrados = alunos.filter(aluno =>
@@ -29,13 +40,23 @@ const GerenciarAlunos = () => {
   // Funções de exemplo para os botões do card
   const handleExcluir = (alunoId) => {
     if (window.confirm('Tem certeza que deseja excluir este aluno?')) {
-      setAlunos(alunos.filter(aluno => aluno.id !== alunoId));
-      alert(`Aluno com ID ${alunoId} excluído!`);
+      const alunosAtualizados = alunos.filter(aluno => aluno.id !== alunoId);
+      setAlunos(alunosAtualizados);
+      localStorage.setItem('alunos', JSON.stringify(alunosAtualizados));
+      alert(`Aluno excluído com sucesso!`);
     }
   };
 
   const handleEditar = (alunoId) => {
-    alert(`Implementar edição para o aluno com ID ${alunoId}.`);
+    // Encontrar o aluno pelo ID
+    const aluno = alunos.find(a => a.id === alunoId);
+    if (aluno) {
+      // Salvar dados do aluno no localStorage e navegar
+      localStorage.setItem('alunoParaEditar', JSON.stringify(aluno));
+      navigate('/EditarAluno');
+    } else {
+      alert('Aluno não encontrado.');
+    }
   };
 
   const handleAdicionar = () => {

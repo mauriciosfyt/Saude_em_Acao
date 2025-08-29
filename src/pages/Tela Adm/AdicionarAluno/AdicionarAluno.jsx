@@ -51,8 +51,17 @@ const AdicionarAluno = () => {
       return;
     }
 
-    // Aqui você implementaria a lógica para salvar o aluno
-    console.log('Novo aluno:', formData);
+    // Salvar o novo aluno no localStorage
+    const alunosAtuais = JSON.parse(localStorage.getItem('alunos') || '[]');
+    const novoAluno = {
+      id: Date.now(), // Gerar ID único
+      ...formData
+    };
+    
+    const alunosAtualizados = [...alunosAtuais, novoAluno];
+    localStorage.setItem('alunos', JSON.stringify(alunosAtualizados));
+    
+    console.log('Novo aluno:', novoAluno);
     alert('Aluno adicionado com sucesso!');
     
     // Limpar formulário

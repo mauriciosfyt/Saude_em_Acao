@@ -14,7 +14,12 @@
   width: 100%;
   flex-direction: column;
 }
-
+@media (min-width: 1080px) {
+  .banner-gradient-categoria-camisa,
+  .banner-gradient-categoria-creatina {
+    padding-top: 3%;
+  }
+}
 .categoria-camisa,
 .categoria-creatina {
   font-family: Arial, sans-serif;

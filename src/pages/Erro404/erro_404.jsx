@@ -5,7 +5,7 @@ import Footer from "../../components/footer";
 import "./Erro404.css";
 
 // Imagem do erro
-import erro404 from "../../assets/banners/banner_erro404.png"; // coloque sua imagem na pasta assets
+import erro404 from "../../assets/banners/banner_404.svg"; // coloque sua imagem na pasta assets
 
 const Erro404 = () => {
   return (

@@ -5,11 +5,18 @@
 }
 
 .profs-container {
-    background: linear-gradient(to bottom, #010114 0%, #002E99 100%);
+    background: linear-gradient(to bottom, #000000 0%, #002E99 100%);
     color: white;
     display: flex;
     justify-content: center;
     align-items: flex-start;
+    padding-top: 5%;
+}
+
+@media (min-width: 1020px) {
+  .profs-container {
+    padding-top: 3%;
+  }
 }
 
 .profs-section {
@@ -32,10 +39,27 @@
 
 .profs-banner img {
     width: 100vw;
-    height: 90vh;
+    height: 80vh;
     object-fit: cover;
     display: block;
     border-radius: 32px;
+}
+
+/* Responsividade para tablets e celulares */
+@media (max-width: 1024px) {
+
+    .profs-banner img {
+        height: 400px;
+        min-height: 200px;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .profs-banner img {
+        height: 200px;
+        min-height: 120px;
+    }
 }
 
 /* Ondas igual ao Perfil */

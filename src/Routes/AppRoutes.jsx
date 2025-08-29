@@ -28,6 +28,9 @@ import Dashboard from '../pages/Tela Adm/Dashboard/index.jsx';
 import GerenciarAlunos from '../pages/Tela Adm/GerenciarAluno/GerenciarAlunos.jsx';
 import Reservas from '../pages/Reservas/Reservas.jsx';
 import AdicionarAluno from '../pages/Tela Adm/AdicionarAluno/AdicionarAluno.jsx';
+import EditarAluno from '../pages/Tela Adm/EditarAluno/EditarAluno.jsx';
+import EditarProduto from '../pages/Tela Adm/Editar_Produto/index.jsx';
+import EditarPersonal from '../pages/Tela Adm/EditarPersonal/EditarPersonal.jsx';
 
 const AppRoutes = () => {
   return (
@@ -60,6 +63,9 @@ const AppRoutes = () => {
         <Route path="/Dashboard" element={<Dashboard />} /> {/* Adicione esta linha */}
         <Route path="/GerenciarAlunos" element={<GerenciarAlunos />} /> {/* Adicione esta linha */}
         <Route path="/AdicionarAluno" element={<AdicionarAluno />} /> {/* Adicione esta linha */}
+        <Route path="/EditarAluno" element={<EditarAluno />} /> {/* Adicione esta linha */}
+        <Route path="/EditarProduto" element={<EditarProduto />} />
+        <Route path="/EditarPersonal" element={<EditarPersonal />} /> {/* Nova rota */}
 
         
         

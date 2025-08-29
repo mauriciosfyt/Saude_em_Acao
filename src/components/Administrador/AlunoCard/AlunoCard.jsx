@@ -13,6 +13,10 @@ const AlunoCard = ({ aluno, onExcluir, onEditar }) => {
         <input type="email" value={aluno.email} disabled />
       </div>
       <div className="form-group">
+        <label>CPF:</label>
+        <input type="text" value={aluno.cpf} disabled />
+      </div>
+      <div className="form-group">
         <label>Senha:</label>
         <input type="password" value="••••••••" disabled />
       </div>

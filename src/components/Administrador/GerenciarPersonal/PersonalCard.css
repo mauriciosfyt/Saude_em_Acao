@@ -60,3 +60,38 @@
   color: #6c757d;
   cursor: not-allowed;
 }
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  border-top: 1px solid #DFE1E6;
+  padding-top: 16px;
+}
+
+.btn-excluir,
+.btn-editar {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-excluir:hover,
+.btn-editar:hover {
+  opacity: 0.85;
+}
+
+.btn-excluir {
+  background-color: #DE350B;
+  color: white;
+}
+
+.btn-editar {
+  background-color: #007BFF;
+  color: white;
+}
