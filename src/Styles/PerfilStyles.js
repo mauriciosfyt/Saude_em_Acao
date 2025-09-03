@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2563eb',
+    backgroundColor: '#405CBA',
   },
   
   // Seção Superior
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   iconCard: {
     width: 50,
     height: 50,
-    backgroundColor: '#2563eb',
+    backgroundColor: '#405CBA',
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
@@ -210,14 +210,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
-    borderColor: '#2563eb',
+    borderColor: '#405CBA',
   },
 
   editAvatarButton: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: '#2563eb',
+    backgroundColor: '#405CBA',
     width: 32,
     height: 32,
     borderRadius: 16,
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   },
 
   editProfileButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#405CBA',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 25,
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#2563eb',
+    color: '#405CBA',
     marginBottom: 5,
   },
 
@@ -440,8 +440,8 @@ const styles = StyleSheet.create({
   },
 
   selectOptionSelected: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
+    backgroundColor: '#405CBA',
+    borderColor: '#405CBA',
   },
 
   selectOptionText: {
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 8,
-    backgroundColor: '#2563eb',
+    backgroundColor: '#405CBA',
     alignItems: 'center',
   },
 

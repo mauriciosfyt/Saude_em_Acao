@@ -66,14 +66,14 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     backgroundColor: 'transparent',
     borderLeftColor: 'transparent',
-    borderBottomColor: '#3b5ccc',
+    borderBottomColor: '#405CBA',
     alignSelf: 'flex-end',
     marginTop: -1,
   },
 
   blueSection: {
     flex: 1,
-    backgroundColor: '#3b5ccc',
+    backgroundColor: '#405CBA',
     alignItems: 'center',
     paddingTop: 12,
   },

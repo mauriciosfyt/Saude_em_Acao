@@ -169,7 +169,7 @@ const Perfil = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
+      <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -187,7 +187,7 @@ const Perfil = ({ navigation }) => {
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
-              <Ionicons name="person" size={60} color="#2563eb" />
+              <Ionicons name="person" size={60} color="#405CBA" />
             </View>
             <TouchableOpacity style={styles.editAvatarButton}>
               <Ionicons name="camera" size={20} color="white" />
@@ -208,7 +208,7 @@ const Perfil = ({ navigation }) => {
 
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
-              <Ionicons name="calendar-outline" size={20} color="#2563eb" />
+              <Ionicons name="calendar-outline" size={20} color="#405CBA" />
               <Text style={styles.profileInfoLabel}>Idade</Text>
             </View>
             <Text style={styles.profileInfoValue}>{dadosUsuario.idade} anos</Text>
@@ -216,7 +216,7 @@ const Perfil = ({ navigation }) => {
 
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
-              <Ionicons name="scale-outline" size={20} color="#2563eb" />
+              <Ionicons name="scale-outline" size={20} color="#405CBA" />
               <Text style={styles.profileInfoLabel}>Peso</Text>
             </View>
             <Text style={styles.profileInfoValue}>{dadosUsuario.peso} kg</Text>
@@ -224,7 +224,7 @@ const Perfil = ({ navigation }) => {
 
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
-              <Ionicons name="resize-outline" size={20} color="#2563eb" />
+              <Ionicons name="resize-outline" size={20} color="#405CBA" />
               <Text style={styles.profileInfoLabel}>Altura</Text>
             </View>
             <Text style={styles.profileInfoValue}>{dadosUsuario.altura} cm</Text>
@@ -232,7 +232,7 @@ const Perfil = ({ navigation }) => {
 
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
-              <Ionicons name="flag-outline" size={20} color="#2563eb" />
+              <Ionicons name="flag-outline" size={20} color="#405CBA" />
               <Text style={styles.profileInfoLabel}>Objetivo</Text>
             </View>
             <Text style={styles.profileInfoValue}>{dadosUsuario.objetivo}</Text>
@@ -240,7 +240,7 @@ const Perfil = ({ navigation }) => {
 
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
-              <Ionicons name="fitness-outline" size={20} color="#2563eb" />
+              <Ionicons name="fitness-outline" size={20} color="#405CBA" />
               <Text style={styles.profileInfoLabel}>Nível de Atividade</Text>
             </View>
             <Text style={styles.profileInfoValue}>{dadosUsuario.nivelAtividade}</Text>
@@ -346,7 +346,7 @@ const Perfil = ({ navigation }) => {
               {/* Notificações */}
               <View style={styles.configItem}>
                 <View style={styles.configItemLeft}>
-                  <Ionicons name="notifications-outline" size={24} color="#2563eb" />
+                  <Ionicons name="notifications-outline" size={24} color="#405CBA" />
                   <Text style={styles.configItemText}>Notificações</Text>
                 </View>
 
@@ -365,7 +365,7 @@ const Perfil = ({ navigation }) => {
                         }
                       }
                     }}
-                    trackColor={{ false: '#e5e7eb', true: '#2563eb' }}
+                    trackColor={{ false: '#e5e7eb', true: '#405CBA' }}
                     thumbColor={notificacoes ? '#ffffff' : '#f3f4f6'}
                   />
 
@@ -386,7 +386,7 @@ const Perfil = ({ navigation }) => {
                         }
                       }}
                     >
-                      <Ionicons name="notifications" size={22} color="#2563eb" />
+                      <Ionicons name="notifications" size={22} color="#405CBA" />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -399,7 +399,7 @@ const Perfil = ({ navigation }) => {
 {/* Som */}
 <View style={styles.configItem}>
   <View style={styles.configItemLeft}>
-    <Ionicons name="volume-high-outline" size={24} color="#2563eb" />
+    <Ionicons name="volume-high-outline" size={24} color="#405CBA" />
     <Text style={styles.configItemText}>Som</Text>
   </View>
 
@@ -407,7 +407,7 @@ const Perfil = ({ navigation }) => {
     <Switch
       value={som}
       onValueChange={setSom}
-      trackColor={{ false: '#e5e7eb', true: '#2563eb' }}
+      trackColor={{ false: '#e5e7eb', true: '#405CBA' }}
       thumbColor={som ? '#ffffff' : '#f3f4f6'}
     />
 
@@ -422,13 +422,13 @@ const Perfil = ({ navigation }) => {
               {/* Vibração */}
               <View style={styles.configItem}>
                 <View style={styles.configItemLeft}>
-                  <Ionicons name="phone-portrait-outline" size={24} color="#2563eb" />
+                  <Ionicons name="phone-portrait-outline" size={24} color="#405CBA" />
                   <Text style={styles.configItemText}>Vibração</Text>
                 </View>
                 <Switch
                   value={vibracao}
                   onValueChange={setVibracao}
-                  trackColor={{ false: '#e5e7eb', true: '#2563eb' }}
+                  trackColor={{ false: '#e5e7eb', true: '#405CBA' }}
                   thumbColor={vibracao ? '#ffffff' : '#f3f4f6'}
                 />
               </View>
@@ -436,13 +436,13 @@ const Perfil = ({ navigation }) => {
               {/* Modo Escuro */}
               <View style={styles.configItem}>
                 <View style={styles.configItemLeft}>
-                  <Ionicons name="moon-outline" size={24} color="#2563eb" />
+                  <Ionicons name="moon-outline" size={24} color="#405CBA" />
                   <Text style={styles.configItemText}>Modo Escuro</Text>
                 </View>
                 <Switch
                   value={modoEscuro}
                   onValueChange={setModoEscuro}
-                  trackColor={{ false: '#e5e7eb', true: '#2563eb' }}
+                  trackColor={{ false: '#e5e7eb', true: '#405CBA' }}
                   thumbColor={modoEscuro ? '#ffffff' : '#f3f4f6'}
                 />
               </View>
@@ -450,7 +450,7 @@ const Perfil = ({ navigation }) => {
               {/* Privacidade */}
               <TouchableOpacity style={styles.configItem} onPress={handlePrivacidade}>
                 <View style={styles.configItemLeft}>
-                  <Ionicons name="shield-outline" size={24} color="#2563eb" />
+                  <Ionicons name="shield-outline" size={24} color="#405CBA" />
                   <Text style={styles.configItemText}>Privacidade</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
@@ -459,7 +459,7 @@ const Perfil = ({ navigation }) => {
               {/* Sobre */}
               <TouchableOpacity style={styles.configItem} onPress={handleSobre}>
                 <View style={styles.configItemLeft}>
-                  <Ionicons name="information-circle-outline" size={24} color="#2563eb" />
+                  <Ionicons name="information-circle-outline" size={24} color="#405CBA" />
                   <Text style={styles.configItemText}>Sobre</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#9ca3af" />

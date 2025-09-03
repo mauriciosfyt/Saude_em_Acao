@@ -43,7 +43,7 @@ const Desempenho = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#2563eb" />
+      <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
 
       <Modal
         animationType="fade"
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   // --- Estilos Originais da Tela (sem alterações) ---
   container: {
     flex: 1,
-    backgroundColor: '#2563eb',
+    backgroundColor: '#405CBA',
   },
   topSection: {
     flex: 0.4,
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   progressBar: {
     flex: 1,
     height: 8,
-    backgroundColor: '#1e40af',
+    backgroundColor: '#405CBA',
     borderRadius: 4,
     marginRight: 15,
   },
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   iconCard: {
     width: 50,
     height: 50,
-    backgroundColor: '#2563eb',
+    backgroundColor: '#405CBA',
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
