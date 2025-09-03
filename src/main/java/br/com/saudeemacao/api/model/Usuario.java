@@ -39,8 +39,6 @@ public class Usuario implements UserDetails {
     private EPerfil perfil;
     @NotNull(message = "Plano é obrigatório")
     private EPlano plano;
-    private Integer treinosFeitosNaSemana;
-    private LocalDate dataUltimoTreino;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

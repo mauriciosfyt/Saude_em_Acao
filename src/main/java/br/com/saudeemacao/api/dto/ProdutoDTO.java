@@ -1,7 +1,6 @@
-// ProdutoDTO.java
 package br.com.saudeemacao.api.dto;
 
-import br.com.saudeemacao.api.model.Produto.Tamanho;
+import br.com.saudeemacao.api.model.EnumProduto.ECategoria;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,10 +22,15 @@ public class ProdutoDTO {
     @Positive(message = "Preço deve ser maior que zero")
     private Double preco;
 
-    @PositiveOrZero(message = "Estoque não pode ser negativo")
-    private Integer estoque;
+    @NotNull(message = "Categoria é obrigatória")
+    private ECategoria categoria;
 
-    private Map<String, Integer> estoquePorTamanho;
+    // Campos de estoque dependentes da categoria
+    @PositiveOrZero(message = "Estoque não pode ser negativo")
+    private Integer estoquePadrao; // Para VITAMINAS
+
+    private Map<String, Integer> estoquePorTamanho; // Para CAMISETAS (String para facilitar a entrada via DTO)
+    private Map<String, Integer> estoquePorSabor; // Para CREATINA, WHEY_PROTEIN (String para facilitar a entrada via DTO)
 
     @NotNull(message = "Imagem é obrigatória")
     private MultipartFile img;

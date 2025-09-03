@@ -1,7 +1,7 @@
-// ProdutoController.java
 package br.com.saudeemacao.api.controller;
 
 import br.com.saudeemacao.api.dto.ProdutoDTO;
+import br.com.saudeemacao.api.model.EnumProduto.ECategoria;
 import br.com.saudeemacao.api.model.Produto;
 import br.com.saudeemacao.api.service.ProdutoService;
 import lombok.RequiredArgsConstructor;
@@ -25,14 +25,9 @@ public class ProdutoController {
         return ResponseEntity.ok(service.getAll());
     }
 
-    @GetMapping("/semtamanho")
-    public ResponseEntity<List<Produto>> getProdutosSemTamanho() {
-        return ResponseEntity.ok(service.getProdutosSemTamanho());
-    }
-
-    @GetMapping("/comtamanho")
-    public ResponseEntity<List<Produto>> getProdutosComTamanho() {
-        return ResponseEntity.ok(service.getProdutosComTamanho());
+    @GetMapping("/categoria/{categoria}")
+    public ResponseEntity<List<Produto>> getProdutosPorCategoria(@PathVariable ECategoria categoria) {
+        return ResponseEntity.ok(service.getProdutosPorCategoria(categoria));
     }
 
     @GetMapping("/{id}")
@@ -40,22 +35,12 @@ public class ProdutoController {
         return ResponseEntity.ok(service.getById(id));
     }
 
-    @PostMapping("/semtamanho")
-    public ResponseEntity<Produto> createSemTamanho(
+    @PostMapping
+    public ResponseEntity<Produto> create(
             @ModelAttribute ProdutoDTO dto,
             UriComponentsBuilder uriBuilder) throws IOException {
 
-        Produto produto = service.createSemTamanho(dto);
-        URI uri = uriBuilder.path("/api/produtos/{id}").buildAndExpand(produto.getId()).toUri();
-        return ResponseEntity.created(uri).body(produto);
-    }
-
-    @PostMapping("/comtamanho")
-    public ResponseEntity<Produto> createComTamanho(
-            @ModelAttribute ProdutoDTO dto,
-            UriComponentsBuilder uriBuilder) throws IOException {
-
-        Produto produto = service.createComTamanho(dto);
+        Produto produto = service.create(dto);
         URI uri = uriBuilder.path("/api/produtos/{id}").buildAndExpand(produto.getId()).toUri();
         return ResponseEntity.created(uri).body(produto);
     }

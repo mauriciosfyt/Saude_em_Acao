@@ -1,4 +1,5 @@
-// LoginService.java (updated)
+// src/main/java/br.com.saudeemacao.api/service/LoginService.java
+
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.model.Usuario;
@@ -46,7 +47,10 @@ public class LoginService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado!"));
     }
 
-    private String gerarToken(Usuario usuario) {
+    /**
+     * ALTERADO: Visibilidade de 'private' para 'public' para ser usado pelo handler do OAuth2.
+     */
+    public String gerarToken(Usuario usuario) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(chaveSecreta);
 

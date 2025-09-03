@@ -1,8 +1,10 @@
-// src/main/java/br/com/saudeemacao/api/service/ProdutoService.java
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.ProdutoDTO;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
+import br.com.saudeemacao.api.model.EnumProduto.ECategoria;
+import br.com.saudeemacao.api.model.EnumProduto.ESabor;
+import br.com.saudeemacao.api.model.EnumProduto.ETamanho;
 import br.com.saudeemacao.api.model.Produto;
 import br.com.saudeemacao.api.repository.ProdutoRepository;
 import com.cloudinary.Cloudinary;
@@ -27,12 +29,9 @@ public class ProdutoService {
         return repository.findAll();
     }
 
-    public List<Produto> getProdutosSemTamanho() {
-        return repository.findByTipo(Produto.TipoProduto.SEMTAMANHO);
-    }
-
-    public List<Produto> getProdutosComTamanho() {
-        return repository.findByTipo(Produto.TipoProduto.COMTAMANHO);
+    // Métodos para buscar produtos por categoria (adaptados)
+    public List<Produto> getProdutosPorCategoria(ECategoria categoria) {
+        return repository.findByCategoria(categoria);
     }
 
     public Produto getById(String id) {
@@ -40,12 +39,8 @@ public class ProdutoService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado com ID: " + id));
     }
 
-    public Produto createSemTamanho(ProdutoDTO dto) throws IOException {
-        validarCamposObrigatorios(dto, true);
-
-        if (dto.getEstoque() == null || dto.getEstoque() < 0) {
-            throw new IllegalArgumentException("Estoque inválido para produto sem tamanho");
-        }
+    public Produto create(ProdutoDTO dto) throws IOException {
+        validarCamposObrigatorios(dto);
 
         String imgUrl = uploadImagem(dto.getImg());
 
@@ -53,39 +48,41 @@ public class ProdutoService {
         produto.setNome(dto.getNome());
         produto.setDescricao(dto.getDescricao());
         produto.setPreco(dto.getPreco());
-        produto.setTipo(Produto.TipoProduto.SEMTAMANHO);
-        produto.setEstoque(dto.getEstoque());
-        produto.setEstoquePorTamanho(null);
         produto.setImg(imgUrl);
+        produto.setCategoria(dto.getCategoria());
 
-        return repository.save(produto);
-    }
-
-    public Produto createComTamanho(ProdutoDTO dto) throws IOException {
-        validarCamposObrigatorios(dto, true);
-
-        if (dto.getEstoquePorTamanho() == null || dto.getEstoquePorTamanho().isEmpty()) {
-            throw new IllegalArgumentException("Deve informar estoque para pelo menos um tamanho");
+        // Configuração do estoque baseada na categoria
+        switch (dto.getCategoria()) {
+            case CAMISETAS:
+                if (dto.getEstoquePorTamanho() == null || dto.getEstoquePorTamanho().isEmpty()) {
+                    throw new IllegalArgumentException("Estoque por tamanho é obrigatório para camisetas.");
+                }
+                produto.setEstoquePorTamanho(dto.getEstoquePorTamanho().entrySet().stream()
+                        .collect(Collectors.toMap(
+                                e -> ETamanho.valueOf(e.getKey().toUpperCase()),
+                                Map.Entry::getValue
+                        )));
+                break;
+            case CREATINA:
+            case WHEY_PROTEIN:
+                if (dto.getEstoquePorSabor() == null || dto.getEstoquePorSabor().isEmpty()) {
+                    throw new IllegalArgumentException("Estoque por sabor é obrigatório para suplementos.");
+                }
+                produto.setEstoquePorSabor(dto.getEstoquePorSabor().entrySet().stream()
+                        .collect(Collectors.toMap(
+                                e -> ESabor.valueOf(e.getKey().toUpperCase()),
+                                Map.Entry::getValue
+                        )));
+                break;
+            case VITAMINAS:
+                if (dto.getEstoquePadrao() == null || dto.getEstoquePadrao() < 0) {
+                    throw new IllegalArgumentException("Estoque padrão é obrigatório para vitaminas.");
+                }
+                produto.setEstoquePadrao(dto.getEstoquePadrao());
+                break;
+            default:
+                throw new IllegalArgumentException("Categoria de produto desconhecida.");
         }
-
-        validarEstoquePorTamanho(dto.getEstoquePorTamanho());
-
-        String imgUrl = uploadImagem(dto.getImg());
-
-        Map<Produto.Tamanho, Integer> estoqueTamanho = dto.getEstoquePorTamanho().entrySet().stream()
-                .collect(Collectors.toMap(
-                        e -> Produto.Tamanho.valueOf(e.getKey().toUpperCase()),
-                        Map.Entry::getValue
-                ));
-
-        Produto produto = new Produto();
-        produto.setNome(dto.getNome());
-        produto.setDescricao(dto.getDescricao());
-        produto.setPreco(dto.getPreco());
-        produto.setTipo(Produto.TipoProduto.COMTAMANHO);
-        produto.setEstoquePorTamanho(estoqueTamanho);
-        produto.setEstoque(null);
-        produto.setImg(imgUrl);
 
         return repository.save(produto);
     }
@@ -108,23 +105,43 @@ public class ProdutoService {
             produto.setPreco(dto.getPreco());
         }
 
-        if (produto.getTipo() == Produto.TipoProduto.SEMTAMANHO && dto.getEstoque() != null) {
-            if (dto.getEstoque() < 0) {
-                throw new IllegalArgumentException("Estoque não pode ser negativo");
-            }
-            produto.setEstoque(dto.getEstoque());
-        } else if (produto.getTipo() == Produto.TipoProduto.COMTAMANHO && dto.getEstoquePorTamanho() != null) {
-            validarEstoquePorTamanho(dto.getEstoquePorTamanho());
-            Map<Produto.Tamanho, Integer> estoqueTamanho = dto.getEstoquePorTamanho().entrySet().stream()
-                    .collect(Collectors.toMap(
-                            e -> Produto.Tamanho.valueOf(e.getKey().toUpperCase()),
-                            Map.Entry::getValue
-                    ));
-            produto.setEstoquePorTamanho(estoqueTamanho);
+        if (dto.getCategoria() != null && !dto.getCategoria().equals(produto.getCategoria())) {
+            throw new IllegalArgumentException("Alteração de categoria não permitida via atualização.");
+        }
+
+        // Atualização do estoque baseada na categoria existente
+        switch (produto.getCategoria()) {
+            case CAMISETAS:
+                if (dto.getEstoquePorTamanho() != null) {
+                    produto.setEstoquePorTamanho(dto.getEstoquePorTamanho().entrySet().stream()
+                            .collect(Collectors.toMap(
+                                    e -> ETamanho.valueOf(e.getKey().toUpperCase()),
+                                    Map.Entry::getValue
+                            )));
+                }
+                break;
+            case CREATINA:
+            case WHEY_PROTEIN:
+                if (dto.getEstoquePorSabor() != null) {
+                    produto.setEstoquePorSabor(dto.getEstoquePorSabor().entrySet().stream()
+                            .collect(Collectors.toMap(
+                                    e -> ESabor.valueOf(e.getKey().toUpperCase()),
+                                    Map.Entry::getValue
+                            )));
+                }
+                break;
+            case VITAMINAS:
+                if (dto.getEstoquePadrao() != null) {
+                    if (dto.getEstoquePadrao() < 0) {
+                        throw new IllegalArgumentException("Estoque padrão não pode ser negativo.");
+                    }
+                    produto.setEstoquePadrao(dto.getEstoquePadrao());
+                }
+                break;
         }
 
         if (dto.getImg() != null && !dto.getImg().isEmpty()) {
-            deletarImagem(produto.getImg()); // Opcional: deletar imagem antiga
+            deletarImagem(produto.getImg());
             String imgUrl = uploadImagem(dto.getImg());
             produto.setImg(imgUrl);
         }
@@ -134,90 +151,146 @@ public class ProdutoService {
 
     public void delete(String id) {
         Produto produto = getById(id);
-        deletarImagem(produto.getImg()); // Opcional: deletar imagem do Cloudinary
+        deletarImagem(produto.getImg());
         repository.deleteById(id);
     }
 
-    // --- MÉTODOS ADICIONADOS PARA GERENCIAR ESTOQUE EM RESERVAS ---
-
-    public void decrementarEstoque(String produtoId, String tamanhoStr) {
+    public void decrementarEstoque(String produtoId, String identificadorVariacao, ECategoria categoria) {
         Produto produto = getById(produtoId);
 
-        if (produto.getTipo() == Produto.TipoProduto.SEMTAMANHO) {
-            if (produto.getEstoque() <= 0) {
-                throw new IllegalStateException("Produto sem estoque.");
-            }
-            produto.setEstoque(produto.getEstoque() - 1);
-        } else {
-            if (tamanhoStr == null || tamanhoStr.isBlank()) {
-                throw new IllegalArgumentException("É necessário especificar o tamanho para este produto.");
-            }
-            Produto.Tamanho tamanho = Produto.Tamanho.valueOf(tamanhoStr.toUpperCase());
-            int estoqueAtual = produto.getEstoquePorTamanho().getOrDefault(tamanho, 0);
-            if (estoqueAtual <= 0) {
-                throw new IllegalStateException("Produto sem estoque para o tamanho " + tamanhoStr);
-            }
-            produto.getEstoquePorTamanho().put(tamanho, estoqueAtual - 1);
+        if (!produto.getCategoria().equals(categoria)) {
+            throw new IllegalArgumentException("A categoria do produto não corresponde à categoria fornecida para o estoque.");
         }
-        repository.save(produto);
-    }
 
-    public void incrementarEstoque(String produtoId, String tamanhoStr) {
-        Produto produto = getById(produtoId);
-
-        if (produto.getTipo() == Produto.TipoProduto.SEMTAMANHO) {
-            produto.setEstoque(produto.getEstoque() + 1);
-        } else {
-            if (tamanhoStr == null || tamanhoStr.isBlank()) {
-                // Não faz nada se o tamanho for nulo para produto com tamanho
-                return;
-            }
-            Produto.Tamanho tamanho = Produto.Tamanho.valueOf(tamanhoStr.toUpperCase());
-            int estoqueAtual = produto.getEstoquePorTamanho().getOrDefault(tamanho, 0);
-            produto.getEstoquePorTamanho().put(tamanho, estoqueAtual + 1);
-        }
-        repository.save(produto);
-    }
-
-    // --- MÉTODOS PRIVADOS AUXILIARES ---
-
-    private void validarCamposObrigatorios(ProdutoDTO dto, boolean isCreate) {
-        if (isCreate) {
-            if (dto.getNome() == null || dto.getNome().trim().isEmpty()) {
-                throw new IllegalArgumentException("Nome é obrigatório");
-            }
-            if (dto.getDescricao() == null || dto.getDescricao().trim().isEmpty()) {
-                throw new IllegalArgumentException("Descrição é obrigatória");
-            }
-            if (dto.getPreco() == null || dto.getPreco() <= 0) {
-                throw new IllegalArgumentException("Preço inválido");
-            }
-            if (dto.getImg() == null || dto.getImg().isEmpty()) {
-                throw new IllegalArgumentException("Imagem é obrigatória");
-            }
-        }
-    }
-
-    private void validarEstoquePorTamanho(Map<String, Integer> estoquePorTamanho) {
-        if (estoquePorTamanho == null) return;
-
-        estoquePorTamanho.forEach((tamanhoStr, quantidade) -> {
-            try {
-                Produto.Tamanho.valueOf(tamanhoStr.toUpperCase());
-                if (quantidade < 0) {
-                    throw new IllegalArgumentException("Estoque não pode ser negativo para o tamanho " + tamanhoStr);
+        switch (categoria) {
+            case CAMISETAS:
+                ETamanho tamanho = ETamanho.valueOf(identificadorVariacao.toUpperCase());
+                Map<ETamanho, Integer> estoqueTamanho = produto.getEstoquePorTamanho();
+                int estoqueAtualTamanho = estoqueTamanho.getOrDefault(tamanho, 0);
+                if (estoqueAtualTamanho <= 0) {
+                    throw new IllegalStateException("Produto sem estoque para o tamanho " + identificadorVariacao);
                 }
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Tamanho inválido: " + tamanhoStr);
-            }
-        });
+                estoqueTamanho.put(tamanho, estoqueAtualTamanho - 1);
+                produto.setEstoquePorTamanho(estoqueTamanho);
+                break;
+            case CREATINA:
+            case WHEY_PROTEIN:
+                ESabor sabor = ESabor.valueOf(identificadorVariacao.toUpperCase());
+                Map<ESabor, Integer> estoqueSabor = produto.getEstoquePorSabor();
+                int estoqueAtualSabor = estoqueSabor.getOrDefault(sabor, 0);
+                if (estoqueAtualSabor <= 0) {
+                    throw new IllegalStateException("Produto sem estoque para o sabor " + identificadorVariacao);
+                }
+                estoqueSabor.put(sabor, estoqueAtualSabor - 1);
+                produto.setEstoquePorSabor(estoqueSabor);
+                break;
+            case VITAMINAS:
+                Integer estoquePadrao = produto.getEstoquePadrao();
+                if (estoquePadrao == null || estoquePadrao <= 0) {
+                    throw new IllegalStateException("Produto sem estoque.");
+                }
+                produto.setEstoquePadrao(estoquePadrao - 1);
+                break;
+        }
+        repository.save(produto);
+    }
+
+    public void incrementarEstoque(String produtoId, String identificadorVariacao, ECategoria categoria) {
+        Produto produto = getById(produtoId);
+
+        if (!produto.getCategoria().equals(categoria)) {
+            // Se a categoria não corresponder, algo está errado, mas podemos não querer lançar erro
+            // Dependendo da lógica de negócio, pode-se apenas logar ou ignorar.
+            // Por simplicidade, vamos ignorar se a categoria não corresponder, assumindo que o chamador sabe a categoria correta.
+            return;
+        }
+
+        switch (categoria) {
+            case CAMISETAS:
+                if (identificadorVariacao == null || identificadorVariacao.isBlank()) {
+                    return; // Não podemos incrementar sem o tamanho
+                }
+                ETamanho tamanho = ETamanho.valueOf(identificadorVariacao.toUpperCase());
+                Map<ETamanho, Integer> estoqueTamanho = produto.getEstoquePorTamanho();
+                estoqueTamanho.put(tamanho, estoqueTamanho.getOrDefault(tamanho, 0) + 1);
+                produto.setEstoquePorTamanho(estoqueTamanho);
+                break;
+            case CREATINA:
+            case WHEY_PROTEIN:
+                if (identificadorVariacao == null || identificadorVariacao.isBlank()) {
+                    return; // Não podemos incrementar sem o sabor
+                }
+                ESabor sabor = ESabor.valueOf(identificadorVariacao.toUpperCase());
+                Map<ESabor, Integer> estoqueSabor = produto.getEstoquePorSabor();
+                estoqueSabor.put(sabor, estoqueSabor.getOrDefault(sabor, 0) + 1);
+                produto.setEstoquePorSabor(estoqueSabor);
+                break;
+            case VITAMINAS:
+                Integer estoquePadrao = produto.getEstoquePadrao();
+                produto.setEstoquePadrao(estoquePadrao != null ? estoquePadrao + 1 : 1);
+                break;
+        }
+        repository.save(produto);
+    }
+
+    private void validarCamposObrigatorios(ProdutoDTO dto) {
+        if (dto.getNome() == null || dto.getNome().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome é obrigatório");
+        }
+        if (dto.getDescricao() == null || dto.getDescricao().trim().isEmpty()) {
+            throw new IllegalArgumentException("Descrição é obrigatória");
+        }
+        if (dto.getPreco() == null || dto.getPreco() <= 0) {
+            throw new IllegalArgumentException("Preço inválido");
+        }
+        if (dto.getCategoria() == null) {
+            throw new IllegalArgumentException("Categoria é obrigatória.");
+        }
+        if (dto.getImg() == null || dto.getImg().isEmpty()) {
+            throw new IllegalArgumentException("Imagem é obrigatória");
+        }
+        // Validação de estoque específica por categoria
+        switch (dto.getCategoria()) {
+            case CAMISETAS:
+                if (dto.getEstoquePorTamanho() == null || dto.getEstoquePorTamanho().isEmpty()) {
+                    throw new IllegalArgumentException("Para 'Camisetas', o estoque por tamanho é obrigatório.");
+                }
+                dto.getEstoquePorTamanho().forEach((tamanhoStr, qtd) -> {
+                    try {
+                        ETamanho.valueOf(tamanhoStr.toUpperCase());
+                        if (qtd < 0) throw new IllegalArgumentException("Estoque não pode ser negativo.");
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Tamanho inválido para 'Camisetas': " + tamanhoStr);
+                    }
+                });
+                break;
+            case CREATINA:
+            case WHEY_PROTEIN:
+                if (dto.getEstoquePorSabor() == null || dto.getEstoquePorSabor().isEmpty()) {
+                    throw new IllegalArgumentException("Para 'Creatina' ou 'Whey Protein', o estoque por sabor é obrigatório.");
+                }
+                dto.getEstoquePorSabor().forEach((saborStr, qtd) -> {
+                    try {
+                        ESabor.valueOf(saborStr.toUpperCase());
+                        if (qtd < 0) throw new IllegalArgumentException("Estoque não pode ser negativo.");
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Sabor inválido para 'Creatina' ou 'Whey Protein': " + saborStr);
+                    }
+                });
+                break;
+            case VITAMINAS:
+                if (dto.getEstoquePadrao() == null || dto.getEstoquePadrao() < 0) {
+                    throw new IllegalArgumentException("Para 'Vitaminas', o estoque padrão é obrigatório e não pode ser negativo.");
+                }
+                break;
+        }
     }
 
     private String uploadImagem(MultipartFile file) {
         try {
             Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap(
-                            "folder", "produtos", // Organiza em uma pasta
+                            "folder", "produtos",
                             "resource_type", "image"
                     ));
             return uploadResult.get("secure_url").toString();
@@ -228,11 +301,9 @@ public class ProdutoService {
 
     private void deletarImagem(String imageUrl) {
         try {
-            // Extrai o public_id da URL
             String publicId = imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf("."));
             cloudinary.uploader().destroy("produtos/" + publicId, ObjectUtils.emptyMap());
         } catch (Exception e) {
-            // Log do erro, mas não interrompe a execução
             System.err.println("Falha ao deletar imagem antiga: " + e.getMessage());
         }
     }

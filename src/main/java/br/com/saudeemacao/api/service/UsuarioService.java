@@ -1,4 +1,5 @@
-// src/main/java/br/com/saudeemacao/api/service/UsuarioService.java
+// src/main/java/br.com.saudeemacao.api/service/UsuarioService.java
+
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.UsuarioSaidaDTO;
@@ -107,11 +108,19 @@ public class UsuarioService {
             throw new RuntimeException("Não foi possível excluir o usuário!");
     }
 
+    /**
+     * NOVO MÉTODO: Exclui um usuário com base no seu endereço de e-mail.
+     */
+    public void excluirPorEmail(String email) {
+        Usuario usuario = repo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário com e-mail " + email + " não encontrado."));
+        repo.delete(usuario);
+    }
+
     public Optional<Usuario> buscarPorEmail(String email) {
         return repo.findByEmail(email);
     }
 
-    // --- MÉTODO ADICIONADO PARA O SISTEMA DE RESERVAS ---
     public List<Usuario> buscarTodosAdmins() {
         return repo.findAll().stream()
                 .filter(u -> u.getPerfil() == EPerfil.ADMIN)

@@ -1,6 +1,9 @@
+// src/main/java/br.com.saudeemacao.api/security/SegurancaFilterChain.java
+
 package br.com.saudeemacao.api.security;
 
 import br.com.saudeemacao.api.model.EPerfil;
+import br.com.saudeemacao.api.security.oauth2.CustomAuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,19 +44,11 @@ public class SegurancaFilterChain {
                         .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
 
-                        // --- REGRAS OAuth2 para Google ---
-                        .requestMatchers(HttpMethod.GET, "/login/oauth2/code/google").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/google").permitAll()
+                        // --- REGRAS OAuth2 para Google (ATUALIZADO) ---
+                        .requestMatchers("/login/oauth2/**").permitAll() // Permite o fluxo de callback do Google
 
-                        // --- REGRAS NOVAS PARA TREINOS ---
-                        .requestMatchers(HttpMethod.POST, "/api/treino").hasAnyRole(EPerfil.ADMIN.name(), EPerfil.PROFESSOR.name())
-                        .requestMatchers(HttpMethod.PUT, "/api/treino/**").hasAnyRole(EPerfil.ADMIN.name(), EPerfil.PROFESSOR.name())
-                        .requestMatchers(HttpMethod.DELETE, "/api/treino/**").hasRole(EPerfil.ADMIN.name())
-                        .requestMatchers(HttpMethod.GET, "/api/treino/meu-treino/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/treino/finalizar").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/treino/historico/**").authenticated()
-
-                        // --- Outras regras existentes ---
+                        // --- Outras regras existentes e novas ---
+                        .requestMatchers(HttpMethod.DELETE, "/api/usuario/me").authenticated() // Protege o endpoint de exclusão de conta
                         .requestMatchers("/api/usuario/meu-perfil").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.PUT, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
@@ -68,15 +63,22 @@ public class SegurancaFilterChain {
                         .requestMatchers(HttpMethod.GET, "/api/usuario").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers("/api/alunos/**").hasAnyRole(EPerfil.ADMIN.name(), EPerfil.PROFESSOR.name())
                         .requestMatchers("/api/professores/**").hasRole(EPerfil.ADMIN.name())
-
+                        .requestMatchers("/api/dashboard/**").hasRole(EPerfil.ADMIN.name())
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("/login/sucesso", true)
-                        .failureUrl("/login?error=oauth_failed")
-                )
+                // --- Configuração do OAuth2 Login (ATUALIZADO) ---
+                .oauth2Login(oauth2 -> {
+                    // Define um handler customizado para ser executado após o sucesso da autenticação
+                    oauth2.successHandler(customAuthenticationSuccessHandler());
+                })
                 .addFilterBefore(segurancaFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    // --- NOVO BEAN: Fornece a instância do nosso handler customizado ---
+    @Bean
+    public CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler() {
+        return new CustomAuthenticationSuccessHandler();
     }
 
     @Bean

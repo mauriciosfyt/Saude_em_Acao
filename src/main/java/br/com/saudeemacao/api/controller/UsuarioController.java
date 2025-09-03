@@ -1,4 +1,5 @@
-// UsuarioController.java (updated)
+// src/main/java/br.com.saudeemacao.api/controller/UsuarioController.java
+
 package br.com.saudeemacao.api.controller;
 
 import br.com.saudeemacao.api.dto.UsuarioSaidaDTO;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -68,6 +70,24 @@ public class UsuarioController {
             }
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro inesperado ao obter principal.");
+        }
+    }
+
+    /**
+     * NOVO MÉTODO: Permite que o usuário logado exclua a própria conta.
+     */
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> excluirMinhaConta(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        try {
+            // Usa o e-mail (username) do token para identificar e excluir o usuário
+            usuarioService.excluirPorEmail(userDetails.getUsername());
+            return ResponseEntity.noContent().build(); // Retorna 204 No Content para sucesso
+        } catch (RuntimeException e) {
+            // Se o usuário não for encontrado (improvável), retorna 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 }

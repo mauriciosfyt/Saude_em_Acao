@@ -1,7 +1,9 @@
-// src/main/java/br/com/saudeemacao/api/service/ReservaAgendadaService.java (NOVO ARQUIVO)
+// src/main/java/br/com.saudeemacao.api/service/ReservaAgendadaService.java
+
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.model.EStatusReserva;
+import br.com.saudeemacao.api.model.Produto;
 import br.com.saudeemacao.api.model.Reserva;
 import br.com.saudeemacao.api.repository.ReservaRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,54 +24,79 @@ public class ReservaAgendadaService {
     private final ProdutoService produtoService;
     private final EmailService emailService;
 
-    // Roda todo dia às 03:00 da manhã
+    /**
+     * LÓGICA COMPLETAMENTE ATUALIZADA:
+     * Roda todo dia às 03:00 da manhã para verificar e cancelar reservas que foram aprovadas
+     * mas não foram retiradas até a data limite (`dataRetirada`).
+     */
     @Scheduled(cron = "0 0 3 * * *")
-    public void expirarReservasAntigas() {
-        log.info("Iniciando tarefa agendada: Expirar Reservas Antigas...");
+    public void cancelarReservasNaoRetiradas() {
+        log.info("Iniciando tarefa agendada: Cancelar Reservas Não Retiradas...");
 
-        // Define o limite de tempo (ex: 7 dias atrás)
-        LocalDateTime limiteExpiracao = LocalDateTime.now().minusDays(7);
-
-        // Busca todas as reservas que foram APROVADAS antes da data limite
-        List<Reserva> reservasParaExpirar = reservaRepository.findByStatusAndDataAnaliseBefore(
+        // Busca todas as reservas que estão APROVADAS e cuja data de retirada já passou.
+        List<Reserva> reservasParaCancelar = reservaRepository.findByStatusAndDataRetiradaBefore(
                 EStatusReserva.APROVADA,
-                limiteExpiracao
+                LocalDateTime.now()
         );
 
-        if (reservasParaExpirar.isEmpty()) {
-            log.info("Nenhuma reserva para expirar encontrada.");
+        if (reservasParaCancelar.isEmpty()) {
+            log.info("Nenhuma reserva para cancelar por não retirada foi encontrada.");
             return;
         }
 
-        log.info("{} reservas encontradas para expiração.", reservasParaExpirar.size());
+        log.info("{} reservas encontradas para cancelamento.", reservasParaCancelar.size());
 
-        for (Reserva reserva : reservasParaExpirar) {
+        for (Reserva reserva : reservasParaCancelar) {
             try {
-                // Devolve o item ao estoque
+                Produto produto = reserva.getProduto();
+                String identificadorVariacao = null;
+
+                // Determina a variação correta para devolver o item ao estoque
+                switch (produto.getCategoria()) {
+                    case CAMISETAS:
+                        if (reserva.getTamanho() != null) {
+                            identificadorVariacao = reserva.getTamanho().name();
+                        }
+                        break;
+                    case CREATINA:
+                    case WHEY_PROTEIN:
+                        if (reserva.getSabor() != null) {
+                            identificadorVariacao = reserva.getSabor().name();
+                        }
+                        break;
+                    case VITAMINAS:
+                        // Não precisa de identificador de variação
+                        break;
+                }
+
+                // 1. Devolve o item ao estoque com os parâmetros corretos
                 produtoService.incrementarEstoque(
-                        reserva.getProduto().getId(),
-                        reserva.getTamanho() != null ? reserva.getTamanho().name() : null
+                        produto.getId(),
+                        identificadorVariacao,
+                        produto.getCategoria()
                 );
 
-                // Atualiza o status da reserva
-                reserva.setStatus(EStatusReserva.EXPIRADA);
+                // 2. Atualiza o status da reserva para CANCELADA
+                reserva.setStatus(EStatusReserva.CANCELADA);
+                reserva.setMotivoAnalise("Cancelada automaticamente por não retirada no prazo.");
                 reservaRepository.save(reserva);
 
-                // Notifica o aluno
-                String motivo = "<p>Sua reserva expirou pois o prazo de retirada de 7 dias foi excedido. O produto retornou ao nosso estoque.</p>";
+                // 3. Notifica o aluno sobre o cancelamento
+                String motivo = "<p>Sua reserva foi cancelada pois o prazo de retirada expirou. O produto retornou ao nosso estoque.</p>";
                 emailService.notificarAlunoStatusReserva(
                         reserva.getUsuario().getEmail(),
-                        reserva.getProduto().getNome(),
-                        "EXPIRADA",
+                        produto.getNome(),
+                        "CANCELADA",
                         motivo
                 );
 
-                log.info("Reserva {} expirada com sucesso.", reserva.getId());
+                log.info("Reserva {} cancelada com sucesso. Estoque do produto {} incrementado.", reserva.getId(), produto.getId());
 
             } catch (Exception e) {
-                log.error("Erro ao expirar a reserva {}: {}", reserva.getId(), e.getMessage());
+                // Loga o erro, mas continua o loop para não impedir que outras reservas sejam processadas
+                log.error("Erro ao cancelar a reserva {}: {}", reserva.getId(), e.getMessage(), e);
             }
         }
-        log.info("Tarefa de expiração de reservas concluída.");
+        log.info("Tarefa de cancelamento de reservas concluída.");
     }
 }

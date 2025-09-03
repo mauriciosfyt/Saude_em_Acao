@@ -1,4 +1,5 @@
 // src/main/java/br/com/saudeemacao/api/repository/ReservaRepository.java
+
 package br.com.saudeemacao.api.repository;
 
 import br.com.saudeemacao.api.model.EStatusReserva;
@@ -21,8 +22,12 @@ public interface ReservaRepository extends MongoRepository<Reserva, String> {
 
     // --- MÉTODOS ADICIONADOS PARA AS MELHORIAS ---
 
-    // 1. Para o serviço de expiração automática
-    List<Reserva> findByStatusAndDataAnaliseBefore(EStatusReserva status, LocalDateTime data);
+    /**
+     * NOVO MÉTODO:
+     * Usado pelo serviço agendado para encontrar reservas aprovadas
+     * cuja data de retirada já passou.
+     */
+    List<Reserva> findByStatusAndDataRetiradaBefore(EStatusReserva status, LocalDateTime data);
 
     // 2. Para verificar o limite de reservas ativas de um aluno
     long countByUsuarioIdAndStatusIn(String usuarioId, Collection<EStatusReserva> statuses);

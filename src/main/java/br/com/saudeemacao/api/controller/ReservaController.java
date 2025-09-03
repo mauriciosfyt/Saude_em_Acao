@@ -1,4 +1,3 @@
-// src/main/java/br/com/saudeemacao/api/controller/ReservaController.java
 package br.com.saudeemacao.api.controller;
 
 import br.com.saudeemacao.api.dto.ReservaAnaliseDTO;

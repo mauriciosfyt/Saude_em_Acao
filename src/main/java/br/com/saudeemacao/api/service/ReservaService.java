@@ -1,10 +1,13 @@
-// src/main/java/br/com/saudeemacao/api/service/ReservaService.java
+// src/main/java/br.com.saudeemacao.api/service/ReservaService.java
+
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.ReservaSolicitacaoDTO;
 import br.com.saudeemacao.api.dto.ReservaStatsDTO;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
 import br.com.saudeemacao.api.model.*;
+import br.com.saudeemacao.api.model.EnumProduto.ESabor;
+import br.com.saudeemacao.api.model.EnumProduto.ETamanho;
 import br.com.saudeemacao.api.repository.ReservaRepository;
 import br.com.saudeemacao.api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,18 +44,51 @@ public class ReservaService {
         }
 
         Produto produto = produtoService.getById(dto.getProdutoId());
-        produtoService.decrementarEstoque(produto.getId(), dto.getTamanho());
 
+        String identificadorVariacao = null;
+        ETamanho tamanho = null;
+        ESabor sabor = null;
+
+        // Valida e extrai a variação do produto (tamanho, sabor) com base na categoria
+        switch (produto.getCategoria()) {
+            case CAMISETAS:
+                if (dto.getTamanho() == null || dto.getTamanho().isBlank()) {
+                    throw new IllegalArgumentException("Tamanho é obrigatório para produtos da categoria CAMISETAS.");
+                }
+                tamanho = ETamanho.valueOf(dto.getTamanho().toUpperCase());
+                identificadorVariacao = dto.getTamanho();
+                break;
+            case CREATINA:
+            case WHEY_PROTEIN:
+                if (dto.getSabor() == null || dto.getSabor().isBlank()) {
+                    throw new IllegalArgumentException("Sabor é obrigatório para produtos da categoria " + produto.getCategoria() + ".");
+                }
+                sabor = ESabor.valueOf(dto.getSabor().toUpperCase());
+                identificadorVariacao = dto.getSabor();
+                break;
+            case VITAMINAS:
+                // Nenhuma variação específica é necessária
+                break;
+            default:
+                throw new IllegalArgumentException("Categoria de produto desconhecida ou sem variação esperada.");
+        }
+
+        // Decrementa o estoque com base na variação correta
+        produtoService.decrementarEstoque(produto.getId(), identificadorVariacao, produto.getCategoria());
+
+        // Cria a nova reserva
         Reserva novaReserva = Reserva.builder()
                 .usuario(usuario)
                 .produto(produto)
-                .tamanho(dto.getTamanho() != null ? Produto.Tamanho.valueOf(dto.getTamanho().toUpperCase()) : null)
+                .tamanho(tamanho)
+                .sabor(sabor)
                 .status(EStatusReserva.PENDENTE)
                 .dataSolicitacao(LocalDateTime.now())
                 .build();
 
         reservaRepository.save(novaReserva);
 
+        // Notifica os administradores
         List<Usuario> admins = usuarioService.buscarTodosAdmins();
         for (Usuario admin : admins) {
             emailService.notificarAdminNovaReserva(admin.getEmail(), usuario.getNome(), produto.getNome());
@@ -60,6 +97,10 @@ public class ReservaService {
         return novaReserva;
     }
 
+    /**
+     * MÉTODO ATUALIZADO:
+     * Ao aprovar, define uma data limite para a retirada do produto.
+     */
     public Reserva aprovarReserva(String id) {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Reserva não encontrada."));
@@ -70,9 +111,20 @@ public class ReservaService {
 
         reserva.setStatus(EStatusReserva.APROVADA);
         reserva.setDataAnalise(LocalDateTime.now());
+
+        // Define a data limite para retirada (ex: 3 dias a partir de agora).
+        // O .with(LocalTime.MAX) garante que o prazo se encerre no final do dia.
+        reserva.setDataRetirada(LocalDateTime.now().plusDays(3).with(LocalTime.MAX));
+
         reservaRepository.save(reserva);
 
-        emailService.notificarAlunoStatusReserva(reserva.getUsuario().getEmail(), reserva.getProduto().getNome(), "APROVADA", "<p>Seu produto está separado e aguardando a retirada!</p>");
+        // Notifica o aluno informando a data limite para retirada
+        String dataFormatada = reserva.getDataRetirada().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String mensagemEmail = String.format(
+                "<p>Seu produto está separado e aguardando a retirada! Você tem até o final do dia %s para buscá-lo.</p>",
+                dataFormatada
+        );
+        emailService.notificarAlunoStatusReserva(reserva.getUsuario().getEmail(), reserva.getProduto().getNome(), "APROVADA", mensagemEmail);
 
         return reserva;
     }
@@ -90,7 +142,15 @@ public class ReservaService {
         reserva.setMotivoAnalise(motivo);
         reservaRepository.save(reserva);
 
-        produtoService.incrementarEstoque(reserva.getProduto().getId(), reserva.getTamanho() != null ? reserva.getTamanho().name() : null);
+        // Determina a variação correta para devolver o item ao estoque
+        String identificadorVariacao = null;
+        if (reserva.getTamanho() != null) {
+            identificadorVariacao = reserva.getTamanho().name();
+        } else if (reserva.getSabor() != null) {
+            identificadorVariacao = reserva.getSabor().name();
+        }
+
+        produtoService.incrementarEstoque(reserva.getProduto().getId(), identificadorVariacao, reserva.getProduto().getCategoria());
 
         String motivoHtml = String.format("<p>Motivo: <em>%s</em></p>", motivo);
         emailService.notificarAlunoStatusReserva(reserva.getUsuario().getEmail(), reserva.getProduto().getNome(), "REJEITADA", motivoHtml);
@@ -112,7 +172,14 @@ public class ReservaService {
         }
 
         if (reserva.getStatus() == EStatusReserva.APROVADA || reserva.getStatus() == EStatusReserva.PENDENTE) {
-            produtoService.incrementarEstoque(reserva.getProduto().getId(), reserva.getTamanho() != null ? reserva.getTamanho().name() : null);
+            // Determina a variação correta para devolver o item ao estoque
+            String identificadorVariacao = null;
+            if (reserva.getTamanho() != null) {
+                identificadorVariacao = reserva.getTamanho().name();
+            } else if (reserva.getSabor() != null) {
+                identificadorVariacao = reserva.getSabor().name();
+            }
+            produtoService.incrementarEstoque(reserva.getProduto().getId(), identificadorVariacao, reserva.getProduto().getCategoria());
         }
 
         reserva.setStatus(EStatusReserva.CANCELADA);
