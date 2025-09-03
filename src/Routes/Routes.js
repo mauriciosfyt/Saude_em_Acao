@@ -18,6 +18,7 @@ import Perfil from '../Pages/Perfil/Perfil';
 import Plano from '../Pages/Plano/Plano';
 import TelaLogin from '../Pages/Login/TelaLogin';
 import Chat from '../Pages/Chat/Chat';
+import Mensalidades from '../Pages/Mensalidade/Mensalidade';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -60,6 +61,7 @@ export default function Routes() {
         <Stack.Screen name="Inicial" component={Inicial} />
         <Stack.Screen name="TelaLogin" component={TelaLogin} />
         <Stack.Screen name="Chat" component={Chat} />
+        <Stack.Screen name="Mensalidades" component={Mensalidades} />
 
 
         {/* O conjunto de abas agora é a segunda tela, chamada de 'MainTabs' */}

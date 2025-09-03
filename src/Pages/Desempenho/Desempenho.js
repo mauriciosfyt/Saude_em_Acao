@@ -71,13 +71,22 @@ const Desempenho = ({ navigation }) => {
               <Text style={styles.menuItemText}>Meu Perfil</Text>
             </TouchableOpacity>
 
-                 <TouchableOpacity 
+            <TouchableOpacity 
               style={styles.menuItem} 
               onPress={() => handleNavegar('Chat')}
             >
               <Ionicons name="person-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Chat</Text>
             </TouchableOpacity>
+
+                <TouchableOpacity 
+              style={styles.menuItem} 
+              onPress={() => handleNavegar('Mensalidades')}
+            >
+              <Ionicons name="person-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Mensalidades</Text>
+            </TouchableOpacity>
+
 
             <TouchableOpacity 
               style={styles.menuItem} 
