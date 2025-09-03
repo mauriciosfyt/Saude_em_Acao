@@ -1,0 +1,201 @@
+import { StyleSheet } from 'react-native';
+
+const stylesLogin = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#fff',
+  },
+  botaoVoltar: {
+    padding: 5,
+  },
+  iconeVoltar: {
+    fontSize: 24,
+    color: '#333',
+  },
+  tituloHeader: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 15,
+  },
+  conteudo: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingHorizontal: 30,
+    paddingTop: 100,
+  },
+  titulo: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 30,
+    marginTop: -35,
+  },
+  campoContainer: {
+    marginBottom: 8,
+    marginTop: 40,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 8,
+  },
+  campo: {
+    backgroundColor: '#D9D9D9',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  botaoEntrar: {
+    backgroundColor: '#405CBA',
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 20,
+    alignItems: 'center',
+    shadowColor: '#405CBA',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  textoBotaoEntrar: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  linhaSeparadora: {
+    height: 3,
+    backgroundColor: '#e0e0e0',
+    marginVertical: 25,
+    width: '100%',
+  },
+  rodape: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 30,
+    paddingVertical: 20,
+  },
+  textoPoliticas: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  linkPoliticas: {
+    color: '#007bff',
+    textDecorationLine: 'underline',
+  },
+  cardOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+  },
+  cardCenter: {
+    width: '90%',
+    maxHeight: '90%',
+    minHeight: '70%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+  },
+  logoHeader: {
+    width: 36,
+    height: 36,
+    resizeMode: 'contain',
+  },
+  botaoVoltarCard: {
+    position: 'absolute',
+    left: 10,
+    padding: 8,
+  },
+  iconeVoltarCard: {
+    fontSize: 24,
+    color: '#333',
+  },
+  tituloCard: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  cardContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  cardButtonContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+  },
+  cardButton: {
+    height: 44,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#405CBA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  cardButtonText: {
+    color: '#405CBA',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  logoCard: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  textoCard: {
+    fontSize: 14,
+    color: '#333',
+    lineHeight: 20,
+    marginBottom: 15,
+    textAlign: 'justify',
+  },
+});
+
+export default stylesLogin;
+
+
