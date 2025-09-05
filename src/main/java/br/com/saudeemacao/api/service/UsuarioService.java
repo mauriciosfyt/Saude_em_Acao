@@ -27,6 +27,9 @@ public class UsuarioService {
     PasswordEncoder cripto;
 
     public Usuario gravar(Usuario u) {
+        // A validação para garantir que apenas um ADMIN possa chamar este método
+        // é feita na classe SegurancaFilterChain. Esta camada de serviço assume
+        // que a chamada já foi autorizada.
         if (repo.existsByEmail(u.getEmail()))
             throw new RuntimeException("Email já existe!");
         if (repo.existsByCpf(u.getCpf()))

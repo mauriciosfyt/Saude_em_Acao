@@ -40,15 +40,20 @@ public class SegurancaFilterChain {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/**", "/api/login", "/api/usuario", "/setup/admin").permitAll()
+                        // ATUALIZAÇÃO: Removido "/api/usuario" desta linha para que não seja mais público.
+                        .requestMatchers(HttpMethod.POST, "/api/auth/**", "/api/login", "/setup/admin").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
 
                         // --- REGRAS OAuth2 para Google (ATUALIZADO) ---
                         .requestMatchers("/login/oauth2/**").permitAll() // Permite o fluxo de callback do Google
 
+                        // --- ATUALIZAÇÃO: Nova regra de segurança para criação de usuários ---
+                        // Apenas usuários com perfil ADMIN podem criar novos usuários (alunos, professores).
+                        .requestMatchers(HttpMethod.POST, "/api/usuario").hasRole(EPerfil.ADMIN.name())
+
                         // --- Outras regras existentes e novas ---
-                        .requestMatchers(HttpMethod.DELETE, "/api/usuario/me").authenticated() // Protege o endpoint de exclusão de conta
+                        .requestMatchers(HttpMethod.DELETE, "/api/usuario/me").authenticated()
                         .requestMatchers("/api/usuario/meu-perfil").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.PUT, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())

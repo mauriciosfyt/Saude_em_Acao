@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling; // <-- IMPORT
 
 @SpringBootApplication
 @EnableScheduling // <-- ADICIONAR ESTA ANOTAÇÃO
-public class SaudeEmAcaoApplication {
+public class    SaudeEmAcaoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SaudeEmAcaoApplication.class, args);
