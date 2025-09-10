@@ -111,7 +111,8 @@ const EditarAluno = () => {
     // Limpar o localStorage temporário
     localStorage.removeItem('alunoParaEditar');
     
-    alert('Aluno atualizado com sucesso!');
+    // Seta a flag para mostrar notificação de edição
+    localStorage.setItem('showAlunoEditado', 'true');
     
     // Navegar de volta para Gerenciar Alunos
     navigate('/GerenciarAlunos');

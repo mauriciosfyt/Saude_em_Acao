@@ -393,6 +393,7 @@
     gap: 24px;
     margin-top: 20px;
     flex-wrap: wrap;
+    align-items: stretch;
 }
 
 .plano-card {
@@ -492,13 +493,17 @@
     font-weight: bold;
     font-size: 1rem;
     cursor: pointer;
-    margin-top: auto;
     transition: background 0.2s;
     border-radius: 12px 0px 12px 0;
 }
 
 .plano-btn:hover {
     background: #0057c2;
+}
+
+/* Garante que o botão fique alinhado na base do card (o Link é o item flex) */
+.plano-card > a {
+    margin-top: auto;
 }
 
 /* 7. NAVEGAÇÃO */

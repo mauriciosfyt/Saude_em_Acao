@@ -24,11 +24,30 @@ const GerenciarPersonal = () => {
   });
   
   const [termoBusca, setTermoBusca] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   // Salvar personal no localStorage sempre que a lista mudar
   useEffect(() => {
     localStorage.setItem('personal', JSON.stringify(personal));
   }, [personal]);
+
+  // Detectar quando um personal foi adicionado ou editado
+  useEffect(() => {
+    if (localStorage.getItem('showPersonalAdicionado') === 'true') {
+      setShowToast(true);
+      setToastMessage('Personal adicionado com sucesso!');
+      localStorage.removeItem('showPersonalAdicionado');
+      setTimeout(() => setShowToast(false), 2000);
+    }
+    
+    if (localStorage.getItem('showPersonalEditado') === 'true') {
+      setShowToast(true);
+      setToastMessage('Personal editado com sucesso!');
+      localStorage.removeItem('showPersonalEditado');
+      setTimeout(() => setShowToast(false), 2000);
+    }
+  }, []);
 
   const personalFiltrados = personal.filter(p =>
     p.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
@@ -43,7 +62,11 @@ const GerenciarPersonal = () => {
       const personalAtualizados = personal.filter(p => p.id !== personalId);
       setPersonal(personalAtualizados);
       localStorage.setItem('personal', JSON.stringify(personalAtualizados));
-      alert('Personal excluído com sucesso!');
+      
+      // Mostrar notificação de exclusão
+      setShowToast(true);
+      setToastMessage('Personal excluído com sucesso!');
+      setTimeout(() => setShowToast(false), 2000);
     }
   };
 
@@ -71,6 +94,12 @@ const GerenciarPersonal = () => {
     <div className="gerenciamento-container">
       <main className="gerenciamento-content">
         <h1>Gerenciamento de Personal</h1>
+        
+        {showToast && (
+          <div className="modal-termos-notification">
+            {toastMessage}
+          </div>
+        )}
         
         <div className="search-bar-wrapper-personal">
           <FaSearch className="search-icon-personal" />

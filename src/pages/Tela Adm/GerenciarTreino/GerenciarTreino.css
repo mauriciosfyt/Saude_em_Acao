@@ -1,0 +1,249 @@
+.gerenciar-treino-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ececec; /* fundo mais claro como no mock */
+  padding: 24px;
+  gap: 24px;
+}
+
+/* Layout principal - duas colunas */
+.gerenciar-treino-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ececec;
+  padding: 24px;
+  gap: 24px;
+}
+
+/* header-actions removido nesta tela */
+.header-actions { display: none; }
+
+.btn-voltar {
+  padding: 8px 16px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-voltar:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000000;
+  margin: 0;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: 1fr auto;
+  gap: 24px;
+  flex: 1;
+}
+
+/* Painel de informações do aluno */
+.aluno-info-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  height: fit-content;
+}
+
+.profile-picture {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.aluno-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-item .label {
+  font-size: 14px;
+  color: #0052CC;
+  font-weight: 800;
+}
+
+.detail-item .value {
+  font-size: 28px; /* título forte como no mock */
+  color: #000000;
+  font-weight: 800;
+}
+
+/* Painel do cronograma */
+.schedule-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.schedule-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000000;
+  margin: 0;
+}
+
+.schedule-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.schedule-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #dfe1e6;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.schedule-card:hover {
+  background-color: #fafbfc;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.day-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: #000000;
+}
+
+.btn-personalizar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 18px;
+  background-color: #ffb300; /* amarelo mais vivo como no mock */
+  color: #000000;
+  border: none;
+  border-radius: 10px; /* pill */
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.2s ease;
+  min-width: 180px;
+  box-shadow: 0 2px 0 #cc8a00;
+}
+
+.btn-personalizar:hover {
+  background-color: #ffc233;
+  transform: translateY(-1px);
+}
+
+.btn-personalizar:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 0 #cc8a00;
+}
+
+/* Container do botão finalizar */
+.finalizar-container {
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.btn-finalizar {
+  padding: 14px 40px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 240px;
+}
+
+.btn-finalizar:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .gerenciar-treino-container {
+    padding: 16px;
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+  
+  .aluno-info-panel {
+    padding: 16px;
+  }
+  
+  .profile-picture {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .schedule-card {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .btn-personalizar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .gerenciar-treino-container {
+    padding: 12px;
+  }
+  
+  .schedule-title {
+    font-size: 20px;
+  }
+  
+  .btn-finalizar {
+    padding: 14px 32px;
+    font-size: 16px;
+  }
+}

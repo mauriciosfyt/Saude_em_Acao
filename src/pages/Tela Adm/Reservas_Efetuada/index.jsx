@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaSearch, FaBars } from "react-icons/fa";
 import "./ReservasEfetuadas.css";
 import HeaderAdmin from "../../../components/header_admin";
@@ -10,7 +10,9 @@ import shorts from "../../../assets/IMG PRODUTO.jpg";
 import Footer from "../../../components/footer";
 
 export default function ReservasEfetuadas() {
- const reservas = [
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [reservas, setReservas] = useState([
   {
     id: 1,
     nome: "Roberto Alves",
@@ -95,8 +97,32 @@ export default function ReservasEfetuadas() {
     telefone: "(11) 92345-6789",
     imagem: shorts,
   }
-];
+]);
 
+  // Handlers para os botões
+  const handleCancelar = (reservaId) => {
+    if (window.confirm('Tem certeza que deseja cancelar esta reserva?')) {
+      const reservasAtualizadas = reservas.filter(reserva => reserva.id !== reservaId);
+      setReservas(reservasAtualizadas);
+      
+      // Mostrar notificação de cancelamento
+      setShowToast(true);
+      setToastMessage('Reserva cancelada com sucesso!');
+      setTimeout(() => setShowToast(false), 2000);
+    }
+  };
+
+  const handleAprovar = (reservaId) => {
+    if (window.confirm('Tem certeza que deseja aprovar esta reserva?')) {
+      const reservasAtualizadas = reservas.filter(reserva => reserva.id !== reservaId);
+      setReservas(reservasAtualizadas);
+      
+      // Mostrar notificação de aprovação
+      setShowToast(true);
+      setToastMessage('Reserva aprovada com sucesso!');
+      setTimeout(() => setShowToast(false), 2000);
+    }
+  };
 
   return (
   
@@ -105,6 +131,12 @@ export default function ReservasEfetuadas() {
      <HeaderAdmin/>
       <main className="content">
         <h1 className="titulo">RESERVAS EFETUADAS</h1>
+        
+        {showToast && (
+          <div className="modal-termos-notification">
+            {toastMessage}
+          </div>
+        )}
 
         {/* Barra de pesquisa */}
         <div className="barra-pesquisa">
@@ -140,8 +172,8 @@ export default function ReservasEfetuadas() {
                 <p className="data">Data: {reserva.data}</p>
 
                 <div className="botoes">
-                  <button className="btn-cancelar">CANCELAR</button>
-                  <button className="btn-aprovar">APROVAR</button>
+                  <button className="btn-cancelar" onClick={() => handleCancelar(reserva.id)}>CANCELAR</button>
+                  <button className="btn-aprovar" onClick={() => handleAprovar(reserva.id)}>APROVAR</button>
                 </div>
               </div>
             </div>

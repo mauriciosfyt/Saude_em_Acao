@@ -100,7 +100,10 @@ const EditarPersonal = () => {
     localStorage.setItem('personal', JSON.stringify(listaAtualizada));
     localStorage.removeItem('personalParaEditar');
 
-    alert('Personal atualizado com sucesso!');
+    // Seta a flag para mostrar notificação de edição
+    localStorage.setItem('showPersonalEditado', 'true');
+
+    // Navegar de volta para Gerenciar Personal
     navigate('/GerenciarPersonal');
   };
 

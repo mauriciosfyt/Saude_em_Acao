@@ -93,6 +93,7 @@ const Carrinho = () => {
           <span>R$ {total}</span>
         </div>
         <button className="btn-continuar">Continuar comprando</button>
+        <button className="btn-reservar-carrinho">Reservar produto</button>
       </div>
     </div>
 

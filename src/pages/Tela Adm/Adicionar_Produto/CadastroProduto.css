@@ -166,11 +166,11 @@ select.campo-controle {
   border: 3px solid #007bff;
   border-radius: 50%;
   color: #007bff;
-  font-size: 48px;
+  font-size: 45px;
   font-weight: 300;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .previa-imagem {

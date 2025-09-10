@@ -6,7 +6,7 @@
   align-items: flex-start;
   gap: 200px;
   padding: 60px 40px;
- background: linear-gradient(to bottom, #004DFF 0%,  #002E99 100%);
+  background: #004DFF;
   flex-wrap: wrap;
 }
 
@@ -92,9 +92,9 @@
   padding: 60px 40px;
   display: flex;
   justify-content: start;
-  padding-bottom: 180px; /* ou até 180px, como antes */
+  padding-bottom: 20px; /* ou até 180px, como antes */
   margin-bottom: 0;
-  background: linear-gradient(to bottom, #002E99 0%, #D9D9D9 70%);
+  background: linear-gradient(to bottom, #004DFF 0%, #D9D9D9 70%);
 }
 
 .description-container {

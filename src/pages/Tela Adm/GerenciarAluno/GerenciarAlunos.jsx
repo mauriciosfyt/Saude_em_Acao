@@ -25,11 +25,30 @@ const GerenciarAlunos = () => {
   });
   
   const [termoBusca, setTermoBusca] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   // Salvar alunos no localStorage sempre que a lista mudar
   useEffect(() => {
     localStorage.setItem('alunos', JSON.stringify(alunos));
   }, [alunos]);
+
+  // Detectar quando um aluno foi adicionado ou editado
+  useEffect(() => {
+    if (localStorage.getItem('showAlunoAdicionado') === 'true') {
+      setShowToast(true);
+      setToastMessage('Aluno adicionado com sucesso!');
+      localStorage.removeItem('showAlunoAdicionado');
+      setTimeout(() => setShowToast(false), 2000);
+    }
+    
+    if (localStorage.getItem('showAlunoEditado') === 'true') {
+      setShowToast(true);
+      setToastMessage('Aluno editado com sucesso!');
+      localStorage.removeItem('showAlunoEditado');
+      setTimeout(() => setShowToast(false), 2000);
+    }
+  }, []);
 
   // Lógica de filtro (pode ser por nome ou email)
   const alunosFiltrados = alunos.filter(aluno =>
@@ -43,7 +62,11 @@ const GerenciarAlunos = () => {
       const alunosAtualizados = alunos.filter(aluno => aluno.id !== alunoId);
       setAlunos(alunosAtualizados);
       localStorage.setItem('alunos', JSON.stringify(alunosAtualizados));
-      alert(`Aluno excluído com sucesso!`);
+      
+      // Mostrar notificação de exclusão
+      setShowToast(true);
+      setToastMessage('Aluno excluído com sucesso!');
+      setTimeout(() => setShowToast(false), 2000);
     }
   };
 
@@ -63,12 +86,23 @@ const GerenciarAlunos = () => {
     navigate('/AdicionarAluno');
   };
 
+  const handleGerenciarTreino = (alunoId) => {
+    // Navegar para a tela de gerenciar treino passando o ID do aluno
+    navigate(`/GerenciarTreino?alunoId=${alunoId}`);
+  };
+
   return (
     <>
       <AdminHeader />
     <div className="alunos-container">
       <main className="alunos-content">
         <h1>Gerenciamento de alunos</h1>
+        
+        {showToast && (
+          <div className="modal-termos-notification">
+            {toastMessage}
+          </div>
+        )}
         
         <div className="search-bar-wrapper">
           <FaSearch className="search-icon" />
@@ -97,6 +131,7 @@ const GerenciarAlunos = () => {
               aluno={aluno} 
               onExcluir={() => handleExcluir(aluno.id)}
               onEditar={() => handleEditar(aluno.id)}
+              onGerenciarTreino={() => handleGerenciarTreino(aluno.id)}
             />
           ))}
         </div>

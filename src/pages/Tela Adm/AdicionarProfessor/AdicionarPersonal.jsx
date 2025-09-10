@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Adicione essa linha
 import { FaSave, FaTimes } from 'react-icons/fa';
 import './AdicionarPersonal.css';
 
@@ -6,6 +7,7 @@ import AdminHeader from '../../../components/header_admin';
 import Footer from "../../../components/footer";
 
 const AdicionarPersonal = () => {
+  const navigate = useNavigate(); // Adicione essa linha
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -14,6 +16,7 @@ const AdicionarPersonal = () => {
     senha: '',
     confirmarSenha: '',
   });
+  const [showToast, setShowToast] = useState(false); // Adicione essa linha
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,13 +58,12 @@ const AdicionarPersonal = () => {
       id: Date.now(), // Gerar ID único
       ...formData
     };
-    
     const personalAtualizados = [...personalAtuais, novoPersonal];
     localStorage.setItem('personal', JSON.stringify(personalAtualizados));
-    
-    console.log('Novo personal:', novoPersonal);
-    alert(`Personal "${formData.nome}" salvo com sucesso!`);
-    
+
+    // Seta a flag para mostrar notificação na próxima tela
+    localStorage.setItem('showPersonalAdicionado', 'true');
+
     // Limpar formulário
     setFormData({
       nome: '',
@@ -71,6 +73,13 @@ const AdicionarPersonal = () => {
       senha: '',
       confirmarSenha: '',
     });
+
+    // Redireciona imediatamente
+    navigate('/GerenciarPersonal'); // Altere para a rota desejada
+  };
+
+  const handleCancelar = () => {
+    navigate('/GerenciarPersonal'); // Altere para a rota desejada
   };
 
   return (
@@ -79,7 +88,13 @@ const AdicionarPersonal = () => {
     <div className="adicionar-container">
       <main className="adicionar-content">
         <h1>Adicionar Novo Personal</h1>
-        
+        {/*
+        {showToast && (
+          <div className="modal-termos-notification">
+            Personal adicionado com sucesso!
+          </div>
+        )}
+        */}
         <form className="adicionar-form" onSubmit={handleSubmit}>
           <div className="form-grid">
             
@@ -170,7 +185,7 @@ const AdicionarPersonal = () => {
           </div>
 
           <div className="form-actions">
-            <button type="button" className="btn-cancelar">
+            <button type="button" className="btn-cancelar" onClick={handleCancelar}>
               <FaTimes /> Cancelar
             </button>
             <button type="submit" className="btn-salvar">

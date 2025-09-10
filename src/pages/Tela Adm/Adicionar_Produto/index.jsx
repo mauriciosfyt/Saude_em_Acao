@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 // Mantive seus caminhos de importação. Se eles estiverem em outra pasta, ajuste conforme necessário.
 import Modal from '../../../components/Administrador/AdicionarProduto/Modal';
 import ControleQuantidade from '../../../components/Administrador/AdicionarProduto/ControleQuantidade';
@@ -22,12 +23,15 @@ const ITENS_POR_CATEGORIA = {
 };
 
 const AdicionarProduto = () => {
+  const navigate = useNavigate();
   const [dadosFormulario, setDadosFormulario] = useState(ESTADO_INICIAL_FORMULARIO);
   const [estoque, setEstoque] = useState({});
   const [modalAberto, setModalAberto] = useState(false);
   const [estoqueTemporario, setEstoqueTemporario] = useState({});
   const [previaImagem, setPreviaImagem] = useState(null);
   const [nomeArquivo, setNomeArquivo] = useState('Selecione um arquivo...');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const inputArquivoRef = useRef(null);
 
   useEffect(() => {
@@ -77,9 +81,51 @@ const AdicionarProduto = () => {
 
   const enviarFormulario = (evento) => {
     evento.preventDefault();
-    const dadosCompletos = { ...dadosFormulario, estoque, nomeArquivo };
-    console.log('Dados do formulário enviados:', dadosCompletos);
-    alert('Produto adicionado! Verifique o console para ver os dados.');
+
+    // Validações básicas
+    if (!dadosFormulario.nome || !dadosFormulario.preco || !dadosFormulario.categoria) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    // Criar novo produto
+    const novoProduto = {
+      id: Date.now(),
+      nome: dadosFormulario.nome,
+      categoria: dadosFormulario.categoria,
+      status: 'Ativo',
+      preco: Number(dadosFormulario.preco) || 0,
+      estoque: Object.values(estoque).reduce((total, qtd) => total + qtd, 0), // Soma total do estoque
+      imagem: previaImagem || 'https://via.placeholder.com/150',
+      descricao: dadosFormulario.descricao || ''
+    };
+
+    // Salvar no localStorage
+    const produtosAtuais = JSON.parse(localStorage.getItem('produtos') || '[]');
+    const produtosAtualizados = [...produtosAtuais, novoProduto];
+    localStorage.setItem('produtos', JSON.stringify(produtosAtualizados));
+
+    // Verificar se a pessoa veio da tela de gerenciar produtos
+    const veioDoGerenciarProduto = localStorage.getItem('veioDoGerenciarProduto') === 'true';
+    
+    // Limpar a flag de origem
+    localStorage.removeItem('veioDoGerenciarProduto');
+
+    // Limpar formulário
+    limparFormulario();
+
+    // Navegar condicionalmente
+    if (veioDoGerenciarProduto) {
+      // Seta a flag para mostrar notificação de adição
+      localStorage.setItem('showProdutoAdicionado', 'true');
+      // Navegar de volta para Gerenciar Produtos
+      navigate('/GerenciarProduto');
+    } else {
+      // Se não veio do gerenciar produtos, mostra notificação na tela atual
+      setShowToast(true);
+      setToastMessage('Produto adicionado com sucesso!');
+      setTimeout(() => setShowToast(false), 2000);
+    }
   };
 
   const limparFormulario = () => {
@@ -111,7 +157,7 @@ const AdicionarProduto = () => {
   // ▼▼▼ FUNÇÃO ATUALIZADA ▼▼▼
   const renderizarResumoEstoque = () => {
     const itensEstoque = Object.entries(estoque).filter(([, qtd]) => qtd > 0);
-    if (itensEstoque.length === 0) return <span className="resumo-estoque-vazio">Nenhum item em estoque</span>;
+    if (itensEstoque.length === 0) return <span className="resumo-estoque-vazio">Nenhum item em estoque </span>;
     
     return (
       <div className="resumo-estoque">
@@ -144,6 +190,13 @@ return (
     {/* O seu formulário (conteúdo principal) permanece no meio */}
     <div className="formulario-container">
       <h1 className="formulario-titulo">Cadastro de produtos</h1>
+      
+      {showToast && (
+        <div className="modal-termos-notification">
+          {toastMessage}
+        </div>
+      )}
+      
       <form onSubmit={enviarFormulario} noValidate>
         {/* ... O resto do seu formulário continua igual ... */}
         {/* ... */}

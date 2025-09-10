@@ -47,6 +47,8 @@ const GerenciarProduto = () => {
   const [termoBusca, setTermoBusca] = useState('');
   const [categoria, setCategoria] = useState('');
   const [produtosFiltrados, setProdutosFiltrados] = useState(produtos);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
     let resultado = produtos;
@@ -71,6 +73,23 @@ const GerenciarProduto = () => {
     localStorage.setItem('produtos', JSON.stringify(produtos));
   }, [produtos]);
 
+  // Detectar quando um produto foi adicionado ou editado
+  useEffect(() => {
+    if (localStorage.getItem('showProdutoAdicionado') === 'true') {
+      setShowToast(true);
+      setToastMessage('Produto adicionado com sucesso!');
+      localStorage.removeItem('showProdutoAdicionado');
+      setTimeout(() => setShowToast(false), 2000);
+    }
+    
+    if (localStorage.getItem('showProdutoEditado') === 'true') {
+      setShowToast(true);
+      setToastMessage('Produto editado com sucesso!');
+      localStorage.removeItem('showProdutoEditado');
+      setTimeout(() => setShowToast(false), 2000);
+    }
+  }, []);
+
   const handleEditClick = (produtoId) => {
     const produto = produtos.find(p => p.id === produtoId);
     if (produto) {
@@ -80,6 +99,8 @@ const GerenciarProduto = () => {
   };
 
   const handleAdicionarProduto = () => {
+    // Marcar que a pessoa veio da tela de gerenciar produtos
+    localStorage.setItem('veioDoGerenciarProduto', 'true');
     navigate('/CadastrarProduto');
   };
 
@@ -87,7 +108,11 @@ const GerenciarProduto = () => {
     if (window.confirm('Tem certeza que deseja excluir este produto?')) {
       const atualizados = produtos.filter((p) => p.id !== produtoId);
       setProdutos(atualizados);
-      alert('Produto excluído com sucesso!');
+      
+      // Mostrar notificação de exclusão
+      setShowToast(true);
+      setToastMessage('Produto excluído com sucesso!');
+      setTimeout(() => setShowToast(false), 2000);
     }
   };
 
@@ -96,6 +121,12 @@ const GerenciarProduto = () => {
       <AdminHeader />
     <div className="container-gerenciar-produto">
       <h1 className="titulo-principal">Gerenciar Produtos</h1>
+      
+      {showToast && (
+        <div className="modal-termos-notification">
+          {toastMessage}
+        </div>
+      )}
 
       <div className="barra-filtros">
         <div className="filtros-esquerda">

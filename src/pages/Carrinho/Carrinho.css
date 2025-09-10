@@ -77,10 +77,44 @@ body {
 }
 
 .quantidade button {
-  width: 25px;
-  height: 25px;
-  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
   cursor: pointer;
+  background: #0070f3;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.quantidade button:hover {
+  background: #0057c2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.quantidade button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.quantidade span {
+  font-weight: bold;
+  font-size: 16px;
+  min-width: 32px;
+  text-align: center;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .preco {
@@ -120,6 +154,27 @@ body {
   cursor: pointer;
   margin-top: auto;
   transition: background 0.2s;
+}
+
+.btn-continuar:hover {
+  background-color: #0047b3;
+}
+
+.btn-reservar-carrinho{
+  background: #91BDE2;
+  color: #fff;
+  border: none;
+  border-radius: 12px 0px 12px 0;
+  padding: 10px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: auto;
+  transition: background 0.2s;
+}
+
+.btn-reservar-carrinho:hover {
+  background-color: #0047b3;
 }
 
 
@@ -166,8 +221,31 @@ body {
   }
 
   .quantidade button {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    background: #0070f3;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 28px;
+    min-height: 28px;
+  }
+
+  .quantidade button:hover {
+    background: #0057c2;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .quantidade button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .preco {
@@ -268,8 +346,31 @@ body {
   }
 
   .quantidade button {
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    background: #0070f3;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 30px;
+    min-height: 30px;
+  }
+
+  .quantidade button:hover {
+    background: #0057c2;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .quantidade button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .preco {

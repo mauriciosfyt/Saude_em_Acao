@@ -14,8 +14,10 @@ const AdicionarAluno = () => {
     cpf: '',
     senha: '',
     confirmarSenha: '',
-    numero: ''
+    numero: '',
+    plano: '' // Novo campo
   });
+  const [showToast, setShowToast] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -27,9 +29,9 @@ const AdicionarAluno = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Validações básicas
-    if (!formData.nome || !formData.email || !formData.cpf || !formData.senha || !formData.numero) {
+    if (!formData.nome || !formData.email || !formData.cpf || !formData.senha || !formData.numero || !formData.plano) {
       alert('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
@@ -54,16 +56,16 @@ const AdicionarAluno = () => {
     // Salvar o novo aluno no localStorage
     const alunosAtuais = JSON.parse(localStorage.getItem('alunos') || '[]');
     const novoAluno = {
-      id: Date.now(), // Gerar ID único
+      id: Date.now(),
       ...formData
     };
     
     const alunosAtualizados = [...alunosAtuais, novoAluno];
     localStorage.setItem('alunos', JSON.stringify(alunosAtualizados));
-    
-    console.log('Novo aluno:', novoAluno);
-    alert('Aluno adicionado com sucesso!');
-    
+
+    // Seta a flag para mostrar notificação na próxima tela
+    localStorage.setItem('showAlunoAdicionado', 'true');
+
     // Limpar formulário
     setFormData({
       nome: '',
@@ -71,10 +73,11 @@ const AdicionarAluno = () => {
       cpf: '',
       senha: '',
       confirmarSenha: '',
-      numero: ''
+      numero: '',
+      plano: ''
     });
 
-    // Navegar de volta para Gerenciar Alunos
+    // Redireciona imediatamente
     navigate('/GerenciarAlunos');
   };
 
@@ -88,7 +91,11 @@ const AdicionarAluno = () => {
       <div className="adicionar-aluno-container">
         <main className="adicionar-aluno-content">
           <h1>Adicionar Novo Aluno</h1>
-          
+          {showToast && (
+            <div className="modal-termos-notification">
+              Aluno adicionado com sucesso!
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="form-aluno">
             <div className="form-group">
               <label htmlFor="nome">Nome Completo *</label>
@@ -141,6 +148,21 @@ const AdicionarAluno = () => {
                  required
                />
              </div>
+            <div className="form-group">
+              <label htmlFor="plano">Plano *</label>
+              <select
+                id="plano"
+                name="plano"
+                value={formData.plano}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Selecione o plano</option>
+                <option value="GOLD">GOLD</option>
+                <option value="ESSENCIAL">ESSENCIAL</option>
+                <option value="BÁSICO">BÁSICO</option>
+              </select>
+            </div>
 
             <div className="form-group">
               <label htmlFor="senha">Senha *</label>
@@ -167,6 +189,7 @@ const AdicionarAluno = () => {
                 required
               />
             </div>
+
 
             <div className="form-actions">
               <button type="button" className="btn-cancelar" onClick={handleCancelar}>

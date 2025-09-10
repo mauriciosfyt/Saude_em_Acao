@@ -31,6 +31,8 @@ import AdicionarAluno from '../pages/Tela Adm/AdicionarAluno/AdicionarAluno.jsx'
 import EditarAluno from '../pages/Tela Adm/EditarAluno/EditarAluno.jsx';
 import EditarProduto from '../pages/Tela Adm/Editar_Produto/index.jsx';
 import EditarPersonal from '../pages/Tela Adm/EditarPersonal/EditarPersonal.jsx';
+import GerenciarTreino from '../pages/Tela Adm/GerenciarTreino/index.jsx';
+import PersonalizarTreino from '../pages/Tela Adm/PersonalizarTreino/index.jsx';
 
 const AppRoutes = () => {
   return (
@@ -66,7 +68,8 @@ const AppRoutes = () => {
         <Route path="/EditarAluno" element={<EditarAluno />} /> {/* Adicione esta linha */}
         <Route path="/EditarProduto" element={<EditarProduto />} />
         <Route path="/EditarPersonal" element={<EditarPersonal />} /> {/* Nova rota */}
-
+        <Route path="/GerenciarTreino" element={<GerenciarTreino />} /> {/* Nova rota */}
+        <Route path="/PersonalizarTreino" element={<PersonalizarTreino />} />
         
         
         {/* Adicione outras rotas conforme necessário */}

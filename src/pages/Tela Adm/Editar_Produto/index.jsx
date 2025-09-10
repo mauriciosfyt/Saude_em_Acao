@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Modal from '../../../components/Administrador/AdicionarProduto/Modal';
 import ControleQuantidade from '../../../components/Administrador/AdicionarProduto/ControleQuantidade';
 import '../Adicionar_Produto/CadastroProduto.css';
@@ -14,6 +15,7 @@ const ITENS_POR_CATEGORIA = {
 };
 
 const EditarProduto = () => {
+  const navigate = useNavigate();
   const [dadosFormulario, setDadosFormulario] = useState({ nome: '', preco: '', categoria: '', descricao: '' });
   const [estoque, setEstoque] = useState({});
   const [modalAberto, setModalAberto] = useState(false);
@@ -109,8 +111,11 @@ const EditarProduto = () => {
     localStorage.setItem('produtos', JSON.stringify(atualizada));
     localStorage.removeItem('produtoParaEditar');
 
-    alert('Produto atualizado com sucesso!');
-    window.history.back();
+    // Seta a flag para mostrar notificação de edição
+    localStorage.setItem('showProdutoEditado', 'true');
+
+    // Navegar de volta para Gerenciar Produtos
+    navigate('/GerenciarProduto');
   };
 
   const limpar = () => {
