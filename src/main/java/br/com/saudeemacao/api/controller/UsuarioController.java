@@ -1,5 +1,3 @@
-// src/main/java/br.com.saudeemacao.api/controller/UsuarioController.java
-
 package br.com.saudeemacao.api.controller;
 
 import br.com.saudeemacao.api.dto.UsuarioSaidaDTO;

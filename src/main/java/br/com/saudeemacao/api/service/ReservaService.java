@@ -1,5 +1,3 @@
-// src/main/java/br.com.saudeemacao.api/service/ReservaService.java
-
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.ReservaSolicitacaoDTO;
