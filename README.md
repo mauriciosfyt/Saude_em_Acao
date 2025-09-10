@@ -1,4 +1,4 @@
-# Saúde em Ação Joao Bonitao
+# Saúde em Ação
 
 > **Sobre o Projeto:**  
   O Saúde em Ação é uma plataforma web completa e moderna voltada à saúde, bem-estar e à gestão da academia.
