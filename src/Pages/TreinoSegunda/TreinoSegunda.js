@@ -1,0 +1,359 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  StatusBar,
+  Modal,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import styles from '../../Styles/TreinoSegundaStyle';
+
+// ...restante do código permanece igual...
+
+const TreinoSegunda = ({ navigation }) => {
+  const [menuVisivel, setMenuVisivel] = useState(false);
+  const [exerciciosConcluidos, setExerciciosConcluidos] = useState(0);
+  const [exerciciosSelecionados, setExerciciosSelecionados] = useState({});
+  const [modalExercicio, setModalExercicio] = useState({ visivel: false, exercicio: null });
+
+  // Dados dos exercícios
+  const exercicios = {
+    peito: [
+      {
+        id: 1,
+        nome: 'Supino Inclinado',
+        series: 4,
+        repeticoes: 15,
+        carga: 0,
+        imagem: require('../../../assets/banner_whey.jpg'),
+        descricao: 'Deite-se no banco inclinado, segure a barra ou halteres acima do peito e desça até próximo ao peitoral. Empurre de volta até a posição inicial mantendo o controle.',
+      },
+      {
+        id: 2,
+        nome: 'Crucifixo Reto',
+        series: 4,
+        repeticoes: 15,
+        carga: 0,
+        imagem: require('../../../assets/banner_creatina1.jpg'),
+        descricao: 'Deite-se no banco reto, segure os halteres acima do peito e abra os braços até a linha do peito, retornando ao início com controle.',
+      },
+      {
+        id: 3,
+        nome: 'Voador Frontal',
+        series: 4,
+        repeticoes: 15,
+        carga: 0,
+        imagem: require('../../../assets/banner_vitamina.jpg'),
+        descricao: 'Sente-se no aparelho voador, apoie os braços e una-os à frente do peito, retornando devagar à posição inicial.',
+      },
+    ],
+    triceps: [
+      {
+        id: 4,
+        nome: 'Polia Alta',
+        series: 4,
+        repeticoes: 15,
+        carga: 0,
+        imagem: require('../../../assets/banner_roupas.jpg'),
+        descricao: 'Em pé, segure a barra da polia alta com as duas mãos e estenda os cotovelos até o final, retornando devagar.',
+      },
+      {
+        id: 5,
+        nome: 'Mergulho em Barras',
+        series: 4,
+        repeticoes: 15,
+        carga: 0,
+        imagem: require('../../../assets/banner_camisas.png'),
+        descricao: 'Apoie-se nas barras paralelas, flexione os cotovelos descendo o corpo e empurre de volta até estender os braços.',
+      },
+      {
+        id: 6,
+        nome: 'Rosca Francesa',
+        series: 4,
+        repeticoes: 15,
+        carga: 0,
+        imagem: require('../../../assets/banner_loja.png'),
+        descricao: 'Deitado, segure a barra com as mãos fechadas e flexione os cotovelos levando a barra até a testa, depois estenda novamente.',
+      },
+    ],
+  };
+
+  const totalExercicios = 6;
+
+  // Funções de controle do menu
+  const handleAbrirMenu = () => {
+    setMenuVisivel(true);
+  };
+
+  const handleFecharMenu = () => {
+    setMenuVisivel(false);
+  };
+
+  const handleNavegar = (nomeDaTela) => {
+    handleFecharMenu();
+    navigation.navigate(nomeDaTela);
+  };
+
+  // Função para marcar/desmarcar exercício
+  const toggleExercicio = (id) => {
+    const novoEstado = { ...exerciciosSelecionados };
+    if (novoEstado[id]) {
+      delete novoEstado[id];
+    } else {
+      novoEstado[id] = true;
+    }
+    setExerciciosSelecionados(novoEstado);
+    setExerciciosConcluidos(Object.keys(novoEstado).length);
+  };
+
+  // Função para começar treino
+  const handleComecarTreino = () => {
+    console.log('Começando treino...');
+    // Aqui você pode implementar a lógica para iniciar o cronômetro ou navegar para uma tela de exercício ativo
+  };
+
+  // Função para finalizar treino
+  const handleFinalizarTreino = () => {
+    console.log('Finalizando treino...');
+    // Aqui você pode implementar a lógica para salvar o progresso e voltar para a tela anterior
+    navigation.goBack();
+  };
+
+  // Funções do modal de exercício
+  const handleAbrirModalExercicio = (exercicio) => {
+    setModalExercicio({ visivel: true, exercicio });
+  };
+
+  const handleFecharModalExercicio = () => {
+    setModalExercicio({ visivel: false, exercicio: null });
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#000000" />
+          </TouchableOpacity>
+          <View /> {/* Espaço vazio para centralizar */}
+          <TouchableOpacity style={styles.menuButton} onPress={handleAbrirMenu}>
+            <Ionicons name="menu" size={24} color="#000000" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Conteúdo Principal */}
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Seção Peito */}
+        <View style={styles.secaoContainer}>
+          <View style={styles.secaoHeader}>
+            <Text style={styles.secaoTitle}>Peito</Text>
+          </View>
+          
+          {exercicios.peito.map((exercicio) => (
+            <View key={exercicio.id} style={styles.exercicioCard}>
+              <TouchableOpacity 
+                style={styles.checkbox}
+                onPress={() => toggleExercicio(exercicio.id)}
+              >
+                <Ionicons 
+                  name={exerciciosSelecionados[exercicio.id] ? "checkmark-circle" : "ellipse-outline"} 
+                  size={24} 
+                  color={exerciciosSelecionados[exercicio.id] ? "#405CBA" : "#ccc"} 
+                />
+              </TouchableOpacity>
+              
+              <Image source={exercicio.imagem} style={styles.exercicioImage} />
+              
+              <View style={styles.exercicioInfo}>
+                <Text style={styles.exercicioNome}>{exercicio.id} {exercicio.nome}</Text>
+                <Text style={styles.exercicioDetalhes}>Série: {exercicio.series}</Text>
+                <Text style={styles.exercicioDetalhes}>Repetição: {exercicio.repeticoes}</Text>
+                <Text style={styles.exercicioDetalhes}>Carga: {exercicio.carga}(kg)</Text>
+              </View>
+              
+              <TouchableOpacity style={styles.infoButton} onPress={() => handleAbrirModalExercicio(exercicio)}>
+                <Ionicons name="information-circle" size={24} color="#405CBA" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+
+        {/* Seção Tríceps */}
+        <View style={styles.secaoContainer}>
+          <View style={styles.secaoHeader}>
+            <Text style={styles.secaoTitle}>Triceps</Text>
+          </View>
+          
+          {exercicios.triceps.map((exercicio) => (
+            <View key={exercicio.id} style={styles.exercicioCard}>
+              <TouchableOpacity 
+                style={styles.checkbox}
+                onPress={() => toggleExercicio(exercicio.id)}
+              >
+                <Ionicons 
+                  name={exerciciosSelecionados[exercicio.id] ? "checkmark-circle" : "ellipse-outline"} 
+                  size={24} 
+                  color={exerciciosSelecionados[exercicio.id] ? "#405CBA" : "#ccc"} 
+                />
+              </TouchableOpacity>
+              
+              <Image source={exercicio.imagem} style={styles.exercicioImage} />
+              
+              <View style={styles.exercicioInfo}>
+                <Text style={styles.exercicioNome}>{exercicio.id} {exercicio.nome}</Text>
+                <Text style={styles.exercicioDetalhes}>Série: {exercicio.series}</Text>
+                <Text style={styles.exercicioDetalhes}>Repetição: {exercicio.repeticoes}</Text>
+                <Text style={styles.exercicioDetalhes}>Carga: {exercicio.carga}(kg)</Text>
+              </View>
+              
+              <TouchableOpacity style={styles.infoButton} onPress={() => handleAbrirModalExercicio(exercicio)}>
+                <Ionicons name="information-circle" size={24} color="#405CBA" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+
+        {/* Barra de Progresso */}
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>{exerciciosConcluidos} de {totalExercicios} Treinos concluidos</Text>
+          <View style={styles.progressBar}>
+            <View 
+              style={[
+                styles.progressFill, 
+                { width: `${(exerciciosConcluidos / totalExercicios) * 100}%` }
+              ]} 
+            />
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Footer com Botões */}
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.comecarButton} onPress={handleComecarTreino}>
+          <Text style={styles.comecarButtonText}>Começar Treino</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.finalizarButton} onPress={handleFinalizarTreino}>
+          <Text style={styles.finalizarButtonText}>Finalizar</Text>
+          <Ionicons name="checkmark-circle" size={20} color="#666" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Modal do Menu */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={menuVisivel}
+        onRequestClose={handleFecharMenu}
+      >
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          onPress={handleFecharMenu}
+          activeOpacity={1}
+        >
+          <View style={styles.menuContent}>
+            <Text style={styles.menuTitle}>Menu</Text>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("MainTabs")}
+            >
+              <Ionicons name="home-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Home</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Perfil")}
+            >
+              <Ionicons name="person-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Meu Perfil</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Chat")}
+            >
+              <Ionicons name="chatbubble-ellipses-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Chat</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Desempenho")}
+            >
+              <Ionicons name="bar-chart-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Desempenho</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("MeuTreino")}
+            >
+              <Ionicons name="fitness-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Meus Treinos</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Mensalidades")}
+            >
+              <Ionicons name="card-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Mensalidades</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Modal Sobre o Exercício */}
+      <Modal
+        visible={modalExercicio.visivel}
+        transparent
+        animationType="fade"
+        onRequestClose={handleFecharModalExercicio}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <View style={{
+            backgroundColor: '#fff',
+            borderRadius: 20,
+            padding: 24,
+            width: '85%',
+            alignItems: 'flex-start'
+          }}>
+            <Text style={{ color: '#888', fontSize: 12, marginBottom: 8 }}>Sobre o Exercício</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#405CBA', marginRight: 8 }} />
+              <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                {modalExercicio.exercicio?.nome}
+              </Text>
+            </View>
+            <Text style={{ fontSize: 15, color: '#222', marginBottom: 16 }}>
+              {modalExercicio.exercicio?.descricao || 'Descrição do exercício.'}
+            </Text>
+            <TouchableOpacity onPress={handleFecharModalExercicio} style={{ alignSelf: 'flex-end', marginTop: 8 }}>
+              <Text style={{ color: '#405CBA', fontWeight: 'bold', fontSize: 16 }}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
+};
+
+export default TreinoSegunda;

@@ -87,6 +87,31 @@ const Desempenho = ({ navigation }) => {
               <Text style={styles.menuItemText}>Mensalidades</Text>
             </TouchableOpacity>
 
+               <TouchableOpacity 
+              style={styles.menuItem} 
+              onPress={() => handleNavegar('LojaProdutos')}
+            >
+              <Ionicons name="person-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Loja</Text>
+            </TouchableOpacity>
+
+                  <TouchableOpacity 
+              style={styles.menuItem} 
+              onPress={() => handleNavegar('LojaFavoritos')}
+            >
+              <Ionicons name="person-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Favoritos</Text>
+            </TouchableOpacity>
+
+                       <TouchableOpacity 
+              style={styles.menuItem} 
+              onPress={() => handleNavegar('LojaReservas')}
+            >
+              <Ionicons name="person-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Reservas</Text>
+            </TouchableOpacity>
+
+
 
             <TouchableOpacity 
               style={styles.menuItem} 

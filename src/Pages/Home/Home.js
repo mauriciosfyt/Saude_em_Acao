@@ -10,8 +10,11 @@ import {
   ScrollView,
   ImageBackground,
   StatusBar,
+  Image,
 } from 'react-native';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+
+import Logo from '../../../assets/icons/logo_dia.png'; // <-- Ajuste o caminho conforme seu projeto
 
 // --- Constantes de Tema (antes em theme.js) ---
 const COLORS = {
@@ -46,9 +49,9 @@ const FeatureButton = ({ iconName, label, onPress }) => {
 const Home = ({ navigation }) => {
   // Dados para os botões da grade
   const features = [
-    { id: 1, icon: 'account-group-outline', label: 'Professores', screen: 'Teachers' },
-    { id: 2, icon: 'weight-lifter', label: 'Meus treinos', screen: 'Workouts' },
-    { id: 3, icon: 'cart-outline', label: 'Nossa loja', screen: 'Shop' },
+    { id: 1, icon: 'account-group-outline', label: 'Professores', screen: 'Professores' },
+    { id: 2, icon: 'weight-lifter', label: 'Meus treinos', screen: 'MeuTreino' },
+    { id: 3, icon: 'cart-outline', label: 'Nossa loja', screen: 'Loja' },
     { id: 4, icon: 'account-circle-outline', label: 'Meu perfil', screen: 'Profile' },
   ];
 
@@ -68,7 +71,7 @@ const Home = ({ navigation }) => {
           <TouchableOpacity>
             <Ionicons name="arrow-back" size={28} color={COLORS.primary} />
           </TouchableOpacity>
-          <Text style={styles.logoText}>OP</Text>
+          <Image source={Logo} style={styles.logoImage} />
           <View style={{ width: 28 }} /> {/* Espaço para centralizar o logo */}
         </View>
 
@@ -101,7 +104,21 @@ const Home = ({ navigation }) => {
               key={feature.id}
               iconName={feature.icon}
               label={feature.label}
-              onPress={() => console.log(`Navegar para ${feature.screen}`)}
+              onPress={() => {
+                if (feature.screen === 'MeuTreino') {
+                  navigation.navigate('MeuTreino');
+                } 
+                 if (feature.screen === 'Loja') {
+                  console.log('Tentando navegar para Loja...');
+                  navigation.navigate('Loja');
+                }
+                 if (feature.screen === 'Professores') {
+                  console.log('Tentando navegar para Loja...');
+                  navigation.navigate('Professores');
+                }else {
+                  console.log(`Navegar para ${feature.screen}`);
+                }
+              }}
             />
           ))}
         </View>
@@ -109,7 +126,6 @@ const Home = ({ navigation }) => {
     </SafeAreaView>
   );
 };
-
 // --- Estilos (StyleSheet) ---
 const styles = StyleSheet.create({
   safeArea: {
@@ -126,10 +142,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: SIZES.medium,
   },
-  logoText: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: COLORS.primary,
+  logoImage: {
+    width: 50, // Defina a largura e altura desejadas para o logo
+    height: 50,
   },
   welcomeSection: {
     marginTop: SIZES.small,

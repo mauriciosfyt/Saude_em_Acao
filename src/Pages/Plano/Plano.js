@@ -1,21 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { PlanoStyle as styles } from '../../Styles/PlanoStyle'; 
 
-// Exemplo de como integrar o componente PerfilDesempenho
-export default function ExemploIntegracao() {
-  const [mostrarPerfil, setMostrarPerfil] = useState(false);
-
-  if (mostrarPerfil) {
-    return (
-      <PerfilDesempenho 
-        navigation={{
-          goBack: () => setMostrarPerfil(false)
-        }}
-      />
-    );
-  }
+export default function Plano({ navigation }) {
+  const onBack = () => navigation && navigation.goBack();
+  const onMudarPlano = () => {
+    navigation && navigation.navigate('TelaPlanos');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -23,7 +15,7 @@ export default function ExemploIntegracao() {
       
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
+        <TouchableOpacity style={styles.backButton} onPress={onBack}>
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Meu plano</Text>
@@ -58,7 +50,7 @@ export default function ExemploIntegracao() {
           <Text style={styles.renewalTitle}>RENOVAÇÃO{'\n'}DO PLANO</Text>
           <TouchableOpacity 
             style={styles.changePlanButton}
-            onPress={() => setMostrarPerfil(true)}
+            onPress={onMudarPlano}
           >
             <Text style={styles.changePlanButtonText}>Mudar de plano</Text>
           </TouchableOpacity>
