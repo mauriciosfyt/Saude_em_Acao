@@ -65,3 +65,21 @@
   background-color: #007BFF;
   color: white;
 }
+
+.btn-gerenciar-treino {
+  width: 100%;
+  padding: 12px 24px;
+  background-color: #0052CC;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin: 8px 0;
+}
+
+.btn-gerenciar-treino:hover {
+  opacity: 0.85;
+}

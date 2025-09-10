@@ -34,7 +34,7 @@ export default function AdminHeader() {
           <li><Link to="/GerenciarAlunos"><FaUserFriends /> Alunos</Link></li>
           <li><Link to="/GerenciarPersonal"><FaUserTie /> Professores</Link></li>
           <li><Link to="/CadastrarProduto"><FaPlusCircle /> Adicionar Produtos</Link></li>
-          <li><Link to="/Dashboard"><FaPlusCircle />Dashboard</Link></li>
+          <li><Link to="/Dashboard"><FaPlusCircle /> Dashboard</Link></li>
 
         </ul>
       </nav>
