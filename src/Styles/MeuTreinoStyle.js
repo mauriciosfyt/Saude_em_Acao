@@ -127,22 +127,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
-    alignItems: 'flex-end',
   },
 
   menuContent: {
     backgroundColor: 'white',
+    borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    borderBottomRightRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 30,
-    width: 250,
-    height: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    maxHeight: '70%',
   },
 
   menuTitle: {

@@ -26,6 +26,9 @@ import MeuTreino from "../Pages/MeuTreino/MeuTreino";
 import TreinoSegunda from "../Pages/TreinoSegunda/TreinoSegunda";
 import Professores from "../Pages/Professores/Professores";
 import TelaPlanos from "../Pages/TelaPlanos/TelaPlanos";
+import PlanoEssencial from "../Components/PlanoEssencial";
+import PlanoGold from "../Components/PlanoGold";
+import PlanoBasico from "../Components/PlanoBasico";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -85,6 +88,9 @@ export default function Routes() {
         <Stack.Screen name="TreinoSegunda" component={TreinoSegunda} />
         <Stack.Screen name="Professores" component={Professores} />
         <Stack.Screen name="TelaPlanos" component={TelaPlanos} />
+        <Stack.Screen name="PlanoBasico" component={PlanoBasico} />
+        <Stack.Screen name="PlanoEssencial" component={PlanoEssencial} />
+        <Stack.Screen name="PlanoGold" component={PlanoGold} />
 
         {/* O conjunto de abas agora é a segunda tela, chamada de 'MainTabs' */}
         <Stack.Screen name="MainTabs" component={TabNavigator} />

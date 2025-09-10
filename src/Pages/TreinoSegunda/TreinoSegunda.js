@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { MaterialIcons } from '@expo/vector-icons';
 import {
   View,
   Text,
@@ -20,8 +19,6 @@ const TreinoSegunda = ({ navigation }) => {
   const [exerciciosConcluidos, setExerciciosConcluidos] = useState(0);
   const [exerciciosSelecionados, setExerciciosSelecionados] = useState({});
   const [modalExercicio, setModalExercicio] = useState({ visivel: false, exercicio: null });
-  const [modalFinalizar, setModalFinalizar] = useState(false);
-  const [modalAviso, setModalAviso] = useState(false);
 
   // Dados dos exercícios
   const exercicios = {
@@ -121,24 +118,9 @@ const TreinoSegunda = ({ navigation }) => {
 
   // Função para finalizar treino
   const handleFinalizarTreino = () => {
-    if (exerciciosConcluidos === totalExercicios) {
-      setModalFinalizar(true);
-    } else {
-      setModalAviso(true);
-    }
-  };
-
-  const handleFecharAviso = () => {
-    setModalAviso(false);
-  };
-
-  const handleConfirmarFinalizar = () => {
-    setModalFinalizar(false);
+    console.log('Finalizando treino...');
+    // Aqui você pode implementar a lógica para salvar o progresso e voltar para a tela anterior
     navigation.goBack();
-  };
-
-  const handleCancelarFinalizar = () => {
-    setModalFinalizar(false);
   };
 
   // Funções do modal de exercício
@@ -366,64 +348,6 @@ const TreinoSegunda = ({ navigation }) => {
             </Text>
             <TouchableOpacity onPress={handleFecharModalExercicio} style={{ alignSelf: 'flex-end', marginTop: 8 }}>
               <Text style={{ color: '#405CBA', fontWeight: 'bold', fontSize: 16 }}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal Finalizar Treino */}
-      <Modal
-        visible={modalFinalizar}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={handleCancelarFinalizar}
-      >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: 'white', borderRadius: 16, padding: 24, alignItems: 'center', width: 300 }}>
-            <MaterialIcons name="check-circle" size={48} color="green" style={{ marginBottom: 12 }} />
-            <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 }}>
-              Parabéns, você completou todos os exercícios.
-            </Text>
-            <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 24 }}>
-              Deseja finalizar o treino?
-            </Text>
-            <TouchableOpacity
-              style={{ backgroundColor: '#405CBA', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 32, marginBottom: 10, width: '100%' }}
-              onPress={handleConfirmarFinalizar}
-            >
-              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>Sim, Finalizar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{ backgroundColor: '#F0F0F0', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 32, width: '100%' }}
-              onPress={handleCancelarFinalizar}
-            >
-              <Text style={{ color: '#405CBA', fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>Não, Voltar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal de Aviso de Exercícios não selecionados */}
-      <Modal
-        visible={modalAviso}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={handleFecharAviso}
-      >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: 'white', borderRadius: 16, padding: 24, alignItems: 'center', width: 300 }}>
-            <MaterialIcons name="error-outline" size={48} color="#F5A623" style={{ marginBottom: 12 }} />
-            <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 }}>
-              Você ainda não completou todos os exercícios.
-            </Text>
-            <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 24 }}>
-              Complete todos os exercícios antes de finalizar o treino.
-            </Text>
-            <TouchableOpacity
-              style={{ backgroundColor: '#405CBA', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 32, width: '100%' }}
-              onPress={handleFecharAviso}
-            >
-              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>OK</Text>
             </TouchableOpacity>
           </View>
         </View>
