@@ -208,7 +208,18 @@ const Loja = ({ navigation }) => {
         <View style={styles.categoriesSection}>
           <View style={styles.categoriesRow}>
             {categories.map((category) => (
-              <TouchableOpacity key={category.id} style={styles.categoryItem}>
+              <TouchableOpacity
+                key={category.id}
+                style={styles.categoryItem}
+                onPress={() => {
+                  if (category.name === 'Creatina' || category.icon === require('../../../../assets/icons/vitamina.png')) {
+                    navigation.navigate('LojaVitaminas');
+                  }
+                  if (category.name === 'Creatina' || category.icon === require('../../../../assets/icons/whey.png')) {
+                    navigation.navigate('LojaWhey');
+                  }
+                }}
+              >
                 <View style={styles.categoryIcon}>
                   {category.type === 'ionicon' ? (
                     <Ionicons name={category.icon} size={24} color="#000" />
