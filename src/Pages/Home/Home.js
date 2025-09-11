@@ -1,0 +1,214 @@
+// screens/Home.js
+
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  ScrollView,
+  ImageBackground,
+  StatusBar,
+  Image,
+} from 'react-native';
+import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+
+import Logo from '../../../assets/icons/logo_dia.png'; // <-- Ajuste o caminho conforme seu projeto
+
+// --- Constantes de Tema (antes em theme.js) ---
+const COLORS = {
+  primary: '#3A3A3A',
+  secondary: '#4A90E2',
+  white: '#FFFFFF',
+  lightGray: '#F4F4F6',
+  gray: '#A9A9A9',
+};
+
+const SIZES = {
+  base: 8,
+  small: 12,
+  font: 14,
+  medium: 16,
+  large: 24,
+  xlarge: 32,
+};
+
+// --- Componente FeatureButton (antes em components/FeatureButton.js) ---
+const FeatureButton = ({ iconName, label, onPress }) => {
+  return (
+    <TouchableOpacity style={styles.featureButtonContainer} onPress={onPress}>
+      <MaterialCommunityIcons name={iconName} size={40} color={COLORS.secondary} />
+      <Text style={styles.featureButtonLabel}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
+
+
+// --- Componente Principal da Tela: Home ---
+const Home = ({ navigation }) => {
+  // Dados para os botões da grade
+  const features = [
+    { id: 1, icon: 'account-group-outline', label: 'Professores', screen: 'Professores' },
+    { id: 2, icon: 'weight-lifter', label: 'Meus treinos', screen: 'MeuTreino' },
+    { id: 3, icon: 'cart-outline', label: 'Nossa loja', screen: 'Loja' },
+    { id: 4, icon: 'account-circle-outline', label: 'Meu perfil', screen: 'Profile' },
+  ];
+
+  // URL de imagem para o card. Substitua por seu asset local se preferir.
+  const promoImage = { uri: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?fit=crop&w=800&q=80' };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" />
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: SIZES.large }}
+      >
+        {/* --- Cabeçalho --- */}
+        <View style={styles.header}>
+          <TouchableOpacity>
+            <Ionicons name="arrow-back" size={28} color={COLORS.primary} />
+          </TouchableOpacity>
+          <Image source={Logo} style={styles.logoImage} />
+          <View style={{ width: 28 }} /> {/* Espaço para centralizar o logo */}
+        </View>
+
+        {/* --- Mensagem de Boas-Vindas --- */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.h1}>Que bom ter você aqui!</Text>
+          <Text style={styles.body2}>Seja bem vindo a academia saúde em ação!</Text>
+        </View>
+
+        {/* --- Card de Assinatura --- */}
+        <TouchableOpacity>
+          <ImageBackground
+            source={promoImage}
+            style={styles.promoCard}
+            imageStyle={{ borderRadius: 20 }}
+          >
+            <View style={styles.promoOverlay}>
+              <Text style={styles.promoText}>
+                Assine com a Equipe Saúde em Ação e treine quando quiser.
+              </Text>
+              <Feather name="arrow-right-circle" size={30} color={COLORS.white} />
+            </View>
+          </ImageBackground>
+        </TouchableOpacity>
+
+        {/* --- Grade de Funcionalidades --- */}
+        <View style={styles.featuresGrid}>
+          {features.map((feature) => (
+            <FeatureButton
+              key={feature.id}
+              iconName={feature.icon}
+              label={feature.label}
+              onPress={() => {
+                if (feature.screen === 'MeuTreino') {
+                  navigation.navigate('MeuTreino');
+                } 
+                 if (feature.screen === 'Loja') {
+                  console.log('Tentando navegar para Loja...');
+                  navigation.navigate('Loja');
+                }
+                 if (feature.screen === 'Professores') {
+                  console.log('Tentando navegar para Loja...');
+                  navigation.navigate('Professores');
+                }else {
+                  console.log(`Navegar para ${feature.screen}`);
+                }
+              }}
+            />
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+// --- Estilos (StyleSheet) ---
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.lightGray,
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: SIZES.medium,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: SIZES.medium,
+  },
+  logoImage: {
+    width: 50, // Defina a largura e altura desejadas para o logo
+    height: 50,
+  },
+  welcomeSection: {
+    marginTop: SIZES.small,
+    marginBottom: SIZES.large,
+  },
+  h1: {
+    fontSize: SIZES.xlarge,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+  },
+  body2: {
+    fontSize: SIZES.font,
+    color: COLORS.gray,
+    marginTop: SIZES.base / 2,
+  },
+  promoCard: {
+    height: 150,
+    justifyContent: 'flex-end',
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginBottom: SIZES.large,
+  },
+  promoOverlay: {
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    padding: SIZES.medium,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  promoText: {
+    color: COLORS.white,
+    fontSize: SIZES.font,
+    fontWeight: '600',
+    flex: 1,
+    marginRight: SIZES.base,
+  },
+  featuresGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: SIZES.small,
+  },
+  // Estilos do FeatureButton
+  featureButtonContainer: {
+    backgroundColor: COLORS.white,
+    width: '48%',
+    padding: SIZES.medium,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SIZES.medium,
+    aspectRatio: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  featureButtonLabel: {
+    fontSize: SIZES.medium,
+    fontWeight: '500',
+    color: COLORS.primary,
+    marginTop: SIZES.base,
+  },
+});
+
+export default Home;
