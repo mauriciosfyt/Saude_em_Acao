@@ -1,0 +1,286 @@
+/* Header principal */
+.header-container {
+  width: 100%;
+  padding: 12px 24px;
+  background: #004DFF;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  color: #ffffff;
+  position: sticky;
+ 
+}
+
+.logo-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 60px;
+}
+
+.search-bar {
+  flex: 2;
+  display: flex;
+  max-width: 600px;
+  margin: 8px 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background-color: #ffffff;
+  color: #000;
+}
+
+.search-button {
+  background-color: #fff;
+  border: none;
+  padding: 0 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-actions {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+.icon_navegacao {
+color: #000;
+}
+
+.icon {
+  font-size: 30px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  color: #000;
+}
+
+.icon:hover {
+  transform: scale(1.1);
+}
+
+/* Navegação secundária */
+.nav-links {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f8f8;
+
+  padding: 12px 24px;
+}
+
+.nav-left {
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.menu-icon {
+  display: block;
+  font-size: 24px;
+  cursor: pointer;
+  color: #000;
+}
+
+.nav-center {
+  display: flex;
+  gap: 32px;
+}
+
+.nav-center a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.nav-center a:hover {
+color: #004DFF;
+}
+
+/* =================================================================== */
+/* --- LÓGICA DO MENU LATERAL (SAINDO DA ESQUERDA) --- */
+/* =================================================================== */
+
+/* Ícone de hambúrguer sempre visível */
+.user-menu-icon {
+  display: block;
+  font-size: 24px;
+  cursor: pointer;
+  color: #000;
+}
+
+/* Estiliza o menu lateral */
+.user-sidebar {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100%;
+  background: linear-gradient(to bottom, #004DFF, #000000);
+  transition: left 0.35s ease;
+  z-index: 1000;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-sidebar.is-open {
+  left: 0;
+}
+
+.user-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+}
+
+.user-sidebar-logo {
+  height: 50px;
+}
+
+.user-sidebar-close-btn {
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+}
+
+.user-sidebar-navlist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-sidebar-navlist li a {
+  display: block;
+  padding: 18px 24px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.user-sidebar-navlist li a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Celulares pequenos: até 480px */
+@media (max-width: 480px) {
+  .logo-img {
+    height: 40px; /* Reduz a altura da logo em telas menores */
+  }
+
+  .icon {
+    font-size: 20px;
+  }
+  
+  .nav-center {
+    gap: 8px;
+    flex-wrap: wrap; /* Se não couber, quebra para linha de baixo */
+    justify-content: center;
+  }
+
+  .nav-center a {
+    font-size: 12px;
+  }
+
+  .menu-icon {
+    font-size: 18px;
+  }
+
+  .user-menu-icon {
+    font-size: 18px;
+  }
+
+  .nav-left {
+    left: 1px;
+  }
+
+  .nav-links {
+    padding: 10px 12px;
+  }
+
+  .search-bar {
+    flex-direction: row;
+    flex: 1 1 100%;
+    max-width: 100%;
+    margin: 8px 0;
+  }
+
+  .search-bar input {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .search-button {
+    padding: 0 10px;
+  }
+
+  .icon_navegacao {
+    font-size: 16px;
+  }
+}
+
+/* Tablets e celulares médios: 481px até 768px */
+@media (min-width: 481px) and (max-width: 768px) {
+  .logo-img {
+    height: 40px; /* Reduz a altura da logo em telas menores */
+  }
+
+  .icon {
+    font-size: 20px;
+  }
+  .nav-center {
+    gap: 12px;
+  }
+
+  .nav-center a {
+    font-size: 13px;
+  }
+
+  .menu-icon {
+    font-size: 20px;
+    margin-top: 6px;
+    margin-left: 10px;        /* zera margem à esquerda */
+  }
+
+  .user-menu-icon {
+    font-size: 20px;
+  }
+
+  .nav-links {
+    padding: 20px 16px;
+  }
+
+  .search-bar {
+    flex: 1 1 100%;
+    max-width: 100%;
+    margin: 8px 0;
+  }
+
+  .search-bar input {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .search-button {
+    padding: 0 12px;
+  }
+}

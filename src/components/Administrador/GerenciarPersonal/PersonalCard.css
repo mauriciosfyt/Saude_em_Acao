@@ -1,0 +1,97 @@
+.card-container {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.card-icon-circle {
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  border-radius: 50%;
+  background-color: #EBF1F8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #007BFF;
+  cursor: pointer;
+}
+
+.card-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-label {
+  font-size: 14px;
+  color: #555;
+  width: 60px; /* Ajuda a alinhar os inputs */
+}
+
+.card-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #DDE3E9;
+  background-color: #F8F9FA;
+  font-size: 14px;
+}
+
+.card-input:disabled {
+  background-color: #E9ECEF;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  border-top: 1px solid #DFE1E6;
+  padding-top: 16px;
+}
+
+.btn-excluir,
+.btn-editar {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-excluir:hover,
+.btn-editar:hover {
+  opacity: 0.85;
+}
+
+.btn-excluir {
+  background-color: #DE350B;
+  color: white;
+}
+
+.btn-editar {
+  background-color: #007BFF;
+  color: white;
+}
