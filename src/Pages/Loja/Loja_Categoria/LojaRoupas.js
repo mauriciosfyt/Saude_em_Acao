@@ -70,7 +70,7 @@ const LojaCategoria = ({ navigation }) => {
       <ScrollView>
         {/* Banner 1 */}
         <View style={styles.bannerContainer}>
-          <Image source={require('../../../../assets/banner_vitaminas.png')} style={styles.bannerImage} resizeMode="cover" />
+          <Image source={require('../../../../assets/banner_camisas.png')} style={styles.bannerImage} resizeMode="cover" />
         </View>
 
         {/* Primeira linha de produtos (4 cards) */}
@@ -116,7 +116,7 @@ const LojaCategoria = ({ navigation }) => {
 
         {/* Banner horizontal (destaque) */}
         <View style={styles.bannerHorizontalContainer}>
-          <Image source={require('../../../../assets/banner_vitamina.jpg')} style={styles.bannerHorizontalImage} resizeMode="cover" />
+          <Image source={require('../../../../assets/banner_roupas.jpg')} style={styles.bannerHorizontalImage} resizeMode="cover" />
         </View>
 
         {/* Segunda linha de produtos (restante) */}

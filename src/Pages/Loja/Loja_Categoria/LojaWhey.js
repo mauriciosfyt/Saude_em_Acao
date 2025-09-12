@@ -70,12 +70,12 @@ const LojaCategoria = ({ navigation }) => {
       <ScrollView>
         {/* Banner 1 */}
         <View style={styles.bannerContainer}>
-          <Image source={require('../../../../assets/banner_creatina.png')} style={styles.bannerImage} resizeMode="cover" />
+          <Image source={require('../../../../assets/banner_whey.png')} style={styles.bannerImage} resizeMode="cover" />
         </View>
 
-        {/* Primeira linha de produtos (2 cards) */}
+        {/* Primeira linha de produtos (4 cards) */}
         <View style={styles.produtosContainer}>
-          {produtos.slice(0, 2).map((produto) => (
+          {produtos.slice(0, 4).map((produto) => (
             <View key={produto.id} style={styles.cardProduto}>
               {/* Selo com raio à direita */}
               {produto.selo && (
@@ -116,12 +116,12 @@ const LojaCategoria = ({ navigation }) => {
 
         {/* Banner horizontal (destaque) */}
         <View style={styles.bannerHorizontalContainer}>
-          <Image source={require('../../../../assets/banner_creatina1.jpg')} style={styles.bannerHorizontalImage} resizeMode="cover" />
+          <Image source={require('../../../../assets/banner_whey.jpg')} style={styles.bannerHorizontalImage} resizeMode="cover" />
         </View>
 
         {/* Segunda linha de produtos (restante) */}
         <View style={styles.produtosContainer}>
-          {produtos.slice(2).map((produto) => (
+          {produtos.slice().map((produto) => (
             <View key={produto.id} style={styles.cardProduto}>
               {/* Selo com raio à direita */}
               {produto.selo && (
@@ -163,11 +163,6 @@ const LojaCategoria = ({ navigation }) => {
               )}
             </View>
           ))}
-        </View>
-
-        {/* Banner horizontal (destaque) */}
-        <View style={styles.bannerHorizontalContainer}>
-          <Image source={require('../../../../assets/banner_creatina1.jpg')} style={styles.bannerHorizontalImage} resizeMode="cover" />
         </View>
 
         {/* Segunda linha de produtos (restante) */}

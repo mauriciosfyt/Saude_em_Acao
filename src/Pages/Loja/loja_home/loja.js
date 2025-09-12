@@ -38,12 +38,12 @@ const Loja = ({ navigation }) => {
   ];
 
   // Categorias
-  const categories = [
-    { id: 1, name: 'Roupas', icon: require('../../../../assets/icons/camisa.png'), type: 'image' },
-    { id: 2, name: 'Whey', icon: require('../../../../assets/icons/whey.png'), type: 'image' },
-    { id: 3, name: 'Vitaminas', icon: require('../../../../assets/icons/vitamina.png'), type: 'image' },
-    { id: 4, name: 'Pré-Treino', icon: require('../../../../assets/icons/pre-treino.png'), type: 'image' },
-  ];
+const categories = [
+  { id: 1, name: 'Roupas', icon: require('../../../../assets/icons/camisa.png'), type: 'image' },
+  { id: 2, name: 'Whey Protein', icon: require('../../../../assets/icons/whey.png'), type: 'image' },
+  { id: 3, name: 'Vitaminas', icon: require('../../../../assets/icons/vitamina.png'), type: 'image' },
+  { id: 4, name: 'Creatina', icon: require('../../../../assets/icons/pre-treino.png'), type: 'image' },
+];
 
   // Produtos horizontais
   const horizontalProducts = [
@@ -212,11 +212,14 @@ const Loja = ({ navigation }) => {
                 key={category.id}
                 style={styles.categoryItem}
                 onPress={() => {
-                  if (category.name === 'Creatina' || category.icon === require('../../../../assets/icons/vitamina.png')) {
+                  if (category.name === 'Roupas') {
+                    navigation.navigate('LojaRoupas');
+                  } else if (category.name === 'Vitaminas') {
                     navigation.navigate('LojaVitaminas');
-                  }
-                  if (category.name === 'Creatina' || category.icon === require('../../../../assets/icons/whey.png')) {
+                  } else if (category.name === 'Whey Protein') {
                     navigation.navigate('LojaWhey');
+                  } else if (category.name === 'Creatina') {
+                    navigation.navigate('LojaCreatina');
                   }
                 }}
               >
