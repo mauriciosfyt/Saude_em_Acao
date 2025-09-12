@@ -1,0 +1,103 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-container {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.modal-titulo {
+  margin: 0;
+  font-size: 22px;
+  color: #333;
+}
+
+.modal-botao-fechar {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #888;
+}
+
+.modal-corpo {
+  /* Estilos para o corpo do modal, se necessário */
+}
+
+/* Estilos para o componente de controle de quantidade dentro do modal */
+.controle-quantidade {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.controle-quantidade:last-child {
+  border-bottom: none;
+}
+
+.controle-label {
+  font-size: 18px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.controle-botoes {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.controle-botoes button {
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.controle-valor {
+  font-size: 18px;
+  font-weight: bold;
+  min-width: 25px;
+  text-align: center;
+}
+
+/* Estilos para os botões de ação do modal */
+.modal-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}

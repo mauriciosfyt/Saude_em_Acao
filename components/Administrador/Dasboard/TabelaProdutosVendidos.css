@@ -1,0 +1,64 @@
+.tabela-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #DFE1E6;
+  border-radius: 8px;
+}
+
+.tabela-produtos {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+}
+
+/* ================================== */
+/* ALTERAÇÃO PRINCIPAL APLICADA AQUI  */
+/* ================================== */
+.tabela-produtos th,
+.tabela-produtos td {
+  padding: 1rem;
+  vertical-align: middle;
+  white-space: nowrap;
+  text-align: center; /* Centraliza TODO o conteúdo */
+  color: #fff;
+}
+
+/* Cabeçalho da Tabela */
+.tabela-produtos thead {
+  background-color: #0047A4;
+  
+}
+
+.tabela-produtos th {
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+/* Corpo da Tabela */
+.tabela-produtos tbody tr {
+  border-bottom: 1px solid #DFE1E6;
+}
+
+.tabela-produtos tbody tr:last-child {
+  border-bottom: none;
+}
+
+.tabela-produtos tbody tr:hover {
+  background-color: #f4f5f7;
+}
+
+.tabela-produtos td {
+  color: #42526E;
+  font-size: 0.95rem;
+}
+
+/* As classes de alinhamento .align-right e .align-center foram removidas por não serem mais necessárias */
+
+/* Classes de largura podem ser mantidas para controle do layout */
+.tabela-produtos .col-icon {
+  width: 10%;
+}
+.tabela-produtos .col-numerica {
+  width: 18%;
+}

@@ -1,0 +1,76 @@
+.modal-termos-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-termos-container {
+  background: #fff;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 90%;
+  padding: 32px 24px 24px 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-termos-title {
+  background: #002b8a;
+  color: #fff;
+  text-align: center;
+  border-radius: 12px 12px 0 0;
+  padding: 16px 0;
+  font-size: 1.5rem;
+  margin: -32px -24px 24px -24px;
+}
+
+.modal-termos-content {
+  color: #222;
+  font-size: 1rem;
+  margin-bottom: 24px;
+  overflow-y: auto;
+  max-height: 50vh;
+}
+
+.modal-termos-button {
+  width: 100%;
+  background: #002b8a;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 0;
+  font-size: 1.2rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.modal-termos-button:hover {
+  background: #001f5c;
+}
+
+.modal-termos-close {
+  position: absolute;
+  top: 10px;
+  right: -13px;
+  background: transparent;
+  border: none;
+  font-size: 2.5rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  outline: none;
+  box-shadow: none;
+  z-index: 2;
+}
