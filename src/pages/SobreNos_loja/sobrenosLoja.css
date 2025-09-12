@@ -1,0 +1,313 @@
+/* -------- SEÇÃO SOBRE NÓS -------- */
+.sobrenos-container {
+  background: linear-gradient(to bottom, #002E99 0%, #002E99 100%);
+  padding: 0; /* encosta no header (sem laterais) */
+  color: #fff;
+  text-align: center;
+ 
+}
+
+.sobrenos-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.sobrenos-title {
+  font-size: 26px;
+  font-weight: bold;
+  margin: 0;
+  margin-bottom: 16px;
+}
+
+.sobrenos-text-wrapper {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.sobrenos-paragraph {
+  flex: 1;
+  min-width: 280px;
+  max-width: 500px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.sobrenos-image-wrapper {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin-top: -4%;
+  margin-bottom: -50px; /* sobrepõe a onda e entra na seção escura com mais sutileza */
+  z-index: 3;
+}
+
+.sobrenos-image {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  width: 50%;
+  max-width: 660px;
+}
+
+/* Círculo branco com textos dentro e divisor central */
+.sobrenos-circle {
+  width: 100vw; /* ocupa a largura total da tela */
+  max-width: none;
+  margin: -1px auto 0; /* sobe 1px para eliminar qualquer filete azul */
+  background: #ffffff;
+  /* Topo reto e base ondulada (semicírculo) */
+  border-radius: 0 0 100% 100% / 0 0 180% 180%;
+  color: #000;
+  position: relative;
+  overflow: hidden;
+  padding: 28px 40px 350px; /* desce ainda mais a parte arredondada */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  left: 50%;
+  transform: translateX(-50%); /* centraliza e faz full-bleed */
+  box-sizing: border-box;
+}
+
+.sobrenos-circle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 72px;
+  bottom: 70px; /* ajusta para não invadir a nova curvatura */
+  width: 2px;
+  background: #004dff;
+  transform: translateX(-50%);
+}
+
+.sobrenos-circle .sobrenos-text-wrapper {
+  width: 90%;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.sobrenos-circle .sobrenos-paragraph {
+  color: #000;
+}
+
+/* Onda separadora */
+.sobrenos-wave {
+  width: 100%;
+  height: 120px;
+  overflow: hidden;
+  line-height: 0;
+  background: none;
+  position: relative;
+  z-index: 2;
+  display: none; /* substituída pela ponta via clip-path no topo da seção escura */
+}
+
+.sobrenos-wave svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* -------- SEÇÃO BENEFÍCIOS -------- */
+.beneficios-container {
+  background-color: #242525;
+  padding: 120px 20px 60px; /* dá respiro abaixo da imagem sobreposta */
+  color: white;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.beneficios-container::before {
+  content: "";
+  position: absolute;
+  top: -2px; /* cobre qualquer hairline entre azul e seção escura */
+  left: -1px;
+  width: calc(100% + 2px);
+  height: 124px;
+  background: linear-gradient(to bottom, #002E99 0%, #002E99 100%);
+  /* Ponta azul no centro (triângulo invertido) */
+  clip-path: polygon(0 0, 0 35%, 50% 100%, 100% 35%, 100% 0);
+  z-index: 1;
+}
+
+.beneficios-title {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+/* 2 colunas no desktop */
+.beneficios-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 60px 100px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.beneficio-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.5;
+  color: white;
+}
+
+.beneficio-icon {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 15px;
+  filter: brightness(0) saturate(100%) invert(34%) sepia(99%) saturate(3627%) hue-rotate(206deg) brightness(96%) contrast(95%);
+}
+
+/* -------- RESPONSIVIDADE -------- */
+
+/* Celulares pequenos (iPhone SE, Galaxy A12, etc.) */
+@media (max-width: 480px) {
+  .sobrenos-title {
+    font-size: 18px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .beneficios-title {
+    font-size: 22px;
+  }
+
+  .sobrenos-paragraph {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .beneficios-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  /* Ajustes do topo branco no mobile */
+  .sobrenos-circle {
+    width: 100%;
+    max-width: none;
+    border-radius: 0 0 40px 40px; /* muito mais arredondado embaixo */
+    padding: 16px 18px 120px; /* mais respiro e curva menor */
+    left: 0;
+    transform: none;
+  }
+
+  /* Esconde o divisor azul no layout de uma coluna */
+  .sobrenos-circle::before {
+    display: none;
+  }
+
+  /* recria apenas a curva inferior usando um pseudo-elemento sem afetar as laterais */
+  .sobrenos-circle::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -60px; /* curva mais sutil */
+    width: 120%;
+    height: 140px;
+    background: #ffffff;
+    border-bottom-left-radius: 50% 100%;
+    border-bottom-right-radius: 50% 100%;
+    z-index: 0;
+  }
+
+  .sobrenos-circle .sobrenos-text-wrapper {
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .sobrenos-paragraph {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .sobrenos-image-wrapper {
+    margin-top: -6%;
+    margin-bottom: -30px;
+  }
+
+  .sobrenos-image {
+    width: 78%;
+    max-width: 420px;
+  }
+
+  .beneficio-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .beneficio-item {
+    font-size: 14px;
+    padding: 0 10px;
+  }
+}
+
+/* Tablets médios (ex: iPads, Galaxy Tab, Surface) */
+@media (max-width: 900px) {
+  .sobrenos-paragraph {
+    font-size: 15px;
+  }
+
+  /* Torna o topo branco mais contido em tablets e remove transform */
+  .sobrenos-circle {
+    width: 100%;
+    left: 0;
+    transform: none;
+    padding: 20px 24px 150px;
+    border-radius: 0 0 175px 175px; /* muito mais arredondado embaixo */
+  }
+
+  .sobrenos-circle::before {
+    display: none; /* sem divisor em telas médias para evitar sobreposição do texto */
+  }
+
+  .sobrenos-circle::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -80px; /* curva mais sutil */
+    width: 130%;
+    height: 180px;
+    background: #ffffff;
+    border-bottom-left-radius: 50% 100%;
+    border-bottom-right-radius: 50% 100%;
+    z-index: 0;
+  }
+
+  .sobrenos-circle .sobrenos-text-wrapper {
+    flex-direction: column;
+    gap: 20px;
+    width: 92%;
+  }
+
+  .beneficios-grid {
+    gap: 40px 40px;
+  }
+
+  .beneficio-item {
+    width: 100%;
+  }
+}
+
+/* Laptops pequenos (ex: Macbook Air, 1366x768) */
+@media (max-width: 1366px) {
+  .sobrenos-paragraph {
+    font-size: 16px;
+  }
+
+  .beneficios-grid {
+    gap: 80px 200px;
+  }
+}

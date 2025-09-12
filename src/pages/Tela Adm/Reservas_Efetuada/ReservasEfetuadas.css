@@ -1,0 +1,205 @@
+
+
+body {
+  background: #f5f5f5;
+}
+
+.content {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  width: calc(100% - 40px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+
+.titulo {
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+/* Barra de pesquisa */
+.barra-pesquisa {
+  display: flex;
+  align-items: center;
+  background: #f5f5f5;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 20px 0;
+  width: 30%;
+  border: 1px solid #e0e0e0;
+  position: relative;
+}
+
+.barra-pesquisa input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  padding-left: 30px;
+  font-size: 14px;
+}
+
+.search-icon {
+  color: #666;
+  font-size: 16px;
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Lista de reservas */
+.lista-reservas {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reserva-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 10px 0;
+  background: #ffffff;
+}
+
+.produto-img {
+  width: 100px;
+  height: auto;
+  object-fit: contain;
+}
+
+.reserva-info {
+  flex: 2;
+  margin-left: 10px;
+}
+
+.reserva-info p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.reserva-info strong {
+  color: #000;
+  font-weight: bold;
+}
+
+.reserva-detalhes {
+  flex: 1;
+  text-align: center;
+}
+
+.reserva-preco {
+  flex: 1;
+  text-align: right;
+}
+
+.reserva-preco .preco-reserva {
+  font-weight: bold;
+  font-size: 18px;
+  margin-right: 120px;
+  
+}
+
+.tamanho{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.reserva-preco .data {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+  margin-right: 80px;
+}
+
+.botoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.btn-cancelar {
+  background: red;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-aprovar {
+  background: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Telas até 1200px */
+@media (max-width: 1200px) {
+
+  .barra-pesquisa {
+    width: 90%;
+  }
+}
+
+/* Telas até 900px */
+@media (max-width: 900px) {
+
+  .barra-pesquisa {
+    width: 95%;
+  }
+  .reserva-preco .preco{
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* Telas até 600px */
+@media (max-width: 600px) {
+  .reserva-item {
+    flex-direction: column; /* deixa todos os blocos empilhados */
+    align-items: flex-start;
+    
+  }
+
+  /* Mover .reserva-detalhes para abaixo de .reserva-info */
+  .reserva-info {
+    order: 1;
+    width: 100%;
+  }
+
+  .reserva-detalhes {
+    order: 2;
+    width: 100%;
+    text-align: left; /* ou center se preferir */
+     margin-top: -90px;
+     font-size: 14px;
+  }
+
+  .reserva-detalhes .quantidade{
+    margin-left: 9px;
+  }
+
+    .reserva-detalhes .tamanho{
+     margin-left: 9px;
+
+    }
+
+  .reserva-preco {
+    order: 3;
+    width: 100%;
+    text-align: left;
+    margin-top: 5px;
+  }
+}
