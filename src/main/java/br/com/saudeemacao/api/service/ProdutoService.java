@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,18 +27,52 @@ public class ProdutoService {
     private final ProdutoRepository repository;
     private final Cloudinary cloudinary;
 
-    public List<Produto> getAll() {
-        return repository.findAll();
+    // Novo método auxiliar para converter String para LocalDateTime
+    private LocalDateTime parseDate(String dateString, String fieldName) {
+        if (dateString == null || dateString.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDateTime.parse(dateString);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Formato de data inválido para " + fieldName + ". Use o formato ISO 8601 (YYYY-MM-DDTHH:MM:SS)");
+        }
     }
 
-    // Métodos para buscar produtos por categoria (adaptados)
+    // Novo método para aplicar a promoção antes de retornar o produto
+    private Produto aplicarPromocaoSeAtiva(Produto produto) {
+        if (produto.getPrecoPromocional() != null &&
+                produto.getDataInicioPromocao() != null &&
+                produto.getDataFimPromocao() != null) {
+
+            LocalDateTime now = LocalDateTime.now();
+
+            // Verifica se a data atual está entre o início e o fim da promoção
+            if (now.isAfter(produto.getDataInicioPromocao()) && now.isBefore(produto.getDataFimPromocao())) {
+                // Se estiver ativa, substitui o preço principal pelo promocional para o front-end
+                // Mas, o preço original permanece no objeto para referência
+                produto.setPreco(produto.getPrecoPromocional());
+            }
+        }
+        return produto;
+    }
+
+    public List<Produto> getAll() {
+        return repository.findAll().stream()
+                .map(this::aplicarPromocaoSeAtiva)
+                .collect(Collectors.toList());
+    }
+
     public List<Produto> getProdutosPorCategoria(ECategoria categoria) {
-        return repository.findByCategoria(categoria);
+        return repository.findByCategoria(categoria).stream()
+                .map(this::aplicarPromocaoSeAtiva)
+                .collect(Collectors.toList());
     }
 
     public Produto getById(String id) {
-        return repository.findById(id)
+        Produto produto = repository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado com ID: " + id));
+        return aplicarPromocaoSeAtiva(produto);
     }
 
     public Produto create(ProdutoDTO dto) throws IOException {
@@ -48,6 +84,12 @@ public class ProdutoService {
         produto.setNome(dto.getNome());
         produto.setDescricao(dto.getDescricao());
         produto.setPreco(dto.getPreco());
+
+        // Atribui os novos campos de promoção, convertendo as Strings para LocalDateTime
+        produto.setPrecoPromocional(dto.getPrecoPromocional());
+        produto.setDataInicioPromocao(parseDate(dto.getDataInicioPromocao(), "dataInicioPromocao"));
+        produto.setDataFimPromocao(parseDate(dto.getDataFimPromocao(), "dataFimPromocao"));
+
         produto.setImg(imgUrl);
         produto.setCategoria(dto.getCategoria());
 
@@ -103,6 +145,17 @@ public class ProdutoService {
                 throw new IllegalArgumentException("Preço deve ser maior que zero");
             }
             produto.setPreco(dto.getPreco());
+        }
+
+        // Atualiza os novos campos de promoção
+        if (dto.getPrecoPromocional() != null) {
+            produto.setPrecoPromocional(dto.getPrecoPromocional());
+        }
+        if (dto.getDataInicioPromocao() != null) {
+            produto.setDataInicioPromocao(parseDate(dto.getDataInicioPromocao(), "dataInicioPromocao"));
+        }
+        if (dto.getDataFimPromocao() != null) {
+            produto.setDataFimPromocao(parseDate(dto.getDataFimPromocao(), "dataFimPromocao"));
         }
 
         if (dto.getCategoria() != null && !dto.getCategoria().equals(produto.getCategoria())) {
@@ -199,16 +252,13 @@ public class ProdutoService {
         Produto produto = getById(produtoId);
 
         if (!produto.getCategoria().equals(categoria)) {
-            // Se a categoria não corresponder, algo está errado, mas podemos não querer lançar erro
-            // Dependendo da lógica de negócio, pode-se apenas logar ou ignorar.
-            // Por simplicidade, vamos ignorar se a categoria não corresponder, assumindo que o chamador sabe a categoria correta.
             return;
         }
 
         switch (categoria) {
             case CAMISETAS:
                 if (identificadorVariacao == null || identificadorVariacao.isBlank()) {
-                    return; // Não podemos incrementar sem o tamanho
+                    return;
                 }
                 ETamanho tamanho = ETamanho.valueOf(identificadorVariacao.toUpperCase());
                 Map<ETamanho, Integer> estoqueTamanho = produto.getEstoquePorTamanho();
@@ -218,7 +268,7 @@ public class ProdutoService {
             case CREATINA:
             case WHEY_PROTEIN:
                 if (identificadorVariacao == null || identificadorVariacao.isBlank()) {
-                    return; // Não podemos incrementar sem o sabor
+                    return;
                 }
                 ESabor sabor = ESabor.valueOf(identificadorVariacao.toUpperCase());
                 Map<ESabor, Integer> estoqueSabor = produto.getEstoquePorSabor();
@@ -283,6 +333,26 @@ public class ProdutoService {
                     throw new IllegalArgumentException("Para 'Vitaminas', o estoque padrão é obrigatório e não pode ser negativo.");
                 }
                 break;
+        }
+
+        // Validação da promoção
+        if (dto.getPrecoPromocional() != null) {
+            if (dto.getPrecoPromocional() <= 0) {
+                throw new IllegalArgumentException("Preço promocional deve ser maior que zero");
+            }
+            if (dto.getDataInicioPromocao() == null || dto.getDataFimPromocao() == null) {
+                throw new IllegalArgumentException("Datas de início e fim da promoção são obrigatórias quando um preço promocional é fornecido.");
+            }
+            try {
+                LocalDateTime inicio = parseDate(dto.getDataInicioPromocao(), "dataInicioPromocao");
+                LocalDateTime fim = parseDate(dto.getDataFimPromocao(), "dataFimPromocao");
+                if (fim != null && inicio != null && fim.isBefore(inicio)) {
+                    throw new IllegalArgumentException("Data de fim da promoção não pode ser anterior à data de início.");
+                }
+            } catch (IllegalArgumentException e) {
+                // Re-lança a exceção para manter o fluxo
+                throw e;
+            }
         }
     }
 

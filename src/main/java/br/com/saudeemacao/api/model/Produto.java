@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Data
@@ -31,6 +32,11 @@ public class Produto {
     @NotNull(message = "Preço é obrigatório")
     @Positive(message = "Preço deve ser maior que zero")
     private Double preco;
+
+    // Novos atributos para a promoção
+    private Double precoPromocional;
+    private LocalDateTime dataInicioPromocao;
+    private LocalDateTime dataFimPromocao;
 
     @NotBlank(message = "Imagem é obrigatória")
     private String img;
