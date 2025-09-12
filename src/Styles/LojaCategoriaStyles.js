@@ -51,7 +51,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'center',
-        marginBottom: 8,
+        marginBottom: 5,
+        marginTop: 30,
     },
     cardProduto: {
         width: 155,
