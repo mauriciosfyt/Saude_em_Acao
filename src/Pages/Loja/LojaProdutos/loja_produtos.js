@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     StyleSheet,
     Text,
@@ -11,8 +11,8 @@ import {
     StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-// 1. Importar o LinearGradient do Expo
 import { LinearGradient } from 'expo-linear-gradient';
+import HeaderLoja from '../../../Components/HeaderLoja';
 
 // Adicionando as cores do gradiente ao tema para manter a organização
 const theme = {
@@ -44,7 +44,8 @@ const theme = {
     },
 };
 
-const LojaProdutos = () => {
+const LojaProdutos = ({ navigation, route }) => {
+    const [searchText, setSearchText] = useState("");
     const productTitlePlaceholder = 'Whey Protein 900g – Alta Performance';
     const descriptionPlaceholder = 'Ganhe massa muscular e recupere mais rápido com nosso Whey Protein de alta qualidade. 21g de proteína por dose, baixo teor de carboidratos e absorção rápida. Ideal para pré ou pós-treino!';
 
@@ -56,19 +57,8 @@ const LojaProdutos = () => {
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
 
-            {/* --- HEADER --- */}
-            <View style={styles.header}>
-                
-                <TouchableOpacity>
-                    <Icon name="arrow-left" size={24} color={theme.colors.icon} />
-                </TouchableOpacity>    
-                    <TextInput
-                        placeholder="Buscar Produtos"
-                        style={styles.searchInput}
-                        placeholderTextColor={theme.colors.placeholder}
-                    />
-                    <Icon name="search" size={20} color={theme.colors.placeholder} style={{ marginRight: 15 }} />
-            </View>
+            {/* HeaderLoja reutilizado da tela da loja */}
+            <HeaderLoja navigation={navigation} searchText={searchText} setSearchText={setSearchText} />
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 {/* --- PRODUCT INFO --- */}
@@ -113,7 +103,6 @@ const LojaProdutos = () => {
             </ScrollView>
 
             {/* --- BOTTOM NAVIGATION --- */}
-            {/* 3. Substituir a View da navegação inferior pelo LinearGradient */}
             <LinearGradient
                 colors={gradientColors}
                 locations={gradientLocations}

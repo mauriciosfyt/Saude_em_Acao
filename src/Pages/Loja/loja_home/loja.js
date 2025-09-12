@@ -125,7 +125,7 @@ const categories = [
 
 
   const renderHorizontalProduct = ({ item }) => (
-    <TouchableOpacity style={styles.horizontalProductCard}>
+    <TouchableOpacity style={styles.horizontalProductCard} onPress={() => navigation.navigate('LojaProdutos', { produto: item })}>
       <TouchableOpacity style={styles.favoriteButton}>
         <Ionicons 
           name={item.isFavorite ? 'heart' : 'heart-outline'} 
@@ -133,7 +133,6 @@ const categories = [
           color={item.isFavorite ? '#ff4757' : COLORS.cinzaMedio} 
         />
       </TouchableOpacity>
-      
       <View style={styles.productContent}>
         <Image source={item.image} style={styles.horizontalProductImage} />
         <View style={styles.textContainer}>
@@ -145,7 +144,6 @@ const categories = [
           </Text>
         </View>
       </View>
-      
       <View style={styles.priceContainer}>
         <Text style={styles.horizontalProductPrice}>{item.price}</Text>
       </View>
@@ -153,7 +151,7 @@ const categories = [
   );
 
   const renderVerticalProduct = ({ item }) => (
-    <TouchableOpacity style={styles.verticalProductCard}>
+    <TouchableOpacity style={styles.verticalProductCard} onPress={() => navigation.navigate('LojaProdutos', { produto: item })}>
       <Image source={item.image} style={styles.verticalProductImage} />
       <View style={styles.verticalProductInfo}>
         <Text style={styles.verticalProductDescription} numberOfLines={2}>

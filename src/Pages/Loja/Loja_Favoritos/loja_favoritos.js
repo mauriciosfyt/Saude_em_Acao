@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     StyleSheet,
     Text,
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { LinearGradient } from 'expo-linear-gradient';
+import HeaderLoja from '../../../Components/HeaderLoja';
 
 // Reutilizando o mesmo objeto de tema para manter a consistência
 const theme = {
@@ -91,7 +92,8 @@ const FavoriteItem = ({ item }) => (
     </View>
 );
 
-const Favoritos = () => {
+const Favoritos = ({ navigation }) => {
+    const [searchText, setSearchText] = useState("");
     const gradientColors = [theme.colors.gradientStart, theme.colors.gradientEnd];
     const gradientLocations = [0, 0.84];
 
@@ -99,30 +101,14 @@ const Favoritos = () => {
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
 
-            {/* --- HEADER (Reutilizado da tela anterior) --- */}
-            <View style={styles.header}>
-                <TouchableOpacity>
-                    <Icon name="arrow-left" size={24} color={theme.colors.icon} />
-                </TouchableOpacity>
-                <LinearGradient
-                    colors={gradientColors}
-                    locations={gradientLocations}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
-                    style={styles.searchBarGradient}
-                >
-                    <TextInput
-                        placeholder="Buscar Produtos"
-                        style={styles.searchInput}
-                        placeholderTextColor={theme.colors.placeholder}
-                    />
-                    <Icon name="search" size={20} color={theme.colors.placeholder} style={{ marginRight: 15 }} />
-                </LinearGradient>
-            </View>
+            {/* HeaderLoja reutilizado da tela da loja */}
+            <HeaderLoja navigation={navigation} searchText={searchText} setSearchText={setSearchText} />
 
             {/* --- CONTEÚDO DA TELA --- */}
             <FlatList
-                data={FAVORITOS_DATA}
+                data={FAVORITOS_DATA.filter(item =>
+                    item.nome.toLowerCase().includes(searchText.toLowerCase())
+                )}
                 renderItem={({ item }) => <FavoriteItem item={item} />}
                 keyExtractor={item => item.id}
                 ListHeaderComponent={<Text style={styles.title}>Meus favoritos</Text>}

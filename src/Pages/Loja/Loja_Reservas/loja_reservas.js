@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     StyleSheet,
     Text,
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { LinearGradient } from 'expo-linear-gradient';
+import HeaderLoja from '../../../Components/HeaderLoja';
 
 // Reutilizando e expandindo o tema
 const theme = {
@@ -136,34 +137,22 @@ const Reservas = () => {
         );
     };
 
+    const [searchText, setSearchText] = useState("");
     return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
 
-            {/* --- HEADER --- */}
-            <View style={styles.header}>
-                <TouchableOpacity>
-                    <Icon name="arrow-left" size={24} color={theme.colors.icon} />
-                </TouchableOpacity>
-                <LinearGradient
-                    colors={gradientColors}
-                    locations={gradientLocations}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
-                    style={styles.searchBarGradient}
-                >
-                    <TextInput
-                        placeholder="Buscar Produtos"
-                        style={styles.searchInput}
-                        placeholderTextColor={theme.colors.placeholder}
-                    />
-                    <Icon name="search" size={20} color={theme.colors.placeholder} style={{ marginRight: 15 }} />
-                </LinearGradient>
-            </View>
+            {/* HeaderLoja reutilizado da tela da loja */}
+            <HeaderLoja navigation={null} searchText={searchText} setSearchText={setSearchText} />
 
             {/* --- LISTA DE SEÇÕES --- */}
             <SectionList
-                sections={RESERVAS_DATA}
+                sections={RESERVAS_DATA.map(section => ({
+                    ...section,
+                    data: section.data.filter(item =>
+                        item.nome.toLowerCase().includes(searchText.toLowerCase())
+                    )
+                })).filter(section => section.data.length > 0)}
                 keyExtractor={(item) => item.id}
                 renderItem={renderItem}
                 renderSectionHeader={renderSectionHeader}
