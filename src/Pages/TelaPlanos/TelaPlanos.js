@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "../../Styles/TelaPlanosStyles";
+import Header from "../../Components/header_planos/Header";
 
 const TelaPlanos = ({ navigation }) => {
   const onBack = () => navigation && navigation.goBack();
@@ -140,12 +141,13 @@ const TelaPlanos = ({ navigation }) => {
         style={styles.backgroundImage}
       >
         <View style={styles.diagonalWhite} />
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onBack} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#ffffff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Planos</Text>
-        </View>
+        <Header
+          title="Planos"
+          onBack={onBack}
+          style={styles.header}
+          titleStyle={styles.headerTitle}
+          backButtonStyle={styles.backButton}
+        />
         <ScrollView
           style={[styles.scrollView, { marginTop: 80 }]}
           contentContainerStyle={[styles.content, { paddingTop: 160 }]}

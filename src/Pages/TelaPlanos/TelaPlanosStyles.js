@@ -51,28 +51,28 @@ const styles = StyleSheet.create({
   },
 
   // --- Cabeçalho ---
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 3,
-  },
-  backButton: {
-    marginRight: 15,
-  },
-  headerTitle: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginLeft:  118 ,
-    marginTop: 40
-   },
+  // header: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   paddingHorizontal: 20,
+  //   paddingTop: 20,
+  //   paddingBottom: 20,
+  //   position: 'absolute',
+  //   top: 0,
+  //   left: 0,
+  //   right: 0,
+  //   zIndex: 3,
+  // },
+  // backButton: {
+  //   marginRight: 15,
+  // },
+  // headerTitle: {
+  //   color: '#ffffff',
+  //   fontSize: 15,
+  //   fontWeight: 'bold',
+  //   marginLeft:  118 ,
+  //   marginTop: 40
+  //  },
 
   // --- ScrollView ---
   scrollView: {
