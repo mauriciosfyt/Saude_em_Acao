@@ -21,24 +21,22 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
     zIndex: 100,
     transform: [{ rotate: '90deg' }],
-
   },
   diagonalWhite: {
     position: 'absolute',
-    bottom: -130, // sobe a faixa branca para aumentar a área visível
+    bottom: -130,
     left: 0,
     width: 0,
     height: 0,
     borderBottomWidth: height,
     borderRightWidth: width,
     borderTopWidth: 0,
-    borderBottomColor: '#AEAEAE',
+    borderBottomColor: '#ffff',
     borderRightColor: 'transparent',
     borderTopColor: 'transparent',
     zIndex: 0,
-    opacity: 0.98,
+    opacity: 0.99,
   },
-  // --- Estrutura Principal e Fundo ---
   container: {
     flex: 1,
     backgroundColor: '#000000',
@@ -49,8 +47,6 @@ const styles = StyleSheet.create({
     height: '100%',
     position: 'relative',
   },
-
-  // --- Cabeçalho ---
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -70,44 +66,34 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 15,
     fontWeight: 'bold',
-    marginLeft:  118 ,
-    marginTop: 40
-   },
-
-  // --- ScrollView ---
+    marginLeft: 110,
+    marginTop: 40,
+  },
   scrollView: {
     flex: 1,
     marginTop: '15%',
     zIndex: 2,
   },
-
-  // --- Conteúdo (contentContainerStyle) ---
   content: {
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 20,
     alignItems: 'center',
   },
-
-  // --- Estilo Base do Card ---
   planCard: {
     width: '100%',
     maxWidth: 350,
     padding: 20,
     borderRadius: 12,
     marginBottom: 8,
-    marginTop: 20, // Adiciona margem superior para descer o card
+    marginTop: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
     position: 'relative',
   },
-
   diagonalBanner: {
     position: 'absolute',
     top: 0,
@@ -122,7 +108,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#405CBA',
     zIndex: 1,
   },
-  // --- Banner ("Mais Vantajoso") ---
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -131,8 +116,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 4,
-    marginTop: -19, // Valor aumentado para descer o banner
-    marginLeft: -18,
+    marginTop: -19.9,
+    marginLeft: -20,
     marginBottom: 8,
     minHeight: 32,
   },
@@ -148,8 +133,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlignVertical: 'center',
   },
-
-  // --- Textos e Botão dentro do Card ---
   planTitle: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -157,15 +140,21 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   planDescription: {
-    fontSize: 10,
+    fontSize: 11,
     lineHeight: 21,
     color: '#6b7280',
     marginBottom: 20,
+    marginTop: -2,
+  },
+  porApenasText: {
+    fontSize: 10,
+    fontWeight: '600',
+    marginBottom: 12,
   },
   planPrice: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#2b67df',
+    color: '#000000', // Preto padrão para todos planos, #3aad94 será sobrescrito no componente
     marginBottom: 20,
   },
   saibaMaisButton: {
@@ -179,6 +168,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    top: -18,
   },
   saibaMaisText: {
     color: '#ffffff',
@@ -188,5 +178,3 @@ const styles = StyleSheet.create({
 });
 
 export default styles;
-
-

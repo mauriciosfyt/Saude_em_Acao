@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
         marginTop: -40,
-        height: 668,
+        height: 700,
     },
     banner: {
         flexDirection: 'row',

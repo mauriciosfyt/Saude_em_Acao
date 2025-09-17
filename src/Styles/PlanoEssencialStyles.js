@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
     marginTop: -40,
-    height: 665,
+    height: 700,
   },
   banner: {
     flexDirection: 'row',
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 35, fontWeight: 'bold', color: '#111827', marginBottom: -2, marginTop: 10 },
   description: { fontSize: 12, lineHeight: 21, color: '#6b7280', marginBottom: 16 },
 
-  priceLabel: { fontSize: 11, color: '#6b7280', marginTop: 20, marginBottom: 4 },
+  priceLabel: { fontSize: 11, color: '#6b7280', marginTop: 20, marginBottom: 4, top: 10 },
   priceRow: { flexDirection: 'row', alignItems: 'flex-end', marginTop: 8 },
   priceValue: { fontSize: 34, fontWeight: 'bold', color: '#111827' },
   pricePerMonth: { fontSize: 20, color: '#2b67df', marginLeft: 6, marginBottom: 2 },
