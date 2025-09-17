@@ -1,3 +1,5 @@
+/* --- SEU CSS ORIGINAL --- */
+
 .personalizar-container {
   min-height: 100vh;
   background: #ececec;
@@ -45,11 +47,11 @@
 .grupo-titulo {
   background: #0b63d1;
   border-radius: 8px 8px 0 0;
-  padding: 8px 10px;
+  padding: 6px 12px;
   text-align: center;
   font-size: 20px;
   color: #fff;
-  width: 100%;
+  width: 30%;
 }
 
 .barra-add {
@@ -60,11 +62,13 @@
   align-items: center;
   justify-content: center;
   font-weight: 900;
-  width: 60%;
+  width: 30%;
   margin: 0 auto;
   color: #fff;
   border: none;
   cursor: pointer;
+  margin-top: -30px;
+  margin-right: 30px;
 }
 
 .exercicios-lista {
@@ -79,7 +83,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  background: #eef3ff; /* leve azul como no mock */
+  background: #eef3ff;
   border: 1px solid #e7e8ec;
   border-radius: 10px;
   padding: 8px 12px;
@@ -92,7 +96,7 @@
 }
 
 .thumb {
-  width: 160px;
+  width: 100px;
   height: 100px;
   background: #c4c4c4;
   border-radius: 6px;
@@ -142,11 +146,6 @@
   font-weight: 700;
 }
 
-@media (max-width: 600px) {
-  .personalizar-container { padding: 16px; }
-  .personalizar-title { font-size: 22px; }
-}
-
 /* Modal */
 .modal-overlay {
   position: fixed;
@@ -157,18 +156,18 @@
   justify-content: center;
   z-index: 1000;
   padding: 8px;
-  overflow: hidden; /* impede rolagem total */
+  overflow: hidden;
 }
 .modal-conteudo {
-  width: 300px;
+  width: 600px;
   max-width: 100%;
   background: #e6edf7;
   border-radius: 12px;
   padding: 10px 12px 12px;
   box-shadow: 0 14px 35px rgba(0,0,0,0.35);
   border: 1px solid #cfd9ea;
-  max-height: calc(100vh - 16px); /* garante caber sem rolagem */
-  overflow: hidden; /* sem rolagem interna */
+  max-height: calc(100vh - 16px);
+  overflow: hidden;
 }
 .modal-titulo {
   margin: 0 0 6px 0;
@@ -263,3 +262,98 @@
 }
 
 
+/* --- CSS RESPONSIVO --- */
+
+/* Telas de tablet e desktops menores (até 1200px) */
+@media (max-width: 1200px) {
+  .personalizar-title {
+    font-size: 38px; /* Reduz um pouco o título principal */
+  }
+}
+
+/* Telas de tablet (até 900px) */
+@media (max-width: 900px) {
+  .personalizar-title {
+    font-size: 32px;
+  }
+  
+  .painel {
+    padding: 12px;
+  }
+  
+  .grupo-titulo, .barra-add {
+    width: 40%; /* Aumenta a largura do título do grupo e do botão de adicionar */
+  }
+
+  .barra-add {
+      margin-right: 15px; /* Reduz a margem para evitar quebra */
+  }
+
+  .exercicio-item {
+    flex-wrap: wrap; /* Permite que os itens quebrem linha se necessário */
+  }
+  
+  .thumb {
+    width: 120px; /* Reduz o tamanho da miniatura */
+    height: 75px;
+  }
+}
+
+/* Telas de celular (até 600px) */
+@media (max-width: 600px) {
+  .personalizar-container {
+    padding: 12px; /* Reduz o preenchimento geral */
+  }
+
+  .personalizar-title {
+    font-size: 24px; /* Título principal bem menor para caber na tela */
+    line-height: 1.2;
+  }
+
+  .grupo-titulo {
+    width: 100%; /* Título do grupo ocupa toda a largura */
+  }
+  
+  .barra-add {
+    width: 100%;
+    margin: 16px 0 0 0; /* Remove margem negativa e posiciona abaixo do título */
+    position: static; /* Garante que não tenha posicionamento relativo que cause problemas */
+  }
+
+  .modal-conteudo {
+  width: 300px;
+
+}
+
+  .exercicio-item {
+    flex-direction: column; /* Itens de exercício em coluna */
+    align-items: stretch; /* Alinha os itens para ocuparem toda a largura */
+    gap: 16px; /* Aumenta o espaçamento quando em coluna */
+    padding: 12px;
+  }
+  
+  .exercicio-info {
+    flex-direction: column; /* Miniatura e texto também em coluna */
+    align-items: center; /* Centraliza a imagem e o texto */
+    text-align: center;
+    width: 100%;
+  }
+
+  .thumb {
+    width: 100%; /* Imagem ocupa a largura total do seu contêiner */
+    max-width: 100px; /* Mas com um limite máximo para não ficar gigante */
+    height: auto; /* Altura automática para manter proporção */
+    margin-bottom: 8px;
+  }
+
+  .acoes {
+    width: 100%; /* Botões ocupam toda a largura */
+    flex-direction: row; /* Botões ficam lado a lado */
+    justify-content: center; /* Centraliza os botões */
+  }
+
+  .acoes-finais {
+    flex-direction: column; /* Botões finais empilhados verticalmente */
+    align-items: stretch; /* Faz com que ocupem a largura disponível */
+  }
+}
