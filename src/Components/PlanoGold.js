@@ -30,14 +30,20 @@ export default function PlanoGold({ navigation, onContratar }) {
 
         <ScrollView contentContainerStyle={[screenStyles.content, { paddingTop: 160 }]} showsVerticalScrollIndicator={false}>
           <View style={cardStyles.card}>
-            <View style={cardStyles.banner}>
-              <Ionicons name="ribbon" size={16} color="#ffffff" style={{ marginRight: 6 }} />
+              <View style={cardStyles.banner}> 
+              <Image source={require('../../assets/icons/completo.png')} style={{ width: 16, height: 16, marginRight: 6 }} />
               <Text style={cardStyles.bannerText}>O mais completo</Text>
-            </View>
+              
+              </View>
 
-            <Text style={cardStyles.titleRow}>Plano Gold</Text>
+        
+          <View style={cardStyles.titleRowContainer}>
+            <Text style={[cardStyles.titleRow, { color: '#ffffff' }]}>Plano </Text>
+            <Text style={[cardStyles.titleRow, { color: '#fbbf24' }]}>Gold</Text>
+          </View>
+
             <Text style={cardStyles.description}>
-              O plano completo com todos os benefícios e suporte premium para seus objetivos.
+             O plano de academia ideal, que oferecer resultados completo por  um preço acessível. Nele inclui acesso a todas as modalidades e acompanhamento profissional de um professor para montar seus treino presonalizados.
             </Text>
 
             <Text style={cardStyles.priceLabel}>Por apenas</Text>
@@ -49,7 +55,7 @@ export default function PlanoGold({ navigation, onContratar }) {
             <Text style={cardStyles.sectionTitle}>Benefícios desse plano</Text>
             <Text style={cardStyles.modalidadeHint}>Todas as modalidades:</Text>
 
-            {[ 'Funcional', 'Thay Fit', 'Pilates' ].map((item) => (
+            {[ 'Funcional', 'Thay Fit', 'Pilates', 'Treino personalizado' ].map((item) => (
               <View key={item} style={cardStyles.benefitRow}>
                 <Image source={require('../../assets/beneficios.png')} style={{ width: 24, height: 24 }} />
                 <Text style={cardStyles.benefitText}>{item}</Text>
