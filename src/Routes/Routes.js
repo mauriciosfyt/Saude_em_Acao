@@ -30,6 +30,11 @@ import PlanoEssencial from "../Components/PlanoEssencial";
 import PlanoGold from "../Components/PlanoGold";
 import PlanoBasico from "../Components/PlanoBasico";
 
+import LojaVitaminas from "../Pages/Loja/Loja_Categoria/LojaVitaminas";
+import LojaWhey from "../Pages/Loja/Loja_Categoria/LojaWhey.js";
+import LojaRoupas from "../Pages/Loja/Loja_Categoria/LojaRoupas.js";
+import LojaCreatina from "../Pages/Loja/Loja_Categoria/LojaCreatina.js";
+
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -97,6 +102,10 @@ export default function Routes() {
 
         {/* Outras telas continuam aqui */}
         <Stack.Screen name="MeuPlano" component={MeuPlano} />
+          <Stack.Screen name="LojaVitaminas" component={LojaVitaminas} />
+  <Stack.Screen name="LojaWhey" component={LojaWhey} />
+  <Stack.Screen name="LojaRoupas" component={LojaRoupas} />
+  <Stack.Screen name="LojaCreatina" component={LojaCreatina} />
       </Stack.Navigator>
     </NavigationContainer>
   );
