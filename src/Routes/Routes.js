@@ -24,6 +24,10 @@ import Reservas from "../Pages/Loja/Loja_Reservas/loja_reservas";
 import Loja from "../Pages/Loja/loja_home/loja";
 import MeuTreino from "../Pages/MeuTreino/MeuTreino";
 import TreinoSegunda from "../Pages/TreinoSegunda/TreinoSegunda";
+import TreinoTerca from "../Pages/TreinoTerca/TreinoTerca";
+import TreinoQuarta from "../Pages/TreinoQuarta/TreinoQuarta";
+import TreinoQuinta from "../Pages/TreinoQuinta/TreinoQuinta";
+import TreinoSexta from "../Pages/TreinoSexta/TreinoSexta";
 import Professores from "../Pages/Professores/Professores";
 import TelaPlanos from "../Pages/TelaPlanos/TelaPlanos";
 import PlanoEssencial from "../Components/PlanoEssencial";
@@ -91,6 +95,10 @@ export default function Routes() {
         <Stack.Screen name="LojaReservas" component={Reservas} />
         <Stack.Screen name="MeuTreino" component={MeuTreino} />
         <Stack.Screen name="TreinoSegunda" component={TreinoSegunda} />
+        <Stack.Screen name="TreinoTerca" component={TreinoTerca} />
+        <Stack.Screen name="TreinoQuarta" component={TreinoQuarta} />
+        <Stack.Screen name="TreinoQuinta" component={TreinoQuinta} />
+        <Stack.Screen name="TreinoSexta" component={TreinoSexta} />
         <Stack.Screen name="Professores" component={Professores} />
         <Stack.Screen name="TelaPlanos" component={TelaPlanos} />
         <Stack.Screen name="PlanoBasico" component={PlanoBasico} />

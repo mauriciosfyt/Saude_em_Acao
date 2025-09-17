@@ -95,8 +95,6 @@ const styles = StyleSheet.create({
   justifyContent: 'center',
   backgroundColor: 'transparent', // sem fundo
   marginRight: 15,
-  borderWidth: 2,
-  borderColor: '#000000', 
   },
 
   exercicioImage: {

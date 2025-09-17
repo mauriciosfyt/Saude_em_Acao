@@ -66,11 +66,22 @@ const MeuTreino = ({ navigation }) => {
   };
 
   const handleIniciarTreino = (treino) => {
-    console.log(`Iniciando treino: ${treino.dia}`);
-    // Navegar para a tela de exercícios específica baseada no dia
+    console.log('DEBUG: handleIniciarTreino chamado para', treino.dia);
+    console.log('DEBUG: navigation object', navigation);
     if (treino.dia === 'Segunda-Feira') {
+      console.log('DEBUG: Navegando para TreinoSegunda');
       navigation.navigate('TreinoSegunda');
-    } else {
+    } else if (treino.dia === 'Terça-Feira') {
+      console.log('DEBUG: Navegando para TreinoTerca');
+      navigation.navigate('TreinoTerca');
+    } else if (treino.dia === 'Quarta-Feira') {
+      console.log('DEBUG: Navegando para TreinoQuarta');
+      navigation.navigate('TreinoQuarta');
+    } else if (treino.dia === 'Quinta-Feira') {
+      console.log('DEBUG: Navegando para TreinoQuinta');
+      navigation.navigate('TreinoQuinta');
+    } else if (treino.dia === 'Sexta-Feira') 
+      navigation.navigate('TreinoSexta');{
       console.log(`Treino para ${treino.dia} ainda não implementado`);
     }
   };
@@ -111,7 +122,7 @@ const MeuTreino = ({ navigation }) => {
         </View>
         
         <View style={styles.greetingSection}>
-          <Text style={styles.greeting}>Olá Heleno!</Text>
+          <Text style={styles.greeting}>Olá Aluno!</Text>
           <Text style={styles.date}>{getCurrentDate()}</Text>
         </View>
       </View>
@@ -123,13 +134,18 @@ const MeuTreino = ({ navigation }) => {
             <Image source={treino.imagem} style={styles.treinoImage} />
             
             <View style={styles.treinoInfo}>
-              <Text style={styles.treinoDia}>{treino.dia}</Text>
+              <View style={styles.treinoDiaContainer}>
+                <Text style={styles.treinoDia}>{treino.dia}</Text>
+              </View>
               <Text style={styles.treinoGrupos}>{treino.grupos}</Text>
             </View>
             
             <TouchableOpacity 
               style={styles.iniciarButton}
-              onPress={() => handleIniciarTreino(treino)}
+              onPress={() => {
+                console.log('DEBUG: Botão Iniciar clicado para', treino.dia);
+                handleIniciarTreino(treino);
+              }}
             >
               <Text style={styles.iniciarButtonText}>Iniciar</Text>
               <Ionicons name="arrow-forward" size={16} color="white" />
