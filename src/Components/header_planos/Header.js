@@ -19,6 +19,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 20,
+    marginTop: 30,
     position: "absolute",
     top: 0,
     left: 0,

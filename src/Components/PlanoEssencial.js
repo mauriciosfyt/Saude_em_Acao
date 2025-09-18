@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, StatusBar, ImageBackground, ScrollView, Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+
 import cardStyles from '../Styles/PlanoEssencialStyles';
 import screenStyles from '../Styles/TelaPlanosStyles';
+import Header from "./header_planos/Header";
+
 
 export default function PlanoEssencial({ navigation, onContratar }) {
   const handleContratar = () => { if (onContratar) onContratar(); };
@@ -17,18 +19,13 @@ export default function PlanoEssencial({ navigation, onContratar }) {
         fadeDuration={0}
         defaultSource={require('../../assets/banner_logos.jpg')}
       >
+        <Header title="Planos" onBack={onBack} />
         <View style={screenStyles.diagonalWhite} />
-
-        <View style={screenStyles.header}>
-          {navigation && (
-            <TouchableOpacity onPress={onBack} style={screenStyles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          )}
-          <Text style={screenStyles.headerTitle}>Planos</Text>
-        </View>
-
-        <ScrollView contentContainerStyle={[screenStyles.content, { paddingTop: 160 }]} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={[screenStyles.scrollView, { marginTop: 130 }]}
+          contentContainerStyle={[screenStyles.content, { paddingTop: 80 }]}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={cardStyles.card}>
             <View style={[cardStyles.banner, { backgroundColor: '#405CBA' }]}>
               <Image source={require('../../assets/icons/vantajoso.png')} style={{ width: 20, height: 23, marginRight: 6, resizeMode: 'contain' }} />

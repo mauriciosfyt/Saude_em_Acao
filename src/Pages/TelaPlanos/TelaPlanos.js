@@ -140,17 +140,11 @@ const TelaPlanos = ({ navigation }) => {
         source={require("../../../assets/banner_logos.jpg")}
         style={styles.backgroundImage}
       >
+        <Header title="Planos" onBack={onBack} />
         <View style={styles.diagonalWhite} />
-        <Header
-          title="Planos"
-          onBack={onBack}
-          style={styles.header}
-          titleStyle={styles.headerTitle}
-          backButtonStyle={styles.backButton}
-        />
         <ScrollView
-          style={[styles.scrollView, { marginTop: 80 }]}
-          contentContainerStyle={[styles.content, { paddingTop: 160 }]}
+          style={[styles.scrollView, { marginTop: 130 }]}
+          contentContainerStyle={[styles.content, { paddingTop: 150 }]}
           showsVerticalScrollIndicator={false}
         >
           {planos.map(renderPlano)}
