@@ -57,11 +57,11 @@ const MeuTreino = ({ navigation }) => {
       'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
       'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
     ];
-    
+
     const dayName = days[today.getDay()];
     const day = today.getDate();
     const month = months[today.getMonth()];
-    
+
     return `${dayName} Feira, ${day} de ${month}`;
   };
 
@@ -80,7 +80,7 @@ const MeuTreino = ({ navigation }) => {
     } else if (treino.dia === 'Quinta-Feira') {
       console.log('DEBUG: Navegando para TreinoQuinta');
       navigation.navigate('TreinoQuinta');
-    } else if (treino.dia === 'Sexta-Feira') 
+    } else if (treino.dia === 'Sexta-Feira')
       navigation.navigate('TreinoSexta');{
       console.log(`Treino para ${treino.dia} ainda não implementado`);
     }
@@ -103,24 +103,24 @@ const MeuTreino = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#4A90E2" />
-      
+
       {/* Header Azul */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
             <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
-          
+
           <Text style={styles.headerTitle}>Meus Treinos</Text>
-          
+
           <TouchableOpacity style={styles.menuButton} onPress={handleAbrirMenu}>
             <Ionicons name="menu" size={24} color="white" />
           </TouchableOpacity>
         </View>
-        
+
         <View style={styles.greetingSection}>
           <Text style={styles.greeting}>Olá Aluno!</Text>
           <Text style={styles.date}>{getCurrentDate()}</Text>
@@ -132,15 +132,15 @@ const MeuTreino = ({ navigation }) => {
         {treinos.map((treino) => (
           <View key={treino.id} style={styles.treinoCard}>
             <Image source={treino.imagem} style={styles.treinoImage} />
-            
+
             <View style={styles.treinoInfo}>
               <View style={styles.treinoDiaContainer}>
                 <Text style={styles.treinoDia}>{treino.dia}</Text>
               </View>
               <Text style={styles.treinoGrupos}>{treino.grupos}</Text>
             </View>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.iniciarButton}
               onPress={() => {
                 console.log('DEBUG: Botão Iniciar clicado para', treino.dia);

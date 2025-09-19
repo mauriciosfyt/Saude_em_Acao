@@ -11,6 +11,7 @@ import {
   Modal,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import HeaderSeta from '../../Components/header_seta/header_seta';
 import styles from '../../Styles/TreinoQuintaStyle';
 
 const TreinoQuinta = ({ navigation }) => {
@@ -151,17 +152,7 @@ const TreinoQuinta = ({ navigation }) => {
       <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
 
       {/* Header com seta de voltar e menu */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <View /> {/* Espaço para centralizar */}
-          <TouchableOpacity style={styles.menuButton} onPress={handleAbrirMenu}>
-            <Ionicons name="menu" size={24} color="#000" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <HeaderSeta navigation={navigation} mesAno={null} />
 
       {/* Conteúdo Principal */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>

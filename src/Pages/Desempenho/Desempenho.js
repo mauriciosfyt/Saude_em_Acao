@@ -28,8 +28,8 @@ const Desempenho = ({ navigation }) => {
       <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
       <View style={styles.topSection}>
         <DesempenhoHeader navigation={navigation} paddingHorizontal={2} />
-        <Text style={styles.monthYearText}>{dadosDesempenho.mesAno}</Text>
-        <View style={styles.progressContainer}>
+        <Text paddingHorizontal={20} style={styles.monthYearText}>{dadosDesempenho.mesAno} </Text>
+        <View paddingHorizontal={20} style={styles.progressContainer}>
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${dadosDesempenho.progressoGeral}%` }]} />
           </View>
@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
   },
   topSection: {
     flex: 0.4,
-    paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 0,
     justifyContent: 'space-between',

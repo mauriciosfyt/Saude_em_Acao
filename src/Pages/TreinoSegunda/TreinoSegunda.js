@@ -143,7 +143,7 @@ const TreinoSegunda = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
 
-      {/* HeaderSeta com menu lateral */}
+      {/* Header com seta de voltar e menu */}
       <HeaderSeta navigation={navigation} mesAno={null} />
 
       {/* Conteúdo Principal */}

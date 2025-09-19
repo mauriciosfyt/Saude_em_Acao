@@ -12,6 +12,7 @@ import {
 } from "react-native";
 // Usaremos Ionicons para manter a consistência com a tela Desempenho
 import { Ionicons } from "@expo/vector-icons";
+import HeaderSeta from '../../Components/header_seta/header_seta';
 
 const Mensalidades = ({ navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
@@ -120,25 +121,12 @@ const Mensalidades = ({ navigation }) => {
       {/* --- CONTEÚDO ORIGINAL DA TELA --- */}
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
         <View style={styles.headerImageContainer}>
+                      {/* Header com seta de voltar e menu */}
+                      <HeaderSeta navigation={navigation} mesAno={null} />
           <Image
             source={require("../../../assets/banner_mensalidades.jpeg")} // Ajuste o caminho da imagem se necessário
             style={styles.headerImage}
           />
-          {/* O novo cabeçalho com os botões sobre a imagem */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={handleVoltar}
-            >
-              <Ionicons name="arrow-back" size={24} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={handleAbrirMenu}
-            >
-              <Ionicons name="menu" size={28} color="white" />
-            </TouchableOpacity>
-          </View>
         </View>
 
         {/* --- CONTAINER BRANCO COM O CONTEÚDO (INTOCADO) --- */}

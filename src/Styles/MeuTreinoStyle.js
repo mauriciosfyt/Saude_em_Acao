@@ -8,33 +8,8 @@ const styles = StyleSheet.create({
   
   // Header Azul
   header: {
-    backgroundColor: '#405CBA',
-    paddingTop: 20,
-    paddingBottom: 30,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-  },
-  
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  
-  backButton: {
-    padding: 8,
-  },
-  
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: 'white',
-  },
-  
-  menuButton: {
-    padding: 8,
+    paddingBottom: 20
+    ,
   },
   
   greetingSection: {

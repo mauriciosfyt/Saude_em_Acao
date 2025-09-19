@@ -11,6 +11,7 @@ import {
   Modal,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import HeaderSeta from '../../Components/header_seta/header_seta';
 import styles from '../../Styles/TreinoTercaStyle';
 
 // ...restante do código permanece igual...
@@ -154,23 +155,8 @@ const TreinoTerca = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#000000" />
-          </TouchableOpacity>
-          <View /> {/* Espaço vazio para centralizar */}
-          <TouchableOpacity style={styles.menuButton} onPress={handleAbrirMenu}>
-            <Ionicons name="menu" size={24} color="#000000" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-  {/* ...existing code... */}
+      {/* Header com seta de voltar e menu */}
+      <HeaderSeta navigation={navigation} mesAno={null} />
 
       {/* Conteúdo Principal */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -246,72 +232,6 @@ const TreinoTerca = ({ navigation }) => {
           <Ionicons name="checkmark-circle" size={20} color="#666" />
         </TouchableOpacity>
       </View>
-
-      {/* Modal do Menu */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={menuVisivel}
-        onRequestClose={handleFecharMenu}
-      >
-        <TouchableOpacity
-          style={styles.menuOverlay}
-          onPress={handleFecharMenu}
-          activeOpacity={1}
-        >
-          <View style={styles.menuContent}>
-            <Text style={styles.menuTitle}>Menu</Text>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("MainTabs")}
-            >
-              <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Home</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Perfil")}
-            >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meu Perfil</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Chat")}
-            >
-              <Ionicons name="chatbubble-ellipses-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Chat</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Desempenho")}
-            >
-              <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Desempenho</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("MeuTreino")}
-            >
-              <Ionicons name="fitness-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meus Treinos</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Mensalidades")}
-            >
-              <Ionicons name="card-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Mensalidades</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
 
       {/* Modal Sobre o Exercício */}
       <Modal
