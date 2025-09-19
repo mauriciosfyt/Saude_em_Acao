@@ -13,13 +13,16 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../../Styles/ProfessoresStyles';
 
-// Seus dados de professores (sem alterações)
+// 1. Importando o novo componente de header
+import HeaderProfessores from '../../Components/header_professores/HeaderProfessores'; // Ajuste o caminho se necessário
+
+// Seus dados de professores
 const professores = [
   {
     id: 1,
     nome: 'Carlos Moura',
     foto: require('../../../assets/professoresImg/prof1.jpeg'),
-    whatsapp: '',
+    whatsapp: '', // Lembre-se de adicionar os números de telefone aqui
   },
   {
     id: 2,
@@ -54,6 +57,7 @@ const professores = [
 ];
 
 const Professores = ({ navigation }) => {
+  // Sua função para abrir o WhatsApp
   const openWhatsApp = (numero) => {
     const url = `whatsapp://send?phone=${numero}`;
     Linking.canOpenURL(url)
@@ -74,19 +78,15 @@ const Professores = ({ navigation }) => {
       <View style={styles.blueShape} />
 
       <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-             <Ionicons name="arrow-back" size={24} color="#000000" />
-          </TouchableOpacity>
-          <Image
-            source={require('../../../assets/icons/logo_dia.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <View style={{width: 40}} />
-        </View>
+        
+        {/* 2. Usando o novo componente de header */}
+        <HeaderProfessores
+          title="Equipe Saúde em Ação"
+          onBackPress={() => navigation.goBack()}
+          navigation={navigation} // <-- VOCÊ PRECISA PASSAR A PROP AQUI
+        />
 
-        <Text style={styles.pageTitle}>Equipe Saúde em Ação</Text>
+        {/* O código JSX do header e do título que estavam aqui foram movidos para o componente */}
 
         <ScrollView 
           showsVerticalScrollIndicator={false}
@@ -116,4 +116,3 @@ const Professores = ({ navigation }) => {
 };
 
 export default Professores;
-

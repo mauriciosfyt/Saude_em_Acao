@@ -1,5 +1,3 @@
-// screens/Home.js
-
 import React from 'react';
 import {
   View,
@@ -14,9 +12,9 @@ import {
 } from 'react-native';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
-import Logo from '../../../assets/icons/logo_dia.png'; // <-- Ajuste o caminho conforme seu projeto
-
-// --- Constantes de Tema (antes em theme.js) ---
+// 1. Importe o novo componente HeaderHome
+import HeaderHome from '../../Components/header_home/HeaderHome';
+// --- Constantes de Tema ---
 const COLORS = {
   primary: '#3A3A3A',
   secondary: '#4A90E2',
@@ -34,7 +32,7 @@ const SIZES = {
   xlarge: 32,
 };
 
-// --- Componente FeatureButton (antes em components/FeatureButton.js) ---
+// --- Componente FeatureButton ---
 const FeatureButton = ({ iconName, label, onPress }) => {
   return (
     <TouchableOpacity style={styles.featureButtonContainer} onPress={onPress}>
@@ -44,18 +42,15 @@ const FeatureButton = ({ iconName, label, onPress }) => {
   );
 };
 
-
 // --- Componente Principal da Tela: Home ---
 const Home = ({ navigation }) => {
-  // Dados para os botões da grade
   const features = [
     { id: 1, icon: 'account-group-outline', label: 'Professores', screen: 'Professores' },
     { id: 2, icon: 'weight-lifter', label: 'Meus treinos', screen: 'MeuTreino' },
     { id: 3, icon: 'cart-outline', label: 'Nossa loja', screen: 'Loja' },
-    { id: 4, icon: 'account-circle-outline', label: 'Meu perfil', screen: 'Profile' },
+    { id: 4, icon: 'account-circle-outline', label: 'Meu perfil', screen: 'Perfil' },
   ];
 
-  // URL de imagem para o card. Substitua por seu asset local se preferir.
   const promoImage = { uri: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?fit=crop&w=800&q=80' };
 
   return (
@@ -66,14 +61,10 @@ const Home = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: SIZES.large }}
       >
-        {/* --- Cabeçalho --- */}
-        <View style={styles.header}>
-          <TouchableOpacity>
-            <Ionicons name="arrow-back" size={28} color={COLORS.primary} />
-          </TouchableOpacity>
-          <Image source={Logo} style={styles.logoImage} />
-          <View style={{ width: 28 }} /> {/* Espaço para centralizar o logo */}
-        </View>
+        {/* 2. Use o novo componente HeaderHome aqui */}
+        <HeaderHome 
+          onProfilePress={() => navigation.navigate('MainTabs', { screen: 'Perfil' })}
+        />
 
         {/* --- Mensagem de Boas-Vindas --- */}
         <View style={styles.welcomeSection}>
@@ -82,7 +73,7 @@ const Home = ({ navigation }) => {
         </View>
 
         {/* --- Card de Assinatura --- */}
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('TelaPlanos')}>
           <ImageBackground
             source={promoImage}
             style={styles.promoCard}
@@ -105,18 +96,13 @@ const Home = ({ navigation }) => {
               iconName={feature.icon}
               label={feature.label}
               onPress={() => {
-                if (feature.screen === 'MeuTreino') {
-                  navigation.navigate('MeuTreino');
-                } 
-                 if (feature.screen === 'Loja') {
-                  console.log('Tentando navegar para Loja...');
-                  navigation.navigate('Loja');
+                if(feature.screen === 'Perfil'){
+                  navigation.navigate('MainTabs', { screen: 'Perfil' })
+                } else if (feature.screen === 'Loja'){
+                  navigation.navigate('MainTabs', { screen: 'Loja' })
                 }
-                 if (feature.screen === 'Professores') {
-                  console.log('Tentando navegar para Loja...');
-                  navigation.navigate('Professores');
-                }else {
-                  console.log(`Navegar para ${feature.screen}`);
+                else {
+                  navigation.navigate(feature.screen)
                 }
               }}
             />
@@ -126,6 +112,7 @@ const Home = ({ navigation }) => {
     </SafeAreaView>
   );
 };
+
 // --- Estilos (StyleSheet) ---
 const styles = StyleSheet.create({
   safeArea: {
@@ -136,16 +123,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: SIZES.medium,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: SIZES.medium,
-  },
-  logoImage: {
-    width: 50, // Defina a largura e altura desejadas para o logo
-    height: 50,
-  },
+  // 3. Os estilos 'header' e 'logoImage' antigos foram removidos daqui
   welcomeSection: {
     marginTop: SIZES.small,
     marginBottom: SIZES.large,
@@ -187,7 +165,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: SIZES.small,
   },
-  // Estilos do FeatureButton
   featureButtonContainer: {
     backgroundColor: COLORS.white,
     width: '48%',

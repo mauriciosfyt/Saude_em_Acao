@@ -7,9 +7,11 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
-  Image, // Importe o componente Image
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
+// 1. Importando o novo componente HeaderChat
+import HeaderChat from '../../Components/header_chat/header_Chat';
 
 // --- Constantes de Cores e Dados ---
 const COLORS = {
@@ -34,30 +36,7 @@ const MOCK_MESSAGES = [
   { id: '8', type: 'audio', sender: 'other' },
 ];
 
-// --- Componente do Cabeçalho Customizado ---
-const CustomHeader = () => {
-  return (
-    <View style={styles.headerContainer}>
-      <TouchableOpacity onPress={() => alert('Botão Voltar pressionado!')}>
-        <Icon name="arrow-left" size={24} color={COLORS.textDark} />
-      </TouchableOpacity>
-      
-      <View style={styles.headerTitleContainer}>
-        <Image
-          // IMPORTANTE: Substitua pelo caminho correto do seu logo
-          source={require('../../../assets/icons/logo_dia.png')} 
-          style={styles.headerLogo}
-          resizeMode="contain"
-        />
-        <Text style={styles.headerTitle}>Chats de Mídias</Text>
-      </View>
-      
-      <TouchableOpacity onPress={() => alert('Botão Menu pressionado!')}>
-        <Icon name="menu" size={24} color={COLORS.textDark} />
-      </TouchableOpacity>
-    </View>
-  );
-};
+// O antigo componente 'CustomHeader' foi removido daqui.
 
 // --- Componente de Entrada de Mensagem ---
 const MessageInput = () => {
@@ -82,12 +61,11 @@ const MessageInput = () => {
 };
 
 // --- Componente Principal da Tela de Chat ---
-const Chat = () => {
-  // Função para renderizar cada item da lista de mensagens
+// 2. A tela agora recebe 'navigation' como propriedade
+const Chat = ({ navigation }) => {
   const renderItem = ({ item }) => {
     const isSender = item.sender === 'me';
     
-    // 1. Renderiza o separador de data
     if (item.type === 'date') {
       return (
         <View style={styles.dateSeparatorContainer}>
@@ -96,7 +74,6 @@ const Chat = () => {
       );
     }
     
-    // 2. Renderiza mensagens de áudio
     if (item.type === 'audio') {
       const iconColor = isSender ? COLORS.textLight : COLORS.textDark;
       const Waveform = () => (
@@ -110,7 +87,7 @@ const Chat = () => {
       return (
         <View style={[styles.messageRow, isSender ? styles.senderRow : styles.receiverRow]}>
           <View style={[styles.audioBubble, isSender ? styles.senderBubble : styles.receiverBubble]}>
-            <Icon name="microphone" size={24} color={iconColor} />
+            <Text>🎤</Text>
             <Waveform />
             {!isSender && <View style={{width: 24}} />}
           </View>
@@ -118,7 +95,6 @@ const Chat = () => {
       );
     }
 
-    // 3. Renderiza mensagens de texto (padrão)
     return (
       <View style={[styles.messageRow, isSender ? styles.senderRow : styles.receiverRow]}>
         <View style={[styles.textBubble, isSender ? styles.senderBubble : styles.receiverBubble]}>
@@ -132,8 +108,12 @@ const Chat = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Cabeçalho customizado adicionado aqui */}
-      <CustomHeader />
+      {/* 3. Usando o novo HeaderChat e passando as props necessárias */}
+      <HeaderChat
+        chatTitle="Equipe de Suporte"
+        onBackPress={() => navigation.goBack()}
+        navigation={navigation}
+      />
       
       <FlatList
         data={MOCK_MESSAGES.slice().reverse()}
@@ -155,38 +135,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   
-  // Estilos do Cabeçalho (ADICIONADO)
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    backgroundColor: COLORS.background,
-    borderBottomColor: COLORS.lightGray,
-    height: 150,
-  },
-  headerTitleContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerLogo: {
-    width: 60,
-    height: 60,
-    marginBottom: 1,
-
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.textDark,
-  },
+  // 4. Os estilos do header antigo (headerContainer, etc.) foram removidos.
   
   // Estilos da Lista de Mensagens
   messageList: {
     flex: 1,
     paddingHorizontal: 10,
-    flexDirection: 'column-reverse',
   },
   messageRow: {
     marginVertical: 5,
@@ -198,8 +152,6 @@ const styles = StyleSheet.create({
   receiverRow: {
     alignSelf: 'flex-end',
   },
-
-  // Estilos dos Balões de Mensagem
   textBubble: {
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -227,8 +179,6 @@ const styles = StyleSheet.create({
   receiverText: {
     color: COLORS.textDark,
   },
-  
-  // Estilos de Áudio e Data
   waveformContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -252,8 +202,6 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontSize: 12,
   },
-
-  // Estilos do Input de Mensagem
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
