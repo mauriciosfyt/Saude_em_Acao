@@ -47,7 +47,6 @@ public class ReservaService {
         ETamanho tamanho = null;
         ESabor sabor = null;
 
-        // Valida e extrai a variação do produto (tamanho, sabor) com base na categoria
         switch (produto.getCategoria()) {
             case CAMISETAS:
                 if (dto.getTamanho() == null || dto.getTamanho().isBlank()) {
@@ -65,16 +64,13 @@ public class ReservaService {
                 identificadorVariacao = dto.getSabor();
                 break;
             case VITAMINAS:
-                // Nenhuma variação específica é necessária
                 break;
             default:
                 throw new IllegalArgumentException("Categoria de produto desconhecida ou sem variação esperada.");
         }
 
-        // Decrementa o estoque com base na variação correta
         produtoService.decrementarEstoque(produto.getId(), identificadorVariacao, produto.getCategoria());
 
-        // Cria a nova reserva
         Reserva novaReserva = Reserva.builder()
                 .usuario(usuario)
                 .produto(produto)
@@ -86,7 +82,8 @@ public class ReservaService {
 
         reservaRepository.save(novaReserva);
 
-        // Notifica os administradores
+        // **** CORREÇÃO APLICADA AQUI ****
+        // O método correto é "buscarTodosAdmins"
         List<Usuario> admins = usuarioService.buscarTodosAdmins();
         for (Usuario admin : admins) {
             emailService.notificarAdminNovaReserva(admin.getEmail(), usuario.getNome(), produto.getNome());
@@ -95,10 +92,6 @@ public class ReservaService {
         return novaReserva;
     }
 
-    /**
-     * MÉTODO ATUALIZADO:
-     * Ao aprovar, define uma data limite para a retirada do produto.
-     */
     public Reserva aprovarReserva(String id) {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Reserva não encontrada."));
@@ -109,14 +102,9 @@ public class ReservaService {
 
         reserva.setStatus(EStatusReserva.APROVADA);
         reserva.setDataAnalise(LocalDateTime.now());
-
-        // Define a data limite para retirada (ex: 3 dias a partir de agora).
-        // O .with(LocalTime.MAX) garante que o prazo se encerre no final do dia.
         reserva.setDataRetirada(LocalDateTime.now().plusDays(3).with(LocalTime.MAX));
-
         reservaRepository.save(reserva);
 
-        // Notifica o aluno informando a data limite para retirada
         String dataFormatada = reserva.getDataRetirada().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         String mensagemEmail = String.format(
                 "<p>Seu produto está separado e aguardando a retirada! Você tem até o final do dia %s para buscá-lo.</p>",
@@ -140,7 +128,6 @@ public class ReservaService {
         reserva.setMotivoAnalise(motivo);
         reservaRepository.save(reserva);
 
-        // Determina a variação correta para devolver o item ao estoque
         String identificadorVariacao = null;
         if (reserva.getTamanho() != null) {
             identificadorVariacao = reserva.getTamanho().name();
@@ -160,7 +147,8 @@ public class ReservaService {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Reserva não encontrada."));
 
-        Usuario usuarioLogado = usuarioRepository.findByEmail(userDetails.getUsername()).get();
+        Usuario usuarioLogado = usuarioRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário logado não encontrado."));
 
         boolean isOwner = reserva.getUsuario().getId().equals(usuarioLogado.getId());
         boolean isAdmin = usuarioLogado.getPerfil() == EPerfil.ADMIN;
@@ -170,7 +158,6 @@ public class ReservaService {
         }
 
         if (reserva.getStatus() == EStatusReserva.APROVADA || reserva.getStatus() == EStatusReserva.PENDENTE) {
-            // Determina a variação correta para devolver o item ao estoque
             String identificadorVariacao = null;
             if (reserva.getTamanho() != null) {
                 identificadorVariacao = reserva.getTamanho().name();

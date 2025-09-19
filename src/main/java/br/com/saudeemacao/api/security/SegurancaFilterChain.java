@@ -1,5 +1,3 @@
-// src/main/java/br.com.saudeemacao.api/security/SegurancaFilterChain.java
-
 package br.com.saudeemacao.api.security;
 
 import br.com.saudeemacao.api.model.EPerfil;
@@ -21,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,21 +39,24 @@ public class SegurancaFilterChain {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // ATUALIZAÇÃO: Removido "/api/usuario" desta linha para que não seja mais público.
+                        // Endpoints públicos
                         .requestMatchers(HttpMethod.POST, "/api/auth/**", "/api/login", "/setup/admin").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
+                        .requestMatchers("/login/oauth2/**").permitAll()
 
-                        // --- REGRAS OAuth2 para Google (ATUALIZADO) ---
-                        .requestMatchers("/login/oauth2/**").permitAll() // Permite o fluxo de callback do Google
+                        // --- REGRAS DE ACESSO ATUALIZADAS ---
+                        // Apenas ADMIN pode gerenciar alunos (GET, POST, PUT, DELETE, etc.)
+                        .requestMatchers("/api/alunos/**").hasRole(EPerfil.ADMIN.name())
 
-                        // --- ATUALIZAÇÃO: Nova regra de segurança para criação de usuários ---
-                        // Apenas usuários com perfil ADMIN podem criar novos usuários (alunos, professores).
-                        .requestMatchers(HttpMethod.POST, "/api/usuario").hasRole(EPerfil.ADMIN.name())
+                        // Apenas ADMIN pode gerenciar professores (GET, POST, PUT, DELETE, etc.)
+                        .requestMatchers("/api/professores/**").hasRole(EPerfil.ADMIN.name())
 
-                        // --- Outras regras existentes e novas ---
+                        // Endpoints para o próprio usuário (autenticado)
                         .requestMatchers(HttpMethod.DELETE, "/api/usuario/me").authenticated()
                         .requestMatchers("/api/usuario/meu-perfil").authenticated()
+
+                        // Regras existentes para produtos e reservas
                         .requestMatchers(HttpMethod.POST, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.PUT, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/produtos/**").hasRole(EPerfil.ADMIN.name())
@@ -65,22 +67,32 @@ public class SegurancaFilterChain {
                         .requestMatchers(HttpMethod.GET, "/api/reservas/stats").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/aprovar").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/rejeitar").hasRole(EPerfil.ADMIN.name())
-                        .requestMatchers(HttpMethod.GET, "/api/usuario").hasRole(EPerfil.ADMIN.name())
-                        .requestMatchers("/api/alunos/**").hasAnyRole(EPerfil.ADMIN.name(), EPerfil.PROFESSOR.name())
-                        .requestMatchers("/api/professores/**").hasRole(EPerfil.ADMIN.name())
                         .requestMatchers("/api/dashboard/**").hasRole(EPerfil.ADMIN.name())
+
+                        // **** ALTERAÇÕES REVERTIDAS PARA A VERSÃO SEGURA ****
+                        // As rotas de criação de usuário agora exigem o perfil ADMIN.
+                        .requestMatchers(HttpMethod.POST, "/api/aluno").hasRole("ADMIN")      // <-- REVERTIDO
+                        .requestMatchers(HttpMethod.POST, "/api/professor").hasRole("ADMIN")  // <-- REVERTIDO
+                        .requestMatchers(HttpMethod.POST, "/api/admin").hasRole("ADMIN")      // <-- REVERTIDO
+
+                        // Demais regras de acesso (leitura e atualização) continuam protegidas
+                        .requestMatchers(HttpMethod.GET, "/api/aluno").hasAnyRole("ADMIN", "PROFESSOR")
+                        .requestMatchers(HttpMethod.GET, "/api/professor").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/aluno/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/professor/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/admin/**").hasRole("ADMIN")
+
+                        // Qualquer outra requisição deve ser autenticada
                         .anyRequest().authenticated()
                 )
-                // --- Configuração do OAuth2 Login (ATUALIZADO) ---
                 .oauth2Login(oauth2 -> {
-                    // Define um handler customizado para ser executado após o sucesso da autenticação
                     oauth2.successHandler(customAuthenticationSuccessHandler());
                 })
                 .addFilterBefore(segurancaFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
-    // --- NOVO BEAN: Fornece a instância do nosso handler customizado ---
     @Bean
     public CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler() {
         return new CustomAuthenticationSuccessHandler();

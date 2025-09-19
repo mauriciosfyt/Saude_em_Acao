@@ -3,15 +3,17 @@ package br.com.saudeemacao.api.model;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size; // Importação adicionada
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -20,32 +22,33 @@ import java.util.List;
 @AllArgsConstructor
 @Document(collection = "usuarios")
 public class Usuario implements UserDetails {
+
     @Id
     private String id;
 
     @NotBlank(message = "Nome é obrigatório")
+    @Size(min = 2, max = 100, message = "Nome deve ter entre 2 e 100 caracteres")
     private String nome;
 
     @NotBlank(message = "Email é obrigatório")
     @Pattern(regexp = "^[A-Za-z0-9+_.-]+@(.+)$", message = "Email inválido")
+    @Indexed(unique = true)
     private String email;
 
     @NotBlank(message = "CPF é obrigatório")
-    // Mantém a validação do formato de entrada, a lógica de validação do algoritmo e a normalização ficarão no Service
-    @Pattern(regexp = "^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$", message = "CPF deve estar no formato 999.999.999-99")
+    @Indexed(unique = true, sparse = true) // Correto: com sparse = true
     private String cpf;
 
     @NotBlank(message = "Senha é obrigatória")
-    @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres.")
+    @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres")
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).*$",
-            message = "A senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial."
+            message = "A senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial"
     )
     private String senha;
 
     @NotBlank(message = "Telefone é obrigatório")
-    // Valida formatos comuns de telefone com DDD. A normalização para 'apenas números' ficará no Service.
-    @Pattern(regexp = "^\\(?\\d{2}\\)?[\\s-]?\\d{4,5}[\\s-]?\\d{4}$", message = "Formato de telefone inválido.")
+    @Indexed(unique = true, sparse = true) // Correto: com sparse = true
     private String telefone;
 
     private String fotoPerfil;
@@ -53,10 +56,15 @@ public class Usuario implements UserDetails {
     @NotNull(message = "Perfil é obrigatório")
     private EPerfil perfil;
 
-    @NotNull(message = "Plano é obrigatório")
-    private EPlano plano;
+    private EPlano plano; // Apenas para ALUNO
 
-    // Métodos da interface UserDetails permanecem inalterados
+    public void setPlano(EPlano plano) {
+        if (this.perfil != EPerfil.ALUNO && plano != null) {
+            throw new IllegalArgumentException("Plano só é permitido para alunos");
+        }
+        this.plano = plano;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + perfil.name()));
