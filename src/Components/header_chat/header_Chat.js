@@ -1,0 +1,168 @@
+import React, { useState } from 'react';
+import { View, Text, Image, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+// Componente renomeado para HeaderChat
+const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
+  const [menuVisivel, setMenuVisivel] = useState(false);
+
+  const handleAbrirMenu = () => setMenuVisivel(true);
+  const handleFecharMenu = () => setMenuVisivel(false);
+
+  // A navegação para telas aninhadas (dentro das abas)
+  const navegarParaTab = (nomeDaAba) => {
+    handleFecharMenu();
+    if (navigation) {
+      navigation.navigate("MainTabs", { screen: nomeDaAba });
+    }
+  };
+
+  // A navegação para telas normais
+  const navegarParaTela = (nomeDaTela) => {
+    handleFecharMenu();
+    if (navigation) {
+      navigation.navigate(nomeDaTela);
+    }
+  };
+
+  return (
+    <>
+      {/* Modal do Menu */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={menuVisivel}
+        onRequestClose={handleFecharMenu}
+      >
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          onPress={handleFecharMenu}
+          activeOpacity={1}
+        >
+          <View style={styles.menuContent}>
+            <Text style={styles.menuTitle}>Menu</Text>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTab("Home")}>
+              <Ionicons name="home-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Home</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTab("Perfil")}>
+              <Ionicons name="person-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Meu Perfil</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("Chat")}>
+              <Ionicons name="chatbubble-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Chat</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("Mensalidades")}>
+              <Ionicons name="card-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Mensalidades</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTab("Loja")}>
+              <Ionicons name="cart-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Loja</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("LojaFavoritos")}>
+              <Ionicons name="heart-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Favoritos</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("LojaReservas")}>
+              <Ionicons name="bookmark-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Reservas</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTab("Desempenho")}>
+              <Ionicons name="bar-chart-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Desempenho</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("Inicial")}>
+              <Ionicons name="log-out-outline" size={24} color="#dc3545" />
+              <Text style={[styles.menuItemText, { color: "#dc3545" }]}>Sair</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Estrutura Visual do Header */}
+      <View>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onBackPress} style={styles.iconButton}>
+            <Ionicons name="arrow-back" size={24} color="#000000" />
+          </TouchableOpacity>
+          <Image
+            source={require('../../../assets/icons/logo_dia.png')} // Ajuste o caminho
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <TouchableOpacity onPress={handleAbrirMenu} style={styles.iconButton}>
+            <Ionicons name="menu" size={28} color="#000000" />
+          </TouchableOpacity>
+        </View>
+        {/* Usando a prop 'chatTitle' */}
+        <Text style={styles.pageTitle}>{chatTitle}</Text>
+      </View>
+    </>
+  );
+};
+
+// Os estilos são idênticos aos do HeaderProfessores
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
+    marginTop: 30,
+    height: 80,
+  },
+  iconButton: {
+    padding: 5,
+    width: 40, 
+    alignItems: 'center',
+  },
+  logo: {
+    width: 50,
+    height: 50,
+  },
+  pageTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    alignItems: "flex-end",
+  },
+  menuContent: {
+    height: "100%",
+    width: "75%",
+    backgroundColor: "white",
+    paddingTop: 80,
+    paddingHorizontal: 20,
+    elevation: 5,
+  },
+  menuTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 30,
+    color: "#333",
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
+  },
+  menuItemText: {
+    fontSize: 18,
+    marginLeft: 15,
+    color: "#333",
+    fontWeight: "500",
+  },
+});
+
+export default HeaderChat;
