@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import DesempenhoHeader from '../../Components/header_seta/header_seta';
 import {
   View,
   Text,
@@ -12,8 +13,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 const Desempenho = ({ navigation }) => {
-  const [menuVisivel, setMenuVisivel] = useState(false);
-
   const dadosDesempenho = {
     mesAno: 'Outubro, 2025',
     progressoGeral: 50,
@@ -22,134 +21,13 @@ const Desempenho = ({ navigation }) => {
     ultimoTreino: '20/31',
   };
 
-  const handleVoltar = () => {
-    if (navigation) {
-      navigation.goBack();
-    }
-  };
-  
-  const handleAbrirMenu = () => {
-    setMenuVisivel(true);
-  };
-
-  const handleFecharMenu = () => {
-    setMenuVisivel(false);
-  }
-
-  const handleNavegar = (nomeDaTela) => {
-    handleFecharMenu();
-    navigation.navigate(nomeDaTela);
-  };
+  // Header e menu agora estão em um componente separado
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
-
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={menuVisivel}
-        onRequestClose={handleFecharMenu}
-      >
-        <TouchableOpacity style={styles.menuOverlay} onPress={handleFecharMenu} activeOpacity={1}>
-          <View style={styles.menuContent}>
-            <Text style={styles.menuTitle}>Menu</Text>
-            
-            <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => handleNavegar('Home')}
-            >
-              <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Home</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => handleNavegar('Perfil')}
-            >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meu Perfil</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => handleNavegar('Chat')}
-            >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Chat</Text>
-            </TouchableOpacity>
-
-                <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => handleNavegar('Mensalidades')}
-            >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Mensalidades</Text>
-            </TouchableOpacity>
-
-               <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => handleNavegar('LojaProdutos')}
-            >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Loja</Text>
-            </TouchableOpacity>
-
-                  <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => handleNavegar('LojaFavoritos')}
-            >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Favoritos</Text>
-            </TouchableOpacity>
-
-                       <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={() => handleNavegar('LojaReservas')}
-            >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Reservas</Text>
-            </TouchableOpacity>
-
-
-
-            <TouchableOpacity 
-              style={styles.menuItem} 
-              onPress={handleFecharMenu}
-            >
-              <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Desempenho</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.menuItem}
-              onPress={() => console.log("Navegar para Configurações")}
-            >
-              <Ionicons name="settings-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Configurações</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.menuItem}
-              onPress={() => handleNavegar('Inicial')}
-            >
-              <Ionicons name="log-out-outline" size={24} color="#dc3545" />
-              <Text style={[styles.menuItemText, {color: '#dc3545'}]}>Sair</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-      
-      {/* SEU CÓDIGO PRINCIPAL (INTOCADO) */}
       <View style={styles.topSection}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.headerButton} onPress={handleVoltar}>
-            <Ionicons name="arrow-back" size={24} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={handleAbrirMenu}>
-            <Ionicons name="menu" size={28} color="white" />
-          </TouchableOpacity>
-        </View>
+        <DesempenhoHeader navigation={navigation} paddingHorizontal={2} />
         <Text style={styles.monthYearText}>{dadosDesempenho.mesAno}</Text>
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
@@ -190,44 +68,7 @@ const Desempenho = ({ navigation }) => {
   );
 };
 
-// ESTILOS ATUALIZADOS AQUI
 const styles = StyleSheet.create({
-  // --- Estilos do Menu Modal ---
-  menuOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    alignItems: 'flex-end', // <--- 1. ADICIONADO: Alinha o menu à direita
-  },
-  menuContent: {
-    height: '100%',
-    width: '75%',
-    backgroundColor: 'white',
-    paddingTop: 80,
-    paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: -2, height: 0 }, // <--- 2. ALTERADO: Sombra para a esquerda
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  menuTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    color: '#333',
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 15,
-  },
-  menuItemText: {
-    fontSize: 18,
-    marginLeft: 15,
-    color: '#333',
-    fontWeight: '500',
-  },
-  
   // --- Estilos Originais da Tela (sem alterações) ---
   container: {
     flex: 1,

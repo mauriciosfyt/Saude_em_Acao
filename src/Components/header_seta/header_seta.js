@@ -1,57 +1,177 @@
-// Arquivo: src/components/CabecalhoPadrao.js
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
+const DesempenhoHeader = ({ navigation, mesAno }) => {
+  const [menuVisivel, setMenuVisivel] = useState(false);
 
-// Importe suas constantes de tema
-import { COLORS, SPACING } from '../../constants/constants'; // <-- Atenção: ajuste o caminho para o seu arquivo!
+  const handleVoltar = () => {
+    if (navigation) {
+      navigation.goBack();
+    }
+  };
 
-/**
- * Um header padronizado com uma seta de voltar automática.
- * @param {object} props
- * @param {React.ReactNode} props.children - Permite adicionar ícones ou botões no lado direito.
- */
-const CabecalhoPadrao = ({ children }) => {
-  // Este hook da React Navigation nos dá acesso ao controle de navegação
-  const navigation = useNavigation();
+  const handleAbrirMenu = () => {
+    setMenuVisivel(true);
+  };
+
+  const handleFecharMenu = () => {
+    setMenuVisivel(false);
+  };
+
+  const handleNavegar = (nomeDaTela) => {
+    handleFecharMenu();
+    navigation.navigate(nomeDaTela);
+  };
 
   return (
-    <View style={estilos.container}>
-      {/* Seta de Voltar (Lado Esquerdo) */}
-      <TouchableOpacity
-        style={estilos.botao}
-        onPress={() => navigation.goBack()} // A mágica acontece aqui!
+    <>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={menuVisivel}
+        onRequestClose={handleFecharMenu}
       >
-        <Icon name="arrow-back" size={24} color={COLORS.escuro} />
-      </TouchableOpacity>
-
-      {/* Conteúdo Extra (Lado Direito) */}
-      <View style={estilos.ladoDireito}>
-        {children}
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          onPress={handleFecharMenu}
+          activeOpacity={1}
+        >
+          <View style={styles.menuContent}>
+            <Text style={styles.menuTitle}>Menu</Text>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Home")}
+            >
+              <Ionicons name="home-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Home</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Perfil")}
+            >
+              <Ionicons name="person-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Meu Perfil</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Chat")}
+            >
+              <Ionicons name="chatbubble-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Chat</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Mensalidades")}
+            >
+              <Ionicons name="card-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Mensalidades</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("LojaProdutos")}
+            >
+              <Ionicons name="cart-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Loja</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("LojaFavoritos")}
+            >
+              <Ionicons name="heart-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Favoritos</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("LojaReservas")}
+            >
+              <Ionicons name="bookmark-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Reservas</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Desempenho")}
+            >
+              <Ionicons name="bar-chart-outline" size={24} color="#333" />
+              <Text style={styles.menuItemText}>Desempenho</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Inicial")}
+            >
+              <Ionicons name="log-out-outline" size={24} color="#dc3545" />
+              <Text style={[styles.menuItemText, { color: "#dc3545" }]}>
+                Sair
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.headerButton} onPress={handleVoltar}>
+          <Ionicons name="arrow-back" size={24} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.headerButton} onPress={handleAbrirMenu}>
+          <Ionicons name="menu" size={28} />
+        </TouchableOpacity>
       </View>
-    </View>
+      <Text style={styles.monthYearText}>{mesAno}</Text>
+    </>
   );
 };
 
-const estilos = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    paddingVertical: SPACING.pequeno,
-    paddingHorizontal: SPACING.medio, // Adicionado padding horizontal para não colar nas bordas
+const styles = StyleSheet.create({
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    alignItems: "flex-end",
   },
-  botao: {
-    padding: SPACING.pequeno, // Aumenta a área de toque do botão
+  menuContent: {
+    height: "100%",
+    width: "75%",
+    backgroundColor: "white",
+    paddingTop: 80,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: -2, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  ladoDireito: {
-    // Este container ajuda a alinhar os itens que você adicionar
-    flexDirection: 'row',
-    alignItems: 'center',
+  menuTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 30,
+    color: "#333",
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
+  },
+  menuItemText: {
+    fontSize: 18,
+    marginLeft: 15,
+    color: "#333",
+    fontWeight: "500",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingBottom: 20,
+    marginTop: 30,
+    paddingHorizontal: 20,
+  },
+  headerButton: {
+    padding: 8,
+  },
+  monthYearText: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "left",
   },
 });
 
-export default CabecalhoPadrao;
+export default DesempenhoHeader;

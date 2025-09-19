@@ -11,12 +11,13 @@ import {
   Modal,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import HeaderSeta from '../../Components/header_seta/header_seta';
 import styles from '../../Styles/TreinoSegundaStyle';
 
 // ...restante do código permanece igual...
 
 const TreinoSegunda = ({ navigation }) => {
-  const [menuVisivel, setMenuVisivel] = useState(false);
+  // Removido menuVisivel, controle agora é do HeaderSeta
   const [exerciciosConcluidos, setExerciciosConcluidos] = useState(0);
   const [exerciciosSelecionados, setExerciciosSelecionados] = useState({});
   const [modalExercicio, setModalExercicio] = useState({ visivel: false, exercicio: null });
@@ -87,19 +88,7 @@ const TreinoSegunda = ({ navigation }) => {
 
   const totalExercicios = 6;
 
-  // Funções de controle do menu
-  const handleAbrirMenu = () => {
-    setMenuVisivel(true);
-  };
-
-  const handleFecharMenu = () => {
-    setMenuVisivel(false);
-  };
-
-  const handleNavegar = (nomeDaTela) => {
-    handleFecharMenu();
-    navigation.navigate(nomeDaTela);
-  };
+  // Menu lateral agora é controlado pelo HeaderSeta
 
   // Função para marcar/desmarcar exercício
   const toggleExercicio = (id) => {
@@ -154,21 +143,8 @@ const TreinoSegunda = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#000000" />
-          </TouchableOpacity>
-          <View /> {/* Espaço vazio para centralizar */}
-          <TouchableOpacity style={styles.menuButton} onPress={handleAbrirMenu}>
-            <Ionicons name="menu" size={24} color="#000000" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      {/* HeaderSeta com menu lateral */}
+      <HeaderSeta navigation={navigation} mesAno={null} />
 
       {/* Conteúdo Principal */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -268,71 +244,7 @@ const TreinoSegunda = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Modal do Menu */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={menuVisivel}
-        onRequestClose={handleFecharMenu}
-      >
-        <TouchableOpacity
-          style={styles.menuOverlay}
-          onPress={handleFecharMenu}
-          activeOpacity={1}
-        >
-          <View style={styles.menuContent}>
-            <Text style={styles.menuTitle}>Menu</Text>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("MainTabs")}
-            >
-              <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Home</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Perfil")}
-            >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meu Perfil</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Chat")}
-            >
-              <Ionicons name="chatbubble-ellipses-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Chat</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Desempenho")}
-            >
-              <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Desempenho</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("MeuTreino")}
-            >
-              <Ionicons name="fitness-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meus Treinos</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Mensalidades")}
-            >
-              <Ionicons name="card-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Mensalidades</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      {/* Menu lateral agora é controlado pelo HeaderSeta */}
 
       {/* Modal Sobre o Exercício */}
       <Modal

@@ -14,18 +14,8 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
 
-  // ===== NOVOS ESTILOS PARA O HEADER =====
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15, // Espaço entre o header e o título
-    paddingTop: 40, // Espaçamento para a Status Bar
-  },
-  headerButton: {
-    padding: 8, // Aumenta a área de toque
-  },
-  // =====================================
+  // ===== ESTILOS DO HEADER DEVEM SER USADOS NO COMPONENTE DesempenhoHeader.js =====
+  // Removidos deste arquivo para evitar duplicidade e conflitos.
   
   // Estilo 'backButton' foi removido
   
