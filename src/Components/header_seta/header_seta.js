@@ -109,10 +109,10 @@ const DesempenhoHeader = ({ navigation, mesAno }) => {
       </Modal>
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerButton} onPress={handleVoltar}>
-          <Ionicons name="arrow-back" size={24}  color='white'/>
+          <Ionicons name="arrow-back" size={24}  color='Black'/>
         </TouchableOpacity>
         <TouchableOpacity style={styles.headerButton} onPress={handleAbrirMenu}>
-          <Ionicons name="menu" size={28}  color='white' />
+          <Ionicons name="menu" size={28}  color='Black' />
         </TouchableOpacity>
       </View>
       <Text style={styles.monthYearText}>{mesAno}</Text>
