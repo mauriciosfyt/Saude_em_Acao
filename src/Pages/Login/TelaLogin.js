@@ -14,6 +14,7 @@ import {
 import { COLORS, SPACING, FONTS, BORDERS } from '../../constants/constants';
 import stylesLogin from '../../Styles/stylesLogin';
 import ModalPoliticasTermos from '../../Components/ModalPoliticasTermos';
+import { Ionicons } from '@expo/vector-icons';
 
 // CORREÇÃO #1: Adicione { navigation } aqui para receber o controle de navegação
 const TelaLogin = ({ navigation }) => {
@@ -75,7 +76,7 @@ const TelaLogin = ({ navigation }) => {
         <View style={stylesLogin.header}>
           {/* CORREÇÃO #3: Adicione o onPress para o botão voltar */}
           <TouchableOpacity style={stylesLogin.botaoVoltar} onPress={() => navigation.goBack()}>
-            <Text style={stylesLogin.iconeVoltar}>←</Text>
+            <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
         </View>
 
@@ -155,7 +156,7 @@ const TelaLogin = ({ navigation }) => {
                   style={stylesLogin.botaoVoltarCard}
                   onPress={() => setMostrarCardPoliticas(false)}
                 >
-                  <Text style={stylesLogin.iconeVoltarCard}>←</Text>
+                  <Ionicons name="arrow-back" size={24} color="#000" />
                 </TouchableOpacity>
                 <Image source={require('../../../assets/icons/logo_dia.png')} style={stylesLogin.logoHeader} />
               </View>
@@ -214,7 +215,7 @@ se tiver dúvidas sobre esta política, entre em contato pelo e-mail: otavio.per
                   style={stylesLogin.botaoVoltarCard}
                   onPress={() => setMostrarCardTermos(false)}
                 >
-                  <Text style={stylesLogin.iconeVoltarCard}>←</Text>
+                  <Ionicons name="arrow-back" size={24} color="#000" />
                 </TouchableOpacity>
                 <Image source={require('../../../assets/icons/logo_dia.png')} style={stylesLogin.logoHeader} />
               </View>
