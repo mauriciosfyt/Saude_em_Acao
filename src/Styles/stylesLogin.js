@@ -12,11 +12,13 @@ const stylesLogin = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingTop: 30,
+    paddingBottom: 15,
+    marginTop: 30,
     backgroundColor: '#fff',
   },
   botaoVoltar: {
-    padding: 5,
+    padding: 8,
   },
   iconeVoltar: {
     fontSize: 24,
