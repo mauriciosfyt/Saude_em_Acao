@@ -158,8 +158,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 20,
+    paddingTop: 10,
+    paddingBottom: 40,
+      marginTop: 30,
+       top: 0,
+    left: 0,
+    right: 0,
   },
 
   backButton: {
@@ -169,7 +173,7 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     color: 'white',
     flex: 1,
