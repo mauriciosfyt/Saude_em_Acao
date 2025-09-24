@@ -13,6 +13,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import HeaderSeta from '../../Components/header_seta/header_seta';
 import styles from '../../Styles/TreinoTercaStyle';
+import { playSuccessSound } from '../../Components/Sounds';
 
 // ...restante do código permanece igual...
 
@@ -135,6 +136,7 @@ const TreinoTerca = ({ navigation }) => {
 
   const handleConfirmarFinalizar = () => {
     setModalFinalizar(false);
+    playSuccessSound();
     navigation.goBack();
   };
 

@@ -13,6 +13,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import HeaderSeta from '../../Components/header_seta/header_seta';
 import styles from '../../Styles/TreinoSextastyle';
+import { playSuccessSound } from '../../Components/Sounds';
 
 // ...restante do código permanece igual...
 
@@ -134,6 +135,7 @@ const TreinoSexta = ({ navigation }) => {
 
   const handleConfirmarFinalizar = () => {
     setModalFinalizar(false);
+    playSuccessSound();
     navigation.goBack();
   };
 

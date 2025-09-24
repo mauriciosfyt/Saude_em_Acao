@@ -1,6 +1,6 @@
 import { scheduleNotification } from '../../Components/Notifications';
 import React, { useState } from 'react';
-import { playSuccessSound, TestSoundButton } from '../../Components/Sounds';
+import { playSuccessSound, TestSoundButton, setSoundEnabled } from '../../Components/Sounds';
 
 import {
   View,
@@ -174,11 +174,11 @@ const Perfil = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
-          <Ionicons name="arrow-back" size={24} color="black" />
+          <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Meu Perfil</Text>
         <TouchableOpacity style={styles.settingsButton} onPress={handleConfiguracoes}>
-          <Ionicons name="settings-outline" size={24} color="black" />
+          <Ionicons name="settings-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
 
@@ -406,7 +406,7 @@ const Perfil = ({ navigation }) => {
   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
     <Switch
       value={som}
-      onValueChange={setSom}
+      onValueChange={(v) => { setSom(v); setSoundEnabled(v); }}
       trackColor={{ false: '#e5e7eb', true: '#405CBA' }}
       thumbColor={som ? '#ffffff' : '#f3f4f6'}
     />
