@@ -11,6 +11,10 @@ export default function CodeModal({ code, onChange, onClose, onValidate }) {
       document.body.classList.remove("modal-open");
     };
   }, []);
+
+  // Garante que sempre haverá 6 campos
+  const codeFields = Array.from({ length: 5 }, (_, idx) => code[idx] || "");
+
   return (
     <div className="modal-bg" onClick={onClose}>
       <div className="modal-login" onClick={(e) => e.stopPropagation()}>
@@ -75,12 +79,12 @@ export default function CodeModal({ code, onChange, onClose, onValidate }) {
         <div
           style={{
             display: "flex",
-            gap: 16,
+            gap: 0,
             justifyContent: "center",
             marginBottom: 24,
           }}
         >
-          {code.map((digit, idx) => (
+          {codeFields.map((digit, idx) => (
             <input
               key={idx}
               id={`code-input-${idx}`}
