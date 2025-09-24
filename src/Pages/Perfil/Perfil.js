@@ -174,11 +174,11 @@ const Perfil = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleVoltar}>
-          <Ionicons name="arrow-back" size={24} color="white" />
+          <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Meu Perfil</Text>
         <TouchableOpacity style={styles.settingsButton} onPress={handleConfiguracoes}>
-          <Ionicons name="settings-outline" size={24} color="white" />
+          <Ionicons name="settings-outline" size={24} color="black" />
         </TouchableOpacity>
       </View>
 
