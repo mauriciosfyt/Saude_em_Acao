@@ -42,80 +42,86 @@ const Mensalidades = ({ navigation }) => {
 
       {/* --- CÓDIGO DO MENU MODAL (ADICIONADO) --- */}
       <Modal
-        animationType="fade"
-        transparent={true}
-        visible={menuVisivel}
-        onRequestClose={handleFecharMenu}
-      >
-        <TouchableOpacity
-          style={styles.menuOverlay}
-          onPress={handleFecharMenu}
-          activeOpacity={1}
-        >
-          <View style={styles.menuContent}>
-            <Text style={styles.menuTitle}>Menu</Text>
-
-            {/* Itens do Menu */}
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Home")}
-            >
-              <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Home</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Perfil")}
-            >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meu Perfil</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Chat")}
-            >
-              <Ionicons
-                name="chatbubble-ellipses-outline"
-                size={24}
-                color="#333"
-              />
-              <Text style={styles.menuItemText}>Chat</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Desempenho")}
-            >
-              <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Desempenho</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.menuItem, styles.menuItemAtivo]}
-              onPress={handleFecharMenu}
-            >
-              <Ionicons name="ribbon-outline" size={24} color="#405CBA" />
-              <Text style={[styles.menuItemText, { color: "#405CBA" }]}>
-                Mensalidades
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => console.log("Configurações")}
-            >
-              <Ionicons name="settings-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Configurações</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Inicial")}
-            >
-              <Ionicons name="log-out-outline" size={24} color="#dc3545" />
-              <Text style={[styles.menuItemText, { color: "#dc3545" }]}>
-                Sair
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+             animationType="fade"
+             transparent={true}
+             visible={menuVisivel}
+             onRequestClose={handleFecharMenu}
+           >
+             <TouchableOpacity
+               style={styles.menuOverlay}
+               onPress={handleFecharMenu}
+               activeOpacity={1}
+             >
+               <View style={styles.menuContent}>
+                 <Text style={styles.menuTitle}>Menu</Text>
+                 <TouchableOpacity
+                   style={styles.menuItem}
+                   onPress={() => handleNavegar("Home")}
+                 >
+                   <Ionicons name="home-outline" size={24} color="#333" />
+                   <Text style={styles.menuItemText}>Home</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity
+                   style={styles.menuItem}
+                   onPress={() => handleNavegar("Perfil")}
+                 >
+                   <Ionicons name="person-outline" size={24} color="#333" />
+                   <Text style={styles.menuItemText}>Meu Perfil</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity
+                   style={styles.menuItem}
+                   onPress={() => handleNavegar("Chat")}
+                 >
+                   <Ionicons name="chatbubble-outline" size={24} color="#333" />
+                   <Text style={styles.menuItemText}>Chat</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity
+                   style={styles.menuItem}
+                   onPress={() => handleNavegar("Mensalidades")}
+                 >
+                   <Ionicons name="card-outline" size={24} color="#333" />
+                   <Text style={styles.menuItemText}>Mensalidades</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity
+                   style={styles.menuItem}
+                   onPress={() => handleNavegar("LojaProdutos")}
+                 >
+                   <Ionicons name="cart-outline" size={24} color="#333" />
+                   <Text style={styles.menuItemText}>Loja</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity
+                   style={styles.menuItem}
+                   onPress={() => handleNavegar("LojaFavoritos")}
+                 >
+                   <Ionicons name="heart-outline" size={24} color="#333" />
+                   <Text style={styles.menuItemText}>Favoritos</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity
+                   style={styles.menuItem}
+                   onPress={() => handleNavegar("LojaReservas")}
+                 >
+                   <Ionicons name="bookmark-outline" size={24} color="#333" />
+                   <Text style={styles.menuItemText}>Reservas</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity
+                   style={styles.menuItem}
+                   onPress={() => handleNavegar("Desempenho")}
+                 >
+                   <Ionicons name="bar-chart-outline" size={24} color="#333" />
+                   <Text style={styles.menuItemText}>Desempenho</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity
+                   style={styles.menuItem}
+                   onPress={() => handleNavegar("Inicial")}
+                 >
+                   <Ionicons name="log-out-outline" size={24} color="#dc3545" />
+                   <Text style={[styles.menuItemText, { color: "#dc3545" }]}>
+                     Sair
+                   </Text>
+                 </TouchableOpacity>
+               </View>
+             </TouchableOpacity>
+           </Modal>
 
       {/* --- CONTEÚDO ORIGINAL DA TELA --- */}
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
@@ -267,7 +273,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   headerButton: {
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    backgroundColor: "transparent",
     padding: 8,
     borderRadius: 20,
   },
