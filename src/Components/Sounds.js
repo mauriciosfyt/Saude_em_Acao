@@ -4,10 +4,20 @@ import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 
 let soundObject;
+let soundEnabled = true;
+
+export function setSoundEnabled(enabled) {
+  soundEnabled = !!enabled;
+}
+
+export function getSoundEnabled() {
+  return soundEnabled;
+}
 
 // Função para tocar som de conclusão de treino
 export async function playSuccessSound() {
   try {
+    if (!soundEnabled) return;
     if (soundObject) {
       await soundObject.unloadAsync();
     }
@@ -26,6 +36,7 @@ export async function playSuccessSound() {
 // Função para tocar som de erro
 export async function playErrorSound() {
   try {
+    if (!soundEnabled) return;
     if (soundObject) {
       await soundObject.unloadAsync();
     }
