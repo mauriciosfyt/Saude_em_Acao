@@ -1,108 +1,175 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-
-  header: {
-    paddingTop: 8,
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButton: {
-    padding: 8,
-    marginRight: 8,
-  },
-  title: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
-    marginRight: 40,
-  },
-
-  whiteSection: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-    backgroundColor: '#ffffff',
-  },
-  mt16: {
-    marginTop: 16,
-  },
-  rowBetween: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  },
-  smallLabel: {
-    fontSize: 12,
-    color: '#6b7280',
-    marginBottom: 6,
-  },
-  planType: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#3b5ccc',
-    letterSpacing: 0.4,
-  },
-  valueStrong: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#111827',
-  },
-
-  // Triângulo invertido: da borda superior esquerda descendo para a direita
-  triangleSeparator: {
-    width: 0,
-    height: 0,
-    borderRightWidth: 0,
-    borderLeftWidth: 900, // aumentar para passar da largura da tela
-    borderBottomWidth: 380, // manter o ângulo visual
-    borderStyle: 'solid',
-    backgroundColor: 'transparent',
-    borderLeftColor: 'transparent',
-    borderBottomColor: '#405CBA',
-    alignSelf: 'flex-end',
-    marginTop: -1,
-  },
-
-  blueSection: {
-    flex: 1,
-    backgroundColor: '#405CBA',
-    alignItems: 'center',
-    paddingTop: 12,
-  },
-  renewTitle: {
-    color: '#fff',
-    fontSize: 40,
-    fontWeight: '800',
-    textAlign: 'center',
-    letterSpacing: 0.5,
-  },
-  primaryButton: {
-    marginTop: 28,
-    backgroundColor: '#8fb0ff',
-    paddingVertical: 14,
-    paddingHorizontal: 22,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 4,
-  },
-  primaryButtonText: {
-    color: '#1f2937',
-    fontSize: 18,
-    fontWeight: '700',
-  },
+	container: {
+		flex: 1,
+		backgroundColor: '#fff',
+		position: 'relative',
+	},
+	diagonalBg: {
+		position: 'absolute',
+		top: -120, // valor negativo para subir o recorte
+		left: 0,
+		width: 0,
+		height: 0,
+		borderBottomWidth: height + 120,
+		borderRightWidth: width,
+		borderTopWidth: 0,
+		borderBottomColor: '#314CB6',
+		borderRightColor: 'transparent',
+		borderTopColor: 'transparent',
+		zIndex: 0,
+		opacity: 1,
+	},
+		header: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			paddingTop: 50,
+			paddingHorizontal: 20,
+			backgroundColor: 'transparent',
+			marginBottom: 10,
+			zIndex: 2,
+		},
+	backButton: {
+		padding: 8,
+	},
+	menuButton: {
+		padding: 8,
+	},
+	title: {
+		fontSize: 20,
+		fontWeight: 'bold',
+		color: '#222',
+	},
+		scrollContent: {
+			alignItems: 'center',
+			paddingBottom: 30,
+			zIndex: 2,
+		},
+				cardPlano: {
+					backgroundColor: '#fff',
+					borderRadius: 18,
+					paddingVertical: 28,
+					paddingHorizontal: 26,
+					width: width * 0.93,
+					marginTop: 10,
+					marginBottom: 22,
+					borderWidth: 1.2,
+					borderColor: '#314CB6',
+					shadowColor: '#314CB6',
+					shadowOffset: { width: 0, height: 4 },
+					shadowOpacity: 0.10,
+					shadowRadius: 10,
+					elevation: 8,
+					zIndex: 2,
+					overflow: 'visible',
+				},
+				cardPlanoRecorte: {
+					position: 'absolute',
+					left: 0,
+					bottom: 0,
+					width: 38,
+					height: 14,
+					backgroundColor: '#314CB6',
+					borderBottomLeftRadius: 18,
+					borderTopRightRadius: 18,
+					zIndex: 3,
+				},
+			planoAtivo: {
+				color: '#4CAF50',
+				fontWeight: 'bold',
+				fontSize: 16,
+				marginBottom: 2,
+				marginLeft: 2,
+				letterSpacing: 0.2,
+			},
+			nomePlano: {
+				color: '#314CB6',
+				fontWeight: 'bold',
+				fontSize: 34,
+				marginBottom: 18,
+				fontFamily: 'monospace',
+				textShadowColor: 'rgba(49,76,182,0.10)',
+				textShadowOffset: { width: 1, height: 2 },
+				textShadowRadius: 2,
+				letterSpacing: 0.5,
+			},
+			beneficiosList: {
+				marginTop: 12,
+				gap: 6,
+			},
+			beneficioItem: {
+				flexDirection: 'row',
+				alignItems: 'center',
+				marginBottom: 8,
+				marginLeft: 2,
+			},
+			beneficioText: {
+				marginLeft: 12,
+				fontSize: 23,
+				color: '#111',
+				fontWeight: 'bold',
+				letterSpacing: 0.1,
+			},
+		infoRow: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			width: width * 0.93,
+			marginBottom: 18,
+			gap: 0,
+		},
+		infoBox: {
+			backgroundColor: '#fff',
+			borderRadius: 16,
+			paddingVertical: 18,
+			paddingHorizontal: 16,
+			width: width * 0.44,
+			alignItems: 'flex-start',
+			shadowColor: '#314CB6',
+			shadowOffset: { width: 0, height: 3 },
+			shadowOpacity: 0.10,
+			shadowRadius: 6,
+			elevation: 4,
+			borderWidth: 1.2,
+			borderColor: '#314CB6',
+			marginBottom: 8,
+		},
+		infoLabel: {
+			color: '#888',
+			fontSize: 16,
+			marginBottom: 4,
+			fontWeight: '600',
+			marginLeft: 2,
+		},
+		infoValue: {
+			color: '#111',
+			fontSize: 24,
+			fontWeight: 'bold',
+			marginLeft: 2,
+		},
+	renovarButton: {
+		marginTop: 30,
+		backgroundColor: '#7B97F4',
+		borderRadius: 8,
+		paddingVertical: 14,
+		width: width * 0.8,
+		alignItems: 'center',
+		alignSelf: 'center',
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.10,
+		shadowRadius: 3,
+		elevation: 2,
+	},
+	renovarButtonText: {
+		color: '#fff',
+		fontSize: 17,
+		fontWeight: 'bold',
+		letterSpacing: 0.5,
+	},
 });
 
 export default styles;
-
-
