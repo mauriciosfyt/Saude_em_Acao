@@ -16,13 +16,14 @@ const styles = StyleSheet.create({
   },
   
   headerContent: {
-    flexDirection: 'row',
-   alignItems: "flex-start",
-    justifyContent: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 30,
     paddingHorizontal: 20,
+    backgroundColor: "transparent",
     marginBottom: 20,
-    paddingTop: 20,
-    marginTop: 30,
+    zIndex: 2,
   },
   
   backButton: {
