@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     color: "#111",
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
     marginLeft: 2,
   },
