@@ -17,7 +17,7 @@ import { playSuccessSound } from '../../Components/Sounds';
 
 // ...restante do código permanece igual...
 
-const TreinoTerca = ({ navigation }) => {
+const TreinoTerca = ({ navigation, route }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
   const [exerciciosConcluidos, setExerciciosConcluidos] = useState(0);
   const [exerciciosSelecionados, setExerciciosSelecionados] = useState({});
@@ -115,10 +115,24 @@ const TreinoTerca = ({ navigation }) => {
     setExerciciosConcluidos(Object.keys(novoEstado).length);
   };
 
-  // Função para começar treino
-  const handleComecarTreino = () => {
-    console.log('Começando treino...');
-    // Aqui você pode implementar a lógica para iniciar o cronômetro ou navegar para uma tela de exercício ativo
+  // Função para selecionar todos os exercícios
+  const handleSelecionarExercicios = () => {
+    if (exerciciosConcluidos === totalExercicios) {
+      setExerciciosSelecionados({});
+      setExerciciosConcluidos(0);
+    } else {
+      const todosExercicios = {};
+      // Selecionar todos os exercícios de costas
+      exercicios.costas.forEach(exercicio => {
+        todosExercicios[exercicio.id] = true;
+      });
+      // Selecionar todos os exercícios de bíceps
+      exercicios.biceps.forEach(exercicio => {
+        todosExercicios[exercicio.id] = true;
+      });
+      setExerciciosSelecionados(todosExercicios);
+      setExerciciosConcluidos(totalExercicios);
+    }
   };
 
   // Função para finalizar treino
@@ -137,7 +151,11 @@ const TreinoTerca = ({ navigation }) => {
   const handleConfirmarFinalizar = () => {
     setModalFinalizar(false);
     playSuccessSound();
-    navigation.goBack();
+    // Marcar treino como concluído se a função estiver disponível
+    if (route?.params?.onTreinoConcluido) {
+      route.params.onTreinoConcluido('Terça-Feira');
+    }
+    navigation.navigate('MeuTreino');
   };
 
   const handleCancelarFinalizar = () => {
@@ -225,13 +243,24 @@ const TreinoTerca = ({ navigation }) => {
 
       {/* Footer com Botões */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.comecarButton} onPress={handleComecarTreino}>
-          <Text style={styles.comecarButtonText}>Começar Treino</Text>
+        <TouchableOpacity style={styles.comecarButton} onPress={handleSelecionarExercicios}>
+          <Text style={styles.comecarButtonText}>Selecionar Exercícios</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.finalizarButton} onPress={handleFinalizarTreino}>
-          <Text style={styles.finalizarButtonText}>Finalizar</Text>
-          <Ionicons name="checkmark-circle" size={20} color="#666" />
+        <TouchableOpacity
+          style={[
+            styles.finalizarButton,
+            exerciciosConcluidos === totalExercicios && { backgroundColor: '#4CAF50' } // Verde se todos selecionados
+          ]}
+          onPress={handleFinalizarTreino}
+        >
+          <Text style={[
+            styles.finalizarButtonText,
+            exerciciosConcluidos === totalExercicios && { color: 'white' } // Texto branco no botão verde
+          ]}>
+            Finalizar
+          </Text>
+          <Ionicons name="checkmark-circle" size={20} color={exerciciosConcluidos === totalExercicios ? "white" : "#666"} />
         </TouchableOpacity>
       </View>
 

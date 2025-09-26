@@ -17,7 +17,7 @@ import { playSuccessSound } from '../../Components/Sounds';
 
 // ...restante do código permanece igual...
 
-const TreinoQuarta = ({ navigation }) => {
+const TreinoQuarta = ({ navigation, route }) => {
   console.log('Renderizando TreinoQuarta');
   // Dados dos exercícios
   const exercicios = {
@@ -113,10 +113,19 @@ const TreinoQuarta = ({ navigation }) => {
     setExerciciosConcluidos(Object.keys(novoEstado).length);
   };
 
-  // Função para começar treino
-  const handleComecarTreino = () => {
-    console.log('Começando treino...');
-    // Aqui você pode implementar a lógica para iniciar o cronômetro ou navegar para uma tela de exercício ativo
+  // Função para selecionar todos os exercícios
+  const handleSelecionarExercicios = () => {
+    if (exerciciosConcluidos === totalExercicios) {
+      setExerciciosSelecionados({});
+      setExerciciosConcluidos(0);
+    } else {
+      const todosExercicios = {};
+      exercicios.perna.forEach(exercicio => {
+        todosExercicios[exercicio.id] = true;
+      });
+      setExerciciosSelecionados(todosExercicios);
+      setExerciciosConcluidos(totalExercicios);
+    }
   };
 
   // Função para finalizar treino
@@ -135,7 +144,11 @@ const TreinoQuarta = ({ navigation }) => {
   const handleConfirmarFinalizar = () => {
     setModalFinalizar(false);
     playSuccessSound();
-    navigation.goBack();
+    // Marcar treino como concluído se a função estiver disponível
+    if (route?.params?.onTreinoConcluido) {
+      route.params.onTreinoConcluido('Quarta-Feira');
+    }
+    navigation.navigate('MeuTreino');
   };
 
   const handleCancelarFinalizar = () => {
@@ -207,13 +220,24 @@ const TreinoQuarta = ({ navigation }) => {
 
       {/* Footer com Botões */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.comecarButton} onPress={handleComecarTreino}>
-          <Text style={styles.comecarButtonText}>Começar Treino</Text>
+        <TouchableOpacity style={styles.comecarButton} onPress={handleSelecionarExercicios}>
+          <Text style={styles.comecarButtonText}>Selecionar Exercícios</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.finalizarButton} onPress={handleFinalizarTreino}>
-          <Text style={styles.finalizarButtonText}>Finalizar</Text>
-          <Ionicons name="checkmark-circle" size={20} color="#666" />
+        <TouchableOpacity
+          style={[
+            styles.finalizarButton,
+            exerciciosConcluidos === totalExercicios && { backgroundColor: '#4CAF50' } // Verde se todos selecionados
+          ]}
+          onPress={handleFinalizarTreino}
+        >
+          <Text style={[
+            styles.finalizarButtonText,
+            exerciciosConcluidos === totalExercicios && { color: 'white' } // Texto branco no botão verde
+          ]}>
+            Finalizar
+          </Text>
+          <Ionicons name="checkmark-circle" size={20} color={exerciciosConcluidos === totalExercicios ? "white" : "#666"} />
         </TouchableOpacity>
       </View>
 
