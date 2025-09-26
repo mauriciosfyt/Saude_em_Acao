@@ -13,6 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import { LinearGradient } from 'expo-linear-gradient';
 import HeaderLoja from '../../../Components/HeaderLoja';
+import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
 
 // Adicionando as cores do gradiente ao tema para manter a organização
 const theme = {
@@ -102,24 +103,7 @@ const LojaProdutos = ({ navigation, route }) => {
                 </View>
             </ScrollView>
 
-            {/* --- BOTTOM NAVIGATION --- */}
-            <LinearGradient
-                colors={gradientColors}
-                locations={gradientLocations}
-                start={{ y: 0, x: 0 }}
-                end={{ y: 1, x: 0 }}
-                style={styles.bottomNav}
-            >
-                <TouchableOpacity>
-                    <Icon name="home" size={28} color={theme.colors.icon} />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Icon name="shopping-cart" size={28} color={theme.colors.icon} />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Icon name="heart" size={28} color={theme.colors.icon} />
-                </TouchableOpacity>
-            </LinearGradient>
+             <BottomNavBar navigation={navigation} activeScreen="LojaProdutos" />
         </SafeAreaView>
     );
 };

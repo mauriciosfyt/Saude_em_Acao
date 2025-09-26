@@ -27,7 +27,7 @@ const Plano = ({ navigation }) => {
         </TouchableOpacity>
         <Text style={styles.title}>Meu plano</Text>
         <TouchableOpacity style={styles.menuButton} onPress={handleAbrirMenu}>
-          <Ionicons name="menu" size={24} color="#222" />
+          <Ionicons name="menu" size={28} color="#222" />
         </TouchableOpacity>
       </View>
 
@@ -76,7 +76,10 @@ const Plano = ({ navigation }) => {
         </View>
 
         {/* Botão de renovar */}
-        <TouchableOpacity style={styles.renovarButton}>
+            <TouchableOpacity
+          style={styles.renovarButton}
+          onPress={() => handleNavegar("TelaPlanos")}
+        >
           <Text style={styles.renovarButtonText}>Renovar Plano</Text>
         </TouchableOpacity>
       </ScrollView>

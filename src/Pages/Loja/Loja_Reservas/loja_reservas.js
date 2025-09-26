@@ -13,6 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import { LinearGradient } from 'expo-linear-gradient';
 import HeaderLoja from '../../../Components/HeaderLoja';
+import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
 
 // Reutilizando e expandindo o tema
 const theme = {
@@ -99,7 +100,8 @@ const getStatusColor = (status) => {
     }
 };
 
-const Reservas = () => {
+// 1. CORREÇÃO: Receber a prop { navigation }
+const Reservas = ({ navigation }) => {
     const gradientColors = [theme.colors.gradientStart, theme.colors.gradientEnd];
     const gradientLocations = [0, 0.84];
 
@@ -142,8 +144,8 @@ const Reservas = () => {
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
 
-            {/* HeaderLoja reutilizado da tela da loja */}
-            <HeaderLoja navigation={null} searchText={searchText} setSearchText={setSearchText} />
+            {/* 2. CORREÇÃO: Passar a prop 'navigation' real, em vez de 'null' */}
+            <HeaderLoja navigation={navigation} searchText={searchText} setSearchText={setSearchText} />
 
             {/* --- LISTA DE SEÇÕES --- */}
             <SectionList
@@ -160,24 +162,7 @@ const Reservas = () => {
                 contentContainerStyle={styles.listContentContainer}
             />
 
-            {/* --- BOTTOM NAVIGATION --- */}
-            <LinearGradient
-                colors={gradientColors}
-                locations={gradientLocations}
-                start={{ y: 0, x: 0 }}
-                end={{ y: 1, x: 0 }}
-                style={styles.bottomNav}
-            >
-                <TouchableOpacity>
-                    <Icon name="home" size={28} color={theme.colors.icon} />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Icon name="shopping-cart" size={28} color={theme.colors.icon} />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Icon name="heart" size={28} color={theme.colors.icon} />
-                </TouchableOpacity>
-            </LinearGradient>
+       <BottomNavBar navigation={navigation} activeScreen="LojaReservas" />
         </SafeAreaView>
     );
 };

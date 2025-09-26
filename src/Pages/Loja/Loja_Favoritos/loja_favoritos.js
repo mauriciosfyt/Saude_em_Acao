@@ -13,6 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import { LinearGradient } from 'expo-linear-gradient';
 import HeaderLoja from '../../../Components/HeaderLoja';
+import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
 
 // Reutilizando o mesmo objeto de tema para manter a consistência
 const theme = {
@@ -116,24 +117,9 @@ const Favoritos = ({ navigation }) => {
                 contentContainerStyle={styles.listContentContainer}
             />
 
-            {/* --- BOTTOM NAVIGATION (Reutilizado da tela anterior) --- */}
-            <LinearGradient
-                colors={gradientColors}
-                locations={gradientLocations}
-                start={{ y: 0, x: 0 }}
-                end={{ y: 1, x: 0 }}
-                style={styles.bottomNav}
-            >
-                <TouchableOpacity>
-                    <Icon name="home" size={28} color={theme.colors.icon} />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Icon name="shopping-cart" size={28} color={theme.colors.icon} />
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Icon name="heart" size={28} color={theme.colors.primary} />
-                </TouchableOpacity>
-            </LinearGradient>
+             <BottomNavBar navigation={navigation} activeScreen="Favoritos" />
+
+        
         </SafeAreaView>
     );
 };
