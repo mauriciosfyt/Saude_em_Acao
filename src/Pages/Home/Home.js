@@ -48,7 +48,7 @@ const Home = ({ navigation }) => {
     { id: 1, icon: 'account-group-outline', label: 'Professores', screen: 'Professores' },
     { id: 2, icon: 'weight-lifter', label: 'Meus treinos', screen: 'MeuTreino' },
     { id: 3, icon: 'cart-outline', label: 'Nossa loja', screen: 'Loja' },
-    { id: 4, icon: 'account-circle-outline', label: 'Meu perfil', screen: 'Perfil' },
+    { id: 4, icon: 'account-circle-outline', label: 'Meu plano', screen: 'Plano' },
   ];
 
   const promoImage = { uri: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?fit=crop&w=800&q=80' };
