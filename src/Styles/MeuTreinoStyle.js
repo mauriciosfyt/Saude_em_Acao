@@ -17,12 +17,12 @@ const styles = StyleSheet.create({
   
   headerContent: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+   alignItems: "flex-start",
+    justifyContent: "flex-start",
     paddingHorizontal: 20,
     marginBottom: 20,
     paddingTop: 20,
-      marginTop: 10,
+    marginTop: 30,
   },
   
   backButton: {
