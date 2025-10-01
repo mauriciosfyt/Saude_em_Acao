@@ -48,8 +48,8 @@ export default function Routes() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {/* 2. Defina 'Inicial' como a PRIMEIRA tela do Stack */}
+            <Stack.Screen name="Inicial" component={Inicial} />
         <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="Inicial" component={Inicial} />
         <Stack.Screen name="Desempenho" component={Desempenho} />
         <Stack.Screen name="Loja" component={Loja} />
         <Stack.Screen name="Plano" component={Plano} />
