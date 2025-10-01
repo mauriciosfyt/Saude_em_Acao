@@ -117,7 +117,7 @@ const Favoritos = ({ navigation }) => {
                 contentContainerStyle={styles.listContentContainer}
             />
 
-             <BottomNavBar navigation={navigation} activeScreen="Favoritos" />
+             <BottomNavBar navigation={navigation} activeScreen="LojaFavoritos" />
 
         
         </SafeAreaView>
