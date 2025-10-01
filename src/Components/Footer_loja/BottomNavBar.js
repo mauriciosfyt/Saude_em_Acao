@@ -28,7 +28,7 @@ const BottomNavBar = ({ navigation, activeScreen }) => {
     const handleNavigate = (item) => {
         if (item.isNested) {
             // Navega para o TabNavigator e depois para a tela específica
-            navigation.navigate('MainTabs', { screen: item.screen });
+           navigation.navigate(item.screen);
         } else {
             // Navega diretamente para a tela no StackNavigator
             navigation.navigate(item.screen);
