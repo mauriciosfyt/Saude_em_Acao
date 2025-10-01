@@ -75,7 +75,7 @@ public class UsuarioService {
         return repo.save(usuario);
     }
 
-    public Usuario criarAdmin(AdminCreateDTO dto) {
+    public Usuario criarAdmin(UsuarioCreateDTO dto) { // Alterado aqui
         // As validações do DTO já foram checadas pelo Spring.
         Usuario usuario = new Usuario();
         usuario.setNome(dto.getNome());
@@ -153,15 +153,6 @@ public class UsuarioService {
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + id));
     }
 
-    public List<UsuarioSaidaDTO> buscarTodos(PageRequest pageable) {
-        List<Usuario> lista = repo.findAll(pageable).getContent();
-        List<UsuarioSaidaDTO> lstDTO = new ArrayList<>();
-
-        for (Usuario usuario : lista) {
-            lstDTO.add(toUsuarioSaidaDTO(usuario));
-        }
-        return lstDTO;
-    }
 
     public Optional<Usuario> buscarPorEmail(String email) {
         return repo.findByEmail(email.toLowerCase());
@@ -220,30 +211,6 @@ public class UsuarioService {
         return repo.save(usuario);
     }
 
-    public Usuario gravar(Usuario usuario) {
-        if (usuario.getNome() == null || usuario.getNome().trim().isEmpty()) {
-            throw new RuntimeException("Nome é obrigatório");
-        }
-        if (usuario.getEmail() == null || usuario.getEmail().trim().isEmpty()) {
-            throw new RuntimeException("Email é obrigatório");
-        }
-        if (usuario.getSenha() == null || usuario.getSenha().trim().isEmpty()) {
-            throw new RuntimeException("Senha é obrigatória");
-        }
-
-        usuario.setEmail(usuario.getEmail().toLowerCase());
-        if (usuario.getCpf() != null) {
-            usuario.setCpf(normalizarCpf(usuario.getCpf()));
-            validarCpf(usuario.getCpf());
-        }
-        if (usuario.getTelefone() != null) {
-            usuario.setTelefone(normalizarTelefone(usuario.getTelefone()));
-        }
-
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-
-        return repo.save(usuario);
-    }
 
     private void validarCamposObrigatorios(String nome, String email, String cpf, String telefone, String senha) {
         if (nome == null || nome.trim().isEmpty()) {

@@ -1,5 +1,3 @@
-// src/main/java/br.com.saudeemacao.api/service/LoginService.java
-
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.model.Usuario;
@@ -10,9 +8,6 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,7 +17,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @Service
-public class LoginService implements UserDetailsService {
+public class LoginService implements UserDetailsService { // <-- A correção está aqui
 
     @Value("${spring.security.jwt.secret}")
     private String chaveSecreta;
@@ -32,24 +27,12 @@ public class LoginService implements UserDetailsService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public String autenticar(Usuario usuario,
-                             AuthenticationManager authenticationManager) {
-        UsernamePasswordAuthenticationToken upat = new UsernamePasswordAuthenticationToken(usuario.getEmail(),
-                usuario.getSenha());
-
-        Authentication usuarioLogado = authenticationManager.authenticate(upat);
-        return gerarToken((Usuario) usuarioLogado.getPrincipal());
-    }
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return usuarioRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado!"));
     }
 
-    /**
-     * ALTERADO: Visibilidade de 'private' para 'public' para ser usado pelo handler do OAuth2.
-     */
     public String gerarToken(Usuario usuario) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(chaveSecreta);

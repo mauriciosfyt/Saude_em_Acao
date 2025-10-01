@@ -49,6 +49,7 @@ public class AuthController {
 
     private final String jwtIssuer = "API SaudeEmAcao";
 
+
     @PostMapping("/solicitar-token")
     public ResponseEntity<String> solicitarToken(@Valid @RequestBody TokenSolicitacaoDTO dto) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(dto.getEmail());

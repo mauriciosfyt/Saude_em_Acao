@@ -26,14 +26,12 @@ public class UsuarioController {
 
     // ROTAS PARA ALUNOS
     @PostMapping("/aluno")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Usuario> criarAluno(@Valid @ModelAttribute AlunoCreateDTO dto) throws IOException { // "throws IOException" adicionado
         Usuario usuario = usuarioService.criarAluno(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
     }
 
     @GetMapping("/aluno")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR')")
     public ResponseEntity<List<UsuarioSaidaDTO>> listarAlunos(
             @RequestParam(defaultValue = "0") int pag,
             @RequestParam(defaultValue = "10") int qtd) {
@@ -41,7 +39,6 @@ public class UsuarioController {
     }
 
     @PutMapping("/aluno/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Usuario> atualizarAluno(
             @PathVariable String id,
             @Valid @ModelAttribute UsuarioUpdateDTO dto) throws IOException { // "throws IOException" adicionado
@@ -50,14 +47,12 @@ public class UsuarioController {
 
     // ROTAS PARA PROFESSORES
     @PostMapping("/professor")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Usuario> criarProfessor(@Valid @ModelAttribute ProfessorCreateDTO dto) throws IOException { // "throws IOException" adicionado
         Usuario usuario = usuarioService.criarProfessor(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
     }
 
     @GetMapping("/professor")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UsuarioSaidaDTO>> listarProfessores(
             @RequestParam(defaultValue = "0") int pag,
             @RequestParam(defaultValue = "10") int qtd) {
@@ -65,7 +60,6 @@ public class UsuarioController {
     }
 
     @PutMapping("/professor/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Usuario> atualizarProfessor(
             @PathVariable String id,
             @Valid @ModelAttribute UsuarioUpdateDTO dto) throws IOException { // "throws IOException" adicionado
@@ -74,14 +68,12 @@ public class UsuarioController {
 
     // ROTAS PARA ADMINS
     @PostMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Usuario> criarAdmin(@Valid @RequestBody AdminCreateDTO dto) {
+    public ResponseEntity<Usuario> criarAdmin(@Valid @RequestBody UsuarioCreateDTO dto) { // Alterado aqui
         Usuario usuario = usuarioService.criarAdmin(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
     }
 
     @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UsuarioSaidaDTO>> listarAdmins(
             @RequestParam(defaultValue = "0") int pag,
             @RequestParam(defaultValue = "10") int qtd) {
@@ -89,7 +81,6 @@ public class UsuarioController {
     }
 
     @PutMapping("/admin/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Usuario> atualizarAdmin(
             @PathVariable String id,
             @Valid @RequestBody UsuarioUpdateDTO dto) throws IOException { // "throws IOException" adicionado
@@ -98,13 +89,11 @@ public class UsuarioController {
 
     // ROTAS GERAIS
     @GetMapping("/usuario/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Usuario> buscarPorId(@PathVariable String id) {
         return ResponseEntity.ok(usuarioService.buscarPorId(id));
     }
 
     @DeleteMapping("/usuario/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluir(@PathVariable String id) {
         usuarioService.excluirPorId(id);
         return ResponseEntity.noContent().build();

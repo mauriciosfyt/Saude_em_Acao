@@ -20,8 +20,8 @@ public class TokenAcessoService {
     private static final SecureRandom random = new SecureRandom();
 
     private String gerarTokenAlfanumericoDe6Digitos() {
-        StringBuilder token = new StringBuilder(6);
-        for (int i = 0; i < 6; i++) {
+        StringBuilder token = new StringBuilder(5);
+        for (int i = 0; i < 5; i++) {
             // Seleciona um caractere aleatório da lista de caracteres permitidos
             int index = random.nextInt(CARACTERES_PERMITIDOS.length());
             token.append(CARACTERES_PERMITIDOS.charAt(index));
