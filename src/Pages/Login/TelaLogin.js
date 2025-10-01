@@ -34,7 +34,7 @@ const TelaLogin = ({ navigation }) => {
     console.log('Tentativa de login:', { email, senha });
 
     // CORREÇÃO #2: Adicione esta linha para navegar para a Home
-    navigation.replace('MainTabs');
+    navigation.replace('Home');
   };
 
   const abrirModalPoliticas = () => {

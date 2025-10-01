@@ -13,13 +13,6 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
     setMenuVisivel(false);
   };
 
-    const navegarParaTab = (nomeDaAba) => {
-    handleFecharMenu();
-    if (navigation) {
-      navigation.navigate("MainTabs", { screen: nomeDaAba });
-    }
-  };
-
 
   const handleNavegar = (nomeDaTela) => {
     handleFecharMenu();
@@ -46,14 +39,14 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
             <Text style={styles.menuTitle}>Menu</Text>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => navegarParaTab("Home")}
+              onPress={() => handleNavegar("Home")}
             >
             <Ionicons name="home-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Home</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => navegarParaTab("Perfil")}
+              onPress={() => handleNavegar("Perfil")}
             >
               <Ionicons name="person-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Meu Perfil</Text>
@@ -95,7 +88,7 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => navegarParaTab("Desempenho")}
+              onPress={() => handleNavegar("Desempenho")}
             >
               <Ionicons name="bar-chart-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Desempenho</Text>

@@ -9,13 +9,6 @@ const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
   const handleAbrirMenu = () => setMenuVisivel(true);
   const handleFecharMenu = () => setMenuVisivel(false);
 
-  // A navegação para telas aninhadas (dentro das abas)
-  const navegarParaTab = (nomeDaAba) => {
-    handleFecharMenu();
-    if (navigation) {
-      navigation.navigate("MainTabs", { screen: nomeDaAba });
-    }
-  };
 
   // A navegação para telas normais
   const navegarParaTela = (nomeDaTela) => {
@@ -41,11 +34,11 @@ const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
         >
           <View style={styles.menuContent}>
             <Text style={styles.menuTitle}>Menu</Text>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTab("Home")}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("Home")}>
               <Ionicons name="home-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Home</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTab("Perfil")}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("Perfil")}>
               <Ionicons name="person-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Meu Perfil</Text>
             </TouchableOpacity>
@@ -57,7 +50,7 @@ const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
               <Ionicons name="card-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Mensalidades</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTab("Loja")}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("Loja")}>
               <Ionicons name="cart-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Loja</Text>
             </TouchableOpacity>
@@ -69,7 +62,7 @@ const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
               <Ionicons name="bookmark-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Reservas</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTab("Desempenho")}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("Desempenho")}>
               <Ionicons name="bar-chart-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Desempenho</Text>
             </TouchableOpacity>

@@ -63,7 +63,8 @@ const Home = ({ navigation }) => {
       >
         {/* 2. Use o novo componente HeaderHome aqui */}
         <HeaderHome 
-          onProfilePress={() => navigation.navigate('MainTabs', { screen: 'Perfil' })}
+          onProfilePress={() => navigation.navigate('Perfil')}
+
         />
 
         {/* --- Mensagem de Boas-Vindas --- */}
@@ -97,9 +98,9 @@ const Home = ({ navigation }) => {
               label={feature.label}
               onPress={() => {
                 if(feature.screen === 'Perfil'){
-                  navigation.navigate('MainTabs', { screen: 'Perfil' })
+                  navigation.navigate('Perfil')
                 } else if (feature.screen === 'Loja'){
-                  navigation.navigate('MainTabs', { screen: 'Loja' })
+                  navigation.navigate('Loja')
                 }
                 else {
                   navigation.navigate(feature.screen)

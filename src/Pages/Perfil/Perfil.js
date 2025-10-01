@@ -41,11 +41,10 @@ const Perfil = ({ navigation }) => {
   // Dados temporários para edição
   const [dadosEditaveis, setDadosEditaveis] = useState({});
 
-  const handleVoltar = () => {
-    // Em navegação por abas, não há necessidade de voltar
-    // Este botão pode ser usado para outras funcionalidades
-    console.log('Voltar');
-  };
+const handleVoltar = () => {
+  navigation.navigate('Home');
+};
+
 
   const handleEditarPerfil = () => {
     // Copia os dados atuais para edição

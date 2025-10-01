@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONTS, BORDERS } from '../../../constants/constants';
 import HeaderLoja from '../../../Components/HeaderLoja.js';
+import { BottomTabBar } from '@react-navigation/bottom-tabs';
 
 const { width } = Dimensions.get('window');
 
@@ -260,6 +261,7 @@ const categories = [
         </View>
       </ScrollView>
     </View>
+
   );
 };
 
