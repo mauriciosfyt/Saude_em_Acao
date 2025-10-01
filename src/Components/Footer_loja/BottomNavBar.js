@@ -13,8 +13,7 @@ const theme = {
 
 // Array com os itens da barra de navegação para facilitar a manutenção
 const navItems = [
-    // 1. Adicionado 'isNested: true' para telas que estão dentro do TabNavigator
-    { name: 'home', screen: 'Loja', isNested: true },
+    { name: 'home', screen: 'Loja', isNested: false }, // alterado para false
     { name: 'shopping-cart', screen: 'LojaReservas', isNested: false },
     { name: 'heart', screen: 'LojaFavoritos', isNested: false },
 ];
