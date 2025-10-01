@@ -9,12 +9,12 @@ import {
   Pressable,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Linking } from 'react-native';
 
 // O componente recebe 'navigation' para poder navegar
 const Inicial = ({ navigation }) => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   // Verifique se estes caminhos estão corretos para o seu projeto
-  const googleIconSource = require('../../../assets/icons/icone_google.png');
   const appLogoSource = require('../../../assets/icons/Logo_Prata.png');
 
   const handleStartPress = () => {
@@ -77,14 +77,20 @@ const Inicial = ({ navigation }) => {
               <View style={styles.separatorLine} />
             </View>
 
-            {/* O botão do Google agora também leva para a tela de Login */}
-            <TouchableOpacity style={styles.googleButton} onPress={navigateToLogin}>
-              <Image
-                source={googleIconSource}
-                style={styles.googleImage}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
+  <TouchableOpacity
+  style={styles.studentButtonTwo}
+  onPress={() => {
+    const phoneNumber = '551140028992'; // substitua pelo número com DDI e DDD (ex: 55 + DDD + número)
+    const message = 'Olá, gostaria de mais informações sobre a academia!'; // mensagem opcional
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+    Linking.openURL(url).catch(err => {
+      console.error('Erro ao abrir o WhatsApp:', err);
+    });
+  }}
+>
+  <Text style={styles.studentButtonTwoText}>Não sou aluno(a)</Text>
+</TouchableOpacity>
           </Pressable>
         </Pressable>
       </Modal>
@@ -171,6 +177,25 @@ const styles = StyleSheet.create({
   },
   studentButtonText: {
     color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+
+  studentButtonTwo: {
+ backgroundColor: '#f0f0f0',
+    height: 52,
+    borderRadius: 12,
+    marginBottom: 12,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  studentButtonTwoText :{
+ color: '#000',
     fontSize: 16,
     fontWeight: '700',
     textAlign: 'center',
