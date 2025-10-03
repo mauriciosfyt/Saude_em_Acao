@@ -1,5 +1,3 @@
-
-
 body {
   background: #f5f5f5;
 }
@@ -102,13 +100,13 @@ body {
   font-weight: bold;
   font-size: 18px;
   margin-right: 120px;
-  
+
 }
 
-.tamanho{
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.tamanho {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .reserva-preco .data {
@@ -140,9 +138,15 @@ body {
   color: white;
   padding: 6px 12px;
   border: none;
-  border-radius: 6px;
+  border-radius: 22px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: bold;
+}
+
+.btn-aprovar:hover {
+  background: #0056b3;
+  
 }
 
 /* Telas até 1200px */
@@ -159,7 +163,8 @@ body {
   .barra-pesquisa {
     width: 95%;
   }
-  .reserva-preco .preco{
+
+  .reserva-preco .preco {
     margin-left: 0;
     margin-right: 0;
   }
@@ -168,9 +173,10 @@ body {
 /* Telas até 600px */
 @media (max-width: 600px) {
   .reserva-item {
-    flex-direction: column; /* deixa todos os blocos empilhados */
+    flex-direction: column;
+    /* deixa todos os blocos empilhados */
     align-items: flex-start;
-    
+
   }
 
   /* Mover .reserva-detalhes para abaixo de .reserva-info */
@@ -182,19 +188,20 @@ body {
   .reserva-detalhes {
     order: 2;
     width: 100%;
-    text-align: left; /* ou center se preferir */
-     margin-top: -90px;
-     font-size: 14px;
+    text-align: left;
+    /* ou center se preferir */
+    margin-top: -90px;
+    font-size: 14px;
   }
 
-  .reserva-detalhes .quantidade{
+  .reserva-detalhes .quantidade {
     margin-left: 9px;
   }
 
-    .reserva-detalhes .tamanho{
-     margin-left: 9px;
+  .reserva-detalhes .tamanho {
+    margin-left: 9px;
 
-    }
+  }
 
   .reserva-preco {
     order: 3;

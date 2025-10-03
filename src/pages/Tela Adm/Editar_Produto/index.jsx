@@ -9,9 +9,6 @@ import Footer from "../../../components/footer";
 
 const ITENS_POR_CATEGORIA = {
   'Camisetas': ['P', 'M', 'G', 'GG', 'G1', 'G2'],
-  'Whey Protein': ['Morango', 'Chocolate', 'Baunilha'],
-  'Creatina': ['Morango', 'Chocolate', 'Baunilha'],
-  'Vitaminas': ['Morango', 'Chocolate', 'Baunilha'],
 };
 
 const EditarProduto = () => {

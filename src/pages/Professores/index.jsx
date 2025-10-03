@@ -1,20 +1,32 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
 import "./Pprofs.css";
 import { FaWhatsapp } from "react-icons/fa";
 import banner from "../../assets/banners/banner_profs.png";
-
-const membros = [
-    { nome: "Fulano", telefone: "(11) 99999-9999", foto: "/imagens/user1.jpg" },
-    { nome: "Ciclano", telefone: "(21) 98888-8888", foto: "/imagens/user2.jpg" },
-    { nome: "Beltrano", telefone: "(31) 97777-7777", foto: "/imagens/user3.jpg" },
-    { nome: "Maria", telefone: "(41) 96666-6666", foto: "/imagens/user4.jpg" },
-    { nome: "Ana", telefone: "(51) 95555-5555", foto: "/imagens/user5.jpg" },
-    { nome: "Pedro", telefone: "(61) 94444-4444", foto: "/imagens/user6.jpg" },
-];
+import { getAllProfessores } from "../../services/usuarioService";
 
 export default function Equipe() {
+    const [membros, setMembros] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchProfessores = async () => {
+            try {
+                const data = await getAllProfessores();
+                // Data pode ser um array ou um objeto com campo 'content' dependendo do backend
+                const list = Array.isArray(data) ? data : (data.content || []);
+                setMembros(list);
+            } catch (err) {
+                setError(err.message || 'Erro ao carregar professores');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProfessores();
+    }, []);
+
     return (
         <div className="equipe-container">
             <HeaderUser />
@@ -40,15 +52,17 @@ export default function Equipe() {
 
             {/* Lista de membros */}
             <div className="equipe-grid">
-                {membros.map((m, index) => (
-                    <div className="equipe-card" key={index}>
+                {loading && <div style={{ padding: 40 }}>Carregando professores...</div>}
+                {error && <div style={{ color: 'red', padding: 20 }}>Erro: {error}</div>}
+                {!loading && !error && membros.length === 0 && <div style={{ padding: 20 }}>Nenhum professor encontrado.</div>}
+                {!loading && !error && membros.map((m, index) => (
+                    <div className="equipe-card" key={m.id || index}>
                         <div className="equipe-foto">
-                            <img src={m.foto} alt={m.nome} />
+                            <img src={m.fotoPerfil|| m.avatar || '/imagens/user-default.png'} alt={m.nome || m.username || 'Professor'} />
                         </div>
-                        <p className="equipe-nome">{m.nome}</p>
-                        <p className="equipe-telefone">{m.telefone}</p>
+                        <p className="equipe-nome">{m.nome || m.username}</p>
                         <a
-                            href={`https://wa.me/55${m.telefone.replace(/\D/g, "")}`}
+                            href={`https://wa.me/55${(m.telefone || m.phone || '').replace(/\D/g, "")}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="btn-whatsapp"

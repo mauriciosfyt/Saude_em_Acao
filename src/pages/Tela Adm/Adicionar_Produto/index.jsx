@@ -16,10 +16,7 @@ const ESTADO_INICIAL_FORMULARIO = {
 };
 
 const ITENS_POR_CATEGORIA = {
-  'Camisetas': ['P', 'M', 'G', 'GG', 'G1', 'G2'],
-  'Whey Protein': ['Morango', 'Chocolate', 'Baunilha'],
-  'Creatina': ['Morango', 'Chocolate', 'Baunilha'],
-  'Vitaminas': ['Morango', 'Chocolate', 'Baunilha'],
+  'CAMISETAS': ['P', 'M', 'G', 'GG', 'G1', 'G2'],
 };
 
 const AdicionarProduto = () => {

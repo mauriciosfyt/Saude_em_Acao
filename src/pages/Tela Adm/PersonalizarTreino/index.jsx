@@ -39,7 +39,7 @@ const PersonalizarTreino = () => {
   const [nomeExercicio, setNomeExercicio] = useState('');
   const [series, setSeries] = useState('4');
   const [repeticoes, setRepeticoes] = useState('12');
-  const [carga, setCarga] = useState('15 kg');
+  const [url, setUrl] = useState(''); // Novo estado para URL
   const [previaImagem, setPreviaImagem] = useState(null);
   const [nomeArquivo, setNomeArquivo] = useState('');
 
@@ -47,7 +47,7 @@ const PersonalizarTreino = () => {
     setNomeExercicio('');
     setSeries('4');
     setRepeticoes('12');
-    setCarga('15 kg');
+    setUrl('');
     setPreviaImagem(null);
     setNomeArquivo('');
     if (inputArquivoRef.current) {
@@ -84,21 +84,20 @@ const PersonalizarTreino = () => {
     }
 
     const novoExercicio = {
-      id: Date.now(), // ID único baseado no tempo atual
+      id: Date.now(),
       nome: nomeExercicio,
       series,
       repeticoes,
-      carga,
+      url, // Adiciona a URL
       imagem: previaImagem,
     };
 
-    // Atualiza o estado, adicionando o novo exercício ao array do grupo correto
     setExercicios(estadoAnterior => ({
       ...estadoAnterior,
       [grupoSelecionado]: [...estadoAnterior[grupoSelecionado], novoExercicio]
     }));
 
-    fecharModal(); // Fecha o modal e limpa o formulário
+    fecharModal();
   };
 
   return (
@@ -132,7 +131,11 @@ const PersonalizarTreino = () => {
                             <div>
                               <div>Série: <b>{exercicio.series}</b></div>
                               <div>Repetição: <b>{exercicio.repeticoes}</b></div>
-                              <div>Carga: <b>{exercicio.carga}</b></div>
+                              {exercicio.url && (
+                                <div>
+                                  URL: <a href={exercicio.url} target="_blank" rel="noopener noreferrer">{exercicio.url}</a>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -197,10 +200,13 @@ const PersonalizarTreino = () => {
               </label>
 
               <label>
-                <span>Carga:</span>
-                <select value={carga} onChange={(e) => setCarga(e.target.value)}>
-                  {[0,5,10,12,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100].map(n => <option key={n} value={`${n} kg`}>{n} kg</option>)}
-                </select>
+                <span>URL do exercício:</span>
+                <input
+                  type="url"
+                  placeholder="https://youtube.com/exemplo"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                />
               </label>
 
               <label>

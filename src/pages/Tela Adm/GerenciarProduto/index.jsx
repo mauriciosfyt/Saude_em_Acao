@@ -6,6 +6,7 @@ import './GerenciarProduto.css';
 
 import AdminHeader from '../../../components/header_admin';
 import Footer from "../../../components/footer";
+import { getAllProdutos, deleteProduto } from '../../../services/produtoService';
 
 // Dados de Exemplo (Mock). Em uma aplicação real, isso viria de uma API.
 const mockProdutos = [
@@ -49,6 +50,8 @@ const GerenciarProduto = () => {
   const [produtosFiltrados, setProdutosFiltrados] = useState(produtos);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     let resultado = produtos;
@@ -90,6 +93,44 @@ const GerenciarProduto = () => {
     }
   }, []);
 
+  // Buscar produtos na API ao montar o componente
+  useEffect(() => {
+    let mounted = true;
+    const fetchProdutos = async () => {
+      setLoading(true);
+      try {
+        const data = await getAllProdutos();
+
+        // Mapear o formato da API para o formato usado no componente
+        const mapped = data.map((p) => ({
+          id: p.id,
+          nome: p.nome,
+          categoria: p.categoria || p.categoria,
+          status: p.status || 'Ativo',
+          preco: p.preco ?? p.precoPromocional ?? 0,
+          estoque: p.estoqueTotal ?? (p.estoquePorTamanho ? Object.values(p.estoquePorTamanho).reduce((a, b) => a + b, 0) : 0),
+          imagem: p.img || p.imagem || '',
+        }));
+
+        if (mounted) {
+          setProdutos(mapped);
+          setProdutosFiltrados(mapped);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar produtos da API:', err);
+        setError('Não foi possível carregar produtos da API. Usando dados locais.');
+        setShowToast(true);
+        setToastMessage('Erro ao carregar produtos. Usando dados locais.');
+        // fallback: mantém os dados locais já carregados (localStorage/mock)
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProdutos();
+    return () => { mounted = false; };
+  }, []);
+
   const handleEditClick = (produtoId) => {
     const produto = produtos.find(p => p.id === produtoId);
     if (produto) {
@@ -104,15 +145,33 @@ const GerenciarProduto = () => {
     navigate('/CadastrarProduto');
   };
 
-  const handleDeleteClick = (produtoId) => {
-    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
+  const handleDeleteClick = async (produtoId) => {
+    if (!window.confirm('Tem certeza que deseja excluir este produto?')) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Tentar obter token (se existir) para autenticação Admin
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken') || null;
+
+      await deleteProduto(produtoId, token);
+
       const atualizados = produtos.filter((p) => p.id !== produtoId);
       setProdutos(atualizados);
-      
+
       // Mostrar notificação de exclusão
       setShowToast(true);
       setToastMessage('Produto excluído com sucesso!');
       setTimeout(() => setShowToast(false), 2000);
+    } catch (err) {
+      console.error('Erro ao excluir produto:', err);
+      setError('Erro ao excluir produto. Veja o console para detalhes.');
+      setShowToast(true);
+      setToastMessage('Erro ao excluir produto.');
+      setTimeout(() => setShowToast(false), 2000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -144,7 +203,7 @@ const GerenciarProduto = () => {
           >
             <option value="">Categoria</option>
             <option value="WheyProtein">WheyProtein</option>
-            <option value="Camiseta">Camiseta</option>
+            <option value="CAMISETAS">Camiseta</option>
             <option value="Inativo">Inativo</option>
           </select>
           <button className="btn-pesquisar">Pesquisar</button>

@@ -1,11 +1,11 @@
-
+/* LojaProduto styles - cleaned and adjusted */
 
 .product-hero {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  gap: 200px;
-  padding: 60px 40px;
+  align-items: center;
+  gap: 48px;
+  padding: 56px 40px;
   background: #004DFF;
   flex-wrap: wrap;
 }
@@ -17,9 +17,10 @@
 }
 
 .main-product {
-  width: 280px;
-  height: 280px;
+  width: 340px;
+  height: 340px;
   margin-bottom: 20px;
+  object-fit: cover;
 }
 
 .thumbs {
@@ -36,25 +37,28 @@
 }
 
 .right-section {
-  max-width: 360px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 24px;
+  max-width: 400px; /* card maior */
+  width: 100%;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 28px 28px 32px 28px;
   color: #010114;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 12px 30px rgba(2,6,23,0.25);
 }
 
 .product-title {
-  font-size: 18px;
-  margin-bottom: 16px;
-  font-weight: bold;
+  font-size: 30px;
+  margin-bottom: 14px;
+  font-weight: 800;
+  color: #050524;
 }
 
 .price {
-  font-size: 32px;
-  color: #15FD00;
-  font-weight: bold;
-  margin: 16px 0;
+  font-size: 30px;
+  color: #15FD00; /* verde vibrante */
+  font-weight: 900;
+  margin: 14px 0 18px 0;
+  letter-spacing: 0.4px;
 }
 
 .select-flavor {
@@ -70,13 +74,28 @@
   width: 100%;
   background-color: #15FD00;
   color: #010114;
-  font-weight: bold;
-  padding: 12px;
+  font-weight: 800;
+  padding: 14px 18px;
   font-size: 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(21,253,0,0.12);
+}
+
+.reserve-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.reserve-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(21,253,0,0.16);
 }
 
 .reserve-button:hover {
@@ -84,9 +103,9 @@
 }
 
 .cart-icon {
-  margin-left: 8px;
+  margin-left: 10px;
+  font-size: 18px;
 }
-
 
 .description-section {
   padding: 60px 40px;
@@ -116,8 +135,6 @@
   line-height: 1.7;
   color: #111;
 }
-
-
 
 .descriptionproduto-section {
   padding: 60px 40px;
@@ -197,8 +214,6 @@
   .right-section {
     padding: 20px;
   }
-
-
 
   .price {
     font-size: 28px;
