@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,13 +11,23 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../../Styles/MeuTreinoStyle';
+import { useTreinos } from '../../context/TreinosContext';
 
 const MeuTreino = ({ navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
-  const [treinosConcluidos, setTreinosConcluidos] = useState(new Set());
   const [modalConcluido, setModalConcluido] = useState({ visivel: false, dia: '' });
+  const { treinosConcluidos, marcarTreinoComoConcluido } = useTreinos();
 
-  // Dados dos treinos para cada dia da semana
+  //(Listener para quando a tela ganha foco (volta de outras telas)
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      console.log('DEBUG: Tela MeuTreino ganhou foco');
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  //Dados dos treinos para cada dia da semana
   const treinos = [
     {
       id: 1,
@@ -95,10 +105,6 @@ const MeuTreino = ({ navigation }) => {
     }
   };
 
-  // Função para marcar treino como concluído
-  const marcarTreinoComoConcluido = (dia) => {
-    setTreinosConcluidos(prev => new Set([...prev, dia]));
-  };
 
   // Função para fechar modal de aviso
   const fecharModalConcluido = () => {
@@ -143,6 +149,8 @@ const MeuTreino = ({ navigation }) => {
         <View style={styles.greetingSection}>
           <Text style={styles.greeting}>Olá Aluno!</Text>
           <Text style={styles.date}>{getCurrentDate()}</Text>
+          {/* Botão de teste temporário */}
+          
         </View>
       </View>
 
