@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import Modal from './Modal';
 import ControleQuantidade from './ControleQuantidade';
 import './FormularioProduto.css';
+import { useNavigate } from 'react-router-dom';
+import { createProduto } from '../../../../services/produtoService';
 
 // O estado inicial agora não tem mais sabor, tamanho e quantidade únicos
 const ESTADO_INICIAL_FORMULARIO = {
@@ -13,7 +15,7 @@ const ESTADO_INICIAL_FORMULARIO = {
 
 // Define os itens de estoque com base na categoria
 const ITENS_POR_CATEGORIA = {
-  'Camisetas': ['P', 'M', 'G', 'GG', 'G1', 'G2'],
+  'CAMISETAS': ['P', 'M', 'G', 'GG', 'G1', 'G2'],
   'Whey Protein': ['Morango', 'Chocolate', 'Baunilha'],
   'Creatina': ['Morango', 'Chocolate', 'Baunilha'],
   'Vitaminas': ['Morango', 'Chocolate', 'Baunilha'],
@@ -28,6 +30,9 @@ const FormularioProduto = () => {
   const [previaImagem, setPreviaImagem] = useState(null);
   const [nomeArquivo, setNomeArquivo] = useState('Selecione um arquivo...');
   const inputArquivoRef = useRef(null);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Zera o estoque sempre que a categoria mudar
   useEffect(() => {
@@ -68,15 +73,56 @@ const FormularioProduto = () => {
     setModalAberto(false);
   };
 
-  const enviarFormulario = (evento) => {
+  const enviarFormulario = async (evento) => {
     evento.preventDefault();
-    const dadosCompletos = {
-      ...dadosFormulario,
-      estoque,
-      nomeArquivo
-    };
-    console.log('Dados do formulário enviados:', dadosCompletos);
-    alert('Produto adicionado! Verifique o console para ver os dados.');
+    setError(null);
+    setLoading(true);
+
+    try {
+      // Preparar payload conforme sua API
+      const estoquePorVariação = { ...estoque };
+      const estoqueTotal = Object.values(estoquePorVariação).reduce((acc, v) => acc + (Number(v) || 0), 0);
+
+      // Normalizar categoria para formato de API (ex: CAMISETAS ou WHEY_PROTEIN)
+      const categoriaApi = dadosFormulario.categoria
+        ? dadosFormulario.categoria.toString().toUpperCase().replace(/\s+/g, '_')
+        : '';
+
+      const payload = {
+        nome: dadosFormulario.nome,
+        descricao: dadosFormulario.descricao,
+        preco: Number(dadosFormulario.preco) || 0,
+        precoPromocional: null,
+        dataInicioPromocao: null,
+        dataFimPromocao: null,
+        img: previaImagem || '',
+        categoria: categoriaApi,
+        estoquePadrao: null,
+        estoquePorTamanho: estoquePorVariação,
+        estoquePorSabor: null,
+        estoqueTotal,
+      };
+
+      // Tentar obter token (se existir) para operações Admin
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken') || null;
+
+      const criado = await createProduto(payload, token);
+      console.log('Produto criado:', criado);
+
+      // Marcar que voltamos para gerenciar produtos (mesma convenção usada em GerenciarProduto)
+      localStorage.setItem('showProdutoAdicionado', 'true');
+      // Opcional: você anteriormente setava 'veioDoGerenciarProduto' quando entrando na tela de cadastro
+      localStorage.setItem('veioDoGerenciarProduto', 'true');
+
+      // Navegar de volta para a lista de produtos (ajuste a rota se necessário)
+      navigate('/GerenciarProduto');
+    } catch (err) {
+      console.error('Erro ao criar produto:', err);
+      setError('Erro ao criar produto. Veja o console para mais detalhes.');
+      alert('Erro ao criar produto. Veja o console para mais detalhes.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const limparFormulario = () => {

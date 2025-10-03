@@ -44,7 +44,7 @@ const AppRoutes = () => {
         <Route path="/Perfil" element={<Perfil />} />
         <Route path="/PerfilAdm" element={<PerfilAdm />} />
         <Route path="/SobreNos" element={<SobreNos />} />
-        <Route path="/LojaProduto" element={<LojaProduto />} />
+  <Route path="/LojaProduto/:id" element={<LojaProduto />} />
         <Route path="/SobrenosLoja" element={<SobrenosLoja />} />
         <Route path="/Carrinho" element={<Carrinho />} />
         <Route path="/Planos" element={<Planos />} />

@@ -1,13 +1,34 @@
-import React from "react";
+
+import React, { useState } from "react";
 import logo from "../../assets/logo1.png";
+import { login } from "../../services/api";
+
 
 export default function LoginModal({ onClose, onLogin, onRecover }) {
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   React.useEffect(() => {
     document.body.classList.add('modal-open');
     return () => {
       document.body.classList.remove('modal-open');
     };
   }, []);
+
+  const handleLogin = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await login(email, senha);
+      if (onLogin) onLogin(data); // Chama callback se existir
+    } catch (err) {
+      setError(err?.message || "Erro ao fazer login");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="modal-bg">
@@ -49,16 +70,31 @@ export default function LoginModal({ onClose, onLogin, onRecover }) {
         <label htmlFor="email" className="modal-label">
           EMAIL
         </label>
-        <input id="email" type="email" className="modal-input" placeholder="Digite seu e-mail" />
+        <input
+          id="email"
+          type="email"
+          className="modal-input"
+          placeholder="Digite seu e-mail"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
         <label htmlFor="senha" className="modal-label">
           SENHA
         </label>
-        <input id="senha" type="password" className="modal-input" placeholder="Digite sua senha" />
+        <input
+          id="senha"
+          type="password"
+          className="modal-input"
+          placeholder="Digite sua senha"
+          value={senha}
+          onChange={e => setSenha(e.target.value)}
+        />
+        {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
         <a href="#" className="modal-link" onClick={onRecover}>
           Esqueci minha senha
         </a>
-        <button className="modal-btn" onClick={onLogin}>
-          LOGIN
+        <button className="modal-btn" onClick={handleLogin} disabled={loading}>
+          {loading ? "Entrando..." : "LOGIN"}
         </button>
       </div>
     </div>

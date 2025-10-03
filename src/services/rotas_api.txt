@@ -1,0 +1,80 @@
+Claro! Preparei uma lista completa com todas as rotas da sua API, organizadas por funcionalidade, explicando o método HTTP, o caminho, o propósito e quem tem permissão para acessá-la.
+
+1. Setup Inicial
+
+Controlador: SetupController.java | Rota base: /setup
+
+Método	Rota	Descrição	Permissão
+POST	/admin	Cria o primeiro usuário administrador do sistema. Geralmente usado apenas uma vez para inicializar a aplicação.	Pública
+
+2. Autenticação e Login
+
+Controladores: LoginController.java, AuthController.java | Rota base: /api e /api/auth
+
+Método	Rota	Descrição	Permissão
+POST	/api/login	Login Padrão: Autentica um usuário com e-mail e senha e retorna um token JWT para acesso.	Pública
+POST	/api/auth/solicitar-token	Login 2FA (Etapa 1): Solicita um código de 6 dígitos que é enviado para o e-mail do usuário para um login mais seguro.	Pública
+POST	/api/auth/login-token	Login 2FA (Etapa 2): Efetua o login usando o código recebido por e-mail e retorna o token JWT.	Pública
+POST	/api/auth/esqueci-senha/solicitar	Redefinir Senha (Etapa 1): Inicia o processo de redefinição de senha, enviando um token para o e-mail do usuário.	Pública
+POST	/api/auth/esqueci-senha/confirmar	Redefinir Senha (Etapa 2): Confirma a redefinição, validando o token e atualizando para uma nova senha.	Pública
+
+3. Gerenciamento de Usuários (Admin, Professor, Aluno)
+
+Controlador: UsuarioController.java | Rota base: /api
+
+Método	Rota	Descrição	Permissão
+POST	/aluno	Cria um novo usuário com o perfil de Aluno.	Admin
+GET	/aluno	Lista todos os usuários com perfil de Aluno.	Admin, Professor
+PUT	/aluno/{id}	Atualiza os dados de um Aluno específico.	Admin
+POST	/professor	Cria um novo usuário com o perfil de Professor.	Admin
+GET	/professor	Lista todos os usuários com perfil de Professor.	Admin
+PUT	/professor/{id}	Atualiza os dados de um Professor específico.	Admin
+POST	/admin	Cria um novo usuário com o perfil de Admin.	Admin
+GET	/admin	Lista todos os usuários com perfil de Admin.	Admin
+PUT	/admin/{id}	Atualiza os dados de um Admin específico.	Admin
+GET	/usuario/{id}	Busca os dados de um usuário de qualquer perfil pelo ID.	Admin
+DELETE	/usuario/{id}	Exclui um usuário de qualquer perfil pelo ID.	Admin
+GET	/meu-perfil	Retorna os dados completos do perfil do usuário que está logado.	Qualquer usuário autenticado
+DELETE	/me	Permite que o usuário logado exclua a sua própria conta.	Qualquer usuário autenticado
+
+4. Gerenciamento de Produtos da Loja
+
+Controlador: ProdutoController.java | Rota base: /api/produtos
+
+Método	Rota	Descrição	Permissão
+POST	/	Cadastra um novo produto na loja.	Admin
+GET	/	Lista todos os produtos disponíveis na loja.	Pública
+GET	/categoria/{categoria}	Lista todos os produtos de uma categoria específica (ex: WHEY_PROTEIN).	Pública
+GET	/{id}	Busca os detalhes de um único produto pelo seu ID.	Pública
+PUT	/{id}	Atualiza as informações de um produto existente.	Admin
+DELETE	/{id}	Exclui um produto do catálogo.	Admin
+
+5. Sistema de Reserva de Produtos
+
+Controlador: ReservaController.java | Rota base: /api/reservas
+
+Método	Rota	Descrição	Permissão
+POST	/	Um aluno solicita a reserva de um produto, que fica com status "PENDENTE".	Aluno, Admin
+GET	/minhas	Lista todas as reservas feitas pelo usuário atualmente logado.	Qualquer usuário autenticado
+GET	/	(Admin) Lista todas as reservas do sistema. Pode ser filtrado por status (ex: /api/reservas?status=PENDENTE).	Admin
+PATCH	/{id}/aprovar	(Admin) Muda o status de uma reserva para "APROVADA".	Admin
+PATCH	/{id}/rejeitar	(Admin) Muda o status de uma reserva para "REJEITADA", devolvendo o item ao estoque.	Admin
+PATCH	/{id}/cancelar	(Usuário) Cancela uma reserva que ele mesmo fez, devolvendo o item ao estoque.	Qualquer usuário autenticado
+GET	/stats	(Admin) Retorna estatísticas sobre as reservas (quantas pendentes, aprovadas, etc.).	Admin
+
+6. Dashboards e Estatísticas (Admin)
+
+Controladores: DashboardController.java | Rota base: /api/dashboard
+
+Método	Rota	Descrição	Permissão
+GET	/stats	Retorna um resumo de dados para o dashboard principal do admin (total de alunos, estoque por categoria, etc.).	Admin
+
+7. Chat em Tempo Real (WebSocket e REST)
+
+Controladores: ChatController.java, ChatRestController.java | Rota base: /api/chat e WebSocket
+
+Tipo	Rota	Descrição	Permissão
+GET	/api/chat/historico/{chatId}	Busca o histórico de mensagens de uma sala de chat específica.	Qualquer usuário autenticado
+WebSocket	/ws-chat	Endpoint para estabelecer a conexão WebSocket.	Pública (autenticação no header)
+WebSocket	/app/chat.sendMessage/{chatId}	Rota para enviar uma mensagem para uma sala de chat.	Qualquer usuário autenticado
+WebSocket	/topic/chat/{chatId}	Rota para escutar/receber mensagens de uma sala de chat.	Qualquer usuário autenticado
