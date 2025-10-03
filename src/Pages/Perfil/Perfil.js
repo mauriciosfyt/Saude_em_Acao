@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../../Styles/PerfilStyles';
+import { useThemePreference } from '../../context/ThemeContext';
 
 const Perfil = ({ navigation }) => {
   const [configModalVisible, setConfigModalVisible] = useState(false);
@@ -24,7 +25,8 @@ const Perfil = ({ navigation }) => {
   const [notificacoes, setNotificacoes] = useState(true);
   const [som, setSom] = useState(true);
   const [vibracao, setVibracao] = useState(false);
-  const [modoEscuro, setModoEscuro] = useState(false);
+  const { isDark: forcedDark, setIsDark } = useThemePreference();
+  const [modoEscuro, setModoEscuro] = useState(!!forcedDark);
 
 
   // Dados mockados do usuário
@@ -440,7 +442,7 @@ const handleVoltar = () => {
                 </View>
                 <Switch
                   value={modoEscuro}
-                  onValueChange={setModoEscuro}
+                  onValueChange={(v) => { setModoEscuro(v); setIsDark(v ? true : undefined); }}
                   trackColor={{ false: '#e5e7eb', true: '#405CBA' }}
                   thumbColor={modoEscuro ? '#ffffff' : '#f3f4f6'}
                 />

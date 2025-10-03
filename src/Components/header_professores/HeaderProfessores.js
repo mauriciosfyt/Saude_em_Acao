@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Modal, StyleSheet, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useThemePreference } from '../../context/ThemeContext';
 
 const HeaderProfessores = ({ title, onBackPress, navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
+  const colorScheme = useColorScheme();
+  const { isDark: forcedDark } = useThemePreference();
+  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
 
   const handleAbrirMenu = () => {
     setMenuVisivel(true);
@@ -35,63 +39,63 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
           activeOpacity={1}
         >
     
-          <View style={styles.menuContent}>
-            <Text style={styles.menuTitle}>Menu</Text>
+          <View style={[styles.menuContent, isDark && { backgroundColor: '#262626' }]}>
+            <Text style={[styles.menuTitle, isDark && { color: '#FFFFFF' }]}>Menu</Text>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Home")}
             >
             <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Home</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Home</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Perfil")}
             >
               <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meu Perfil</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Meu Perfil</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Chat")}
             >
               <Ionicons name="chatbubble-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Chat</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Chat</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Mensalidades")}
             >
               <Ionicons name="card-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Mensalidades</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Mensalidades</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("LojaProdutos")}
             >
               <Ionicons name="cart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Loja</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Loja</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("LojaFavoritos")}
             >
               <Ionicons name="heart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Favoritos</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Favoritos</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("LojaReservas")}
             >
               <Ionicons name="bookmark-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Reservas</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Reservas</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Desempenho")}
             >
               <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Desempenho</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Desempenho</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
@@ -109,7 +113,7 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
       <View>
         <View style={styles.header}>
           <TouchableOpacity onPress={onBackPress} style={styles.iconButton}>
-            <Ionicons name="arrow-back" size={24} color="#000000" />
+            <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
           </TouchableOpacity>
           
           <Image
@@ -119,11 +123,11 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
           />
           
           <TouchableOpacity onPress={handleAbrirMenu} style={styles.iconButton}>
-            <Ionicons name="menu" size={28} color="#000000" />
+            <Ionicons name="menu" size={28} color={isDark ? '#FFFFFF' : '#000000'} />
           </TouchableOpacity>
         </View>
         
-        <Text style={styles.pageTitle}>{title}</Text>
+        <Text style={[styles.pageTitle, isDark && { color: '#FFFFFF' }]}>{title}</Text>
       </View>
     </>
   );

@@ -7,6 +7,7 @@ import {
   Modal,
   Image,
   Pressable,
+  useColorScheme,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Linking } from 'react-native';
@@ -34,10 +35,12 @@ const Inicial = ({ navigation }) => {
     navigation.navigate('TelaLogin');
   };
 
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isDark && { backgroundColor: '#2B2B2B' }]}>
       <LinearGradient
-        colors={['#405CBA', '#405CBA', '#5A7DE8', '#8BA0E0', '#E8ECF5']}
+        colors={isDark ? ['#121212', '#1F1F1F', '#262626', '#2E2E2E', '#3A3A3A'] : ['#405CBA', '#405CBA', '#5A7DE8', '#8BA0E0', '#E8ECF5']}
         locations={[0, 0.4, 0.6, 0.8, 1]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
@@ -51,7 +54,7 @@ const Inicial = ({ navigation }) => {
           />
         </View>
 
-        <Text style={styles.welcomeText}>Seja bem vindo!</Text>
+        <Text style={[styles.welcomeText, isDark && { color: '#EAEAEA' }]}>Seja bem vindo!</Text>
 
         <TouchableOpacity style={styles.startButton} onPress={handleStartPress}>
           <Text style={styles.startButtonText}>Começar</Text>
@@ -65,7 +68,7 @@ const Inicial = ({ navigation }) => {
         onRequestClose={handleCloseModal}
       >
         <Pressable style={styles.modalOverlay} onPress={handleCloseModal}>
-          <Pressable style={styles.modalContent} onPress={() => {}}>
+          <Pressable style={[styles.modalContent, isDark && { backgroundColor: '#333' }]} onPress={() => {}}>
             {/* O botão "Já sou aluno" agora chama a função correta */}
             <TouchableOpacity style={styles.studentButton} onPress={navigateToLogin}>
               <Text style={styles.studentButtonText}>Já sou aluno(a)</Text>
@@ -73,7 +76,7 @@ const Inicial = ({ navigation }) => {
 
             <View style={styles.separator}>
               <View style={styles.separatorLine} />
-              <Text style={styles.separatorText}>ou</Text>
+              <Text style={[styles.separatorText, isDark && { color: '#EAEAEA' }]}>ou</Text>
               <View style={styles.separatorLine} />
             </View>
 

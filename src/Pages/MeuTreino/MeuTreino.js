@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,26 +8,21 @@ import {
   Image,
   StatusBar,
   Modal,
+  useColorScheme,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../../Styles/MeuTreinoStyle';
-import { useTreinos } from '../../context/TreinosContext';
+import { useThemePreference } from '../../context/ThemeContext';
 
 const MeuTreino = ({ navigation }) => {
+  const colorScheme = useColorScheme();
+  const { isDark: forcedDark } = useThemePreference();
+  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
   const [menuVisivel, setMenuVisivel] = useState(false);
+  const [treinosConcluidos, setTreinosConcluidos] = useState(new Set());
   const [modalConcluido, setModalConcluido] = useState({ visivel: false, dia: '' });
-  const { treinosConcluidos, marcarTreinoComoConcluido } = useTreinos();
 
-  //(Listener para quando a tela ganha foco (volta de outras telas)
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      console.log('DEBUG: Tela MeuTreino ganhou foco');
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  //Dados dos treinos para cada dia da semana
+  // Dados dos treinos para cada dia da semana
   const treinos = [
     {
       id: 1,
@@ -105,6 +100,10 @@ const MeuTreino = ({ navigation }) => {
     }
   };
 
+  // Função para marcar treino como concluído
+  const marcarTreinoComoConcluido = (dia) => {
+    setTreinosConcluidos(prev => new Set([...prev, dia]));
+  };
 
   // Função para fechar modal de aviso
   const fecharModalConcluido = () => {
@@ -149,22 +148,20 @@ const MeuTreino = ({ navigation }) => {
         <View style={styles.greetingSection}>
           <Text style={styles.greeting}>Olá Aluno!</Text>
           <Text style={styles.date}>{getCurrentDate()}</Text>
-          {/* Botão de teste temporário */}
-          
         </View>
       </View>
 
       {/* Lista de Treinos */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.content, isDark && { backgroundColor: '#3A3A3A' }]} showsVerticalScrollIndicator={false}>
         {treinos.map((treino) => (
-          <View key={treino.id} style={styles.treinoCard}>
+          <View key={treino.id} style={[styles.treinoCard, isDark && { backgroundColor: '#2B2B2B' }]}>
             <Image source={treino.imagem} style={styles.treinoImage} />
             
             <View style={styles.treinoInfo}>
               <View style={styles.treinoDiaContainer}>
-                <Text style={styles.treinoDia}>{treino.dia}</Text>
+                <Text style={[styles.treinoDia, isDark && { color: '#FFFFFF' }]}>{treino.dia}</Text>
               </View>
-              <Text style={styles.treinoGrupos}>{treino.grupos}</Text>
+              <Text style={[styles.treinoGrupos, isDark && { color: '#D1D5DB' }]}>{treino.grupos}</Text>
             </View>
             
             <TouchableOpacity 
@@ -208,8 +205,8 @@ const MeuTreino = ({ navigation }) => {
           onPress={handleFecharMenu}
           activeOpacity={1}
         >
-          <View style={styles.menuContent}>
-            <Text style={styles.menuTitle}>Menu</Text>
+          <View style={[styles.menuContent, isDark && { backgroundColor: '#262626' }]}>
+            <Text style={[styles.menuTitle, isDark && { color: '#FFFFFF' }]}>Menu</Text>
 
             {/* Itens do Menu */}
             <TouchableOpacity
@@ -217,7 +214,7 @@ const MeuTreino = ({ navigation }) => {
               onPress={() => handleNavegar("MainTabs")}
             >
               <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Home</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Home</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -225,7 +222,7 @@ const MeuTreino = ({ navigation }) => {
               onPress={() => handleNavegar("Perfil")}
             >
               <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meu Perfil</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Meu Perfil</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -233,7 +230,7 @@ const MeuTreino = ({ navigation }) => {
               onPress={() => handleNavegar("Chat")}
             >
               <Ionicons name="chatbubble-ellipses-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Chat</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Chat</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -241,7 +238,7 @@ const MeuTreino = ({ navigation }) => {
               onPress={() => handleNavegar("Desempenho")}
             >
               <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Desempenho</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Desempenho</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -257,7 +254,7 @@ const MeuTreino = ({ navigation }) => {
               onPress={() => handleNavegar("Mensalidades")}
             >
               <Ionicons name="card-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Mensalidades</Text>
+              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Mensalidades</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>

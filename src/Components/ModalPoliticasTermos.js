@@ -14,11 +14,14 @@ import {
 
 import { COLORS, SPACING, FONTS, BORDERS } from '../constants/constants';
 import stylesModal from '../Styles/stylesModal'
+import { useColorScheme } from 'react-native';
 
 
 const { height: alturaTela } = Dimensions.get('window');
 
 const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPoliticas, aoAbrirTermos }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const animacaoSubida = useRef(new Animated.Value(alturaTela)).current;
   const animacaoOpacidade = useRef(new Animated.Value(0)).current;
 
@@ -117,20 +120,20 @@ const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPol
             }
           ]}
         >
-          <SafeAreaView style={stylesModal.modalContent}>
+          <SafeAreaView style={[stylesModal.modalContent, isDark && { backgroundColor: '#2B2B2B' }]}>
             {/* Header do Modal */}
-            <View style={stylesModal.headerModal}>
-              <Text style={stylesModal.tituloHeader}>Políticas e termos</Text>
+            <View style={[stylesModal.headerModal, isDark && { backgroundColor: '#2B2B2B' }]}>
+              <Text style={[stylesModal.tituloHeader, isDark && { color: '#FFFFFF' }]}>Políticas e termos</Text>
               <TouchableOpacity 
                 style={stylesModal.botaoFechar}
                 onPress={aoFechar}
               >
-                <Text style={stylesModal.iconeFechar}>×</Text>
+                <Text style={[stylesModal.iconeFechar, isDark && { color: '#FFFFFF' }]}>×</Text>
               </TouchableOpacity>
             </View>
 
             {/* Conteúdo do Modal */}
-            <View style={stylesModal.conteudoContainer}>
+            <View style={[stylesModal.conteudoContainer, isDark && { backgroundColor: '#2B2B2B' }]}>
               {renderizarConteudo()}
             </View>
           </SafeAreaView>

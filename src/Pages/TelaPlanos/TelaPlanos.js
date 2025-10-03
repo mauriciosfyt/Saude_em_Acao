@@ -8,12 +8,17 @@ import {
   ScrollView,
   ImageBackground,
   Image,
+  useColorScheme,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "../../Styles/TelaPlanosStyles";
 import Header from "../../Components/header_planos/Header";
+import { useThemePreference } from "../../context/ThemeContext";
 
 const TelaPlanos = ({ navigation }) => {
+  const colorScheme = useColorScheme();
+  const { isDark: forcedDark } = useThemePreference();
+  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
   const onBack = () => navigation && navigation.goBack();
 
   const onSaibaMais = (plano) => {
@@ -64,12 +69,14 @@ const TelaPlanos = ({ navigation }) => {
         style={[
           styles.planCard,
           plano.id === "basico" ? { marginTop: -110 } : null,
-          { backgroundColor: plano.id === "gold" ? "#656565" : "#ffffff" },
+          isDark
+            ? { backgroundColor: plano.id === 'gold' ? '#5a5a5a' : '#3A3A3A' }
+            : { backgroundColor: plano.id === "gold" ? "#656565" : "#ffffff" },
         ]}
       >
         {plano.id === "basico" && <View style={styles.triangleSmall} />}
         {plano.bannerText && (
-          <View style={styles.banner}>
+          <View style={[styles.banner, isDark && { backgroundColor: '#405CBA' }]}>
             {plano.bannerIcon && (
               <Image
                 source={plano.bannerIcon}
@@ -84,11 +91,11 @@ const TelaPlanos = ({ navigation }) => {
         {/* Título */}
         {plano.id === "gold" ? (
           <Text style={styles.planTitle}>
-            <Text style={{ color: "#ffffff" }}>Plano </Text>
+            <Text style={{ color: isDark ? "#ffffff" : "#ffffff" }}>Plano </Text>
             <Text style={{ color: "#fbbf24" }}>Gold</Text>
           </Text>
         ) : (
-          <Text style={[styles.planTitle, { color: "#111827" }]}>
+          <Text style={[styles.planTitle, { color: isDark ? "#FFFFFF" : "#111827" }]}>
             {plano.titulo}
           </Text>
         )}
@@ -97,7 +104,7 @@ const TelaPlanos = ({ navigation }) => {
         <Text
           style={[
             styles.planDescription,
-            { color: plano.id === "gold" ? "#ffffff" : "#6b7280" },
+            { color: plano.id === "gold" ? "#ffffff" : (isDark ? '#D1D5DB' : "#6b7280") },
           ]}
         >
           {plano.descricao}
@@ -107,7 +114,7 @@ const TelaPlanos = ({ navigation }) => {
         <Text
           style={[
             styles.porApenasText,
-            { color: plano.id === "gold" ? "#fbbf24" : "#6b7280" },
+            { color: plano.id === "gold" ? "#fbbf24" : (isDark ? '#C7C7C7' : "#6b7280") },
           ]}
         >
           Por apenas
@@ -117,7 +124,7 @@ const TelaPlanos = ({ navigation }) => {
         <Text
           style={[
             styles.planPrice,
-            { color: plano.id === "gold" ? "#ffffff" : "#000000", marginTop: -8 },
+            { color: plano.id === "gold" ? "#ffffff" : (isDark ? '#FFFFFF' : "#000000"), marginTop: -8 },
           ]}
         >
           {plano.preco}
@@ -134,14 +141,14 @@ const TelaPlanos = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, isDark && { backgroundColor: '#000000' }]}>
       <StatusBar barStyle="light-content" />
       <ImageBackground
         source={require("../../../assets/banner_logos.jpg")}
         style={styles.backgroundImage}
       >
         <Header title="Planos" onBack={onBack} />
-        <View style={styles.diagonalWhite} />
+        <View style={[styles.diagonalWhite, isDark && { borderBottomColor: '#3A3A3A', opacity: 1 }]} />
         <ScrollView
           style={[styles.scrollView, { marginTop: 130 }]}
           contentContainerStyle={[styles.content, { paddingTop: 150 }]}

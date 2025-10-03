@@ -125,22 +125,6 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
 
-  concluidoButton: {
-    backgroundColor: '#4CAF50', // Verde para treino concluído
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  concluidoButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
-    marginRight: 5,
-  },
-
   // Estilos do Menu Modal
   menuOverlay: {
     flex: 1,

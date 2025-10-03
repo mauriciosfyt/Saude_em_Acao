@@ -9,10 +9,16 @@ import {
   Image,
   Modal,
   StyleSheet,
+  useColorScheme,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+import { useThemePreference } from '../../context/ThemeContext';
+
 const Desempenho = ({ navigation }) => {
+  const colorScheme = useColorScheme();
+  const { isDark: forcedDark } = useThemePreference();
+  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
   const dadosDesempenho = {
     mesAno: 'Outubro, 2025',
     progressoGeral: 50,
@@ -25,41 +31,41 @@ const Desempenho = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
-      <View style={styles.topSection}>
+      <StatusBar barStyle={'light-content'} backgroundColor={'#405CBA'} />
+      <View style={[styles.topSection, { backgroundColor: '#405CBA' }]}>
         <DesempenhoHeader navigation={navigation} paddingHorizontal={2} />
-        <Text paddingHorizontal={20} style={styles.monthYearText}>{dadosDesempenho.mesAno} </Text>
+        <Text paddingHorizontal={20} style={[styles.monthYearText]}>{dadosDesempenho.mesAno} </Text>
         <View paddingHorizontal={20} style={styles.progressContainer}>
-          <View style={styles.progressBar}>
+          <View style={[styles.progressBar, { backgroundColor: '#1e40af' }]}>
             <View style={[styles.progressFill, { width: `${dadosDesempenho.progressoGeral}%` }]} />
           </View>
           <Text style={styles.progressText}>{dadosDesempenho.progressoGeral}%</Text>
         </View>
       </View>
-      <View style={styles.bottomSection}>
+      <View style={[styles.bottomSection, isDark && { backgroundColor: '#3A3A3A' }]}>
         <View style={styles.progressTitleContainer}>
-          <Text style={styles.progressTitle}>Progresso</Text>
+          <Text style={[styles.progressTitle, isDark && { color: '#FFFFFF' }]}>Progresso</Text>
           <Image source={require('../../../assets/icons/imageGráficoProgresso.png')} style={styles.progressTitleIcon} />
         </View>
         <View style={styles.cardsContainer}>
           <View style={styles.cardRow}>
-            <View style={styles.iconCard}>
+            <View style={[styles.iconCard, isDark && { backgroundColor: '#2563eb' }]}>
               <Image source={require('../../../assets/icons/imageGráfico.png')} style={styles.iconImage} />
             </View>
-            <View style={styles.infoCard}>
-              <Text style={styles.infoLabel}>Treinos realizados esse mês</Text>
-              <Text style={styles.infoValue}>
+            <View style={[styles.infoCard, isDark && { backgroundColor: '#2B2B2B' }]}>
+              <Text style={[styles.infoLabel, isDark && { color: '#D1D5DB' }]}>Treinos realizados esse mês</Text>
+              <Text style={[styles.infoValue, isDark && { color: '#FFFFFF' }]}>
                 {dadosDesempenho.treinosRealizados}/{dadosDesempenho.treinosTotal}
               </Text>
             </View>
           </View>
           <View style={styles.cardRow}>
-            <View style={styles.iconCard}>
+            <View style={[styles.iconCard, isDark && { backgroundColor: '#2563eb' }]}>
               <Image source={require('../../../assets/icons/imageGráfico.png')} style={styles.iconImage} />
             </View>
-            <View style={styles.infoCard}>
-              <Text style={styles.infoLabel}>Ultimo treino realizado</Text>
-              <Text style={styles.infoValue}>{dadosDesempenho.ultimoTreino}</Text>
+            <View style={[styles.infoCard, isDark && { backgroundColor: '#2B2B2B' }]}>
+              <Text style={[styles.infoLabel, isDark && { color: '#D1D5DB' }]}>Ultimo treino realizado</Text>
+              <Text style={[styles.infoValue, isDark && { color: '#FFFFFF' }]}>{dadosDesempenho.ultimoTreino}</Text>
             </View>
           </View>
         </View>

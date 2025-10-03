@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Image, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useThemePreference } from '../../context/ThemeContext';
 
 // Constantes de cores para o componente
 const COLORS = {
@@ -9,8 +10,11 @@ const COLORS = {
 };
 
 const HeaderHome = ({ onProfilePress }) => {
+  const colorScheme = useColorScheme();
+  const { isDark: forcedDark } = useThemePreference();
+  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, isDark && { backgroundColor: '#2B2B2B' }]}>
       {/* 1. Adicionamos um 'espaçador' invisível aqui para empurrar a logo para o centro */}
       <View style={styles.iconButton} />
 
@@ -23,7 +27,7 @@ const HeaderHome = ({ onProfilePress }) => {
 
       {/* 3. O ícone de perfil, que age como o terceiro elemento */}
       <TouchableOpacity onPress={onProfilePress} style={styles.iconButton}>
-        <Ionicons name="person-circle-outline" size={32} color={COLORS.primary} />
+        <Ionicons name="person-circle-outline" size={32} color={isDark ? '#FFFFFF' : COLORS.primary} />
       </TouchableOpacity>
     </View>
   );

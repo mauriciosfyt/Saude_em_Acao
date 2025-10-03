@@ -9,13 +9,18 @@ import {
   Image,
   StatusBar,
   Modal,
+  useColorScheme,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import HeaderSeta from '../../Components/header_seta/header_seta';
 import styles from '../../Styles/TreinoSegundaStyle';
 import { playSuccessSound } from '../../Components/Sounds';
+import { useThemePreference } from '../../context/ThemeContext';
 
 const TreinoSegunda = ({ navigation, route }) => {
+  const colorScheme = useColorScheme();
+  const { isDark: forcedDark } = useThemePreference();
+  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
   // Removido menuVisivel, controle agora é do HeaderSeta
   const [exerciciosConcluidos, setExerciciosConcluidos] = useState(0);
   const [exerciciosSelecionados, setExerciciosSelecionados] = useState({});
@@ -159,14 +164,14 @@ const TreinoSegunda = ({ navigation, route }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, isDark && { backgroundColor: '#2B2B2B' }]}>
       <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
 
       {/* Header com seta de voltar e menu */}
       <HeaderSeta navigation={navigation} mesAno={null} />
 
       {/* Conteúdo Principal */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.content, isDark && { backgroundColor: '#3A3A3A' }]} showsVerticalScrollIndicator={false}>
         {/* Seção Peito */}
         <View style={styles.secaoContainer}>
           <View style={styles.secaoHeader}>
@@ -174,7 +179,7 @@ const TreinoSegunda = ({ navigation, route }) => {
           </View>
           
           {exercicios.peito.map((exercicio) => (
-            <View key={exercicio.id} style={styles.exercicioCard}>
+            <View key={exercicio.id} style={[styles.exercicioCard, isDark && { backgroundColor: '#2B2B2B' }]}>
               <TouchableOpacity 
                 style={styles.checkbox}
                 onPress={() => toggleExercicio(exercicio.id)}
@@ -189,10 +194,10 @@ const TreinoSegunda = ({ navigation, route }) => {
               <Image source={exercicio.imagem} style={styles.exercicioImage} />
               
               <View style={styles.exercicioInfo}>
-                <Text style={styles.exercicioNome}>{exercicio.id} {exercicio.nome}</Text>
-                <Text style={styles.exercicioDetalhes}>Série: {exercicio.series}</Text>
-                <Text style={styles.exercicioDetalhes}>Repetição: {exercicio.repeticoes}</Text>
-                <Text style={styles.exercicioDetalhes}>Carga: {exercicio.carga}(kg)</Text>
+                <Text style={[styles.exercicioNome, isDark && { color: '#FFFFFF' }]}>{exercicio.id} {exercicio.nome}</Text>
+                <Text style={[styles.exercicioDetalhes, isDark && { color: '#D1D5DB' }]}>Série: {exercicio.series}</Text>
+                <Text style={[styles.exercicioDetalhes, isDark && { color: '#D1D5DB' }]}>Repetição: {exercicio.repeticoes}</Text>
+                <Text style={[styles.exercicioDetalhes, isDark && { color: '#D1D5DB' }]}>Carga: {exercicio.carga}(kg)</Text>
               </View>
               
               <TouchableOpacity style={styles.infoButton} onPress={() => handleAbrirModalExercicio(exercicio)}>
@@ -209,7 +214,7 @@ const TreinoSegunda = ({ navigation, route }) => {
           </View>
           
           {exercicios.triceps.map((exercicio) => (
-            <View key={exercicio.id} style={styles.exercicioCard}>
+            <View key={exercicio.id} style={[styles.exercicioCard, isDark && { backgroundColor: '#2B2B2B' }]}>
               <TouchableOpacity 
                 style={styles.checkbox}
                 onPress={() => toggleExercicio(exercicio.id)}
@@ -224,10 +229,10 @@ const TreinoSegunda = ({ navigation, route }) => {
               <Image source={exercicio.imagem} style={styles.exercicioImage} />
               
               <View style={styles.exercicioInfo}>
-                <Text style={styles.exercicioNome}>{exercicio.id} {exercicio.nome}</Text>
-                <Text style={styles.exercicioDetalhes}>Série: {exercicio.series}</Text>
-                <Text style={styles.exercicioDetalhes}>Repetição: {exercicio.repeticoes}</Text>
-                <Text style={styles.exercicioDetalhes}>Carga: {exercicio.carga}(kg)</Text>
+                <Text style={[styles.exercicioNome, isDark && { color: '#FFFFFF' }]}>{exercicio.id} {exercicio.nome}</Text>
+                <Text style={[styles.exercicioDetalhes, isDark && { color: '#D1D5DB' }]}>Série: {exercicio.series}</Text>
+                <Text style={[styles.exercicioDetalhes, isDark && { color: '#D1D5DB' }]}>Repetição: {exercicio.repeticoes}</Text>
+                <Text style={[styles.exercicioDetalhes, isDark && { color: '#D1D5DB' }]}>Carga: {exercicio.carga}(kg)</Text>
               </View>
               
               <TouchableOpacity style={styles.infoButton} onPress={() => handleAbrirModalExercicio(exercicio)}>
@@ -239,7 +244,7 @@ const TreinoSegunda = ({ navigation, route }) => {
 
         {/* Barra de Progresso */}
         <View style={styles.progressContainer}>
-          <Text style={styles.progressText}>{exerciciosConcluidos} de {totalExercicios} Treinos concluidos</Text>
+          <Text style={[styles.progressText, isDark && { color: '#E5E7EB' }]}>{exerciciosConcluidos} de {totalExercicios} Treinos concluidos</Text>
           <View style={styles.progressBar}>
             <View 
               style={[
@@ -252,7 +257,7 @@ const TreinoSegunda = ({ navigation, route }) => {
       </ScrollView>
 
       {/* Footer com Botões */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, isDark && { backgroundColor: '#3A3A3A', borderTopColor: '#4A4A4A' }]}>
         <TouchableOpacity style={styles.comecarButton} onPress={handleSelecionarExercicios}>
           <Text style={styles.comecarButtonText}>Selecionar Exercícios</Text>
         </TouchableOpacity>

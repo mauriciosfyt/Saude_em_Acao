@@ -9,11 +9,16 @@ import {
   StyleSheet,
   StatusBar,
   Modal,
+  useColorScheme,
 } from "react-native";
+import { useThemePreference } from "../../context/ThemeContext";
 // Usaremos Ionicons para manter a consistência com a tela Desempenho
 import { Ionicons } from "@expo/vector-icons";
 
 const Mensalidades = ({ navigation }) => {
+  const colorScheme = useColorScheme();
+  const { isDark: forcedDark } = useThemePreference();
+  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
   const [menuVisivel, setMenuVisivel] = useState(false);
 
   // Funções de controle do menu e navegação
@@ -37,8 +42,8 @@ const Mensalidades = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
+    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#2B2B2B' }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? '#2B2B2B' : '#000'} />
 
       {/* --- CÓDIGO DO MENU MODAL (ADICIONADO) --- */}
       <Modal
@@ -52,63 +57,63 @@ const Mensalidades = ({ navigation }) => {
                onPress={handleFecharMenu}
                activeOpacity={1}
              >
-               <View style={styles.menuContent}>
-                 <Text style={styles.menuTitle}>Menu</Text>
+              <View style={[styles.menuContent, isDark && { backgroundColor: '#262626' }]}>
+                <Text style={[styles.menuTitle, isDark && { color: '#FFFFFF' }]}>Menu</Text>
                  <TouchableOpacity
                    style={styles.menuItem}
                    onPress={() => handleNavegar("Home")}
                  >
                    <Ionicons name="home-outline" size={24} color="#333" />
-                   <Text style={styles.menuItemText}>Home</Text>
+                  <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Home</Text>
                  </TouchableOpacity>
                  <TouchableOpacity
                    style={styles.menuItem}
                    onPress={() => handleNavegar("Perfil")}
                  >
                    <Ionicons name="person-outline" size={24} color="#333" />
-                   <Text style={styles.menuItemText}>Meu Perfil</Text>
+                  <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Meu Perfil</Text>
                  </TouchableOpacity>
                  <TouchableOpacity
                    style={styles.menuItem}
                    onPress={() => handleNavegar("Chat")}
                  >
                    <Ionicons name="chatbubble-outline" size={24} color="#333" />
-                   <Text style={styles.menuItemText}>Chat</Text>
+                  <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Chat</Text>
                  </TouchableOpacity>
                  <TouchableOpacity
                    style={styles.menuItem}
                    onPress={() => handleNavegar("Mensalidades")}
                  >
                    <Ionicons name="card-outline" size={24} color="#333" />
-                   <Text style={styles.menuItemText}>Mensalidades</Text>
+                  <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Mensalidades</Text>
                  </TouchableOpacity>
                  <TouchableOpacity
                    style={styles.menuItem}
                    onPress={() => handleNavegar("LojaProdutos")}
                  >
                    <Ionicons name="cart-outline" size={24} color="#333" />
-                   <Text style={styles.menuItemText}>Loja</Text>
+                  <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Loja</Text>
                  </TouchableOpacity>
                  <TouchableOpacity
                    style={styles.menuItem}
                    onPress={() => handleNavegar("LojaFavoritos")}
                  >
                    <Ionicons name="heart-outline" size={24} color="#333" />
-                   <Text style={styles.menuItemText}>Favoritos</Text>
+                  <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Favoritos</Text>
                  </TouchableOpacity>
                  <TouchableOpacity
                    style={styles.menuItem}
                    onPress={() => handleNavegar("LojaReservas")}
                  >
                    <Ionicons name="bookmark-outline" size={24} color="#333" />
-                   <Text style={styles.menuItemText}>Reservas</Text>
+                  <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Reservas</Text>
                  </TouchableOpacity>
                  <TouchableOpacity
                    style={styles.menuItem}
                    onPress={() => handleNavegar("Desempenho")}
                  >
                    <Ionicons name="bar-chart-outline" size={24} color="#333" />
-                   <Text style={styles.menuItemText}>Desempenho</Text>
+                  <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Desempenho</Text>
                  </TouchableOpacity>
                  <TouchableOpacity
                    style={styles.menuItem}
@@ -149,12 +154,12 @@ const Mensalidades = ({ navigation }) => {
 
         {/* --- CONTAINER BRANCO COM O CONTEÚDO (INTOCADO) --- */}
         {/* Todo o seu código original está aqui, como você pediu. */}
-        <View style={styles.contentContainer}>
-          <Text style={styles.mainTitle}>
+        <View style={[styles.contentContainer, isDark && { backgroundColor: '#3A3A3A' }]}>
+          <Text style={[styles.mainTitle, isDark && { color: '#FFFFFF' }]}>
             Alunos Saúde em Ação tem{" "}
             <Text style={styles.highlightTitle}>muito mais vantagens!</Text>
           </Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, isDark && { color: '#D1D5DB' }]}>
             Equipamentos de ponta e um espaço ideal para seu treino. Tudo o que
             você precisa para alcançar seus objetivos está aqui.
           </Text>
@@ -170,10 +175,10 @@ const Mensalidades = ({ navigation }) => {
                 />
               </View>
               <View style={styles.featureTextContainer}>
-                <Text style={styles.featureTitle}>
+                <Text style={[styles.featureTitle, isDark && { color: '#FFFFFF' }]}>
                   Recursos exclusivos no app
                 </Text>
-                <Text style={styles.featureDescription}>
+                <Text style={[styles.featureDescription, isDark && { color: '#C7C7C7' }]}>
                   Registre seu progresso, treinos personalizados, imagens,
                   exercícios e muito mais.
                 </Text>
@@ -186,10 +191,10 @@ const Mensalidades = ({ navigation }) => {
                 <Ionicons name="barbell-outline" size={28} color="#6A82FB" />
               </View>
               <View style={styles.featureTextContainer}>
-                <Text style={styles.featureTitle}>
+                <Text style={[styles.featureTitle, isDark && { color: '#FFFFFF' }]}>
                   Área de musculação e aeróbico
                 </Text>
-                <Text style={styles.featureDescription}>
+                <Text style={[styles.featureDescription, isDark && { color: '#C7C7C7' }]}>
                   Ampla área de musculação e equipamentos de qualidade de última
                   geração.
                 </Text>
@@ -202,10 +207,10 @@ const Mensalidades = ({ navigation }) => {
                 <Ionicons name="people-outline" size={28} color="#6A82FB" />
               </View>
               <View style={styles.featureTextContainer}>
-                <Text style={styles.featureTitle}>
+                <Text style={[styles.featureTitle, isDark && { color: '#FFFFFF' }]}>
                   Professores especialistas
                 </Text>
-                <Text style={styles.featureDescription}>
+                <Text style={[styles.featureDescription, isDark && { color: '#C7C7C7' }]}>
                   Profissionais com todo o conhecimento necessário para orientar
                   nossos alunos saúde em ação.
                 </Text>
@@ -285,6 +290,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     marginHorizontal: 16,
     borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "#405CBA",
     elevation: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },

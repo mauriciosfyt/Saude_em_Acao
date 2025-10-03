@@ -9,7 +9,8 @@ import {
   Platform,
   Alert,
   ScrollView,
-  Image
+  Image,
+  useColorScheme,
 } from 'react-native';
 import { COLORS, SPACING, FONTS, BORDERS } from '../../constants/constants';
 import stylesLogin from '../../Styles/stylesLogin';
@@ -18,6 +19,8 @@ import { Ionicons } from '@expo/vector-icons';
 
 // CORREÇÃO #1: Adicione { navigation } aqui para receber o controle de navegação
 const TelaLogin = ({ navigation }) => {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarModal, setMostrarModal] = useState(false);
@@ -67,50 +70,52 @@ const TelaLogin = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={stylesLogin.container}>
+    <SafeAreaView style={[stylesLogin.container, isDark && { backgroundColor: '#2B2B2B' }]}>
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={stylesLogin.keyboardView}
       >
         {/* Header */}
-        <View style={stylesLogin.header}>
+        <View style={[stylesLogin.header, isDark && { backgroundColor: '#2B2B2B' }]}>
           {/* CORREÇÃO #3: Adicione o onPress para o botão voltar */}
           <TouchableOpacity style={stylesLogin.botaoVoltar} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#000" />
+            <Ionicons name="arrow-back" size={24} color={isDark ? '#FFF' : '#000'} />
           </TouchableOpacity>
         </View>
 
         {/* O resto do seu código permanece idêntico */}
-        <View style={stylesLogin.conteudo}>
-          <Text style={stylesLogin.titulo}>Login</Text>
+        <View style={[stylesLogin.conteudo, isDark && { backgroundColor: '#2B2B2B' }]}>
+          <Text style={[stylesLogin.titulo, isDark && { color: '#FFF' }]}>Login</Text>
           
           <View style={stylesLogin.campoContainer}>
-            <Text style={stylesLogin.label}>Email:</Text>
+            <Text style={[stylesLogin.label, isDark && { color: '#EAEAEA' }]}>Email:</Text>
             <TextInput
-              style={stylesLogin.campo}
+              style={[stylesLogin.campo, isDark && { backgroundColor: '#3A3A3A', color: '#FFF', borderColor: '#4A4A4A' }]}
               value={email}
               onChangeText={setEmail}
               placeholder="Digite seu email"
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              placeholderTextColor={isDark ? '#A7A7A7' : undefined}
             />
           </View>
 
           <View style={stylesLogin.campoContainer}>
-            <Text style={stylesLogin.label}>Senha:</Text>
+            <Text style={[stylesLogin.label, isDark && { color: '#EAEAEA' }]}>Senha:</Text>
             <TextInput
-              style={stylesLogin.campo}
+              style={[stylesLogin.campo, isDark && { backgroundColor: '#3A3A3A', color: '#FFF', borderColor: '#4A4A4A' }]}
               value={senha}
               onChangeText={setSenha}
               placeholder="Digite sua senha"
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
+              placeholderTextColor={isDark ? '#A7A7A7' : undefined}
             />
           </View>
 
-          <View style={stylesLogin.linhaSeparadora} />
+          <View style={[stylesLogin.linhaSeparadora, isDark && { backgroundColor: '#3F3F3F' }]} />
 
           <TouchableOpacity 
             style={stylesLogin.botaoEntrar}
@@ -120,18 +125,18 @@ const TelaLogin = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <View style={stylesLogin.rodape}>
-          <Text style={stylesLogin.textoPoliticas}>
+        <View style={[stylesLogin.rodape, isDark && { backgroundColor: '#2B2B2B' }]}>
+          <Text style={[stylesLogin.textoPoliticas, isDark && { color: '#AAAAAA' }]}>
             Ao começar declara estar de acordo com a nossa{' '}
             <Text 
-              style={stylesLogin.linkPoliticas}
+              style={[stylesLogin.linkPoliticas, isDark && { color: '#6EA8FF' }]}
               onPress={abrirModalPoliticas}
             >
               Política de privacidade
             </Text>
             {' '}e com o nosso{' '}
             <Text 
-              style={stylesLogin.linkPoliticas}
+              style={[stylesLogin.linkPoliticas, isDark && { color: '#6EA8FF' }]}
               onPress={abrirModalTermos}
             >
               Tratamento de dados pessoais
