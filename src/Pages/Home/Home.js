@@ -11,6 +11,7 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Svg, Path, Circle } from 'react-native-svg';
 
 // 1. Importe o novo componente HeaderHome
 import HeaderHome from '../../Components/header_home/HeaderHome';
@@ -42,6 +43,71 @@ const FeatureButton = ({ iconName, label, onPress }) => {
   );
 };
 
+// --- Card de Analytics (gráficos simulados) ---
+const AnalyticsCard = ({ onPress }) => {
+  const bars = [40, 25, 55, 60, 52];
+  const weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
+  return (
+    <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.analyticsCard}>
+      <Text style={styles.analyticsMonth}>Janeiro,2025</Text>
+      <View style={styles.analyticsInner}>
+        {/* Área (esquerda) */}
+        <View style={styles.areaWrapper}>
+          <Svg width={150} height={100} viewBox="0 0 150 100">
+            {(() => {
+              const h = 90; // baseline height
+              const pts = [
+                { x: 8, y: 38 },
+                { x: 26, y: 48 },
+                { x: 44, y: 30 },
+                { x: 62, y: 34 },
+                { x: 80, y: 42 },
+                { x: 98, y: 30 },
+                { x: 118, y: 30 },
+                { x: 138, y: 28 },
+              ];
+              const areaPath = `M 0 ${h} ${pts
+                .map((p, i) => `${i === 0 ? 'L' : 'L'} ${p.x} ${p.y}`)
+                .join(' ')} L 150 ${h} Z`;
+              const linePath = `M ${pts[0].x} ${pts[0].y} ${pts
+                .slice(1)
+                .map((p) => `L ${p.x} ${p.y}`)
+                .join(' ')}`;
+              return (
+                <>
+                  <Path d={areaPath} fill="#3FA2FF" />
+                  <Path d={linePath} fill="none" stroke="#4A90E2" strokeWidth={2} />
+                  {pts.map((p, idx) => (
+                    <Circle key={idx} cx={p.x} cy={p.y} r={3} fill="#FFFFFF" stroke="#4A90E2" strokeWidth={1.5} />
+                  ))}
+                </>
+              );
+            })()}
+          </Svg>
+          <Text style={styles.monthLabel}>Janeiro</Text>
+        </View>
+
+        {/* Divisor */}
+        <View style={styles.analyticsDivider} />
+
+        {/* Barras (direita) */}
+        <View style={styles.barWrapper}>
+          <View style={styles.barsRow}>
+            {bars.map((h, idx) => (
+              <View key={idx} style={[styles.bar, { height: h }]} />
+            ))}
+          </View>
+          <View style={styles.weekdaysRow}>
+            {weekdays.map((d) => (
+              <Text key={d} style={styles.weekdayText}>{d}</Text>
+            ))}
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 // --- Componente Principal da Tela: Home ---
 const Home = ({ navigation }) => {
   const features = [
@@ -50,8 +116,6 @@ const Home = ({ navigation }) => {
     { id: 3, icon: 'cart-outline', label: 'Nossa loja', screen: 'Loja' },
     { id: 4, icon: 'account-circle-outline', label: 'Meu plano', screen: 'Plano' },
   ];
-
-  const promoImage = { uri: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?fit=crop&w=800&q=80' };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -73,21 +137,8 @@ const Home = ({ navigation }) => {
           <Text style={styles.body2}>Seja bem vindo a academia saúde em ação!</Text>
         </View>
 
-        {/* --- Card de Assinatura --- */}
-        <TouchableOpacity onPress={() => navigation.navigate('TelaPlanos')}>
-          <ImageBackground
-            source={promoImage}
-            style={styles.promoCard}
-            imageStyle={{ borderRadius: 20 }}
-          >
-            <View style={styles.promoOverlay}>
-              <Text style={styles.promoText}>
-                Assine com a Equipe Saúde em Ação e treine quando quiser.
-              </Text>
-              <Feather name="arrow-right-circle" size={30} color={COLORS.white} />
-            </View>
-          </ImageBackground>
-        </TouchableOpacity>
+        {/* --- Card com Gráficos --- */}
+        <AnalyticsCard onPress={() => navigation.navigate('Desempenho')} />
 
         {/* --- Grade de Funcionalidades --- */}
         <View style={styles.featuresGrid}>
@@ -139,26 +190,84 @@ const styles = StyleSheet.create({
     color: COLORS.gray,
     marginTop: SIZES.base / 2,
   },
-  promoCard: {
-    height: 150,
-    justifyContent: 'flex-end',
-    borderRadius: 20,
-    overflow: 'hidden',
+  analyticsCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    paddingVertical: SIZES.medium,
+    paddingHorizontal: SIZES.medium,
     marginBottom: SIZES.large,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  promoOverlay: {
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    padding: SIZES.medium,
+  analyticsMonth: {
+    position: 'absolute',
+    top: 8,
+    right: 12,
+    color: COLORS.gray,
+    fontSize: 12,
+  },
+  analyticsInner: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  areaWrapper: {
+    flex: 1,
     alignItems: 'center',
   },
-  promoText: {
-    color: COLORS.white,
-    fontSize: SIZES.font,
+  areaBox: {
+    width: '85%',
+    height: 90,
+    backgroundColor: '#5B84E2',
+    borderRadius: 6,
+    position: 'relative',
+  },
+  areaDot: {
+    position: 'absolute',
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#FFFFFF',
+  },
+  monthLabel: {
+    marginTop: 8,
+    fontSize: 12,
+    color: COLORS.primary,
     fontWeight: '600',
+  },
+  analyticsDivider: {
+    width: 1,
+    height: 110,
+    backgroundColor: COLORS.lightGray,
+    marginHorizontal: SIZES.base,
+  },
+  barWrapper: {
     flex: 1,
-    marginRight: SIZES.base,
+    alignItems: 'center',
+  },
+  barsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    width: '85%',
+    height: 90,
+  },
+  bar: {
+    width: 18,
+    borderRadius: 4,
+    backgroundColor: '#AFC0D9',
+  },
+  weekdaysRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '85%',
+    marginTop: 6,
+  },
+  weekdayText: {
+    fontSize: 10,
+    color: COLORS.gray,
   },
   featuresGrid: {
     flexDirection: 'row',
