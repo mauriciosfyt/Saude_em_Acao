@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React , { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,21 +8,23 @@ import {
   Image,
   StatusBar,
   Modal,
-  useColorScheme,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../../Styles/MeuTreinoStyle';
-import { useThemePreference } from '../../context/ThemeContext';
+import { useTreinos } from '../../context/TreinosContext';
 
 const MeuTreino = ({ navigation }) => {
-  const colorScheme = useColorScheme();
-  const { isDark: forcedDark } = useThemePreference();
-  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
   const [menuVisivel, setMenuVisivel] = useState(false);
-  const [treinosConcluidos, setTreinosConcluidos] = useState(new Set());
   const [modalConcluido, setModalConcluido] = useState({ visivel: false, dia: '' });
+  const { treinosConcluidos, marcarTreinoComoConcluido } = useTreinos();
 
-  // Dados dos treinos para cada dia da semana
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      console.log('DEBUG: Tela MeuTreino ganhou foco');
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   const treinos = [
     {
       id: 1,
@@ -56,7 +58,6 @@ const MeuTreino = ({ navigation }) => {
     },
   ];
 
-  // Função para obter a data atual formatada
   const getCurrentDate = () => {
     const today = new Date();
     const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -64,129 +65,88 @@ const MeuTreino = ({ navigation }) => {
       'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
       'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
     ];
-    
     const dayName = days[today.getDay()];
     const day = today.getDate();
     const month = months[today.getMonth()];
-    
     return `${dayName} Feira, ${day} de ${month}`;
   };
 
   const handleIniciarTreino = (treino) => {
-    // Verificar se o treino já foi concluído
     if (treinosConcluidos.has(treino.dia)) {
       setModalConcluido({ visivel: true, dia: treino.dia });
       return;
     }
-
-    console.log('DEBUG: handleIniciarTreino chamado para', treino.dia);
-    console.log('DEBUG: navigation object', navigation);
     if (treino.dia === 'Segunda-Feira') {
-      console.log('DEBUG: Navegando para TreinoSegunda');
       navigation.navigate('TreinoSegunda', { onTreinoConcluido: marcarTreinoComoConcluido });
     } else if (treino.dia === 'Terça-Feira') {
-      console.log('DEBUG: Navegando para TreinoTerca');
       navigation.navigate('TreinoTerca', { onTreinoConcluido: marcarTreinoComoConcluido });
     } else if (treino.dia === 'Quarta-Feira') {
-      console.log('DEBUG: Navegando para TreinoQuarta');
       navigation.navigate('TreinoQuarta', { onTreinoConcluido: marcarTreinoComoConcluido });
     } else if (treino.dia === 'Quinta-Feira') {
-      console.log('DEBUG: Navegando para TreinoQuinta');
       navigation.navigate('TreinoQuinta', { onTreinoConcluido: marcarTreinoComoConcluido });
     } else if (treino.dia === 'Sexta-Feira') {
       navigation.navigate('TreinoSexta', { onTreinoConcluido: marcarTreinoComoConcluido });
-    } else {
-      console.log(`Treino para ${treino.dia} ainda não implementado`);
     }
   };
 
-  // Função para marcar treino como concluído
-  const marcarTreinoComoConcluido = (dia) => {
-    setTreinosConcluidos(prev => new Set([...prev, dia]));
-  };
-
-  // Função para fechar modal de aviso
   const fecharModalConcluido = () => {
     setModalConcluido({ visivel: false, dia: '' });
   };
 
-  // Funções de controle do menu
-  const handleAbrirMenu = () => {
-    setMenuVisivel(true);
-  };
-
-  const handleFecharMenu = () => {
-    setMenuVisivel(false);
-  };
-
+  const handleAbrirMenu = () => setMenuVisivel(true);
+  const handleFecharMenu = () => setMenuVisivel(false);
   const handleNavegar = (nomeDaTela) => {
     handleFecharMenu();
     navigation.navigate(nomeDaTela);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles?.container || { flex: 1, backgroundColor: '#fff' }}>
       <StatusBar barStyle="light-content" backgroundColor="#4A90E2" />
-      
-      {/* Header Azul */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
+      {/* Header */}
+      <View style={styles?.header || { backgroundColor: '#4A90E2', padding: 16 }}>
+        <View style={styles?.headerContent || { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
-          
-          <Text style={styles.headerTitle}>Meus Treinos</Text>
-          
-          <TouchableOpacity style={styles.menuButton} onPress={handleAbrirMenu}>
+          <Text style={styles?.headerTitle || { color: 'white', fontSize: 20, fontWeight: 'bold' }}>Meus Treinos</Text>
+          <TouchableOpacity onPress={handleAbrirMenu}>
             <Ionicons name="menu" size={24} color="white" />
           </TouchableOpacity>
         </View>
-        
-        <View style={styles.greetingSection}>
-          <Text style={styles.greeting}>Olá Aluno!</Text>
-          <Text style={styles.date}>{getCurrentDate()}</Text>
+        <View style={styles?.greetingSection || { marginTop: 8 }}>
+          <Text style={styles?.greeting || { color: 'white', fontSize: 16 }}>Olá Aluno!</Text>
+          <Text style={styles?.date || { color: 'white', fontSize: 14 }}>{getCurrentDate()}</Text>
         </View>
       </View>
 
       {/* Lista de Treinos */}
-      <ScrollView style={[styles.content, isDark && { backgroundColor: '#3A3A3A' }]} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles?.content || { flex: 1, padding: 16 }}>
         {treinos.map((treino) => (
-          <View key={treino.id} style={[styles.treinoCard, isDark && { backgroundColor: '#2B2B2B' }]}>
-            <Image source={treino.imagem} style={styles.treinoImage} />
-            
-            <View style={styles.treinoInfo}>
-              <View style={styles.treinoDiaContainer}>
-                <Text style={[styles.treinoDia, isDark && { color: '#FFFFFF' }]}>{treino.dia}</Text>
-              </View>
-              <Text style={[styles.treinoGrupos, isDark && { color: '#D1D5DB' }]}>{treino.grupos}</Text>
+          <View key={treino.id} style={styles?.treinoCard || { backgroundColor: '#eee', borderRadius: 8, marginBottom: 16, padding: 16 }}>
+            <Image source={treino.imagem} style={styles?.treinoImage || { width: '100%', height: 120, borderRadius: 8 }} />
+            <View style={styles?.treinoInfo || { marginTop: 8 }}>
+              <Text style={styles?.treinoDia || { fontSize: 18, fontWeight: 'bold' }}>{treino.dia}</Text>
+              <Text style={styles?.treinoGrupos || { fontSize: 16 }}>{treino.grupos}</Text>
             </View>
-            
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.iniciarButton,
-                treinosConcluidos.has(treino.dia) && styles.concluidoButton
+                styles?.iniciarButton || { backgroundColor: '#405CBA', borderRadius: 8, padding: 12, marginTop: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+                treinosConcluidos.has(treino.dia) && (styles?.concluidoButton || { backgroundColor: '#4CAF50' })
               ]}
-              onPress={() => {
-                if (!treinosConcluidos.has(treino.dia)) {
-                  console.log('DEBUG: Botão clicado para', treino.dia);
-                  handleIniciarTreino(treino);
-                }
-              }}
-              disabled={treinosConcluidos.has(treino.dia)} // Desabilita o botão se concluído
+              onPress={() => !treinosConcluidos.has(treino.dia) && handleIniciarTreino(treino)}
+              disabled={treinosConcluidos.has(treino.dia)}
             >
               <Text style={[
-                styles.iniciarButtonText,
-                treinosConcluidos.has(treino.dia) && styles.concluidoButtonText
+                styles?.iniciarButtonText || { color: 'white', fontWeight: 'bold', marginRight: 8 },
+                treinosConcluidos.has(treino.dia) && (styles?.concluidoButtonText || { color: '#fff' })
               ]}>
                 {treinosConcluidos.has(treino.dia) ? 'Concluído' : 'Iniciar'}
               </Text>
-              <Ionicons 
-                name={treinosConcluidos.has(treino.dia) ? "checkmark-circle" : "arrow-forward"} 
-                size={16} 
-                color="white" 
+              <Ionicons
+                name={treinosConcluidos.has(treino.dia) ? "checkmark-circle" : "arrow-forward"}
+                size={16}
+                color="white"
               />
             </TouchableOpacity>
           </View>
@@ -201,60 +161,35 @@ const MeuTreino = ({ navigation }) => {
         onRequestClose={handleFecharMenu}
       >
         <TouchableOpacity
-          style={styles.menuOverlay}
+          style={styles?.menuOverlay || { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }}
           onPress={handleFecharMenu}
           activeOpacity={1}
         >
-          <View style={[styles.menuContent, isDark && { backgroundColor: '#262626' }]}>
-            <Text style={[styles.menuTitle, isDark && { color: '#FFFFFF' }]}>Menu</Text>
-
-            {/* Itens do Menu */}
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("MainTabs")}
-            >
+          <View style={styles?.menuContent || { backgroundColor: 'white', borderRadius: 16, padding: 24, margin: 32 }}>
+            <Text style={styles?.menuTitle || { fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>Menu</Text>
+            <TouchableOpacity style={styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }} onPress={() => handleNavegar("MainTabs")}>
               <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Home</Text>
+              <Text style={styles?.menuItemText || { marginLeft: 8 }}>Home</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Perfil")}
-            >
+            <TouchableOpacity style={styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }} onPress={() => handleNavegar("Perfil")}>
               <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Meu Perfil</Text>
+              <Text style={styles?.menuItemText || { marginLeft: 8 }}>Meu Perfil</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Chat")}
-            >
+            <TouchableOpacity style={styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }} onPress={() => handleNavegar("Chat")}>
               <Ionicons name="chatbubble-ellipses-outline" size={24} color="#333" />
-              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Chat</Text>
+              <Text style={styles?.menuItemText || { marginLeft: 8 }}>Chat</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Desempenho")}
-            >
+            <TouchableOpacity style={styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }} onPress={() => handleNavegar("Desempenho")}>
               <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Desempenho</Text>
+              <Text style={styles?.menuItemText || { marginLeft: 8 }}>Desempenho</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.menuItem, styles.menuItemAtivo]}
-              onPress={() => handleNavegar("MeuTreino")}
-            >
+            <TouchableOpacity style={[styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }, styles?.menuItemAtivo || {}]} onPress={() => handleNavegar("MeuTreino")}>
               <Ionicons name="fitness-outline" size={24} color="#405CBA" />
-              <Text style={[styles.menuItemText, styles.menuItemTextAtivo]}>Meus Treinos</Text>
+              <Text style={[styles?.menuItemText || { marginLeft: 8 }, styles?.menuItemTextAtivo || { color: '#405CBA', fontWeight: 'bold' }]}>Meus Treinos</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Mensalidades")}
-            >
+            <TouchableOpacity style={styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }} onPress={() => handleNavegar("Mensalidades")}>
               <Ionicons name="card-outline" size={24} color="#333" />
-              <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Mensalidades</Text>
+              <Text style={styles?.menuItemText || { marginLeft: 8 }}>Mensalidades</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
