@@ -1,6 +1,6 @@
 // src/pages/Home/index.jsx
 import "./styles.css";
-import banner_home from "../../assets/banners/banner_home.svg"
+import banner_home from "../../assets/banners/banner_home.svg";
 import img_abaixo_banner from "../../assets/img_home.jpeg";
 import Footer from "../../components/footer";
 import navegacao_ntem from "../../assets/navegacao_Ntem.png";
@@ -10,6 +10,7 @@ import navegacao_loja from "../../assets/navegacao_loja.png";
 import tela_app from "../../assets/tela_app.png";
 import { Link } from "react-router-dom";
 import React, { useRef, useEffect, useState } from "react";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import Header_nLogin from "../../components/header_nLogin/index.jsx";
 
 function Home() {
@@ -83,56 +84,110 @@ function Home() {
         {/* PLANOS */}
         <section className="planos">
           <h2>PLANOS</h2>
-          <div className="plano-cards">
+          <div className="plano-cards branco">
+            {/* PLANO BÁSICO */}
             <div className="plano-card">
-              <h3>BÁSICO</h3>
-              <div className="linha-azul"></div>
+              <h3>Plano Básico</h3>
+              <p className="descricao">XXXXXXXXXX</p>
               <p className="preco">
-                <b>R$ 120,00</b>
+                <b>R$ 119,00</b>
               </p>
-              <span className="modalidade-titulo">
-                ESCOLHA UMA DAS MODALIDADES:
-              </span>
+              <a href="https://api.whatsapp.com/message/7SFQMRX2M76KG1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer">
+                <button className="plano-btn">Assinar agora</button>
+              </a>
               <ul>
-                <li>FUNCIONAL</li>
-                <li>THAY FIT</li>
-                <li>PILATES</li>
+                <li>Escolha uma das modalidades a baixo:</li>
+                <li>
+                  <span className="icons ">
+                    <FaCheckCircle />
+                  </span>{" "}
+                  Pilates
+                </li>
+                <li>
+                  <span className="icons ">
+                    <FaCheckCircle />
+                  </span>{" "}
+                  Thay fit
+                </li>
+                <li>
+                  <span className="icons ">
+                    <FaCheckCircle />
+                  </span>{" "}
+                  Funcional
+                </li>
               </ul>
-              <Link to={"/Planos"}>
-                <button className="plano-btn">Saiba Mais</button>
-              </Link>
             </div>
+
+            {/* PLANO ESSENCIAL */}
             <div className="plano-card">
-              <h3>ESSENCIAL</h3>
-              <div className="linha-azul"></div>
+              <h3>Plano Essencial</h3>
+              <p className="descricao">XXXXXXXXXX</p>
               <p className="preco">
-                <b>R$ 159,90</b>
+                <b>R$ 159,00</b>
               </p>
-              <span className="modalidade-titulo">TODAS AS MODALIDADES:</span>
+              <a href="https://api.whatsapp.com/message/7SFQMRX2M76KG1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer">
+                <button className="plano-btn">Assinar agora</button>
+              </a>
               <ul>
-                <li>FUNCIONAL</li>
-                <li>THAY FIT</li>
-                <li>PILATES</li>
+                <li>Todas as modalidades a baixo:</li>
+                <li>
+                  <span className="icons ">
+                    <FaCheckCircle />
+                  </span>{" "}
+                  Pilates
+                </li>
+                <li>
+                  <span className="icons ">
+                    <FaCheckCircle />
+                  </span>{" "}
+                  Thay fit
+                </li>
+                <li>
+                  <span className="icons">
+                    <FaCheckCircle />
+                  </span>{" "}
+                  Funcional
+                </li>
               </ul>
-              <Link to={"/Planos"}>
-                <button className="plano-btn">Saiba Mais</button>
-              </Link>
             </div>
-            <div className="plano-card">
-              <h3>GOLD</h3>
-              <div className="linha-azul"></div>
+            {/* PLANO GOLD */}
+            <div className="plano-card destaque">
+              <span className="mais-vantajoso ">o mais vantajoso</span>
+              <h3>Plano Gold</h3>
+              <p className="descricao branco">XXXXXXXXXX</p>
               <p className="preco">
-                <b>R$ 300,00</b>
+                <b>À partir de R$350,00</b>
               </p>
-              <span className="modalidade-titulo">TODAS AS MODALIDADES:</span>
-              <ul>
-                <li>FUNCIONAL</li>
-                <li>THAY FIT</li>
-                <li>PILATES</li>
-              </ul>
-              <Link to={"/Planos"}>
-                <button className="plano-btn">Saiba Mais</button>
+              <Link to="/Planos">
+                <button className="plano-btn">saiba mais</button>
               </Link>
+              <ul>
+                <li>Todas as modalidades a baixo:</li>
+                <li>
+                  <span className="icons ">
+                    <FaCheckCircle />
+                  </span>{" "}
+                  Pilates
+                </li>
+                <li>
+                  <span className="icons ">
+                    <FaCheckCircle />
+                  </span>{" "}
+                  Thay fit
+                </li>
+                <li>
+                  <span className="icons">
+                    <FaCheckCircle />
+                  </span>{" "}
+                  Funcional
+                </li>
+                <li>
+                  <span className="icons">
+                    <FaCheckCircle />
+                  </span>{" "}
+                  Treino Personalizado
+                </li>
+              </ul>
             </div>
           </div>
         </section>

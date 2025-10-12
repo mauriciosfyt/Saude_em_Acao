@@ -27,6 +27,18 @@ export default function Equipe() {
         fetchProfessores();
     }, []);
 
+    // Normaliza URLs de imagem: força https quando possível para evitar Mixed Content
+    const fixImageUrl = (url) => {
+        if (!url) return url;
+        // Se já começa com https, devolve
+        if (/^https:\/\//i.test(url)) return url;
+        // Se começa com http, tenta trocar para https
+        if (/^http:\/\//i.test(url)) return url.replace(/^http:\/\//i, 'https://');
+        // Se for URL sem protocolo (ex: //res.cloudinary...), deixar como https://
+        if (/^\/\//.test(url)) return 'https:' + url;
+        return url;
+    };
+
     return (
         <div className="equipe-container">
             <HeaderUser />
@@ -58,7 +70,7 @@ export default function Equipe() {
                 {!loading && !error && membros.map((m, index) => (
                     <div className="equipe-card" key={m.id || index}>
                         <div className="equipe-foto">
-                            <img src={m.fotoPerfil|| m.avatar || '/imagens/user-default.png'} alt={m.nome || m.username || 'Professor'} />
+                            <img src={fixImageUrl(m.fotoPerfil || m.avatar) || '/imagens/user-default.png'} alt={m.nome || m.username || 'Professor'} />
                         </div>
                         <p className="equipe-nome">{m.nome || m.username}</p>
                         <a
