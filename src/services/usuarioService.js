@@ -1,5 +1,7 @@
-// URL base da nossa API para endpoints de usuário
-const API_URL = 'https://saudeemacao.onrender.com/api';
+// URL base da nossa API para endpoints de usuário.
+// Em produção, defina VITE_API_BASE_URL na Vercel (ex: https://saudeemacao.onrender.com)
+// Se a variável não estiver definida, usamos o caminho relativo '/api' (funciona com o rewrite do Vercel).
+const API_URL = (import.meta.env.VITE_API_BASE_URL || '') + '/api';
 
 // --- Funções Auxiliares ---
 

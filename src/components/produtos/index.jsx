@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllProdutos } from '../../services/produtoService'; // ⬅️ Importa nossa função
 import './produto.css';
+import { fixImageUrl } from '../../utils/image';
 
 const ProdutosSection = () => {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const ProdutosSection = () => {
         {produtos.map((produto) => (
           <div className="product-card" key={produto.id}> {/* ⬅️ Usa o ID do produto como key */}
             {/* ATENÇÃO: Verifique se os nomes dos campos (ex: 'imagemUrl', 'nome', 'preco') correspondem aos da sua API */}
-           <img src={produto.img} alt={produto.nome} />
+           <img src={fixImageUrl(produto.img)} alt={produto.nome} />
             <h3>{produto.nome}</h3>
             <hr className="linha-produto" />
             {/* Formata o preço para o padrão brasileiro */}

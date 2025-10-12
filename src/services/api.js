@@ -3,7 +3,9 @@
 
 import axios from 'axios';
 
-const API_BASE_URL = 'https://saudeemacao.onrender.com'; // Altere para a URL real da sua API backend
+// Usa variável de ambiente Vite (defina VITE_API_BASE_URL em produção se desejar)
+// Se não definida, usa caminho relativo (''), permitindo que o rewrite/proxy trate as requisições.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 // Login padrão: autentica usuário se o usuario existe vai para o modal de token
 export const login = async (email, senha) => {
