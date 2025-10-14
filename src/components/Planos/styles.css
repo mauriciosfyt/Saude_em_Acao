@@ -1,0 +1,370 @@
+/* styles específicos do componente Planos (movidos de src/pages/Home/styles.css) */
+
+.planos {
+    padding: 30px 20px;
+    background-color: #e2e8f0;
+    text-align: center;
+}
+
+.planos h2 {
+    color: #000;
+    margin-bottom: 18px;
+}
+
+.plano-cards {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+.plano-card {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    width: 320px;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+    border-radius: 8px;
+}
+
+.plano-card:hover {
+    box-shadow: 0 8px 32px rgba(0, 112, 243, 0.18), 0 2px 8px rgba(0, 0, 0, 0.10);
+    transform: translateY(-10px) scale(1.04);
+    border-color: #1062fe;
+}
+
+.plano-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.linha-azul {
+    width: 90%;
+    height: 5px;
+    background: #1062fe;
+    border-radius: 3px;
+    margin: 0 auto 10px auto;
+}
+
+.preco {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #111;
+    margin: 12px 0 8px 0;
+}
+
+.destaque-preco {
+    font-size: 1.6rem;
+}
+
+/* Aumentar preço para visual mais destacado no design enviado */
+.plano-card .preco.destaque-preco {
+    font-size: 2rem;
+}
+
+.modalidade-titulo {
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 8px;
+    margin-top: 2px;
+    color: #000;
+}
+
+.plano-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0 0;
+    text-align: left;
+    width: 100%;
+}
+
+.plano-card ul li {
+    font-size: 15px;
+    color: #111;
+    margin-bottom: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+.plano-btn {
+    background: #1062fe;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 8px 0;
+    cursor: pointer;
+
+}
+
+.plano-btn.full {
+    width: 100%;
+    display: block;
+    text-align: center;
+    margin: 12px 0 8px 0;
+    max-width: 100%;
+}
+
+.plano-btn.inverted {
+    background: #1062fe;
+}
+
+.plano-cards {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+    /* garante que os cards fiquem acima da transição */
+}
+
+
+.plano-card.destaque.dark {
+    background: #222324;
+    color: white;
+    position: relative;
+    padding: 32px 22px;
+    border-radius: 10px;
+}
+
+.tag {
+    position: absolute;
+    top: -12px;
+    left: 8px;
+    background-color: #1062fe;
+    color: white;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 8px 0;
+}
+
+/* Ajustes para o cartão destaque (Gold) */
+.plano-card.destaque.dark h3,
+.plano-card.destaque.dark .descricao,
+.plano-card.destaque.dark ul li,
+.plano-card.destaque.dark .modalidade-titulo {
+    color: #ffffff;
+}
+
+.plano-card.destaque.dark .preco {
+    color: #ffffff;
+    font-size: 2rem;
+    margin: 10px 0;
+}
+
+.plano-card.destaque.dark .plano-btn.full.inverted {
+    color: #fff;
+    /* tornar consistente com os outros botões: full width e alinhamento igual */
+    margin: 0px 0 8px ;
+    display: block;
+    font-size: 1.1rem;
+    border-radius: 8px 0;
+    width: 250px;
+    max-width: 100%;
+}
+
+.plano-card.destaque.dark ul li .icons {
+    /* ícone circular mais escuro com check verde visível */
+    color: #00cc66;
+}
+
+.plano-card.destaque.dark .valor-a-partir {
+    color: #e6f0e9;
+}
+
+.plano-card .descricao {
+    margin: 6px 0 12px 0;
+    font-size: 14px;
+    text-align: left;
+    /* aumentar min-height para alinhar preços entre cards */
+    min-height: 96px;
+}
+
+.plano-card .preco {
+    font-size: 22px;
+    margin: 10px 0;
+}
+
+.plano-btn {
+    background: #1062fe;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+    border-radius: 8px 0;
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+.plano-btn:hover {
+    background: #0047b3;
+}
+
+/* Evita que anchors usados como botões mudem cor do texto para azul */
+.plano-btn,
+.plano-btn:link,
+.plano-btn:visited,
+.plano-btn:active,
+.plano-btn:focus {
+    color: #fff;
+    text-decoration: none;
+}
+
+.plano-btn:hover {
+    color: #fff;
+}
+
+.plano-card ul {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    /* alinhamento à esquerda para ficar como no exemplo */
+    width: 100%;
+    margin-top: 12px;
+}
+
+.icons {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.icons.cross {
+    color: #ff3333;
+}
+
+.icons>svg {
+    display: block;
+}
+
+/* Ícone circular verde como no exemplo */
+.plano-card ul li .icons {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #00aa44;
+    margin-right: 12px;
+}
+
+.plano-card ul li .icons svg {
+    width: 14px;
+    height: 14px;
+}
+
+
+.plano-card ul li .icons {
+    color: #00cc66;
+    flex: 0 0 28px;
+}
+
+/* Estilo para ícone com X (círculo vermelho claro) */
+.plano-card ul li .icons.cross {
+    color: #ff3333;
+}
+
+.modalidade-titulo {
+    color: #9aa0a6;
+    font-size: 0.95rem;
+    text-align: center;
+    width: 100%;
+    margin: 10px 0 6px 0;
+}
+
+.plano-card ul li {
+    gap: 10px;
+    margin: 8px 0;
+}
+
+/* reserva largura fixa para o ícone e permite que o texto quebre na área restante */
+.plano-card ul li .icons {
+    flex: 0 0 28px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* garante que o texto da lista ocupe o restante do espaço */
+.plano-card ul li {
+    word-break: break-word;
+}
+
+/* alinha descrições e cabeçalhos como no exemplo (centralizados) */
+.plano-card h3 {
+    text-align: left;
+}
+
+.plano-card .descricao,
+.plano-card p.descricao {
+    text-align: left;
+}
+
+/* Preço centralizado e underline mais curto e grosso como na imagem */
+.plano-card .preco {
+    text-align: left;
+    font-size: 22px;
+    margin: 10px 0;
+}
+
+.valor-a-partir {
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+/* botão centralizado no card: tornar full-width consistente */
+.plano-card .plano-btn {
+    /* garante que o botão fique "colado" ao final do card para todos os cards
+       (assim preços e botões ficam alinhados mesmo com conteúdo variável) */
+    align-self: stretch;
+    width: 100%;
+    margin-top: auto;
+    width: 250px;
+
+}
+
+/* -------- RESPONSIVIDADE -------- */
+
+/* Celulares pequenos */
+@media (max-width: 480px) {
+    .planos-container {
+        padding: 40px 15px 80px;
+        clip-path: polygon(0 0, 0 85%, 50% 100%, 100% 85%, 100% 0);
+    }
+
+    .plano-card {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .plano-cards {
+        gap: 16px;
+    }
+}
+
+/* Tablets médios */
+@media (max-width: 900px) {
+    .planos-container {
+        padding: 50px 20px 100px;
+        clip-path: polygon(0 0, 0 95%, 50% 100%, 100% 95%, 100% 0);
+    }
+
+    .plano-cards {
+        gap: 20px;
+    }
+}
