@@ -41,6 +41,173 @@
   transition: none !important;
 }
 
+.app-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* --- Estilos do Grid e Cards (Foco: 1920x1080) --- */
+.gridContainer {
+  display: grid;
+  /* Cria um grid de 3 colunas e 2 linhas */
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 20px;
+  width: 100%;
+  max-width: 1400px; /* Largura máxima para a tela de 1920px */
+  height: 500px; /* Altura fixa para manter a proporção */
+}
+
+.card {
+  border-radius: 15px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden; /* Garante que os filhos respeitem o border-radius */
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.03); /* Efeito de zoom sutil no hover */
+  cursor: pointer;
+}
+
+/* Card principal que ocupa duas linhas */
+.largeCard {
+  grid-row: span 2; /* Ocupa 2 células da linha */
+  display: flex;
+  align-items: flex-end; /* Alinha o título na parte inferior */
+  padding: 40px;
+}
+
+.largeTitle {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7); /* Sombra para legibilidade */
+}
+
+/* Cards menores */
+.smallCard {
+  display: flex;
+  align-items: flex-end; /* Alinha o wrapper do título na parte inferior */
+}
+
+.smallTitleWrapper {
+  background-color: #0055ff; /* Fundo azul como na imagem */
+  width: 100%;
+  text-align: center;
+  padding: 2px 0px;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+
+.smallTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+
+/* --- Media Query para telas menores (Foco: 1200x800) --- */
+@media (max-width: 1200px) {
+  .gridContainer {
+    max-width: 1000px; /* Reduz a largura máxima do container */
+    height: 550px; /* Reduz a altura */
+    gap: 15px; /* Reduz o espaçamento */
+  }
+
+  .largeCard {
+    padding: 30px;
+  }
+
+  .largeTitle {
+    font-size: 2.8rem; /* Diminui a fonte do título principal */
+  }
+
+  .smallTitleWrapper {
+  padding: 2px 0px;
+  }
+  
+  .smallTitle {
+    font-size: 1rem; /* Diminui a fonte dos títulos menores */
+  }
+}
+
+/* --- Media Query para telas de 900px --- */
+@media (max-width: 900px) {
+  .gridContainer {
+    grid-template-columns: repeat(2, 1fr); /* Muda para 2 colunas */
+    grid-template-rows: auto; /* Linhas automáticas */
+    max-width: 700px;
+    height: auto; /* Altura se ajusta ao conteúdo */
+  }
+
+  .largeCard {
+    grid-column: 1 / -1; /* Ocupa a largura inteira */
+    grid-row: 1; /* Fica na primeira linha */
+    min-height: 300px;
+  }
+
+  .largeTitle {
+    font-size: 2.5rem;
+  }
+}
+
+/* --- Media Query para telas de 768px --- */
+@media (max-width: 768px) {
+    .gridContainer {
+        max-width: 500px;
+    }
+
+    .largeTitle {
+        font-size: 2.2rem;
+    }
+    
+    .smallTitle {
+        font-size: 0.9rem;
+    }
+
+    .card {
+        min-height: 180px;
+    }
+
+    .largeCard {
+      padding: 25px;
+    }
+}
+
+/* --- Media Query para telas de 480px (Mobile) --- */
+@media (max-width: 480px) {
+  .app-container {
+    padding: 15px; /* Menos padding na lateral do celular */
+  }
+
+  .gridContainer {
+    grid-template-columns: 1fr; /* Apenas 1 coluna */
+    max-width: 100%;
+    gap: 15px;
+  }
+
+  .largeCard {
+    grid-column: 1; /* Reseta para o fluxo normal */
+    grid-row: 1;
+    min-height: 250px;
+    padding: 20px;
+  }
+  
+  .largeTitle {
+    font-size: 2rem;
+  }
+
+
+}
+
+
 /* Responsividade para tablets e celulares */
 
 @media (max-width: 768px) {

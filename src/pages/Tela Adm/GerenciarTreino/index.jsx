@@ -12,7 +12,7 @@ const GerenciarTreino = () => {
 
   const [aluno, setAluno] = useState({
     nome: 'Arthur Heleno',
-    cpf: '123456-78910',
+   telefone: '123456-78910',
     email: 'helenocosta@gmail.com',
     foto: fotoAluno
   });
@@ -20,10 +20,10 @@ const GerenciarTreino = () => {
   useEffect(() => {
     if (alunoId) {
       const alunosMock = {
-        '1': { nome: "Ana Beatriz Costa", cpf: "123.456.789-00", email: "ana.costa@email.com" },
-        '2': { nome: "Bruno Dias Lima", cpf: "987.654.321-00", email: "bruno.lima@email.com" },
-        '3': { nome: "Carla Martins", cpf: "456.789.123-00", email: "carla.martins@email.com" },
-        '4': { nome: "Daniel Fogaça", cpf: "789.123.456-00", email: "daniel.fogaca@email.com" }
+        '1': { nome: "Ana Beatriz Costa",telefone: "123.456.789-00", email: "ana.costa@email.com" },
+        '2': { nome: "Bruno Dias Lima",telefone: "987.654.321-00", email: "bruno.lima@email.com" },
+        '3': { nome: "Carla Martins",telefone: "456.789.123-00", email: "carla.martins@email.com" },
+        '4': { nome: "Daniel Fogaça",telefone: "789.123.456-00", email: "daniel.fogaca@email.com" }
       };
       const dadosAluno = alunosMock[alunoId] || aluno;
       setAluno(prev => ({ ...prev, ...dadosAluno }));
@@ -61,11 +61,9 @@ const GerenciarTreino = () => {
               <div className="small-label">Nome:</div>
               <div className="aluno-nome">{aluno.nome}</div>
 
-              <div className="small-label">CPF:</div>
-              <div className="aluno-cpf">{aluno.cpf}</div>
+              <div className="small-label">Telefone:</div>
+              <div className="aluno-telefone">{aluno.telefone}</div>
 
-              <div className="small-label">Email:</div>
-              <div className="aluno-email">{aluno.email}</div>
             </div>
 
             <div className="profile-photo">

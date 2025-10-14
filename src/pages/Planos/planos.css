@@ -21,7 +21,8 @@
   color: white;
   margin-bottom: 30px;
   position: relative;
-  z-index: 2; /* garante que o header fique acima da transição */
+  z-index: 2;
+  /* garante que o header fique acima da transição */
 }
 
 .planos-header h2 {
@@ -44,7 +45,8 @@
   display: flex;
   justify-content: center;
   gap: 24px;
-  flex-wrap: wrap; /* permite quebra para várias linhas, igual à Home */
+  flex-wrap: wrap;
+  /* permite quebra para várias linhas, igual à Home */
   align-items: stretch;
   margin-top: 24px;
   position: relative;
@@ -55,20 +57,22 @@
   background: #fff;
   color: #0b2a66;
   border-radius: 14px;
-  padding: 22px;
+  padding: 32px 22px;
   box-shadow: 0 6px 18px rgba(2, 36, 97, 0.18);
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 380px;
-  align-items: center; /* centra títulos, botões e preço horizontalmente */
-  width: 300px; /* largura fixa similar à Home para controlar colunas */
+  align-items: center;
+  /* centra títulos, botões e preço horizontalmente */
+  width: 300px;
+  /* largura fixa similar à Home para controlar colunas */
 }
 
 .plano-card.featured {
   transform: translateY(-10px);
-  border: 3px solid rgba(255,255,255,0.12);
+  border: 3px solid rgba(255, 255, 255, 0.12);
 }
 
 .plano-card .plano-title-gold {
@@ -77,7 +81,8 @@
   margin-bottom: 8px;
   color: #0070f3;
   text-align: center;
-  min-height: 48px; /* garante espaço consistente para títulos */
+  min-height: 48px;
+  /* garante espaço consistente para títulos */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,21 +133,34 @@
   font-size: 14px;
 }
 
-.plano-features .icon { font-size: 16px; }
-.plano-features .ok { color: #1e9b48; }
-.plano-features .no { color: #d9534f; }
+.plano-features .icon {
+  font-size: 16px;
+}
+
+.plano-features .ok {
+  color: #1e9b48;
+}
+
+.plano-features .no {
+  color: #d9534f;
+}
 
 /* Descrição com borda e rótulo centralizado */
 .descricao-box {
   position: relative;
   margin: 8px auto 18px auto;
-  padding: 22px 16px; /* espaço interno */
-  border: 2px solid rgba(11, 42, 102, 0.12); /* cor suave com base no site */
+  padding: 22px 16px;
+  /* espaço interno */
+  border: 2px solid rgba(11, 42, 102, 0.12);
+  /* cor suave com base no site */
   border-radius: 10px;
-  background: #fff; /* mantém o conteúdo legível */
-  color: #0b2a66; /* cor do texto do site */
+  background: #fff;
+  /* mantém o conteúdo legível */
+  color: #0b2a66;
+  /* cor do texto do site */
   max-width: 100%;
-  min-height: 56px; /* padroniza altura do bloco de descrição */
+  min-height: 56px;
+  /* padroniza altura do bloco de descrição */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -153,13 +171,14 @@
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: #0b2a66; /* cor principal do site */
+  background: #0b2a66;
+  /* cor principal do site */
   color: #fff;
   font-weight: 800;
   font-size: 12px;
   padding: 6px 12px;
   border-radius: 8px 0;
-  box-shadow: 0 4px 12px rgba(2,36,97,0.12);
+  box-shadow: 0 4px 12px rgba(2, 36, 97, 0.12);
 }
 
 .descricao-text {
@@ -185,7 +204,8 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  margin-top: auto; /* empurra o CTA para baixo, alinhando todos os cards */
+  margin-top: auto;
+  /* empurra o CTA para baixo, alinhando todos os cards */
 }
 
 .plano-cta .plano-price {
@@ -218,7 +238,8 @@
 
 .plano-btn:hover,
 .plano-btn-gold:hover {
-  color: #fff; /* mantém branco no hover */
+  color: #fff;
+  /* mantém branco no hover */
 }
 
 /* Responsividade (igual à página Home) */
@@ -234,7 +255,9 @@
     gap: 20px;
   }
 
-  .plano-card { min-height: 420px; }
+  .plano-card {
+    min-height: 420px;
+  }
 }
 
 /* Celulares pequenos: cards empilhados, largura limitada para melhor leitura */
@@ -257,6 +280,7 @@
     min-height: auto;
   }
 
-  .plano-cards { gap: 16px; }
+  .plano-cards {
+    gap: 16px;
+  }
 }
-

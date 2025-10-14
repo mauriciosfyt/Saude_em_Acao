@@ -198,7 +198,7 @@ const SobreNos = () => {
               </Slider>
             </div>
 
-            <Link to={"/Planos"}>
+            <Link to={"/"} state={{ scrollTo: "planos" }}>
               <button className="btn-sobre">
                 VISUALIZAR PLANOS
                 <svg

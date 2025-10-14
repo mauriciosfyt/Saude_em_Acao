@@ -51,7 +51,7 @@ body {
 
 /* rótulos pequenos em azul */
 .small-label {
-  font-size: 13px;
+  font-size: 20px;
   color: #004dff;
   font-weight: 700;
   margin-top: 6px;
@@ -66,9 +66,9 @@ body {
 }
 
 /* cpf e email */
-.aluno-cpf,
+.aluno-telefone,
 .aluno-email {
-  font-size: 13px;
+  font-size: 24px;
   color: #222;
   font-weight: 600;
 }

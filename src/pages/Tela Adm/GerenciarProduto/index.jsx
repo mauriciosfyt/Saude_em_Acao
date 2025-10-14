@@ -8,36 +8,6 @@ import AdminHeader from '../../../components/header_admin';
 import Footer from "../../../components/footer";
 import { getAllProdutos, deleteProduto } from '../../../services/produtoService';
 
-// Dados de Exemplo (Mock). Em uma aplicação real, isso viria de uma API.
-const mockProdutos = [
-  {
-    id: 1,
-    nome: 'Shake Protein Growth',
-    categoria: 'WheyProtein',
-    status: 'Ativo',
-    preco: 10.00,
-    estoque: 175,
-    imagem: 'https://i.imgur.com/gO0ySNa.png',
-  },
-  {
-    id: 2,
-    nome: 'Camiseta Preta Growth',
-    categoria: 'Camiseta',
-    status: 'Ativo',
-    preco: 50.00,
-    estoque: 80,
-    imagem: 'https://i.imgur.com/SzGacad.png',
-  },
-  {
-    id: 3,
-    nome: 'Whey Protein Growth',
-    categoria: 'Inativo',
-    status: 'Inativo',
-    preco: 124.00,
-    estoque: 110,
-    imagem: 'https://i.imgur.com/Ahd2Jj8.png',
-  },
-];
 
 const GerenciarProduto = () => {
   const navigate = useNavigate();
@@ -204,7 +174,8 @@ const GerenciarProduto = () => {
             <option value="">Categoria</option>
             <option value="WheyProtein">WheyProtein</option>
             <option value="CAMISETAS">Camiseta</option>
-            <option value="Inativo">Inativo</option>
+            <option value="VITAMINAS">Vitaminas</option>
+            <option value="PreTreino">Pré-Treino</option>
           </select>
           <button className="btn-pesquisar">Pesquisar</button>
         </div>
@@ -219,7 +190,7 @@ const GerenciarProduto = () => {
           <thead>
             <tr>
               <th>Produto</th>
-              <th>Categoria/Status</th>
+              <th>Categoria</th>
               <th>Preço</th>
               <th>Estoque</th>
               <th>Ação</th>

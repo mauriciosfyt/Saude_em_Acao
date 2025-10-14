@@ -2,20 +2,23 @@
 import "./styles.css";
 import banner_home from "../../assets/banners/banner_home.svg";
 import img_abaixo_banner from "../../assets/img_home.jpeg";
+import modalidade1 from "../../assets/thayfit.jpeg";
+import modalidade2 from "../../assets/banners/banner_pilates.jpeg";
+import modalidade3 from "../../assets/banners/banner_funcional.svg";
 import Footer from "../../components/footer";
-import navegacao_ntem from "../../assets/navegacao_Ntem.png";
-import navegacao_suporte from "../../assets/navegacao_suporte.png";
-import navegacao_prof from "../../assets/navegacao_professores.png";
-import navegacao_loja from "../../assets/navegacao_loja.png";
-import tela_app from "../../assets/tela_app.png";
+// navegação removida — imagens não mais necessárias
+import tela_app from "../../assets/banners/banner_app.svg";
 import { Link } from "react-router-dom";
 import React, { useRef, useEffect, useState } from "react";
-import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
+// ícones não utilizados removidos
 import Header_nLogin from "../../components/header_nLogin/index.jsx";
+import Planos from "../../components/Planos";
 
 function Home() {
   const historiaRef = useRef(null);
   const [showHistoria, setShowHistoria] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const observer = new window.IntersectionObserver(
@@ -27,6 +30,17 @@ function Home() {
     if (historiaRef.current) observer.observe(historiaRef.current);
     return () => observer.disconnect();
   }, []);
+
+  // Se a navegação indicar que devemos rolar até 'planos', executa o scroll suave
+  useEffect(() => {
+    if (location && location.state && location.state.scrollTo === "planos") {
+      const el = document.getElementById("planos");
+      if (el) {
+        // pequeno timeout para garantir que a Home foi carregada/renderizada
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      }
+    }
+  }, [location]);
 
   return (
     <div className="home-container">
@@ -82,148 +96,46 @@ function Home() {
         </div>
 
         {/* PLANOS */}
-        <section className="planos">
-          <h2>PLANOS</h2>
-          <div className="plano-cards branco">
-            {/* PLANO BÁSICO */}
-            <div className="plano-card">
-              <h3>Plano Básico</h3>
-              <p className="descricao">XXXXXXXXXX</p>
-              <p className="preco">
-                <b>R$ 119,00</b>
-              </p>
-              <a href="https://api.whatsapp.com/message/7SFQMRX2M76KG1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer">
-                <button className="plano-btn">Assinar agora</button>
-              </a>
-              <ul>
-                <li>Escolha uma das modalidades a baixo:</li>
-                <li>
-                  <span className="icons ">
-                    <FaCheckCircle />
-                  </span>{" "}
-                  Pilates
-                </li>
-                <li>
-                  <span className="icons ">
-                    <FaCheckCircle />
-                  </span>{" "}
-                  Thay fit
-                </li>
-                <li>
-                  <span className="icons ">
-                    <FaCheckCircle />
-                  </span>{" "}
-                  Funcional
-                </li>
-              </ul>
+        <div id="planos">
+          <Planos />
+        </div>
+
+        {/* Nossas modalidades (substitui a navegação) */}
+        <section className="modalidades">
+          <div className="modalidades-header">
+            <div className="modalidades-left">
+              <h2 className="modalidades-titulo">Nossas <span className="azul">modalidades</span></h2>
             </div>
 
-            {/* PLANO ESSENCIAL */}
-            <div className="plano-card">
-              <h3>Plano Essencial</h3>
-              <p className="descricao">XXXXXXXXXX</p>
-              <p className="preco">
-                <b>R$ 159,00</b>
-              </p>
-              <a href="https://api.whatsapp.com/message/7SFQMRX2M76KG1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer">
-                <button className="plano-btn">Assinar agora</button>
-              </a>
-              <ul>
-                <li>Todas as modalidades a baixo:</li>
-                <li>
-                  <span className="icons ">
-                    <FaCheckCircle />
-                  </span>{" "}
-                  Pilates
-                </li>
-                <li>
-                  <span className="icons ">
-                    <FaCheckCircle />
-                  </span>{" "}
-                  Thay fit
-                </li>
-                <li>
-                  <span className="icons">
-                    <FaCheckCircle />
-                  </span>{" "}
-                  Funcional
-                </li>
-              </ul>
-            </div>
-            {/* PLANO GOLD */}
-            <div className="plano-card destaque">
-              <span className="mais-vantajoso ">o mais vantajoso</span>
-              <h3>Plano Gold</h3>
-              <p className="descricao branco">XXXXXXXXXX</p>
-              <p className="preco">
-                <b>À partir de R$350,00</b>
-              </p>
-              <Link to="/Planos">
-                <button className="plano-btn">saiba mais</button>
-              </Link>
-              <ul>
-                <li>Todas as modalidades a baixo:</li>
-                <li>
-                  <span className="icons ">
-                    <FaCheckCircle />
-                  </span>{" "}
-                  Pilates
-                </li>
-                <li>
-                  <span className="icons ">
-                    <FaCheckCircle />
-                  </span>{" "}
-                  Thay fit
-                </li>
-                <li>
-                  <span className="icons">
-                    <FaCheckCircle />
-                  </span>{" "}
-                  Funcional
-                </li>
-                <li>
-                  <span className="icons">
-                    <FaCheckCircle />
-                  </span>{" "}
-                  Treino Personalizado
-                </li>
-              </ul>
+            <div className="modalidades-divider" />
+
+            <div className="modalidades-right">
+              <p className="modalidades-descricao">Temos como missão ajudar todos os nossos alunos a atingir os seus resultados, seja com qual modalidade escolher, confira:</p>
             </div>
           </div>
-        </section>
 
-        {/* Navegação */}
-
-        <section className="navegacao">
-          <h2 className="navegacao-titulo">
-            Experiência <span className="azul">Saúde em ação</span>
-          </h2>
-          <div className="navegacao-links">
-            <Link to="/Professores">
-              <div>
-                <img src={navegacao_prof} alt="Tela professor" />
-                <p>Personal</p>
+          <div className="modalidades-grid">
+            <Link to="/Professores" className="modalidade-card">
+              <img src={modalidade1} alt="Thay fit" />
+              <div className="modalidade-overlay">
+                <h3>Thay fit</h3>
+                <span className="saiba-mais">Saiba mais →</span>
               </div>
             </Link>
 
-            <Link to="/Loja">
-              <div>
-                <img src={navegacao_loja} alt="Tela loja" />
-                <p>Loja</p>
+            <Link to="/Planos" className="modalidade-card">
+              <img src={modalidade2} alt="Pilates" />
+              <div className="modalidade-overlay">
+                <h3>Pilates</h3>
+                <span className="saiba-mais">Saiba mais →</span>
               </div>
             </Link>
 
-            <Link to="/SobreNos">
-              <div>
-                <img src={navegacao_suporte} alt="Academia" />
-                <p>Sobre Nós</p>
-              </div>
-            </Link>
-
-            <Link to="/Planos">
-              <div>
-                <img src={navegacao_ntem} alt="Planos" />
-                <p>Planos</p>
+            <Link to="/Reservas" className="modalidade-card">
+              <img src={modalidade3} alt="Funcional" />
+              <div className="modalidade-overlay">
+                <h3>Funcional</h3>
+                <span className="saiba-mais">Saiba mais →</span>
               </div>
             </Link>
           </div>
@@ -238,23 +150,16 @@ function Home() {
               <h3>Seu aliado nos treinos!</h3>
               <ul>
                 <li>
-                  <span className="check"></span> Confira seu treino
-                  personalizado completo
+                  <span className="bullet"></span> Confira seu treino personalizado completo
                 </li>
                 <li>
-                  <span className="check"></span> Veja a execução dos exercícios
-                  em vídeo
+                  <span className="bullet"></span> Veja a execução dos exercícios em vídeo
                 </li>
                 <li>
-                  <span className="check"></span> Acompanhe o progresso de carga
+                  <span className="bullet"></span> Acompanhe o progresso de carga
                 </li>
                 <li>
-                  <span className="check"></span> Acesse 60 treinos mesmo se não
-                  for nosso aluno
-                </li>
-                <li>
-                  <span className="check"></span> Compre ou faça upgrade de
-                  plano
+                  <span className="bullet"></span> Compre ou faça upgrade de plano gold
                 </li>
               </ul>
               <div className="qr-section">

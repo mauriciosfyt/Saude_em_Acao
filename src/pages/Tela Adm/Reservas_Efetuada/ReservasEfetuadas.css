@@ -1,212 +1,243 @@
-body {
-  background: #f5f5f5;
-}
 
 .content {
-  background: #ffffff;
-  padding: 20px;
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
   border-radius: 8px;
-  width: calc(100% - 40px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  margin: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .titulo {
   text-align: center;
-  font-weight: bold;
-  font-size: 20px;
+  font-size: 1.75rem;
+  margin-bottom: 2rem;
+  color: #172b4d;
 }
 
-/* Barra de pesquisa */
-.barra-pesquisa {
+/* --- BARRA DE AÇÕES (BUSCA E FILTRO) --- */
+.barra-acoes {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  background: #f5f5f5;
-  padding: 8px 12px;
-  border-radius: 8px;
-  margin: 20px 0;
-  width: 30%;
-  border: 1px solid #e0e0e0;
+  flex-wrap: wrap; 
+  gap: 1rem; 
+  margin-bottom: 2.5rem;
+}
+
+.barra-pesquisa {
+  flex: 1;
+  min-width: 250px;
   position: relative;
 }
 
 .barra-pesquisa input {
-  border: none;
-  background: transparent;
-  outline: none;
-  width: 100%;
-  padding-left: 30px;
-  font-size: 14px;
+  width: 50%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem; /* Espaço para o ícone */
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  font-size: 1rem;
+    background: #f5f5f5;
 }
 
 .search-icon {
-  color: #666;
-  font-size: 16px;
   position: absolute;
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  pointer-events: none;
+  color: #888;
 }
 
-/* Lista de reservas */
+.container-filtro {
+  position: relative;
+}
+
+.filtro-reservas {
+  padding: 0.75rem 1rem 0.75rem 2.5rem; /* Espaço para o ícone */
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  font-size: 1rem;
+  min-width: 200px;
+    background: #f5f5f5;
+}
+
+.filtro-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+}
+
+/* --- LISTA DE RESERVAS E CARDS --- */
 .lista-reservas {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.5rem;
 }
 
+/* CARD DE RESERVA - LAYOUT DESKTOP */
 .reserva-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 10px 0;
-  background: #ffffff;
+  gap: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #dfe1e6;
+  border-radius: 8px;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.reserva-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .produto-img {
-  width: 100px;
-  height: auto;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
+  border-radius: 4px;
+  border: 1px solid #f0f0f0;
+  flex-shrink: 0;
 }
 
-.reserva-info {
-  flex: 2;
-  margin-left: 10px;
-}
-
-.reserva-info p {
-  margin: 4px 0;
-  font-size: 14px;
-}
-
-.reserva-info strong {
-  color: #000;
-  font-weight: bold;
-}
-
-.reserva-detalhes {
+.reserva-info, .reserva-detalhes {
   flex: 1;
-  text-align: center;
+}
+
+.reserva-info p, .reserva-detalhes p {
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+  color: #5e6c84;
+}
+
+.reserva-info .nome {
+  font-weight: bold;
+  color: #172b4d;
+  font-size: 1rem;
 }
 
 .reserva-preco {
-  flex: 1;
   text-align: right;
 }
 
 .reserva-preco .preco-reserva {
+  font-size: 1.2rem;
   font-weight: bold;
-  font-size: 18px;
-  margin-right: 120px;
-
-}
-
-.tamanho {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: #172b4d;
 }
 
 .reserva-preco .data {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 10px;
-  margin-right: 80px;
+  font-size: 0.9rem;
+  color: #5e6c84;
+  margin-bottom: 0.5rem;
 }
 
 .botoes {
   display: flex;
+  gap: 0.75rem;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 5px;
 }
 
-.btn-cancelar {
-  background: red;
-  color: white;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
+.btn-cancelar,
 .btn-aprovar {
-  background: #007bff;
-  color: white;
-  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.25rem;
   border: none;
   border-radius: 22px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: #fff;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-cancelar {
+  background-color: #dc3545;
+}
+
+.btn-aprovar {
+  background-color: #007bff;
+}
+
+.btn-cancelar:hover {
+  background-color: #c82333;
+  transform: scale(1.03);
 }
 
 .btn-aprovar:hover {
-  background: #0056b3;
-  
+  background-color: #0056b3;
+  transform: scale(1.03);
 }
 
-/* Telas até 1200px */
-@media (max-width: 1200px) {
-
-  .barra-pesquisa {
-    width: 90%;
-  }
+.btn-cancelar:focus,
+.btn-aprovar:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
 }
 
-/* Telas até 900px */
-@media (max-width: 900px) {
 
-  .barra-pesquisa {
-    width: 95%;
+/* --- CORES DOS STATUS --- */
+.status-pendente { color: #f39c12; font-weight: bold; }
+.status-efetuada { color: #2ecc71; font-weight: bold; }
+.status-cancelada { color: #e74c3c; font-weight: bold; }
+
+
+/* ================================================================== */
+/* LAYOUT RESPONSIVO (MOBILE) */
+/* ================================================================== */
+@media (max-width: 768px) {
+  .content {
+    padding: 1rem;
+      max-width: 340px;
   }
 
-  .reserva-preco .preco {
-    margin-left: 0;
-    margin-right: 0;
-  }
-}
-
-/* Telas até 600px */
-@media (max-width: 600px) {
-  .reserva-item {
+  .barra-acoes {
     flex-direction: column;
-    /* deixa todos os blocos empilhados */
-    align-items: flex-start;
-
+    align-items: stretch;
   }
 
-  /* Mover .reserva-detalhes para abaixo de .reserva-info */
-  .reserva-info {
-    order: 1;
-    width: 100%;
+  .barra-pesquisa input {
+  width: 100%;
+
+}
+
+
+  /* CARD DE RESERVA - LAYOUT MOBILE */
+  .reserva-item {
+    flex-direction: column; /* Empilha os blocos */
+    align-items: flex-start; /* Alinha tudo à esquerda */
+    gap: 1rem;
   }
 
-  .reserva-detalhes {
-    order: 2;
-    width: 100%;
-    text-align: left;
-    /* ou center se preferir */
-    margin-top: -90px;
-    font-size: 14px;
-  }
+  /* Define a ORDEM CORRETA de exibição */
+  .produto-img { order: 1; }
+   .reserva-info { order: 2; }
+  .reserva-detalhes { order: 3; }
+  .reserva-preco { order: 4; }
 
-  .reserva-detalhes .quantidade {
-    margin-left: 9px;
-  }
-
-  .reserva-detalhes .tamanho {
-    margin-left: 9px;
-
-  }
-
-  .reserva-preco {
-    order: 3;
+  /* Ajusta o alinhamento e largura dos blocos no mobile */
+  .reserva-info, .reserva-detalhes, .reserva-preco {
     width: 100%;
     text-align: left;
-    margin-top: 5px;
   }
+
+  
+
+.botoes {
+  width: 100%;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.btn-cancelar,
+.btn-aprovar {
+  flex: 1; /* ambos ocupam o mesmo espaço */
+  text-align: center;
+  border-radius: 25px;
+}
+
+
 }
