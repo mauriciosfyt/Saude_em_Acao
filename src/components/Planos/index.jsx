@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import "./styles.css";
 
-function Planos() {
+function PlanosComponent({ cardBg }) {
+  const altClass = cardBg === "d9d9" ? "alt-bg" : "";
+
   return (
-    <section className="planos">
+    <section className={`planos ${altClass}`}>
       <h2>PLANOS</h2>
       <div className="plano-cards">
         <div className="plano-card">
@@ -60,4 +62,4 @@ function Planos() {
   );
 }
 
-export default Planos;
+export default PlanosComponent;

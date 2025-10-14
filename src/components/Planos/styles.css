@@ -368,3 +368,13 @@
         gap: 20px;
     }
 }
+
+/* Classe alternativa para aplicar background específico em determinadas telas (aplica à seção) */
+.planos.alt-bg {
+    background-color: #d9d9d9;
+}
+
+/* Garante que o cartão destaque continue escuro mesmo quando a seção tiver alt-bg */
+.planos.alt-bg .plano-card.destaque.dark {
+    background: #222324;
+}
