@@ -1,0 +1,68 @@
+/* src/pages/Pilates/Pilates.css */
+
+/* Estilização do Banner Principal para Pilates */
+.pilates-banner {
+    position: relative;
+   height: 800px;
+    width: 100%;
+    background-image: url('../../../src/assets/banner_pilates.svg'); 
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: #D9D9D9;
+    padding-left: 5%;
+}
+
+.pilates-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.2); /* Sobreposição escura suave */
+    z-index: 1;
+}
+
+/* Seção de Texto Introdutório */
+.pilates-intro {
+    background-color: #D9D9D9;
+    padding: 60px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.pilates-intro__content {
+    max-width: 800px;
+    text-align: center;
+}
+
+.pilates-intro__content p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+.pilates-cta {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    font-size: 1.2rem;
+    color: #333;
+    background-color: #D9D9D9;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .pilates-banner {
+        height: 40vh;
+    }
+    .pilates-intro {
+        padding: 40px 15px;
+    }
+    .pilates-intro__content p {
+        font-size: 1rem;
+    }
+}

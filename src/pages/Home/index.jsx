@@ -2,9 +2,9 @@
 import "./styles.css";
 import banner_home from "../../assets/banners/banner_home.svg";
 import img_abaixo_banner from "../../assets/img_home.jpeg";
-import modalidade1 from "../../assets/thayfit.jpeg";
-import modalidade2 from "../../assets/banners/banner_pilates.jpeg";
-import modalidade3 from "../../assets/banners/banner_funcional.svg";
+import modalidade1 from "../../assets/banners/banner_thayfit.jpg";
+import modalidade2 from "../../assets/banners/banner_pilates.jpg";
+import modalidade3 from "../../assets/banners/banner_funcional.webp";
 import Footer from "../../components/footer";
 // navegação removida — imagens não mais necessárias
 import tela_app from "../../assets/banners/banner_app.svg";
@@ -115,7 +115,7 @@ function Home() {
           </div>
 
           <div className="modalidades-grid">
-            <Link to="/Professores" className="modalidade-card">
+            <Link to="/ThayFit" className="modalidade-card">
               <img src={modalidade1} alt="Thay fit" />
               <div className="modalidade-overlay">
                 <h3>Thay fit</h3>
@@ -123,7 +123,7 @@ function Home() {
               </div>
             </Link>
 
-            <Link to="/Planos" className="modalidade-card">
+            <Link to="/Pilates" className="modalidade-card">
               <img src={modalidade2} alt="Pilates" />
               <div className="modalidade-overlay">
                 <h3>Pilates</h3>
@@ -131,8 +131,9 @@ function Home() {
               </div>
             </Link>
 
-            <Link to="/Reservas" className="modalidade-card">
-              <img src={modalidade3} alt="Funcional" />
+            <Link to="/Funcional" className="modalidade-card">
+              {/* imagem com classe específica para estilização apenas desta modalidade */}
+              <img className="modalidade-funcional-img" src={modalidade3} alt="Funcional" />
               <div className="modalidade-overlay">
                 <h3>Funcional</h3>
                 <span className="saiba-mais">Saiba mais →</span>

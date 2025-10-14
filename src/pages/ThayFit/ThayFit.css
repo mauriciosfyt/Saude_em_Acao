@@ -1,0 +1,163 @@
+/* src/pages/ThayFit/ThayFit.css */
+
+/* Estilização do Banner Principal */
+.main-banner {
+    position: relative;
+    height: 80vh;
+    width: 100%;
+    /* Use a imagem do banner que já tem o texto "Thay fit" embutido */
+    background-image: url('../../../src/assets/thayfit.jpeg'); /* URL da IMAGEM DO SEU BANNER com texto */
+    background-size: cover;
+    background-position: center;
+    /* Se a imagem já tem a sobreposição, ou se você não precisar dela,
+       pode remover o ::before ou ajustar sua opacidade.
+       Para corresponder à imagem, mantive uma sobreposição leve aqui.
+    */
+    display: flex; /* Mantido para centralização futura se houver outros elementos */
+    align-items: center;
+    justify-content: flex-start; /* Alinha o conteúdo à esquerda */
+    color: white;
+    padding-left: 5%; /* distancia do canto esquerdo */
+    position: relative;
+}
+
+
+.main-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.2); /* Sobreposição mais leve */
+    z-index: 1;
+}
+
+/* Seção de Texto Introdutório - permanece a mesma */
+.intro-section {
+    background-color: #D9D9D9;
+    padding: 60px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.intro-content {
+    max-width: 800px;
+    text-align: center;
+}
+
+.intro-content p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+.contrate-plano{
+    display: flex;
+    justify-content: center;
+}
+
+/* Responsividade - permanece a mesma, pois não há elementos dinâmicos no banner */
+@media (max-width: 768px) {
+    .main-banner {
+        height: 40vh; /* Ajuste a altura do banner para telas menores */
+    }
+    .intro-section {
+        padding: 40px 15px;
+    }
+    .intro-content p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .banner-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .banner-divider {
+        height: 48px;
+        width: 5px;
+    }
+    .main-banner {
+        padding-left: 6%;
+    }
+}
+
+/* Responsividade inspirada nas regras do SobreNos */
+@media (min-width: 1080px) {
+    .main-banner {
+        /* mantém altura generosa em telas grandes */
+        height: 80vh;
+    }
+
+    .banner-content h1 {
+        font-size: 6rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .main-banner {
+        height: 60vh;
+    }
+
+    .banner-content {
+        padding: 0 4%;
+    }
+
+    .banner-content h1 {
+        font-size: clamp(40px, 8vw, 72px);
+        text-align: left;
+    }
+
+    .banner-divider {
+        height: 72px;
+        width: 6px;
+    }
+}
+
+@media (max-width: 600px) {
+    .main-banner {
+        height: 300px; /* mesmo comportamento do SobreNos */
+    }
+
+    .banner-content {
+        width: 100%;
+        padding: 0 6%;
+        justify-content: center;
+    }
+
+    .banner-content h1 {
+        font-size: 28px;
+        text-align: center;
+    }
+
+    .banner-divider {
+        height: 48px;
+        width: 6px;
+    }
+}
+
+.banner-content {
+    position: relative;
+    z-index: 2; /* mantem o texto acima da sobreposição */
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.banner-content h1 {
+    font-size: 6rem; /* tamanho grande como no exemplo */
+    margin: 0;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -2px;
+}
+
+.banner-divider {
+    display: block;
+    width: 6px;
+    height: 80px;
+    background-color: #1062fe; /* barra azul vertical */
+    border-radius: 4px;
+}
