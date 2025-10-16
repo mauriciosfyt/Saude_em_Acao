@@ -2,8 +2,8 @@
 
 import React from 'react';
 import './ThayFit.css';
-import bannerImg from '../../assets/banners/banner_thayfit.jpg';
-import Header from '../../components/header_loja';
+import thayfitBanner from '../../assets/banners/banner_thayfit.svg';
+import Header from '../../components/header_nLogin';
 import Footer from '../../components/footer';
 import PlanosComponent from '../../components/Planos';
 
@@ -15,16 +15,12 @@ const ThayFit = () => {
      <Header />
     <main className="thayfit-page">
      
-      {/* Seção do Banner Principal - agora puramente um background image */}
-      <header className="main-banner">
-        <div className="banner-img">
-          <img src={bannerImg} alt="Thay fit banner" />
-        </div>
-        <div className="banner-content">
-          <h1>Thay fit</h1>
-          <span className="banner-divider" aria-hidden="true"></span>
-        </div>
-      </header>
+      {/* Banner principal (igual ao da Home) */}
+      <div>
+        <section className="banner_thayfit">
+          <img src={thayfitBanner} alt="Banner Thay fit" />
+        </section>
+      </div>
 
       {/* Seção de Texto Introdutório */}
       <section className="intro-section">

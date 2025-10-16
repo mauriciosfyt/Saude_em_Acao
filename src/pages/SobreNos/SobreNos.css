@@ -6,8 +6,7 @@
       #000000 31%,
       #004dff 69%,
       #d9d9d9 100%);
-  display: flex;
-  justify-content: center;
+
   align-items: flex-start;
   padding-top: 5%;
   position: relative;

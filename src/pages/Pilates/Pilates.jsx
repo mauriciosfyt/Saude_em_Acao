@@ -2,9 +2,11 @@
 
 import React from 'react';
 import './Pilates.css'; // Importando o novo arquivo CSS
-import Header from '../../components/header_loja';
+import Header from '../../components/header_nLogin';
 import Footer from '../../components/footer';
 import PlanosComponent from '../../components/Planos';
+import pilatesBanner from '../../assets/banners/banner_pilates.svg';
+
 
 const Pilates = () => {
   return (
@@ -12,10 +14,12 @@ const Pilates = () => {
       <Header />
       <main className="pilates-page">
         
-        {/* Seção do Banner Principal */}
-        <header className="pilates-banner">
-          {/* A imagem de fundo específica do Pilates será definida no CSS */}
-        </header>
+      {/* Banner principal (igual ao da Home) */}
+      <div>
+        <section className="banner_thayfit">
+          <img src={pilatesBanner} alt="Banner Thay fit" />
+        </section>
+      </div>
 
         {/* Seção de Texto Introdutório */}
         <section className="pilates-intro">
@@ -29,7 +33,7 @@ const Pilates = () => {
         <h3 className="pilates-cta">Contrate um plano e venha fazer parte da família saúde em ação!</h3>
       </main>
 
-      <PlanosComponent />
+  <PlanosComponent cardBg="d9d9" />
       <Footer />
     </>
   );

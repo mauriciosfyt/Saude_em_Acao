@@ -2,9 +2,9 @@
 import "./styles.css";
 import banner_home from "../../assets/banners/banner_home.svg";
 import img_abaixo_banner from "../../assets/img_home.jpeg";
-import modalidade1 from "../../assets/banners/banner_thayfit.jpg";
-import modalidade2 from "../../assets/banners/banner_pilates.jpg";
-import modalidade3 from "../../assets/banners/banner_funcional.webp";
+import modalidade1 from "../../assets/banners/thayfit.jpg";
+import modalidade2 from "../../assets/banners/pilates.jpg";
+import modalidade3 from "../../assets/banners/funcional.jpg";
 import Footer from "../../components/footer";
 // navegação removida — imagens não mais necessárias
 import tela_app from "../../assets/banners/banner_app.svg";
