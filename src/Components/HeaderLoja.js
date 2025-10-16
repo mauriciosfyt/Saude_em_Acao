@@ -43,9 +43,17 @@ const HeaderLoja = ({ navigation: navigationProp, searchText, setSearchText }) =
             />
             <Ionicons name="search" size={20} color="#000" style={styles.searchIcon} />
           </View>
-          <TouchableOpacity onPress={handleAbrirMenu} style={styles.menuButton}>
-            <Ionicons name="menu" size={28} color="#000" />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('LojaCarrinho')} 
+              style={styles.cartButton}
+            >
+              <Ionicons name="cart-outline" size={24} color="#000" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleAbrirMenu} style={styles.menuButton}>
+              <Ionicons name="menu" size={28} color="#000" />
+            </TouchableOpacity>
+          </View>
         </View>
       </LinearGradient>
 
@@ -70,10 +78,6 @@ const HeaderLoja = ({ navigation: navigationProp, searchText, setSearchText }) =
             <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Chat')}>
               <Ionicons name="chatbubble-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Chat</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Mensalidades')}>
-              <Ionicons name="card-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Mensalidades</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('LojaProdutos')}>
               <Ionicons name="cart-outline" size={24} color="#333" />
@@ -113,8 +117,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cartButton: {
+    marginRight: 15,
+    padding: 5,
+  },
   menuButton: {
-    marginLeft: 15,
+    marginLeft: 5,
   },
   menuOverlay: {
     flex: 1,
