@@ -3,17 +3,17 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
   ScrollView,
   ImageBackground,
   StatusBar,
   Image,
-  useColorScheme,
 } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useThemePreference } from '../../context/ThemeContext';
 import { Svg, Path, Circle } from 'react-native-svg';
+
 
 // 1. Importe o novo componente HeaderHome
 import HeaderHome from '../../Components/header_home/HeaderHome';
@@ -36,59 +36,22 @@ const SIZES = {
 };
 
 // --- Componente FeatureButton ---
-const FeatureButton = ({ iconName, label, onPress, isDark }) => {
+const FeatureButton = ({ iconName, label, onPress }) => {
   return (
-    <TouchableOpacity
-      style={[
-        styles.featureButtonContainer,
-        isDark && {
-          backgroundColor: '#3A3A3A',
-          shadowColor: '#000',
-          shadowOpacity: 0.5,
-          shadowRadius: 6,
-          elevation: 2,
-        },
-      ]}
-      onPress={onPress}
-    >
-      <MaterialCommunityIcons
-        name={iconName}
-        size={40}
-        color={COLORS.secondary}
-      />
-      <Text
-        style={[
-          styles.featureButtonLabel,
-          isDark && { color: '#E6E6E6' },
-        ]}
-      >
-        {label}
-      </Text>
+    <TouchableOpacity style={styles.featureButtonContainer} onPress={onPress}>
+      <MaterialCommunityIcons name={iconName} size={40} color={COLORS.secondary} />
+      <Text style={styles.featureButtonLabel}>{label}</Text>
     </TouchableOpacity>
   );
 };
 
 // --- Card de Analytics (gráficos simulados) ---
-const AnalyticsCard = ({ onPress, isDark }) => {
+const AnalyticsCard = ({ onPress }) => {
   const bars = [40, 25, 55, 60, 52];
   const weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
   return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={onPress}
-      style={[
-        styles.analyticsCard,
-        isDark && { backgroundColor: '#3A3A3A' },
-      ]}
-    >
-      <Text
-        style={[
-          styles.analyticsMonth,
-          isDark && { color: '#E0E0E0' },
-        ]}
-      >
-        Janeiro,2025
-      </Text>
+    <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.analyticsCard}>
+      <Text style={styles.analyticsMonth}>Janeiro,2025</Text>
       <View style={styles.analyticsInner}>
         {/* Área (esquerda) */}
         <View style={styles.areaWrapper}>
@@ -114,38 +77,31 @@ const AnalyticsCard = ({ onPress, isDark }) => {
                 .join(' ')}`;
               return (
                 <>
-                  <Path d={areaPath} fill={isDark ? '#3FA2FF' : '#3FA2FF'} />
-                  <Path d={linePath} fill="none" stroke={isDark ? '#79A9FF' : '#4A90E2'} strokeWidth={2} />
+                  <Path d={areaPath} fill="#3FA2FF" />
+                  <Path d={linePath} fill="none" stroke="#4A90E2" strokeWidth={2} />
                   {pts.map((p, idx) => (
-                    <Circle key={idx} cx={p.x} cy={p.y} r={3} fill="#FFFFFF" stroke={isDark ? '#79A9FF' : '#4A90E2'} strokeWidth={1.5} />
+                    <Circle key={idx} cx={p.x} cy={p.y} r={3} fill="#FFFFFF" stroke="#4A90E2" strokeWidth={1.5} />
                   ))}
                 </>
               );
             })()}
           </Svg>
-          <Text style={[styles.monthLabel, isDark && { color: '#E6E6E6' }]}>Janeiro</Text>
+          <Text style={styles.monthLabel}>Janeiro</Text>
         </View>
 
         {/* Divisor */}
-        <View style={[styles.analyticsDivider, isDark && { backgroundColor: '#515151' }]} />
+        <View style={styles.analyticsDivider} />
 
         {/* Barras (direita) */}
         <View style={styles.barWrapper}>
           <View style={styles.barsRow}>
             {bars.map((h, idx) => (
-              <View
-                key={idx}
-                style={[
-                  styles.bar,
-                  { height: h },
-                  isDark && { backgroundColor: '#B7C3D6' },
-                ]}
-              />
+              <View key={idx} style={[styles.bar, { height: h }]} />
             ))}
           </View>
           <View style={styles.weekdaysRow}>
             {weekdays.map((d) => (
-              <Text key={d} style={[styles.weekdayText, isDark && { color: '#C9C9C9' }]}>{d}</Text>
+              <Text key={d} style={styles.weekdayText}>{d}</Text>
             ))}
           </View>
         </View>
@@ -156,9 +112,6 @@ const AnalyticsCard = ({ onPress, isDark }) => {
 
 // --- Componente Principal da Tela: Home ---
 const Home = ({ navigation }) => {
-  const colorScheme = useColorScheme();
-  const { isDark: forcedDark, systemIsDark } = useThemePreference();
-  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
   const features = [
     { id: 1, icon: 'account-group-outline', label: 'Professores', screen: 'Professores' },
     { id: 2, icon: 'weight-lifter', label: 'Meus treinos', screen: 'MeuTreino' },
@@ -167,10 +120,10 @@ const Home = ({ navigation }) => {
   ];
 
   return (
-    <SafeAreaView style={[styles.safeArea, isDark && { backgroundColor: '#2B2B2B' }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" />
       <ScrollView
-        style={[styles.container]}
+        style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: SIZES.large }}
       >
@@ -182,12 +135,12 @@ const Home = ({ navigation }) => {
 
         {/* --- Mensagem de Boas-Vindas --- */}
         <View style={styles.welcomeSection}>
-          <Text style={[styles.h1, isDark && { color: '#FFFFFF' }]}>Que bom ter você aqui!</Text>
-          <Text style={[styles.body2, isDark && { color: '#BBBBBB' }]}>Seja bem vindo a academia saúde em ação!</Text>
+          <Text style={styles.h1}>Que bom ter você aqui!</Text>
+          <Text style={styles.body2}>Seja bem vindo a academia saúde em ação!</Text>
         </View>
 
         {/* --- Card com Gráficos --- */}
-        <AnalyticsCard isDark={isDark} onPress={() => navigation.navigate('Desempenho')} />
+        <AnalyticsCard onPress={() => navigation.navigate('Desempenho')} />
 
         {/* --- Grade de Funcionalidades --- */}
         <View style={styles.featuresGrid}>
@@ -196,7 +149,6 @@ const Home = ({ navigation }) => {
               key={feature.id}
               iconName={feature.icon}
               label={feature.label}
-              isDark={isDark}
               onPress={() => {
                 if(feature.screen === 'Perfil'){
                   navigation.navigate('Perfil')
