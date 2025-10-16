@@ -17,7 +17,6 @@ import Perfil from "../Pages/Perfil/Perfil";
 import Plano from "../Pages/Plano/Plano";
 import TelaLogin from "../Pages/Login/TelaLogin";
 import Chat from "../Pages/Chat/Chat";
-import Mensalidades from "../Pages/Mensalidade/Mensalidade";
 import LojaProdutos from "../Pages/Loja/LojaProdutos/loja_produtos";
 import LojaFavoritos from "../Pages/Loja/Loja_Favoritos/loja_favoritos";
 import Reservas from "../Pages/Loja/Loja_Reservas/loja_reservas";
@@ -38,6 +37,7 @@ import LojaVitaminas from "../Pages/Loja/Loja_Categoria/LojaVitaminas";
 import LojaWhey from "../Pages/Loja/Loja_Categoria/LojaWhey.js";
 import LojaRoupas from "../Pages/Loja/Loja_Categoria/LojaRoupas.js";
 import LojaCreatina from "../Pages/Loja/Loja_Categoria/LojaCreatina.js";
+import LojaCarrinho from "../Pages/Loja/Loja_Carrinho/LojaCarrinho.js";
 
 const Stack = createNativeStackNavigator();
 
@@ -57,7 +57,6 @@ export default function Routes() {
         
         <Stack.Screen name="TelaLogin" component={TelaLogin} />
         <Stack.Screen name="Chat" component={Chat} />
-        <Stack.Screen name="Mensalidades" component={Mensalidades} />
         <Stack.Screen name="LojaProdutos" component={LojaProdutos} />
         <Stack.Screen name="LojaFavoritos" component={LojaFavoritos} />
         <Stack.Screen name="LojaReservas" component={Reservas} />
@@ -80,6 +79,7 @@ export default function Routes() {
   <Stack.Screen name="LojaWhey" component={LojaWhey} />
   <Stack.Screen name="LojaRoupas" component={LojaRoupas} />
   <Stack.Screen name="LojaCreatina" component={LojaCreatina} />
+  <Stack.Screen name="LojaCarrinho" component={LojaCarrinho} />
       </Stack.Navigator>
     </NavigationContainer>
   );
