@@ -62,13 +62,6 @@ const DesempenhoHeader = ({ navigation, mesAno }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleNavegar("Mensalidades")}
-            >
-              <Ionicons name="card-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Mensalidades</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
               onPress={() => handleNavegar("LojaProdutos")}
             >
               <Ionicons name="cart-outline" size={24} color="#333" />
