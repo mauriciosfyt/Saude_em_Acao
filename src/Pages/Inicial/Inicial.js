@@ -1,46 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  Modal,
   Image,
-  Pressable,
-  useColorScheme,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Linking } from 'react-native';
 
 // O componente recebe 'navigation' para poder navegar
 const Inicial = ({ navigation }) => {
-  const [showLoginModal, setShowLoginModal] = useState(false);
   // Verifique se estes caminhos estão corretos para o seu projeto
   const appLogoSource = require('../../../assets/icons/Logo_Prata.png');
 
+  // Função para navegar diretamente para o login
   const handleStartPress = () => {
-    setShowLoginModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowLoginModal(false);
-  };
-
-  // --- CORREÇÃO APLICADA AQUI ---
-  // Esta função agora navega para a tela de Login, como desejado.
-  const navigateToLogin = () => {
-    setShowLoginModal(false);
-    // Usamos 'navigate' para ir para a tela de Login.
-    // O nome 'TelaLogin' deve ser o mesmo que você definiu no seu arquivo de rotas.
     navigation.navigate('TelaLogin');
   };
 
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
   return (
-    <View style={[styles.container, isDark && { backgroundColor: '#2B2B2B' }]}>
+    <View style={styles.container}>
       <LinearGradient
-        colors={isDark ? ['#121212', '#1F1F1F', '#262626', '#2E2E2E', '#3A3A3A'] : ['#405CBA', '#405CBA', '#5A7DE8', '#8BA0E0', '#E8ECF5']}
+        colors={['#405CBA', '#405CBA', '#5A7DE8', '#8BA0E0', '#E8ECF5']}
         locations={[0, 0.4, 0.6, 0.8, 1]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
@@ -54,49 +35,12 @@ const Inicial = ({ navigation }) => {
           />
         </View>
 
-        <Text style={[styles.welcomeText, isDark && { color: '#EAEAEA' }]}>Seja bem vindo!</Text>
+        <Text style={styles.welcomeText}>Seja bem vindo!</Text>
 
         <TouchableOpacity style={styles.startButton} onPress={handleStartPress}>
-          <Text style={styles.startButtonText}>Começar</Text>
+          <Text style={styles.startButtonText}>Entrar</Text>
         </TouchableOpacity>
       </LinearGradient>
-
-      <Modal
-        visible={showLoginModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={handleCloseModal}
-      >
-        <Pressable style={styles.modalOverlay} onPress={handleCloseModal}>
-          <Pressable style={[styles.modalContent, isDark && { backgroundColor: '#333' }]} onPress={() => {}}>
-            {/* O botão "Já sou aluno" agora chama a função correta */}
-            <TouchableOpacity style={styles.studentButton} onPress={navigateToLogin}>
-              <Text style={styles.studentButtonText}>Já sou aluno(a)</Text>
-            </TouchableOpacity>
-
-            <View style={styles.separator}>
-              <View style={styles.separatorLine} />
-              <Text style={[styles.separatorText, isDark && { color: '#EAEAEA' }]}>ou</Text>
-              <View style={styles.separatorLine} />
-            </View>
-
-  <TouchableOpacity
-  style={styles.studentButtonTwo}
-  onPress={() => {
-    const phoneNumber = '551140028992'; // substitua pelo número com DDI e DDD (ex: 55 + DDD + número)
-    const message = 'Olá, gostaria de mais informações sobre a academia!'; // mensagem opcional
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-
-    Linking.openURL(url).catch(err => {
-      console.error('Erro ao abrir o WhatsApp:', err);
-    });
-  }}
->
-  <Text style={styles.studentButtonTwoText}>Não sou aluno(a)</Text>
-</TouchableOpacity>
-          </Pressable>
-        </Pressable>
-      </Modal>
     </View>
   );
 };
@@ -147,94 +91,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     textAlign: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    paddingHorizontal: 20,
-    paddingTop: 48,
-    paddingBottom: 44,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 10,
-  },
-  studentButton: {
-    backgroundColor: '#405CBA',
-    height: 52,
-    borderRadius: 12,
-    marginBottom: 12,
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  studentButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-
-  studentButtonTwo: {
- backgroundColor: '#f0f0f0',
-    height: 52,
-    borderRadius: 12,
-    marginBottom: 12,
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  studentButtonTwoText :{
- color: '#000',
-    fontSize: 16,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  separator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-    marginBottom: 14,
-  },
-  separatorLine: {
-    flex: 1,
-    height: 6,
-    backgroundColor: '#000000',
-    borderRadius: 3,
-  },
-  separatorText: {
-    marginHorizontal: 16,
-    color: '#000000',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  googleButton: {
-    backgroundColor: '#D9D9D9',
-    height: 52,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#000',
-    marginTop: 12,
-    flexDirection: 'row',
-  },
-  googleImage: {
-    width: 24,
-    height: 24,
   },
 });
 
