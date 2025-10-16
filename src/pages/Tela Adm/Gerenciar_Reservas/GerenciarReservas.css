@@ -1,0 +1,192 @@
+/* GerenciarReservas.css */
+/* Estilo fiel ao novo layout de cards */
+
+.reservas-content-wrapper {
+  flex-grow: 1;
+  padding: 40px 50px;
+  background-color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin-left: 260px; /* Ajuste se o menu lateral tiver outra largura */
+}
+
+/* --- Cabeçalho (Título, Busca, Filtro) --- */
+.reservas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding: 20px 30px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+}
+
+.reservas-title {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #2D2D2D;
+  margin: 0;
+}
+
+.reservas-search-container {
+  display: flex;
+  align-items: center;
+  background-color: #F8F9FA; 
+  border: 1px solid #DFE1E6; 
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 100%;
+  max-width: 400px;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.reservas-search-container:focus-within {
+  border-color: #007bff;
+}
+
+.reservas-search-icon {
+  color: #6c757d;
+  margin-right: 10px;
+}
+
+.reservas-search-input {
+  border: none;
+  background: none;
+  outline: none;
+  width: 100%;
+  font-size: 1em;
+  color: #333;
+}
+
+.reservas-filter-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.reservas-filter-button:hover {
+  background-color: #5a6268;
+}
+
+/* --- NOVOS ESTILOS PARA OS BOTÕES DE FILTRO --- */
+.reservas-filter-group {
+  display: flex;
+  gap: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 4px;
+  background-color: #f8f9fa;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #495057;
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.filter-btn:hover {
+  background-color: #e9ecef;
+}
+
+.filter-btn.active {
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Lista de Cards --- */
+.reservas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reserva-card {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  padding: 20px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-bottom: 1px solid #000;
+}
+
+.reserva-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.reserva-card-image {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  border: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.reserva-card-info,
+.reserva-card-details,
+.reserva-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  height: 100%; /* Garante que as colunas tenham a mesma altura */
+}
+
+.reserva-card-info { flex: 2; } /* Ocupa mais espaço */
+.reserva-card-details { flex: 1.5; }
+.reserva-card-actions { flex: 1; align-items: flex-end; } /* Alinha à direita */
+
+.reserva-card p {
+  margin: 0;
+  font-size: 0.95em;
+  color: #495057;
+}
+
+.reserva-card p strong {
+  color: #343A40;
+  font-weight: 600;
+}
+
+.reserva-price {
+  font-size: 1.5em !important;
+  font-weight: bold;
+  color: #28a745 !important;
+  margin-bottom: 5px !important;
+}
+
+.reserva-date {
+  font-size: 0.9em !important;
+  color: #6c757d !important;
+  margin-top: auto; /* Empurra a data para o final */
+}
+
+
+/* --- Cores dos Status --- */
+.status-efetuada { color: #2ecc71; font-weight: bold; }
+.status-cancelada { color: #e74c3c; font-weight: bold; }
+
+.nenhuma-reserva {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.2em;
+    color: #6c757d;
+}

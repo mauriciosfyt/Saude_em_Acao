@@ -1,234 +1,235 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { updateProduto } from '../../../services/produtoService'; // Verifique se o caminho está correto
+
+// Componentes Reutilizados
+import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import Modal from '../../../components/Administrador/AdicionarProduto/Modal';
 import ControleQuantidade from '../../../components/Administrador/AdicionarProduto/ControleQuantidade';
-import '../Adicionar_Produto/CadastroProduto.css';
 
-import AdminHeader from '../../../components/header_admin';
-import Footer from "../../../components/footer";
+// IMPORTANTE: Certifique-se de que o import aponta para o novo arquivo CSS
+import './EditarProduto.css'; 
 
-const ITENS_POR_CATEGORIA = {
-  'Camisetas': ['P', 'M', 'G', 'GG', 'G1', 'G2'],
-};
+// Ícone de Upload (para consistência)
+const PlusIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 5V19" stroke="#007bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5 12H19" stroke="#007bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// Categorias (mantendo a mesma estrutura da tela de Adicionar)
+const CATEGORIAS_PRODUTO = [
+  { valor: 'CAMISETAS', rotulo: 'Camisetas', itens: ['P', 'M', 'G', 'GG'] },
+  { valor: 'WHEY_PROTEIN', rotulo: 'Whey Protein', itens: ['Morango', 'Chocolate', 'Baunilha'] },
+  { valor: 'CREATINA', rotulo: 'Creatina', itens: ['Morango', 'Chocolate', 'Baunilha'] },
+  { valor: 'VITAMINAS', rotulo: 'Vitaminas', itens: ['Morango', 'Chocolate', 'Baunilha'] },
+];
 
 const EditarProduto = () => {
   const navigate = useNavigate();
+  const [produtoId, setProdutoId] = useState(null);
   const [dadosFormulario, setDadosFormulario] = useState({ nome: '', preco: '', categoria: '', descricao: '' });
   const [estoque, setEstoque] = useState({});
+  const [imagem, setImagem] = useState(null); // Armazena o NOVO arquivo de imagem
+  const [previaImagem, setPreviaImagem] = useState(null); // Exibe a imagem atual ou a prévia da nova
+  
+  // Controle do Modal
   const [modalAberto, setModalAberto] = useState(false);
   const [estoqueTemporario, setEstoqueTemporario] = useState({});
-  const [previaImagem, setPreviaImagem] = useState(null);
-  const [nomeArquivo, setNomeArquivo] = useState('Selecione um arquivo...');
+  const estoqueRef = useRef(estoque);
+
   const inputArquivoRef = useRef(null);
 
-  // Carregar produto do localStorage
+  // Carrega os dados do produto do localStorage quando o componente é montado
   useEffect(() => {
-    const salvo = localStorage.getItem('produtoParaEditar');
-    if (!salvo) return;
-    const produto = JSON.parse(salvo);
-
+    const produtoSalvo = localStorage.getItem('produtoParaEditar');
+    if (!produtoSalvo) {
+      alert('Nenhum produto selecionado para edição.');
+      navigate('/GerenciarProduto');
+      return;
+    }
+    const produto = JSON.parse(produtoSalvo);
+    
+    setProdutoId(produto.id);
     setDadosFormulario({
       nome: produto.nome || '',
       preco: produto.preco || '',
       categoria: produto.categoria || '',
       descricao: produto.descricao || '',
     });
+    
+    const estoqueExistente = produto.estoquePorTamanho || {};
+    setEstoque(estoqueExistente);
+    estoqueRef.current = estoqueExistente;
 
-    // Se tiver estrutura de estoque/variações salva no futuro, aqui seria carregada
-    setPrevIaSeExistir(produto);
-  }, []);
+    if (produto.imagem) {
+      setPreviaImagem(produto.imagem);
+    }
+  }, [navigate]);
 
-  const setPrevIaSeExistir = (produto) => {
-    if (produto.imagem) setPreviaImagem(produto.imagem);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setDadosFormulario(prevState => ({ ...prevState, [name]: value }));
   };
 
-  const aoMudar = (evento) => {
-    const { name, value } = evento.target;
-    setDadosFormulario(estadoAnterior => ({ ...estadoAnterior, [name]: value }));
+  const handleImagemChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagem(file); // Guarda o novo arquivo de imagem para ser enviado
+      setPreviaImagem(URL.createObjectURL(file)); // Gera uma prévia local da nova imagem
+    }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!produtoId) return;
+
+    const formData = new FormData();
+    formData.append('nome', dadosFormulario.nome);
+    formData.append('preco', parseFloat(dadosFormulario.preco.toString().replace(',', '.')));
+    formData.append('categoria', dadosFormulario.categoria);
+    formData.append('descricao', dadosFormulario.descricao);
+
+    if (imagem) {
+      formData.append('img', imagem);
+    }
+
+    for (const [tamanho, quantidade] of Object.entries(estoqueRef.current)) {
+      if (quantidade > 0) {
+        formData.append(`estoquePorTamanho[${tamanho}]`, quantidade);
+      }
+    }
+
+    try {
+      // **Ação Futura**: Descomente a linha abaixo para conectar com a API
+       await updateProduto(produtoId, formData);
+    
+
+      localStorage.setItem('showProdutoEditado', 'true');
+      navigate('/GerenciarProduto');
+    } catch (error) { // O erro de sintaxe estava aqui. Corrigido para a forma padrão.
+      console.error('Erro ao editar produto:', error);
+      alert(`Ocorreu um erro ao editar o produto: ${error.message}`);
+    }
+  };
+  
+  const handleCancelar = () => {
+    navigate('/GerenciarProduto');
+  };
+
+  // --- Lógica do Modal de Estoque ---
   const abrirModalEstoque = () => {
     if (!dadosFormulario.categoria) {
       alert('Por favor, selecione uma categoria primeiro.');
       return;
     }
-    const itens = ITENS_POR_CATEGORIA[dadosFormulario.categoria] || [];
-    const estoqueInicial = { ...estoque };
-    itens.forEach(item => {
-      if (!(item in estoqueInicial)) estoqueInicial[item] = 0;
-    });
-    setEstoqueTemporario(estoqueInicial);
+    setEstoqueTemporario(estoque);
     setModalAberto(true);
   };
+  
+  const fecharModalEstoque = () => setModalAberto(false);
 
-  const aoMudarEstoqueTemporario = (item, valor) => {
-    setEstoqueTemporario(estadoAnterior => ({
-      ...estadoAnterior,
-      [item]: Math.max(0, (estadoAnterior[item] || 0) + valor)
-    }));
-  };
-
-  const confirmarEstoque = () => {
+  const salvarEstoque = () => {
     setEstoque(estoqueTemporario);
-    setModalAberto(false);
+    estoqueRef.current = estoqueTemporario;
+    fecharModalEstoque();
   };
-
-  const aoMudarImagem = (evento) => {
-    const arquivo = evento.target.files[0];
-    if (arquivo && arquivo.type.startsWith('image/')) {
-      const leitor = new FileReader();
-      leitor.onloadend = () => setPreviaImagem(leitor.result);
-      leitor.readAsDataURL(arquivo);
-      setNomeArquivo(arquivo.name);
+  
+  const renderizarResumoEstoque = () => {
+    const itens = Object.entries(estoqueRef.current).filter(([, qtd]) => qtd > 0);
+    if (itens.length === 0) {
+      return <span className="editar-produto-resumo-vazio">Nenhum estoque definido</span>;
     }
-  };
-
-  const salvarAlteracoes = (evento) => {
-    evento.preventDefault();
-
-    const produtoParaEditar = JSON.parse(localStorage.getItem('produtoParaEditar') || 'null');
-    if (!produtoParaEditar?.id) {
-      alert('Produto inválido.');
-      return;
-    }
-
-    const lista = JSON.parse(localStorage.getItem('produtos') || '[]');
-    const atualizada = lista.map(p => {
-      if (p.id === produtoParaEditar.id) {
-        return {
-          ...p,
-          ...dadosFormulario,
-          preco: Number(dadosFormulario.preco) || 0,
-          imagem: previaImagem || p.imagem,
-        };
-      }
-      return p;
-    });
-
-    localStorage.setItem('produtos', JSON.stringify(atualizada));
-    localStorage.removeItem('produtoParaEditar');
-
-    // Seta a flag para mostrar notificação de edição
-    localStorage.setItem('showProdutoEditado', 'true');
-
-    // Navegar de volta para Gerenciar Produtos
-    navigate('/GerenciarProduto');
-  };
-
-  const limpar = () => {
-    // Não limpamos ID; apenas campos
-    setDadosFormulario({ nome: '', preco: '', categoria: '', descricao: '' });
-    setEstoque({});
-    setPreviaImagem(null);
-    setNomeArquivo('Selecione um arquivo...');
-    if (inputArquivoRef.current) inputArquivoRef.current.value = "";
-  };
-
-  const renderizarCorpoModal = () => (
-    <>
-      {(ITENS_POR_CATEGORIA[dadosFormulario.categoria] || []).map(item => (
-        <ControleQuantidade
-          key={item}
-          label={item}
-          quantidade={estoqueTemporario[item] || 0}
-          onAumentar={() => aoMudarEstoqueTemporario(item, 1)}
-          onDiminuir={() => aoMudarEstoqueTemporario(item, -1)}
-        />
-      ))}
-      <div className="modal-acoes">
-        <button className="btn btn-perigo" onClick={() => setModalAberto(false)}>Cancelar</button>
-        <button className="btn btn-primario" onClick={confirmarEstoque}>Confirmar</button>
+    return (
+      <div className="editar-produto-resumo-estoque">
+        {itens.map(([item, qtd]) => <span key={item} className="editar-produto-resumo-item">{`${item}: ${qtd}`}</span>)}
       </div>
-    </>
-  );
+    );
+  };
+  
+  const getItensCategoriaAtual = () => {
+    const categoriaSelecionada = CATEGORIAS_PRODUTO.find(c => c.valor === dadosFormulario.categoria);
+    return categoriaSelecionada ? categoriaSelecionada.itens : [];
+  };
 
   return (
-    <>
-      <AdminHeader />
+    <div style={{ display: 'flex' }}>
+      <MenuAdm />
+      <main className="editar-produto-container">
+        <h1 className="editar-produto-main-title">Editar Produto</h1>
 
-      <Modal
-        titulo={`Definir Quantidades - ${dadosFormulario.categoria || 'Produto'}`}
-        aberto={modalAberto}
-        aoFechar={() => setModalAberto(false)}
-      >
-        {renderizarCorpoModal()}
-      </Modal>
-
-      <div className="formulario-container">
-        <h1 className="formulario-titulo">Editar produto</h1>
-        <form onSubmit={salvarAlteracoes} noValidate>
-          <div className="formulario-layout">
-            <div className="coluna-campos">
-              <div className="grupo-campo">
-                <label htmlFor="nome">Nome:</label>
-                <input id="nome" name="nome" type="text" className="campo-controle" value={dadosFormulario.nome} onChange={aoMudar} />
+        <form onSubmit={handleSubmit}>
+          <div className="editar-produto-form-layout">
+            <div className="editar-produto-image-upload-section">
+              <div className="editar-produto-image-placeholder" onClick={() => inputArquivoRef.current.click()}>
+                {previaImagem ? (
+                  <img src={previaImagem} alt="Pré-visualização" className="editar-produto-previa-imagem" />
+                ) : (
+                  <PlusIcon />
+                )}
               </div>
-              <div className="grupo-campo">
-                <label htmlFor="preco">Preço:</label>
-                <input id="preco" name="preco" type="number" className="campo-controle" value={dadosFormulario.preco} onChange={aoMudar} />
-              </div>
-              <div className="grupo-campo">
-                <label htmlFor="categoria">Categoria:</label>
-                <div className="select-container">
-                  <select id="categoria" name="categoria" className="campo-controle" value={dadosFormulario.categoria} onChange={aoMudar}>
-                    <option value="" disabled>Selecione uma categoria...</option>
-                    {Object.keys(ITENS_POR_CATEGORIA).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div className="grupo-campo">
-                <label>Estoque por Variação:</label>
-                {/* Reutilizando mesmo resumo do cadastro. Aqui pode exibir baseado em 'estoque' quando implementado */}
-                <button
-                  type="button"
-                  className="btn btn-definir-estoque"
-                  onClick={abrirModalEstoque}
-                >
-                  Definir Estoque
-                </button>
-              </div>
-              <div className="grupo-campo">
-                <label htmlFor="descricao">Descrição:</label>
-                <textarea id="descricao" name="descricao" rows="4" className="campo-controle" value={dadosFormulario.descricao} onChange={aoMudar}></textarea>
-              </div>
+              <input
+                type="file"
+                ref={inputArquivoRef}
+                onChange={handleImagemChange}
+                accept="image/*"
+                style={{ display: 'none' }}
+              />
             </div>
-            <div className="coluna-imagem">
-              <div className="grupo-campo">
-                <label>Imagem:</label>
-                <div className="caixa-previa-imagem" onClick={() => inputArquivoRef.current.click()}>
-                  {previaImagem ? (
-                    <img src={previaImagem} alt="Pré-visualização" className="previa-imagem" />
-                  ) : (
-                    <div className="placeholder-upload">
-                      <div className="icone-mais">+</div>
-                    </div>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  ref={inputArquivoRef}
-                  onChange={aoMudarImagem}
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                />
-                <div className="acoes-upload-imagem">
-                  <button type="button" className="btn btn-procurar" onClick={() => inputArquivoRef.current.click()}>
-                    PROCURAR
+
+            <div className="editar-produto-form-fields-section">
+              <div className="editar-produto-form-group">
+                <label htmlFor="nome">Nome</label>
+                <input type="text" id="nome" name="nome" value={dadosFormulario.nome} onChange={handleChange} required />
+              </div>
+              <div className="editar-produto-form-group">
+                <label htmlFor="preco">Preço</label>
+                <input type="text" id="preco" name="preco" value={dadosFormulario.preco} onChange={handleChange} placeholder="ex: 99,90" required />
+              </div>
+              <div className="editar-produto-form-group">
+                <label htmlFor="categoria">Categoria</label>
+                <select id="categoria" name="categoria" value={dadosFormulario.categoria} onChange={handleChange} required>
+                  <option value="" disabled>Selecione...</option>
+                  {CATEGORIAS_PRODUTO.map(cat => <option key={cat.valor} value={cat.valor}>{cat.rotulo}</option>)}
+                </select>
+              </div>
+              <div className="editar-produto-form-group-vertical">
+                <label>Estoque por variação</label>
+                <div className="editar-produto-container-estoque">
+                  {renderizarResumoEstoque()}
+                  <button type="button" className="editar-produto-btn-definir-estoque" onClick={abrirModalEstoque}>
+                    Definir Estoque
                   </button>
-                  <span className="info-arquivo">{nomeArquivo}</span>
                 </div>
+              </div>
+              <div className="editar-produto-form-group-vertical">
+                <label htmlFor="descricao">Descrição</label>
+                <textarea id="descricao" name="descricao" value={dadosFormulario.descricao} onChange={handleChange} rows="4" />
               </div>
             </div>
           </div>
-          <div className="formulario-acoes">
-            <button type="button" className="btn btn-perigo" onClick={limpar}>LIMPAR</button>
-            <button type="submit" className="btn btn-primario">SALVAR</button>
+
+          <div className="editar-produto-action-buttons">
+            <button type="button" className="editar-produto-cancel-button" onClick={handleCancelar}>cancelar</button>
+            <button type="submit" className="editar-produto-save-button">Salvar</button>
           </div>
         </form>
-      </div>
+      </main>
 
-      <Footer />
-    </>
+      <Modal titulo="Definir Estoque" aberto={modalAberto} aoFechar={fecharModalEstoque}>
+        {getItensCategoriaAtual().map(item => (
+          <ControleQuantidade
+            key={item}
+            label={item}
+            quantidade={estoqueTemporario[item] || 0}
+            onAumentar={() => setEstoqueTemporario(p => ({ ...p, [item]: (p[item] || 0) + 1 }))}
+            onDiminuir={() => setEstoqueTemporario(p => ({ ...p, [item]: Math.max(0, (p[item] || 0) - 1) }))}
+          />
+        ))}
+        <button className="editar-produto-save-button modal-save-button" onClick={salvarEstoque}>Salvar Estoque</button>
+      </Modal>
+    </div>
   );
 };
 

@@ -2,58 +2,76 @@
 /* CSS DA PÁGINA PRINCIPAL DASHBOARD */
 /* ================================== */
 
-/* O "molde" */
 .dashboard-container {
-  background-color: #d9d9d9;
-  min-height: 100vh;
-  padding: 20px 15px;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  box-sizing: border-box;
+  min-height: 100vh;
+  background-color: #e8f4f8;
 }
 
-.dashboard-content {
-  width: 100%;
-  max-width: 1200px;
-  background-color: #FFFFFF;
-  border-radius: 16px;
+.dashboard-main {
+  flex: 1;
+  margin-left: 250px;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  box-sizing: border-box;
+  background: linear-gradient(180deg, #4a90e2 0%, #e8f4f8 50%, #f8fbff 100%);
+  min-height: 100vh;
 }
 
-.dashboard-content h1 {
-  font-size: 28px;
-  color: #172B4D;
-  text-align: center;
-  margin-bottom: 30px;
-  border-bottom: 1px solid #DFE1E6;
-  padding-bottom: 20px;
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Grid para os cards de estatísticas */
-.stats-grid {
+.chart-row {
   display: grid;
-  /* Cria colunas responsivas. Em telas pequenas, caberá 1 ou 2. Em grandes, mais. */
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-  margin-bottom: 40px;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-.tabela-section h2 {
-  font-size: 22px;
-  color: #172B4D;
-  margin-bottom: 20px;
+.page-grid {
+  display: grid;
+  grid-template-columns: 1fr 260px; /* conteúdo + coluna de produtos */
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
+.left-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-/* Ajustes para telas maiores */
-@media (min-width: 768px) {
-  .dashboard-container {
-    padding: 40px;
+.top-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.products-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .top-charts {
+    grid-template-columns: 1fr;
   }
-  .dashboard-content {
-    padding: 32px;
+  .page-grid {
+    grid-template-columns: 1fr; /* produtos vão para baixo */
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    margin-left: 0;
+    padding: 10px;
+  }
+  .products-sidebar {
+    flex-direction: column;
   }
 }

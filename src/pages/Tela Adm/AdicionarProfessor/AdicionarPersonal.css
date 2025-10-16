@@ -1,137 +1,115 @@
-/* ======================================================= */
-/* ESTILO BASE (DESKTOP FIRST) */
-/* ======================================================= */
+/* --- ESTILO RESTAURADO PARA SER FIEL À IMAGEM ORIGINAL DO ADICIONAR PERSONAL --- */
 
-.adicionar-container {
-  background-color: #d9d9d9;
-  min-height: 100vh;
-  padding: 40px;
+.adicionar-personal-container {
+  flex-grow: 1;
+  padding: 70px;
+  background-color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  margin-left: 260px;
+}
+
+.personal-main-title {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #2D2D2D;
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.personal-form-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+}
+
+.personal-image-upload-section {
+  flex-shrink: 0;
+}
+
+.personal-image-placeholder {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  /* --- ALTERAÇÃO: Borda azul restaurada --- */
+  border: 3px solid #007bff; /* Borda azul original */
   display: flex;
   justify-content: center;
   align-items: center;
-  box-sizing: border-box;
-}
-
-.adicionar-content {
-  width: 100%;
-  max-width: 900px;
-  background-color: #FFFFFF;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  box-sizing: border-box;
-}
-
-.adicionar-content h1 {
-  font-size: 28px;
-  color: #172B4D;
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group label {
-  font-weight: 600;
-  color: #42526E;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #DFE1E6;
-  border-radius: 6px;
-  font-size: 16px;
-  background-color: #FAFBFC;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #007BFF;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 30px;
-  border-top: 1px solid #DFE1E6;
-  padding-top: 20px;
-}
-
-.btn-salvar, .btn-cancelar {
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.3s ease;
+}
+
+.personal-image-placeholder:hover {
+  background-color: #dee2e6;
+}
+
+.personal-form-fields-section {
+  width: 100%;
+  max-width: 450px;
+}
+
+.personal-form-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  margin-bottom: 25px;
 }
 
-.btn-salvar {
-  background-color: #007BFF;
-  color: #FFFFFF;
+.personal-form-group label {
+  font-size: 1.1em;
+  color: #333;
+  font-weight: 500;
+  width: 150px;
+  flex-shrink: 0;
 }
 
-.btn-salvar:hover {
-  background-color: #0056b3;
+.personal-form-group input {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 2px solid #ced4da;
+  font-size: 1em;
+  background-color: transparent;
+  transition: border-color 0.3s ease;
 }
 
-.btn-cancelar {
-  background-color: #F4F5F7;
-  color: #42526E;
-  border: 1px solid #DFE1E6;
+.personal-form-group input:focus {
+  outline: none;
+  border-bottom-color: #007bff;
 }
 
-.btn-cancelar:hover {
-  background-color: #dfe1e6;
+.personal-action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 40px;
+  margin-top: 40px;
+  padding-right: calc((100% - 450px - 180px - 60px) / 2);
 }
 
+.personal-cancel-button,
+.personal-save-button {
+   background-color: #fff;
+    color: #fff;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 12px 0px 12px 0;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 500;
+    transition: background 0.2s;
+    box-shadow: none;
+}
 
-/* ======================================================= */
-/* AJUSTES PARA CELULARES (max-width: 768px) */
-/* ======================================================= */
+.personal-cancel-button:hover,
+.personal-save-button:hover {
+  opacity: 0.85;
+}
 
-@media (max-width: 768px) {
-  .adicionar-container {
-    padding: 20px 15px;
-    align-items: flex-start;
-  }
+.personal-cancel-button {
+  background-color: #dc3545; /* Vermelho */
+}
 
-  .adicionar-content {
-    padding: 20px;
-  }
-
-  .adicionar-content h1 {
-    font-size: 22px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  
-  .form-actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
+.personal-save-button {
+  background-color: #28a745; /* Verde */
 }

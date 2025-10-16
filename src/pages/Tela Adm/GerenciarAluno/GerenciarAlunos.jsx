@@ -1,144 +1,115 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaSearch } from 'react-icons/fa';
-import './GerenciarAlunos.css';
-import AlunoCard from '../../../components/Administrador/AlunoCard/AlunoCard'; // Ajuste o caminho conforme sua estrutura
+import React from 'react';
+import './GerenciarAlunos.css'; // O CSS correspondente com as classes novas
+import MenuAdm from '../../../components/MenuAdm/MenuAdm';
+import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import ModalGerenciarTreino from './ModalGerenciarTreino';
 
-import AdminHeader from '../../../components/header_admin';
-import Footer from "../../../components/footer";
+// Ícone de busca
+const SearchIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c757d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+);
 
-// Dados de exemplo
-const mockAlunos = [
-  { id: 1, nome: 'Ana Beatriz Costa', email: 'ana.costa@email.com', cpf: '123.456.789-00', senha: '', numero: '(11) 98765-4321' },
-  { id: 2, nome: 'Bruno Dias Lima', email: 'bruno.lima@email.com', cpf: '987.654.321-00', senha: '', numero: '(21) 91234-5678' },
-  { id: 3, nome: 'Carla Martins', email: 'carla.martins@email.com', cpf: '456.789.123-00', senha: '', numero: '(31) 95555-4444' },
-  { id: 4, nome: 'Daniel Fogaça', email: 'daniel.fogaca@email.com', cpf: '789.123.456-00', senha: '', numero: '(41) 93333-2222' },
+// Dados mockados
+const alunosData = [
+ { id: 1, nome: 'Pedro', email: 'Aluno0@gmail.com', funcao: 'Aluno' },
+  { id: 2, nome: 'Bruno', email: 'Aluno1@gmail.com', funcao: 'Aluno' },
+  { id: 3, nome: 'Cleiton', email: 'Aluno2@gmail.com', funcao: 'Aluno' },
+  { id: 4, nome: 'Senai', email: 'Aluno3@gmail.com', funcao: 'Aluno' },
+  { id: 5, nome: 'Japa', email: 'Aluno4@gmail.com', funcao: 'Aluno' },
+  { id: 6, nome: 'Heleno', email: 'Aluno5@gmail.com', funcao: 'Aluno' },
+  { id: 7, nome: 'Maumau', email: 'Aluno6@gmail.com', funcao: 'Aluno' },
+  { id: 8, nome: 'PH', email: 'Aluno7@gmail.com', funcao: 'Aluno' },
+  { id: 9, nome: 'Renato', email: 'Aluno8@gmail.com', funcao: 'Aluno' },
 ];
 
 const GerenciarAlunos = () => {
-  const navigate = useNavigate();
-  
-  // Carregar alunos do localStorage ou usar dados mock
-  const [alunos, setAlunos] = useState(() => {
-    const savedAlunos = localStorage.getItem('alunos');
-    return savedAlunos ? JSON.parse(savedAlunos) : mockAlunos;
-  });
-  
-  const [termoBusca, setTermoBusca] = useState('');
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedAluno, setSelectedAluno] = useState(null);
+  const [selectedTreinos, setSelectedTreinos] = useState({});
 
-  // Salvar alunos no localStorage sempre que a lista mudar
-  useEffect(() => {
-    localStorage.setItem('alunos', JSON.stringify(alunos));
-  }, [alunos]);
-
-  // Detectar quando um aluno foi adicionado ou editado
-  useEffect(() => {
-    if (localStorage.getItem('showAlunoAdicionado') === 'true') {
-      setShowToast(true);
-      setToastMessage('Aluno adicionado com sucesso!');
-      localStorage.removeItem('showAlunoAdicionado');
-      setTimeout(() => setShowToast(false), 2000);
-    }
-    
-    if (localStorage.getItem('showAlunoEditado') === 'true') {
-      setShowToast(true);
-      setToastMessage('Aluno editado com sucesso!');
-      localStorage.removeItem('showAlunoEditado');
-      setTimeout(() => setShowToast(false), 2000);
-    }
-  }, []);
-
-  // Lógica de filtro (pode ser por nome ou email)
-  const alunosFiltrados = alunos.filter(aluno =>
-    aluno.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
-    aluno.email.toLowerCase().includes(termoBusca.toLowerCase())
-  );
-  
-  // Funções de exemplo para os botões do card
-  const handleExcluir = (alunoId) => {
-    if (window.confirm('Tem certeza que deseja excluir este aluno?')) {
-      const alunosAtualizados = alunos.filter(aluno => aluno.id !== alunoId);
-      setAlunos(alunosAtualizados);
-      localStorage.setItem('alunos', JSON.stringify(alunosAtualizados));
-      
-      // Mostrar notificação de exclusão
-      setShowToast(true);
-      setToastMessage('Aluno excluído com sucesso!');
-      setTimeout(() => setShowToast(false), 2000);
-    }
+  const handleOpenModal = (aluno) => {
+    setSelectedAluno(aluno);
+    setModalOpen(true);
   };
 
-  const handleEditar = (alunoId) => {
-    // Encontrar o aluno pelo ID
-    const aluno = alunos.find(a => a.id === alunoId);
-    if (aluno) {
-      // Salvar dados do aluno no localStorage e navegar
-      localStorage.setItem('alunoParaEditar', JSON.stringify(aluno));
-      navigate('/EditarAluno');
-    } else {
-      alert('Aluno não encontrado.');
-    }
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedAluno(null);
   };
 
-  const handleAdicionar = () => {
-    navigate('/AdicionarAluno');
-  };
-
-  const handleGerenciarTreino = (alunoId) => {
-    // Navegar para a tela de gerenciar treino passando o ID do aluno
-    navigate(`/GerenciarTreino?alunoId=${alunoId}`);
+  // Recebe o treino escolhido no modal e salva por aluno
+  const handleChooseTreino = (treino) => {
+    if (!selectedAluno) return;
+    setSelectedTreinos(prev => ({ ...prev, [selectedAluno.id]: treino }));
+    // fechar é tratado por onClose do modal também
+    setModalOpen(false);
+    setSelectedAluno(null);
   };
 
   return (
-    <>
-      <AdminHeader />
-    <div className="alunos-container">
-      <main className="alunos-content">
-        <h1>Gerenciamento de alunos</h1>
-        
-        {showToast && (
-          <div className="modal-termos-notification">
-            {toastMessage}
+    <div style={{ display: 'flex' }}>
+      <MenuAdm />
+
+      {/* --- ALTERAÇÃO: Classes renomeadas com prefixo 'alunos-' --- */}
+      <main className="alunos-content-wrapper">
+        <div className="alunos-header">
+          <h1 className="alunos-title">Alunos</h1>
+          <div className="alunos-search-container">
+            <SearchIcon />
+            <input className="alunos-search-input" type="text" placeholder="Pesquisa" />
           </div>
-        )}
-        
-        <div className="search-bar-wrapper">
-          <FaSearch className="search-icon" />
-          <input
-            type="text"
-            className="input-busca"
-            value={termoBusca}
-            onChange={(e) => setTermoBusca(e.target.value)}
-            placeholder="Buscar"
-          />
+          <Link to="/AdicionarAluno" className="alunos-add-button-link">
+            <button className="alunos-add-button">Novo Aluno</button>
+          </Link>
         </div>
 
-        <div className="header-actions">
-          <div className="count-display">
-            TOTAL DE ALUNOS: <strong>{alunos.length}</strong>
-          </div>
-          <button className="add-button" onClick={handleAdicionar}>
-            <FaPlus size={14} /> ADICIONAR
-          </button>
-        </div>
-
-        <div className="aluno-list">
-          {alunosFiltrados.map((aluno) => (
-            <AlunoCard 
-              key={aluno.id} 
-              aluno={aluno} 
-              onExcluir={() => handleExcluir(aluno.id)}
-              onEditar={() => handleEditar(aluno.id)}
-              onGerenciarTreino={() => handleGerenciarTreino(aluno.id)}
-            />
-          ))}
-        </div>
+        <table className="alunos-table">
+          <thead className="alunos-thead">
+            <tr>
+              <th>Nome:</th>
+              <th>Email</th>
+              <th>Função</th>
+              <th>Treino</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody className="alunos-tbody">
+            {alunosData.map(aluno => (
+              <tr key={aluno.id}>
+                <td>{aluno.nome}</td>
+                <td>{aluno.email}</td>
+                <td>{aluno.funcao}</td>
+                <td>
+                  <button
+                    className="alunos-treino-link"
+                    onClick={(e) => { e.preventDefault(); handleOpenModal(aluno); }}
+                    aria-label={`Gerenciar treino de ${aluno.nome}`}
+                  >
+                    Gerenciar
+                  </button>
+                  {selectedTreinos[aluno.id] && (
+                    <div className="treino-chosen" title={`Treino escolhido: ${selectedTreinos[aluno.id].title}`}>
+                      <span className="treino-dot" aria-hidden="true" />
+                      <span className="treino-title">{selectedTreinos[aluno.id].title}</span>
+                    </div>
+                  )}
+                </td>
+                <td>
+                  <a href="#" className="alunos-action-link-edit">Edit</a>
+                  <a href="#" className="alunos-action-link-delete">Delete</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </main>
+      {/* Modal renderizado aqui para ficar sobre a tela */}
+  <ModalGerenciarTreino open={modalOpen} onClose={handleCloseModal} aluno={selectedAluno} onChoose={handleChooseTreino} />
     </div>
-    <Footer />
-    </>
   );
 };
 

@@ -1,176 +1,177 @@
-/* ================================================================== */
-/* CSS FINAL E RESPONSIVO PARA TODAS AS TELAS */
-/* ================================================================== */
+/* GerenciarProduto.css */
+/* VERSÃO FINAL: Inclui o campo de busca com ícone e mantém o design fiel à imagem. */
 
-body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f0f2f5;
-    color: #333;
+/* --- Wrapper Principal --- */
+.produto-content-wrapper {
+  flex-grow: 1;
+  padding: 40px 50px;
+  background-color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin-left: 260px; /* Ajuste se o menu lateral tiver outra largura */
 }
 
-.container-gerenciar-produto {
-    max-width: 1100px;
-    margin: 2rem auto;
-    padding: 1rem;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    box-sizing: border-box;
+/* --- Cabeçalho: Título, Filtros, Botão --- */
+.produto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
 }
 
-/* Adiciona um padding maior em telas de tablet para cima */
-@media (min-width: 768px) {
-    .container-gerenciar-produto {
-        padding: 2rem;
-    }
+.produto-title {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #2D2D2D;
+  margin: 0;
 }
 
-.titulo-principal {
-    text-align: center;
-    font-size: 1.75rem;
-    margin-bottom: 2rem;
-    color: #172b4d;
+.produto-filters {
+  display: flex;
+  gap: 15px;
 }
 
-/* Barra de Filtros flexível que se adapta ao espaço */
-.barra-filtros {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap; /* Permite que os itens quebrem para a linha de baixo em telas estreitas */
-    gap: 1rem;
-    margin-bottom: 2rem;
+/* --- NOVO: Estilo do contêiner de busca --- */
+.produto-search-container {
+  display: flex;
+  align-items: center;
+  background-color: #FAFBFC; 
+  border: 1px solid #DFE1E6; 
+  border-radius: 8px;
+  padding: 8px 16px;
+  width: 320px;
+  transition: border-color 0.2s ease-in-out;
 }
 
-.filtros-esquerda {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    flex: 1;
+.produto-search-container:focus-within {
+  border-color: #007bff; /* Efeito de foco */
 }
 
-.input-busca-produto {
-    flex: 2 1 250px; /* flex-grow, flex-shrink, flex-basis */
+/* --- ATUALIZADO: Input de busca agora sem estilo próprio --- */
+.produto-search-input {
+  border: none;
+  background: none;
+  outline: none;
+  margin-left: 10px;
+  width: 100%;
+  font-size: 1em;
+  color: #333;
 }
 
-.select-categoria {
-    flex: 1 1 150px;
+.produto-search-input::placeholder {
+  color: #6c757d;
 }
 
-.btn-pesquisar {
-    flex: 0 1 auto;
+/* --- Seletor de Categoria (mantém o estilo antigo para consistência) --- */
+.produto-category-select {
+  padding: 10px 15px;
+  font-size: 1em;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  background-color: #F8F9FA;
+  color: #6c757d;
+  min-width: 180px;
 }
 
-.input-busca-produto, .select-categoria {
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    border: 1px solid #dfe1e6;
-    border-radius: 4px;
-    background-color: #fafbfc;
-    box-sizing: border-box;
+/* --- Botão Novo Produto --- */
+.produto-add-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.btn-pesquisar, .btn-editar, .btn-excluir {
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    font-weight: 500;
-    color: #ffffff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
-    white-space: nowrap; /* Evita que o texto do botão quebre */
-    box-sizing: border-box;
+.produto-add-button:hover {
+  background-color: #218838;
 }
 
-.btn-pesquisar:hover, .btn-editar:hover, .btn-excluir:hover {
-    background-color: #0056b3;
+.produto-add-button-link {
+  text-decoration: none;
 }
 
-.btn-adicionar {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    color: #ffffff;
-    background-color: #28a745;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+/* --- Tabela de Produtos --- */
+.produto-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
 }
 
-.btn-adicionar:hover {
-    background-color: #218838;
+.produto-thead th {
+  padding: 15px 10px;
+  color: #343A40;
+  font-size: 1.1em;
+  font-weight: bold;
+  border-bottom: 2px solid #DEE2E6;
 }
 
-/* Wrapper que habilita o scroll horizontal */
-.tabela-wrapper {
-    width: 100%;
-    overflow-x: auto; /* AQUI ACONTECE A MÁGICA DA RESPONSIVIDADE */
-    -webkit-overflow-scrolling: touch; /* Melhora a experiência de scroll em iOS */
+.produto-tbody tr {
+  border-bottom: 1px solid #DEE2E6;
 }
 
-/* Estilização da tabela */
-.tabela-produtos {
-    width: 100%;
-    min-width: 650px; /* Largura mínima para a tabela não ficar espremida */
-    border-collapse: collapse;
-    text-align: left;
+.produto-tbody tr:hover {
+  background-color: #f8f9fa;
 }
 
-.tabela-produtos th, .tabela-produtos td {
-    padding: 1rem;
-    vertical-align: middle;
-    border-bottom: 1px solid #dfe1e6;
-    white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+.produto-tbody td {
+  padding: 20px 10px;
+  color: #343A40;
+  vertical-align: middle;
 }
 
-.tabela-produtos th {
-    font-weight: 600;
-    color: #5e6c84;
-    font-size: 0.85rem;
-    text-transform: uppercase;
+.produto-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-weight: 500;
 }
 
-.tabela-produtos tbody tr:hover {
-    background-color: #fafbfc;
+.produto-imagem {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
-.info-produto {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+.produto-categoria-text {
+  color: #007BFF;
+  font-weight: 500;
 }
 
-.imagem-produto {
-    width: 45px;
-    height: 45px;
-    object-fit: contain;
-    border-radius: 4px;
-    border: 1px solid #dfe1e6;
+/* --- Links de Ação (Edit/Delete) --- */
+.produto-action-link-edit,
+.produto-action-link-delete {
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin-right: 20px;
 }
 
-.status-ativo {
-    color: #28a745;
-    font-weight: 500;
+.produto-action-link-edit {
+  color: #007BFF;
 }
 
-.status-inativo {
-    color: #dc3545;
-    font-weight: 500;
+.produto-action-link-delete {
+  color: #DC3545;
 }
 
-/* Estilo do botão Excluir específico (vermelho) */
-.btn-excluir {
-    background-color: #dc3545;
+.produto-action-link-edit:hover,
+.produto-action-link-delete:hover {
+  text-decoration: underline;
 }
 
-.btn-excluir:hover {
-    background-color: #b02a37;
+/* --- Notificação (Toast) --- */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    background-color: #28a745; /* Verde para sucesso */
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
 }

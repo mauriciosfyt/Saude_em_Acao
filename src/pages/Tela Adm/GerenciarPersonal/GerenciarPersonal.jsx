@@ -1,140 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import { FaPlus, FaSearch } from 'react-icons/fa';
-import PersonalCard from '../../../components/Administrador/GerenciarPersonal/PersonalCard';
-import './GerenciarPersonal.css';
-import AdminHeader from '../../../components/header_admin';
-import Footer from "../../../components/footer";
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import './GerenciarPersonal.css'; // O CSS correspondente com as classes novas
+import MenuAdm from '../../../components/MenuAdm/MenuAdm';
+import { Link } from 'react-router-dom';
+
+// Ícone de busca
+const SearchIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+);
+
+// Dados mockados
+const personalData = [
+{ id: 1, nome: 'Admin', email: 'Admin', funcao: 'Admin', status: 'Ativo' },
+  { id: 2, nome: 'Bruno', email: 'Personal1@gmail.com', funcao: 'Personal', status: 'Ativo' },
+  { id: 3, nome: 'Cleiton', email: 'Personal2@gmail.com', funcao: 'Personal', status: 'Ativo' },
+  { id: 4, nome: 'Senai', email: 'Personal3@gmail.com', funcao: 'Personal', status: 'Ativo' },
+  { id: 5, nome: 'Japa', email: 'Personal4@gmail.com', funcao: 'Personal', status: 'Ativo' },
+  { id: 6, nome: 'Heleno', email: 'Personal5@gmail.com', funcao: 'Personal', status: 'Ativo' },
+  { id: 7, nome: 'Maumau', email: 'Personal6@gmail.com', funcao: 'Personal', status: 'Ativo' },
+  { id: 8, nome: 'PH', email: 'Personal7@gmail.com', funcao: 'Personal', status: 'Ativo' },
+  { id: 9, nome: 'Renato', email: 'Personal8@gmail.com', funcao: 'Personal', status: 'Ativo' },
+];
 
 const GerenciarPersonal = () => {
-  const navigate = useNavigate();
-  
-  // Dados mock para personal
-  const mockPersonal = [
-    { id: 1, nome: 'Dr. João Silva', email: 'joao.silva@uni.com', cpf: '123.456.789-00', numero: '(11) 99988-7766', senha: '' },
-    { id: 2, nome: 'Dra. Maria Santos', email: 'maria.santos@uni.com', cpf: '987.654.321-00', numero: '(21) 98877-6655', senha: '' },
-    { id: 3, nome: 'Prof. Carlos Oliveira', email: 'carlos.oliveira@uni.com', cpf: '456.789.123-00', numero: '(31) 97766-5544', senha: '' },
-    { id: 4, nome: 'Dra. Ana Costa', email: 'ana.costa@uni.com', cpf: '789.123.456-00', numero: '(41) 96655-4433', senha: '' },
-  ];
-
-  // Carregar personal do localStorage ou usar dados mock
-  const [personal, setPersonal] = useState(() => {
-    const savedPersonal = localStorage.getItem('personal');
-    return savedPersonal ? JSON.parse(savedPersonal) : mockPersonal;
-  });
-  
-  const [termoBusca, setTermoBusca] = useState('');
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-
-  // Salvar personal no localStorage sempre que a lista mudar
-  useEffect(() => {
-    localStorage.setItem('personal', JSON.stringify(personal));
-  }, [personal]);
-
-  // Detectar quando um personal foi adicionado ou editado
-  useEffect(() => {
-    if (localStorage.getItem('showPersonalAdicionado') === 'true') {
-      setShowToast(true);
-      setToastMessage('Personal adicionado com sucesso!');
-      localStorage.removeItem('showPersonalAdicionado');
-      setTimeout(() => setShowToast(false), 2000);
-    }
-    
-    if (localStorage.getItem('showPersonalEditado') === 'true') {
-      setShowToast(true);
-      setToastMessage('Personal editado com sucesso!');
-      localStorage.removeItem('showPersonalEditado');
-      setTimeout(() => setShowToast(false), 2000);
-    }
-  }, []);
-
-  const personalFiltrados = personal.filter(p =>
-    p.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
-    p.email.toLowerCase().includes(termoBusca.toLowerCase())
-  );
-  
-  const totalPersonal = personal.filter(p => p.nome).length;
-
-  // Funções para os botões do card
-  const handleExcluir = (personalId) => {
-    if (window.confirm('Tem certeza que deseja excluir este personal?')) {
-      const personalAtualizados = personal.filter(p => p.id !== personalId);
-      setPersonal(personalAtualizados);
-      localStorage.setItem('personal', JSON.stringify(personalAtualizados));
-      
-      // Mostrar notificação de exclusão
-      setShowToast(true);
-      setToastMessage('Personal excluído com sucesso!');
-      setTimeout(() => setShowToast(false), 2000);
-    }
-  };
-
-  const handleEditar = (personalId) => {
-    // Encontrar o personal pelo ID
-    const personalEncontrado = personal.find(p => p.id === personalId);
-    if (personalEncontrado) {
-      // Salvar dados do personal no localStorage e navegar
-      localStorage.setItem('personalParaEditar', JSON.stringify(personalEncontrado));
-      navigate('/EditarPersonal');
-    } else {
-      alert('Personal não encontrado.');
-    }
-  };
-
-  const handleAdicionar = () => {
-    navigate('/AdicionarPersonal');
-  };
-
   return (
+    <div style={{ display: 'flex' }}>
+      <MenuAdm />
 
-    <>
-     <AdminHeader />
-   
-    <div className="gerenciamento-container">
-      <main className="gerenciamento-content">
-        <h1>Gerenciamento de Personal</h1>
-        
-        {showToast && (
-          <div className="modal-termos-notification">
-            {toastMessage}
+      {/* --- ALTERAÇÃO: Classes renomeadas com prefixo 'personal-' --- */}
+      <main className="personal-content-wrapper">
+        <div className="personal-header">
+          <h1 className="personal-title">Personal</h1>
+          <div className="personal-search-container">
+            <SearchIcon />
+            <input className="personal-search-input" type="text" placeholder="Pesquisa" />
           </div>
-        )}
-        
-        <div className="search-bar-wrapper-personal">
-          <FaSearch className="search-icon-personal" />
-          <input
-            type="text"
-            className="input-busca-personal"
-            value={termoBusca}
-            onChange={(e) => setTermoBusca(e.target.value)}
-            placeholder="Buscar"
-          />
+          <Link to="/AdicionarPersonal" className="personal-add-button-link">
+            <button className="personal-add-button">Novo Personal</button>
+          </Link>
         </div>
 
-        <div className="header-actions">
-          <div className="professor-count">
-            TOTAL DE PERSONAL: <strong>{totalPersonal}</strong>
-          </div>
-          <button className="add-button" onClick={handleAdicionar}>
-            <FaPlus size={14} /> ADICIONAR
-          </button>
-        </div>
-
-        <div className="professor-list">
-          {personalFiltrados.map((personal) => (
-            <PersonalCard 
-              key={personal.id} 
-              personal={personal} 
-              onExcluir={() => handleExcluir(personal.id)}
-              onEditar={() => handleEditar(personal.id)}
-            />
-          ))}
-        </div>
+        <table className="personal-table">
+          <thead className="personal-thead">
+            <tr>
+              <th>Nome:</th>
+              <th>Email</th>
+              <th>Função</th>
+              <th>Status</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody className="personal-tbody">
+            {personalData.map(person => (
+              <tr key={person.id}>
+                <td>{person.nome}</td>
+                <td>{person.email}</td>
+                <td>{person.funcao}</td>
+                <td>
+                  <span className="personal-status-text">{person.status}</span>
+                </td>
+                <td>
+                  <a href="#" className="personal-action-link-edit">Edit</a>
+                  <a href="#" className="personal-action-link-delete">Delete</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </main>
     </div>
-      <Footer />
-     </>
   );
 };
 

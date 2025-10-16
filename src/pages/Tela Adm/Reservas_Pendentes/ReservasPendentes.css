@@ -1,0 +1,165 @@
+/* ReservasPendentes.css */
+/* Estilos com o campo de busca centralizado */
+
+.reservas-pendente-content-wrapper {
+  flex-grow: 1;
+  padding: 40px 50px;
+  background-color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin-left: 260px;
+}
+
+/* --- Cabeçalho (COM A CENTRALIZAÇÃO) --- */
+.reservas-pendente-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+  padding: 20px 30px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  position: relative; /* 1. Âncora para o posicionamento absoluto */
+  height: 90px; /* Adicionado para garantir espaço vertical */
+}
+
+.reservas-pendente-title {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #2D2D2D;
+  margin: 0;
+}
+
+.reservas-pendente-search-container {
+  display: flex;
+  align-items: center;
+  background-color: #F8F9FA; 
+  border: 1px solid #DFE1E6; 
+  border-radius: 8px;
+  padding: 10px 16px;
+  width: 100%;
+  max-width: 400px;
+  
+  /* 2. Novas regras para centralização absoluta */
+  position: absolute;
+  left: 80%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.reservas-pendente-search-icon {
+  color: #6c757d;
+  margin-right: 10px;
+}
+
+.reservas-pendente-search-input {
+  border: none;
+  background: none;
+  outline: none;
+  width: 100%;
+  font-size: 1em;
+}
+
+/* --- Lista de Cards (sem alterações) --- */
+.reservas-pendente-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reservas-pendente-card {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  padding: 20px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #000;
+}
+
+.reservas-pendente-card-image {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  border: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.reservas-pendente-card-info,
+.reservas-pendente-card-details,
+.reservas-pendente-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  height: 100%;
+}
+
+.reservas-pendente-card-info { flex: 2; }
+.reservas-pendente-card-details { flex: 1.5; }
+.reservas-pendente-card-actions { flex: 1; align-items: flex-end; }
+
+.reservas-pendente-card p {
+  margin: 0;
+  font-size: 0.95em;
+  color: #495057;
+}
+
+.reservas-pendente-card p strong {
+  color: #343A40;
+  font-weight: 600;
+}
+
+.reservas-pendente-price {
+  font-size: 1.5em !important;
+  font-weight: bold;
+  color: #343A40 !important;
+  margin-bottom: auto !important;
+}
+
+.reservas-pendente-date {
+  font-size: 0.9em !important;
+  color: #6c757d !important;
+  margin-bottom: 15px !important;
+}
+
+/* --- Botões de Ação --- */
+.reservas-pendente-buttons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-cancelar,
+.btn-aprovar {
+  flex: 1;
+     background-color: #fff;
+    color: #fff;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 12px 0px 12px 0;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 500;
+    transition: background 0.2s;
+    box-shadow: none;
+}
+
+.btn-cancelar { background-color: #dc3545; }
+.btn-cancelar:hover { background-color: #c82333; transform: scale(1.03); }
+
+.btn-aprovar { background-color: #28a745; }
+.btn-aprovar:hover { background-color: #218838; transform: scale(1.03); }
+
+/* --- Status e Mensagens --- */
+.status-pendente { 
+  color: #f39c12; 
+  font-weight: bold; 
+}
+
+.reservas-pendente-nenhuma-reserva {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2em;
+  color: #6c757d;
+}

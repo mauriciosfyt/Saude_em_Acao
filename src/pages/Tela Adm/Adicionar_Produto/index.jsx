@@ -1,13 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-// Mantive seus caminhos de importação. Se eles estiverem em outra pasta, ajuste conforme necessário.
+import { createProduto } from '../../../services/produtoService';
+
+// Componentes Reutilizados
+import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import Modal from '../../../components/Administrador/AdicionarProduto/Modal';
 import ControleQuantidade from '../../../components/Administrador/AdicionarProduto/ControleQuantidade';
+
+// Estilo
 import './CadastroProduto.css';
 
-import AdminHeader from '../../../components/header_admin';
-import Footer from "../../../components/footer";
+// Ícone de upload
+const PlusIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 5V19" stroke="#007bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5 12H19" stroke="#007bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
+// --- Configurações do Formulário ---
 const ESTADO_INICIAL_FORMULARIO = {
   nome: '',
   preco: '',
@@ -15,262 +26,210 @@ const ESTADO_INICIAL_FORMULARIO = {
   descricao: '',
 };
 
-const ITENS_POR_CATEGORIA = {
-  'CAMISETAS': ['P', 'M', 'G', 'GG', 'G1', 'G2'],
-};
+const CATEGORIAS_PRODUTO = [
+  { valor: 'CAMISETAS', rotulo: 'Camisetas', itens: ['P', 'M', 'G', 'GG'] },
+  { valor: 'WHEY_PROTEIN', rotulo: 'Whey Protein', itens: ['Morango', 'Chocolate', 'Baunilha'] },
+  { valor: 'CREATINA', rotulo: 'Creatina', itens: ['Morango', 'Chocolate', 'Baunilha'] },
+  { valor: 'VITAMINAS', rotulo: 'Vitaminas', itens: ['Morango', 'Chocolate', 'Baunilha'] },
+];
 
 const AdicionarProduto = () => {
   const navigate = useNavigate();
   const [dadosFormulario, setDadosFormulario] = useState(ESTADO_INICIAL_FORMULARIO);
   const [estoque, setEstoque] = useState({});
+  const [imagem, setImagem] = useState(null);
+  const [previaImagem, setPreviaImagem] = useState(null);
+  
+  // Controle do Modal
   const [modalAberto, setModalAberto] = useState(false);
   const [estoqueTemporario, setEstoqueTemporario] = useState({});
-  const [previaImagem, setPreviaImagem] = useState(null);
-  const [nomeArquivo, setNomeArquivo] = useState('Selecione um arquivo...');
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+
   const inputArquivoRef = useRef(null);
 
-  useEffect(() => {
-    setEstoque({});
-  }, [dadosFormulario.categoria]);
-
-  const aoMudar = (evento) => {
-    const { name, value } = evento.target;
-    setDadosFormulario(estadoAnterior => ({ ...estadoAnterior, [name]: value }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setDadosFormulario(prevState => ({ ...prevState, [name]: value }));
+    if (name === 'categoria') {
+      setEstoque({});
+    }
   };
-  
+
+  const handleImagemChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagem(file);
+      setPreviaImagem(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { nome, preco, categoria } = dadosFormulario;
+    
+    if (!nome || !preco || !categoria || !imagem) {
+      alert('Por favor, preencha todos os campos obrigatórios e selecione uma imagem.');
+      return;
+    }
+
+    // ================================================================= //
+    // ## DEPURAÇÃO E VALIDAÇÃO FINAL ##
+    // ================================================================= //
+    
+    // 1. Logs para depuração: Veremos isso no console do navegador (F12)
+    console.log('--- Verificando antes de enviar ---');
+    console.log('Categoria selecionada:', categoria);
+    console.log('Estado ATUAL do estoque:', estoque);
+
+    // 2. Validação definitiva
+    const categoriasExigemEstoque = ['CREATINA', 'WHEY_PROTEIN', 'CAMISETAS', 'VITAMINAS'];
+    if (categoriasExigemEstoque.includes(categoria)) {
+      const totalEstoque = Object.values(estoque).reduce((soma, qtd) => soma + qtd, 0);
+      console.log('Total em estoque calculado:', totalEstoque);
+
+      if (totalEstoque <= 0) {
+        alert(`Para a categoria '${dadosFormulario.categoria}', a quantidade total em estoque deve ser maior que zero.`);
+        return; // Impede o envio do formulário
+      }
+    }
+
+    const formData = new FormData();
+    formData.append('nome', dadosFormulario.nome);
+    formData.append('preco', parseFloat(preco.replace(',', '.')));
+    formData.append('categoria', dadosFormulario.categoria);
+    formData.append('descricao', dadosFormulario.descricao);
+    formData.append('img', imagem);
+
+    for (const [tamanho, quantidade] of Object.entries(estoque)) {
+        if(quantidade > 0) { // Garante que apenas itens com estoque sejam enviados
+            formData.append(`estoquePorTamanho[${tamanho}]`, quantidade);
+        }
+    }
+
+    try {
+      await createProduto(formData);
+      localStorage.setItem('showProdutoAdicionado', 'true');
+      navigate('/GerenciarProduto');
+    } catch (error) {
+      console.error('Erro ao criar produto:', error);
+      alert(`Ocorreu um erro ao criar o produto: ${error.message}`);
+    }
+  };
+
+  const handleCancelar = () => {
+    navigate('/GerenciarProduto');
+  };
+
   const abrirModalEstoque = () => {
     if (!dadosFormulario.categoria) {
       alert('Por favor, selecione uma categoria primeiro.');
       return;
     }
-    const itens = ITENS_POR_CATEGORIA[dadosFormulario.categoria] || [];
-    const estoqueInicial = { ...estoque };
-    itens.forEach(item => {
-      if (!(item in estoqueInicial)) estoqueInicial[item] = 0;
-    });
-    setEstoqueTemporario(estoqueInicial);
+    setEstoqueTemporario(estoque);
     setModalAberto(true);
   };
-  
-  const aoMudarEstoqueTemporario = (item, valor) => {
-    setEstoqueTemporario(estadoAnterior => ({
-      ...estadoAnterior,
-      [item]: Math.max(0, (estadoAnterior[item] || 0) + valor)
-    }));
-  };
-  
-  const confirmarEstoque = () => {
+
+  const fecharModalEstoque = () => setModalAberto(false);
+
+  const salvarEstoque = () => {
     setEstoque(estoqueTemporario);
-    setModalAberto(false);
-  };
-  
-  const aoMudarImagem = (evento) => {
-    const arquivo = evento.target.files[0];
-    if (arquivo && arquivo.type.startsWith('image/')) {
-        const leitor = new FileReader();
-        leitor.onloadend = () => setPreviaImagem(leitor.result);
-        leitor.readAsDataURL(arquivo);
-        setNomeArquivo(arquivo.name);
-    }
+    fecharModalEstoque();
   };
 
-  const enviarFormulario = (evento) => {
-    evento.preventDefault();
-
-    // Validações básicas
-    if (!dadosFormulario.nome || !dadosFormulario.preco || !dadosFormulario.categoria) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
-
-    // Criar novo produto
-    const novoProduto = {
-      id: Date.now(),
-      nome: dadosFormulario.nome,
-      categoria: dadosFormulario.categoria,
-      status: 'Ativo',
-      preco: Number(dadosFormulario.preco) || 0,
-      estoque: Object.values(estoque).reduce((total, qtd) => total + qtd, 0), // Soma total do estoque
-      imagem: previaImagem || 'https://via.placeholder.com/150',
-      descricao: dadosFormulario.descricao || ''
-    };
-
-    // Salvar no localStorage
-    const produtosAtuais = JSON.parse(localStorage.getItem('produtos') || '[]');
-    const produtosAtualizados = [...produtosAtuais, novoProduto];
-    localStorage.setItem('produtos', JSON.stringify(produtosAtualizados));
-
-    // Verificar se a pessoa veio da tela de gerenciar produtos
-    const veioDoGerenciarProduto = localStorage.getItem('veioDoGerenciarProduto') === 'true';
-    
-    // Limpar a flag de origem
-    localStorage.removeItem('veioDoGerenciarProduto');
-
-    // Limpar formulário
-    limparFormulario();
-
-    // Navegar condicionalmente
-    if (veioDoGerenciarProduto) {
-      // Seta a flag para mostrar notificação de adição
-      localStorage.setItem('showProdutoAdicionado', 'true');
-      // Navegar de volta para Gerenciar Produtos
-      navigate('/GerenciarProduto');
-    } else {
-      // Se não veio do gerenciar produtos, mostra notificação na tela atual
-      setShowToast(true);
-      setToastMessage('Produto adicionado com sucesso!');
-      setTimeout(() => setShowToast(false), 2000);
-    }
-  };
-
-  const limparFormulario = () => {
-    setDadosFormulario(ESTADO_INICIAL_FORMULARIO);
-    setEstoque({});
-    setPreviaImagem(null);
-    setNomeArquivo('Selecione um arquivo...');
-    if (inputArquivoRef.current) inputArquivoRef.current.value = "";
-  };
-  
-  const renderizarCorpoModal = () => (
-    <>
-      {(ITENS_POR_CATEGORIA[dadosFormulario.categoria] || []).map(item => (
-        <ControleQuantidade
-          key={item}
-          label={item}
-          quantidade={estoqueTemporario[item] || 0}
-          onAumentar={() => aoMudarEstoqueTemporario(item, 1)}
-          onDiminuir={() => aoMudarEstoqueTemporario(item, -1)}
-        />
-      ))}
-      <div className="modal-acoes">
-        <button className="btn btn-perigo" onClick={() => setModalAberto(false)}>Cancelar</button>
-        <button className="btn btn-primario" onClick={confirmarEstoque}>Confirmar</button>
-      </div>
-    </>
-  );
-
-  // ▼▼▼ FUNÇÃO ATUALIZADA ▼▼▼
   const renderizarResumoEstoque = () => {
-    const itensEstoque = Object.entries(estoque).filter(([, qtd]) => qtd > 0);
-    if (itensEstoque.length === 0) return <span className="resumo-estoque-vazio">Nenhum item em estoque </span>;
-    
+    const itens = Object.entries(estoque).filter(([, qtd]) => qtd > 0);
+    if (itens.length === 0) {
+      return <span className="resumo-estoque-vazio">Nenhum estoque definido</span>;
+    }
     return (
       <div className="resumo-estoque">
-        {itensEstoque.map(([item, qtd]) => (
-          // Estrutura para o estilo "Pílula com Badge"
-          <div key={item} className="resumo-item">
-            <span className="resumo-item-nome">{item}</span>
-            <span className="resumo-item-qtd">{qtd}</span>
-          </div>
-        ))}
+        {itens.map(([item, qtd]) => <span key={item} className="resumo-item">{`${item}: ${qtd}`}</span>)}
       </div>
     );
   };
+  
+  const getItensCategoriaAtual = () => {
+    const categoriaSelecionada = CATEGORIAS_PRODUTO.find(c => c.valor === dadosFormulario.categoria);
+    return categoriaSelecionada ? categoriaSelecionada.itens : [];
+  };
 
-  // CÓDIGO ATUALIZADO COM HEADER E FOOTER
-return (
-  <>
-    {/* 1. Adicione o Header aqui, no topo da página */}
-    <AdminHeader />
-
-    {/* O Modal pode continuar aqui, ele não interfere no layout visual */}
-    <Modal
-      titulo={`Definir Quantidades - ${dadosFormulario.categoria || 'Produto'}`}
-      aberto={modalAberto}
-      aoFechar={() => setModalAberto(false)}
-    >
-      {renderizarCorpoModal()}
-    </Modal>
-    
-    {/* O seu formulário (conteúdo principal) permanece no meio */}
-    <div className="formulario-container">
-      <h1 className="formulario-titulo">Cadastro de produtos</h1>
-      
-      {showToast && (
-        <div className="modal-termos-notification">
-          {toastMessage}
-        </div>
-      )}
-      
-      <form onSubmit={enviarFormulario} noValidate>
-        {/* ... O resto do seu formulário continua igual ... */}
-        {/* ... */}
-        <div className="formulario-layout">
-          <div className="coluna-campos">
-            <div className="grupo-campo">
-              <label htmlFor="nome">Nome:</label>
-              <input id="nome" name="nome" type="text" className="campo-controle" value={dadosFormulario.nome} onChange={aoMudar} />
-            </div>
-            <div className="grupo-campo">
-              <label htmlFor="preco">Preço:</label>
-              <input id="preco" name="preco" type="number" className="campo-controle" value={dadosFormulario.preco} onChange={aoMudar} />
-            </div>
-            <div className="grupo-campo">
-              <label htmlFor="categoria">Categoria:</label>
-              <div className="select-container">
-                <select id="categoria" name="categoria" className="campo-controle" value={dadosFormulario.categoria} onChange={aoMudar}>
-                  <option value="" disabled>Selecione uma categoria...</option>
-                  {Object.keys(ITENS_POR_CATEGORIA).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-              </div>
-            </div>
-            <div className="grupo-campo">
-              <label>Estoque por Variação:</label>
-              {renderizarResumoEstoque()}
-              <button
-                type="button"
-                className="btn btn-definir-estoque"
-                onClick={abrirModalEstoque}
-              >
-                Definir Estoque
-              </button>
-            </div>
-            <div className="grupo-campo">
-              <label htmlFor="descricao">Descrição:</label>
-              <textarea id="descricao" name="descricao" rows="4" className="campo-controle" value={dadosFormulario.descricao} onChange={aoMudar}></textarea>
-            </div>
-          </div>
-          <div className="coluna-imagem">
-            <div className="grupo-campo">
-              <label>Imagem:</label>
-              <div className="caixa-previa-imagem" onClick={() => inputArquivoRef.current.click()}>
+  return (
+    <div style={{ display: 'flex' }}>
+      <MenuAdm />
+      <main className="adicionar-produto-container">
+        <h1 className="produto-main-title">Adicionar Produto</h1>
+        <form onSubmit={handleSubmit}>
+          {/* O restante do seu JSX continua o mesmo... */}
+          <div className="produto-form-layout">
+            <div className="produto-image-upload-section">
+              <div className="produto-image-placeholder" onClick={() => inputArquivoRef.current.click()}>
                 {previaImagem ? (
-                  <img src={previaImagem} alt="Pré-visualização" className="previa-imagem" />
+                  <img src={previaImagem} alt="Pré-visualização" className="produto-previa-imagem" />
                 ) : (
-                  <div className="placeholder-upload">
-                    <div className="icone-mais">+</div>
-                  </div>
+                  <PlusIcon />
                 )}
               </div>
               <input
                 type="file"
                 ref={inputArquivoRef}
-                onChange={aoMudarImagem}
+                onChange={handleImagemChange}
                 accept="image/*"
                 style={{ display: 'none' }}
               />
-              <div className="acoes-upload-imagem">
-                <button type="button" className="btn btn-procurar" onClick={() => inputArquivoRef.current.click()}>
-                  PROCURAR
-                </button>
-                <span className="info-arquivo">{nomeArquivo}</span>
+            </div>
+
+            <div className="produto-form-fields-section">
+              <div className="produto-form-group">
+                <label htmlFor="nome">Nome</label>
+                <input type="text" id="nome" name="nome" value={dadosFormulario.nome} onChange={handleChange} required />
+              </div>
+              <div className="produto-form-group">
+                <label htmlFor="preco">Preço</label>
+                <input type="text" id="preco" name="preco" value={dadosFormulario.preco} onChange={handleChange} placeholder="ex: 99,90" required />
+              </div>
+              <div className="produto-form-group">
+                <label htmlFor="categoria">Categoria</label>
+                <select id="categoria" name="categoria" value={dadosFormulario.categoria} onChange={handleChange} required>
+                  <option value="" disabled>Selecione...</option>
+                  {CATEGORIAS_PRODUTO.map(cat => <option key={cat.valor} value={cat.valor}>{cat.rotulo}</option>)}
+                </select>
+              </div>
+              <div className="produto-form-group-vertical">
+                <label>Estoque por variação</label>
+                <div className="container-estoque">
+                  {renderizarResumoEstoque()}
+                  <button type="button" className="btn-definir-estoque" onClick={abrirModalEstoque}>
+                    Definir Estoque
+                  </button>
+                </div>
+              </div>
+              <div className="produto-form-group-vertical">
+                <label htmlFor="descricao">Descrição</label>
+                <textarea id="descricao" name="descricao" value={dadosFormulario.descricao} onChange={handleChange} rows="4" />
               </div>
             </div>
           </div>
-        </div>
-        <div className="formulario-acoes">
-          <button type="button" className="btn btn-perigo" onClick={limparFormulario}>LIMPAR</button>
-          <button type="submit" className="btn btn-primario">ADICIONAR</button>
-        </div>
-      </form>
-    </div>
 
-    {/* 3. E adicione o Footer aqui, no final da página */}
-    <Footer />
-  </>
-);
+          <div className="produto-action-buttons">
+            <button type="button" className="produto-cancel-button" onClick={handleCancelar}>cancelar</button>
+            <button type="submit" className="produto-save-button">Salvar</button>
+          </div>
+        </form>
+      </main>
+
+      <Modal titulo="Definir Estoque" aberto={modalAberto} aoFechar={fecharModalEstoque}>
+        {getItensCategoriaAtual().map(item => (
+          <ControleQuantidade
+            key={item}
+            label={item}
+            quantidade={estoqueTemporario[item] || 0}
+            onAumentar={() => setEstoqueTemporario(p => ({ ...p, [item]: (p[item] || 0) + 1 }))}
+            onDiminuir={() => setEstoqueTemporario(p => ({ ...p, [item]: Math.max(0, (p[item] || 0) - 1) }))}
+          />
+        ))}
+        <button className="produto-save-button modal-save-button" onClick={salvarEstoque}>Salvar Estoque</button>
+      </Modal>
+    </div>
+  );
 };
 
 export default AdicionarProduto;

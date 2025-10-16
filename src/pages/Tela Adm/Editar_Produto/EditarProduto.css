@@ -1,15 +1,15 @@
-/* AdicionarProduto.css */
-/* Estilo fiel à imagem, baseado no AdicionarPersonal.css */
+/* EditarProduto.css */
+/* Estilo consistente com a tela de Adicionar Produto */
 
-.adicionar-produto-container {
+.editar-produto-container {
   flex-grow: 1;
   padding: 70px;
   background-color: #FFFFFF;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  margin-left: 260px; /* Ajuste conforme a largura do seu menu */
+  margin-left: 260px; /* Ajuste se a largura do seu menu for diferente */
 }
 
-.produto-main-title {
+.editar-produto-main-title {
   font-size: 2.2em;
   font-weight: bold;
   color: #2D2D2D;
@@ -17,7 +17,7 @@
   text-align: center;
 }
 
-.produto-form-layout {
+.editar-produto-form-layout {
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -25,11 +25,11 @@
 }
 
 /* --- Seção da Imagem --- */
-.produto-image-upload-section {
+.editar-produto-image-upload-section {
   flex-shrink: 0;
 }
 
-.produto-image-placeholder {
+.editar-produto-image-placeholder {
   width: 180px;
   height: 180px;
   border-radius: 50%;
@@ -40,41 +40,41 @@
   align-items: center;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  overflow: hidden; /* Garante que a imagem não saia do círculo */
+  overflow: hidden;
 }
 
-.produto-image-placeholder:hover {
+.editar-produto-image-placeholder:hover {
   background-color: #dee2e6;
 }
 
-.produto-previa-imagem {
+.editar-produto-previa-imagem {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* --- Seção dos Campos --- */
-.produto-form-fields-section {
+/* --- Seção dos Campos do Formulário --- */
+.editar-produto-form-fields-section {
   width: 100%;
   max-width: 450px;
 }
 
-.produto-form-group {
+.editar-produto-form-group {
   display: flex;
   align-items: center;
   margin-bottom: 25px;
 }
 
-.produto-form-group label {
+.editar-produto-form-group label {
   font-size: 1.1em;
   color: #333;
   font-weight: 500;
-  width: 150px; /* Largura fixa para alinhamento */
+  width: 150px;
   flex-shrink: 0;
 }
 
-.produto-form-group input,
-.produto-form-group select {
+.editar-produto-form-group input,
+.editar-produto-form-group select {
   width: 100%;
   padding: 10px 0;
   border: none;
@@ -84,27 +84,26 @@
   transition: border-color 0.3s ease;
 }
 
-.produto-form-group input:focus,
-.produto-form-group select:focus {
+.editar-produto-form-group input:focus,
+.editar-produto-form-group select:focus {
   outline: none;
   border-bottom-color: #007bff;
 }
 
-/* Grupo vertical para descrição e estoque */
-.produto-form-group-vertical {
+.editar-produto-form-group-vertical {
   display: flex;
   flex-direction: column;
   margin-bottom: 25px;
 }
 
-.produto-form-group-vertical label {
+.editar-produto-form-group-vertical label {
   font-size: 1.1em;
   color: #333;
   font-weight: 500;
   margin-bottom: 10px;
 }
 
-.produto-form-group-vertical textarea {
+.editar-produto-form-group-vertical textarea {
   width: 100%;
   padding: 10px;
   border: 2px solid #ced4da;
@@ -115,13 +114,13 @@
   resize: vertical;
 }
 
-.produto-form-group-vertical textarea:focus {
+.editar-produto-form-group-vertical textarea:focus {
   outline: none;
   border-color: #007bff;
 }
 
-/* --- Estilos do Controle de Estoque (importados do seu CSS antigo) --- */
-.container-estoque {
+/* --- Estilos do Controle de Estoque --- */
+.editar-produto-container-estoque {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -130,13 +129,13 @@
   padding: 15px;
 }
 
-.resumo-estoque {
+.editar-produto-resumo-estoque {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.resumo-item {
+.editar-produto-resumo-item {
   background-color: #e9ecef;
   border: 1px solid #ddd;
   padding: 4px 8px;
@@ -144,12 +143,12 @@
   font-size: 14px;
 }
 
-.resumo-estoque-vazio {
+.editar-produto-resumo-vazio {
   color: #6c757d;
   font-style: italic;
 }
 
-.btn-definir-estoque {
+.editar-produto-btn-definir-estoque {
   align-self: flex-start;
   padding: 10px 15px;
   border: none;
@@ -161,13 +160,12 @@
   transition: background-color 0.2s;
 }
 
-.btn-definir-estoque:hover {
+.editar-produto-btn-definir-estoque:hover {
   background-color: #0056b3;
 }
 
-
-/* --- Botões de Ação --- */
-.produto-action-buttons {
+/* --- Botões de Ação Principais --- */
+.editar-produto-action-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 15px;
@@ -175,8 +173,8 @@
   padding-top: 20px;
 }
 
-.produto-cancel-button, .produto-save-button {
-   background-color: #fff;
+.editar-produto-cancel-button, .editar-produto-save-button {
+    background-color: #fff;
     color: #fff;
     border: none;
     padding: 8px 24px;
@@ -188,22 +186,22 @@
     box-shadow: none;
 }
 
-.produto-cancel-button {
+.editar-produto-cancel-button {
   background-color: #dc3545;
   color: #fff;
   border: 1px solid #ced4da;
 }
 
-.produto-cancel-button:hover {
+.editar-produto-cancel-button:hover {
   background-color: #dc3545;
 }
 
-.produto-save-button {
+.editar-produto-save-button {
   background-color: #28a745;
   color: white;
 }
 
-.produto-save-button:hover {
+.editar-produto-save-button:hover {
   background-color: #218838;
 }
 

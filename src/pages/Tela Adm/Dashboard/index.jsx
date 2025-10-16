@@ -1,49 +1,70 @@
-import React from 'react';
-import { FaUserGraduate, FaChalkboardTeacher, FaBoxes, FaWarehouse, FaCalendarCheck, FaChartLine } from 'react-icons/fa';
-
+import React, { useState } from 'react';
 import './Dashboard.css';
-import StatCard from '../../../components/Administrador/Dasboard/StatCard';
-import TabelaProdutosVendidos from '../../../components/Administrador/Dasboard/TabelaProdutosVendidos'; 
+import MenuAdm from './../../../components/MenuAdm/MenuAdm';
+import TotalVendasChart from '../../../components/Administrador/Dasboard/TotalVendasChart';
+import AlunosPlanosChart from '../../../components/Administrador/Dasboard/AlunosPlanosChart';
+import GraficoA from '../../../components/Administrador/Dasboard/GraficoA';
+import ProductCard from '../../../components/Administrador/Dasboard/ProductCard';
 
-import AdminHeader from '../../../components/header_admin';
-import Footer from "../../../components/footer";
+// Importar as imagens
+import camisaImg from '../../../assets/icones/Camisa.png';
+import preTreinoImg from '../../../assets/icones/Pré-Treino.png';
+import wheyImg from '../../../assets/icones/Whey protain.png';
+import vitaminaImg from '../../../assets/icones/vitamina.png';
 
-// Dados mockados para a tabela
-const mockProdutos = [
-  { id: 1, nome: 'Regata Branca Growth', vendidos: 70, estoque: 20, reservados: 43 },
-  { id: 2, nome: 'Camiseta Preta Growth', vendidos: 50, estoque: 32, reservados: 32 },
-  { id: 3, nome: 'Whey Protein 1(Kg)', vendidos: 30, estoque: 50, reservados: 24 },
-];
 
 const Dashboard = () => {
+  const [activeMenuItem, setActiveMenuItem] = useState('Dashboard');
+
+  const handleMenuClick = (item) => {
+    setActiveMenuItem(item);
+    // Aqui você pode adicionar lógica para navegar entre páginas
+    console.log('Menu item clicked:', item);
+  };
+
   return (
-    <>
-     <AdminHeader />
-
     <div className="dashboard-container">
-      {/* O bloco branco central */}
-      <main className="dashboard-content">
-        <h1>Dashboard</h1>
-        
-        {/* Seção dos cards de estatísticas */}
-        <section className="stats-grid">
-          <StatCard icon={<FaUserGraduate />} title="Alunos" value="120" />
-          <StatCard icon={<FaWarehouse />} title="Estoque" value="135" />
-          <StatCard icon={<FaChalkboardTeacher />} title="Professores" value="16" />
-          <StatCard icon={<FaCalendarCheck />} title="Reservas" value="49" />
-          <StatCard icon={<FaBoxes />} title="Produtos Ativo" value="30" />
-          <StatCard icon={<FaChartLine />} title="Vendas (Total)" value="110" />
-        </section>
+      <MenuAdm activeItem={activeMenuItem} onItemClick={handleMenuClick} />
+      
+      <main className="dashboard-main">
+        <div className="page-grid">
+          <section className="left-content">
+            <div className="top-charts">
+              <TotalVendasChart />
+              <AlunosPlanosChart />
+            </div>
+            <GraficoA />
+          </section>
 
-        {/* Seção da tabela */}
-        <section className="tabela-section">
-          <h2>Produtos mais vendidos</h2>
-          <TabelaProdutosVendidos produtos={mockProdutos} />
-        </section>
+          <aside className="products-sidebar">
+            <ProductCard 
+              nome="Produto A" 
+              preco="R$300,00" 
+              tipo="tshirt" 
+              imagem={camisaImg}
+            />
+            <ProductCard 
+              nome="Produto B" 
+              preco="R$300,00" 
+              tipo="supplement" 
+              imagem={preTreinoImg}
+            />
+            <ProductCard 
+              nome="Produto C" 
+              preco="R$300,00" 
+              tipo="whey" 
+              imagem={wheyImg}
+            />
+            <ProductCard 
+              nome="Produto D" 
+              preco="R$300,00" 
+              tipo="pills" 
+              imagem={vitaminaImg}
+            />
+          </aside>
+        </div>
       </main>
     </div>
-     <Footer />
-  </>
   );
 };
 

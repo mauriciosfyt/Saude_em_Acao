@@ -1,246 +1,244 @@
-/* ===== fundo geral (cinza) ===== */
-body {
-  background: #bfbfbf; /* tom semelhante ao do mock (você pode ajustar para #e6e6e6 ou #f4f4f4) */
-  margin: 0;
-  font-family: Arial, sans-serif;
-}
-
-/* pagina central com espaçamento */
-.gerenciar-treino-page {
-  padding: 18px;
+/* --- BASE E LAYOUT PRINCIPAL --- */
+.gerenciartreino-container {
   display: flex;
-  justify-content: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
 }
 
-/* cartão branco central (faixa interna) */
-.main-card {
-  width: calc(100% - 80px);
-  max-width: 1200px; /* controla a largura final em telas grandes */
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 26px;
-  box-sizing: border-box;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.12);
+.gerenciartreino-main-content {
+  flex: 1;
+  margin-left: 260px; /* Espaço para o MenuAdm */
+  background-color: white;
+  min-height: 100vh;
+  padding: 50px 40px;
 }
 
-/* título central */
-.page-title {
+.gerenciartreino-content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- CABEÇALHO, AÇÕES E FILTROS --- */
+.gerenciartreino-page-header {
+  margin-bottom: 40px;
+}
+
+.gerenciartreino-page-header h1 {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #2D2D2D;
+  margin: 0;
+}
+
+.gerenciartreino-actions-section {
+  margin-bottom: 30px;
   text-align: center;
-  margin: 0 0 18px;
-  font-size: 28px;
-  font-weight: 800;
-  color: #111;
 }
 
-/* linha do perfil: texto à esquerda, foto à direita */
-.profile-row {
+.gerenciartreino-btn-novo-treino {
+  background-color: #5FC248;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 20px 0px 20px 0px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.gerenciartreino-btn-novo-treino:hover {
+  background-color: #4a9b3a;
+  transform: translateY(-1px);
+}
+
+.gerenciartreino-plus-icon {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-radius: 50%;
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  gap: 120px;
-  margin-bottom: 22px;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: transparent;
 }
 
-/* infos do aluno (left) */
-.profile-info {
+.gerenciartreino-filters-section {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 720px;
+  gap: 40px;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-/* rótulos pequenos em azul */
-.small-label {
-  font-size: 20px;
-  color: #004dff;
-  font-weight: 700;
-  margin-top: 6px;
-}
-
-/* nome em destaque */
-.aluno-nome {
-  font-size: 26px;
-  font-weight: 800;
-  color: #111;
-  margin-bottom: 6px;
-}
-
-/* cpf e email */
-.aluno-telefone,
-.aluno-email {
-  font-size: 24px;
-  color: #222;
-  font-weight: 600;
-}
-
-/* foto do aluno (direita) */
-.profile-photo img {
-  width: 148px;
-  height: 148px;
-  object-fit: cover;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-}
-
-/* ===== GRID DE CARDS ===== */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  align-items: center;
-}
-
-/* card padrao */
-.schedule-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 18px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 180px; /* altura consistente para todos os cards */
-  border: 1px solid #004dff
-}
-
-/* titulo do card */
-.card-title {
-  font-size: 18px;
-  font-weight: 800;
-  margin: 0 0 10px;
-  color: #111;
-}
-
-/* lista com marcador pontinho azul (estético como na imagem) */
-.ex-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.gerenciartreino-filter-group {
+  position: relative;
   flex: 1;
 }
 
-.ex-list li {
+.gerenciartreino-filter-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  padding: 8px 0;
+  font-size: 16px;
+  background: transparent;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.gerenciartreino-filter-input:focus {
+  border-bottom-color: #007bff;
+}
+
+.gerenciartreino-input-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #007bff;
+  transition: width 0.3s ease;
+}
+
+.gerenciartreino-filter-input:focus + .gerenciartreino-input-underline {
+  width: 100%;
+}
+
+/* --- LISTA DE CARDS DE TREINO --- */
+.gerenciartreino-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background-color: #f2f2f2;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gerenciartreino-card {
+  background-color: #f2f2f2;
+  padding: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: relative;
-  padding-left: 14px;
-  margin: 8px 0;
-  color: #222;
-  font-size: 14px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.gerenciartreino-card:last-child {
+  border-bottom: none;
+}
+
+.gerenciartreino-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #2563eb;
+}
+
+.gerenciartreino-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.gerenciartreino-card-title {
+  font-size: 16px;
+  color: #333;
   font-weight: 600;
 }
 
-/* bullet estilizado */
-.ex-list li::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  background: #004dff;
-  border-radius: 50%;
-  position: absolute;
-  left: 0;
-  top: 9px;
+.gerenciartreino-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-/* rodapé do card para posicionar botão embaixo */
-.card-footer {
-  margin-top: 12px;
+.gerenciartreino-card-tags .gerenciartreino-tag {
+  background-color: #6c757d;
+  color: white;
+  padding: 4px 15px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-.btn-personalizar {
-  width: 150px;
-  background: #004dff;
-  border: none;
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 800;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
-  display: block;
-  margin: 0 auto; /* centraliza horizontalmente */
-  color: #fff;
-}
-
-.btn-personalizar:hover {
-  background: #96b5fd;
-}
-
-/* card Finalizar (posicionado como último item do grid) */
-.finalize-card {
+.gerenciartreino-card-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 180px;
 }
 
-.btn-finalizar {
-  width: 100%;
-  max-width: 220px;
-  background: #31c74c;
-  color: #fff;
-  font-weight: 800;
-  font-size: 18px;
-  padding: 14px 18px;
+.gerenciartreino-actions-btn {
+  background: none;
   border: none;
-  border-radius: 8px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
   cursor: pointer;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  padding: 5px;
+  line-height: 1;
 }
 
-.btn-finalizar:hover {
-  background: #28a83f;
+/* --- MODAL DE AÇÕES --- */
+.gerenciartreino-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-
-@media (max-width: 1366px) {
-  .main-card {
-    max-width: 1000px;
-    padding: 20px;
-  }
-  .profile-photo img {
-    width: 200px;
-    height: 200px;
-  }
-  .aluno-nome {
-    font-size: 22px;
-  }
-  .cards-grid {
-    gap: 16px;
-  }
-  .schedule-card {
-    min-height: 160px;
-    padding: 14px;
-  }
+.gerenciartreino-modal-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e0e0e0;
 }
 
-/* para 1280x800 fica ok com o breakpoint acima.
-   abaixo disso reorganiza para 2 colunas e mobile 1 coluna */
-@media (max-width: 1000px) {
-  .cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
+.gerenciartreino-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 15px;
 }
 
-@media (max-width: 768px) {
-  .cards-grid {
-    grid-template-columns: 1fr;
-  }
-  .main-card {
-    padding: 18px;
-    width: calc(100% - 10px);
-  }
-  .btn-personalizar {
-    width: 100%;
-  }
-  .btn-finalizar {
-    max-width: 100%;
-  }
-    .profile-row {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 30px;
-  }
-  .profile-info {
-    align-items: center;
-  }
+.gerenciartreino-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
+
+.gerenciartreino-modal-btn {
+  background: none;
+  border: none;
+  padding: 10px 15px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.edit-btn:hover { background-color: #e3f2fd; color: #1976d2; }
+.duplicate-btn:hover { background-color: #f3e5f5; color: #7b1fa2; }
+.remove-btn:hover { background-color: #ffebee; color: #d32f2f; }
+

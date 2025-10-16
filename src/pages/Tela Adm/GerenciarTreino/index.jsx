@@ -1,112 +1,138 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import AdminHeader from '../../../components/header_admin';
-import Footer from '../../../components/footer';
-import fotoAluno from '../../../assets/professor1.jpeg'; // ajuste se for .jpg ou outro caminho
-import './GerenciarTreino.css';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './GerenciarTreino.css'; // O CSS atualizado
+import MenuAdm from './../../../components/MenuAdm/MenuAdm';
 
 const GerenciarTreino = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const alunoId = searchParams.get('alunoId');
+  const [activeMenuItem, setActiveMenuItem] = useState('Ger/Treinos');
+  const [showModal, setShowModal] = useState(false);
+  const [selectedTreino, setSelectedTreino] = useState(null);
 
-  const [aluno, setAluno] = useState({
-    nome: 'Arthur Heleno',
-   telefone: '123456-78910',
-    email: 'helenocosta@gmail.com',
-    foto: fotoAluno
-  });
+  const handleMenuClick = (item) => {
+    setActiveMenuItem(item);
+  };
 
-  useEffect(() => {
-    if (alunoId) {
-      const alunosMock = {
-        '1': { nome: "Ana Beatriz Costa",telefone: "123.456.789-00", email: "ana.costa@email.com" },
-        '2': { nome: "Bruno Dias Lima",telefone: "987.654.321-00", email: "bruno.lima@email.com" },
-        '3': { nome: "Carla Martins",telefone: "456.789.123-00", email: "carla.martins@email.com" },
-        '4': { nome: "Daniel Fogaça",telefone: "789.123.456-00", email: "daniel.fogaca@email.com" }
-      };
-      const dadosAluno = alunosMock[alunoId] || aluno;
-      setAluno(prev => ({ ...prev, ...dadosAluno }));
+  const handleTreinoActions = (treino) => {
+    setSelectedTreino(treino);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedTreino(null);
+  };
+
+  const handleAdicionarTreino = () => {
+    navigate('/AdicionarTreino');
+  };
+
+  const treinos = [
+    {
+      id: 1,
+      titulo: "3x - Fem - Iniciante - Emagrecimento",
+      sessaoTag: "3 sessões",
+      tags: ["Emagrecimento", "Feminino", "De 20 a 60 anos"]
+    },
+    {
+      id: 2,
+      titulo: "3x - Fem - Iniciante - Hipertrofia",
+      sessaoTag: "3 sessões",
+      tags: ["Hipertrofia", "Feminino", "De 20 a 60 anos"]
+    },
+    {
+      id: 3,
+      titulo: "3x - Masc - Iniciante - Adaptado",
+      sessaoTag: "3 sessões",
+      tags: ["Adaptado", "masculino", "De 20 a 60 anos"]
+    },
+    {
+      id: 4,
+      titulo: "3x - Masc - Adaptado",
+      sessaoTag: "3 sessões",
+      tags: ["adaptado", "masculino", "De 20 a 60 anos"]
     }
-  }, [alunoId]);
-
-  const diasSemana = [
-    { dia: 'Segunda-Feira', treinos: ['Peito', 'Tríceps'] },
-    { dia: 'Terça-Feira', treinos: ['Costas', 'Bíceps'] },
-    { dia: 'Quarta-Feira', treinos: ['Quadríceps', 'Ombro'] },
-    { dia: 'Quinta-Feira', treinos: ['Cardio', 'Abdomen'] },
-    { dia: 'Sexta-Feira', treinos: ['Posterior de coxa', 'Panturrilha'] },
   ];
 
-  const handlePersonalizarTreino = (dia) => {
-    navigate(`/PersonalizarTreino?alunoId=${alunoId || ''}&dia=${encodeURIComponent(dia)}`);
-  };
-
-  const handleFinalizar = () => {
-    // lógica de salvar/finalizar aqui
-    navigate('/GerenciarAlunos');
-  };
-
   return (
-    <>
-      <AdminHeader />
-      <div className="gerenciar-treino-page">
-        {/* container branco central com bordas arredondadas */}
-        <div className="main-card">
-          <h1 className="page-title">Gerenciamento de treino</h1>
+    <div className="gerenciartreino-container">
+      <MenuAdm activeItem={activeMenuItem} onItemClick={handleMenuClick} />
+      
+      <main className="gerenciartreino-main-content">
+        <div className="gerenciartreino-content-wrapper">
+          <header className="gerenciartreino-page-header">
+            <h1>Gerenciar Treinos</h1>
+          </header>
 
-          {/* bloco de perfil */}
-          <div className="profile-row">
-            <div className="profile-info">
-              <div className="small-label">Nome:</div>
-              <div className="aluno-nome">{aluno.nome}</div>
+          <div className="gerenciartreino-actions-section">
+            <button className="gerenciartreino-btn-novo-treino" onClick={handleAdicionarTreino}>
+              <span className="gerenciartreino-plus-icon">+</span>
+              Novo treino
+            </button>
+          </div>
 
-              <div className="small-label">Telefone:</div>
-              <div className="aluno-telefone">{aluno.telefone}</div>
-
+          <div className="gerenciartreino-filters-section">
+            <div className="gerenciartreino-filter-group">
+              <input type="text" placeholder="Nome" className="gerenciartreino-filter-input" />
+              <div className="gerenciartreino-input-underline"></div>
             </div>
-
-            <div className="profile-photo">
-              <img
-                src={aluno.foto}
-                alt={`Foto de ${aluno.nome}`}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  // fallback inline svg pequeno
-                  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTMwIiBoZWlnaHQ9IjEzMCIgdmlld0JveD0iMCAwIDEzMCAxMzAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEzMCIgaGVpZ2h0PSIxMzAiIGZpbGw9IiNFMEUwRTAiIHJ4PSIxNiIvPjxjaXJjbGUgY3g9IjY1IiBjeT0iNDRGIiByPSIyMCIgZmlsbD0iI0FBN0E3QSIvPjxwYXRoIGQ9Ik0zMiA5MUMzMiA4MCA1MyA3MSA2NSAzN0M3NyA3MSA5OCA4MCA5OCA5MSIgc3Ryb2tlPSIjQkJCQiIvPjwvc3ZnPg==';
-                }}
-              />
+            <div className="gerenciartreino-filter-group">
+              <input type="text" placeholder="Tipo do treino" className="gerenciartreino-filter-input" />
+              <div className="gerenciartreino-input-underline"></div>
+            </div>
+            <div className="gerenciartreino-filter-group">
+              <input type="text" placeholder="Responsável" className="gerenciartreino-filter-input" />
+              <div className="gerenciartreino-input-underline"></div>
             </div>
           </div>
 
-          {/* grid de cards (3 colunas) */}
-          <div className="cards-grid">
-            {diasSemana.map((item, idx) => (
-              <div key={idx} className="schedule-card">
-                <h3 className="card-title">{item.dia}</h3>
-                <ul className="ex-list">
-                  {item.treinos.map((t, i) => <li key={i}>{t}</li>)}
-                </ul>
-                <div className="card-footer">
-                  <button className="btn-personalizar" onClick={() => handlePersonalizarTreino(item.dia)}>
-                    Personalizar treino
+          <div className="gerenciartreino-list">
+            {treinos.map((treino) => (
+              <div key={treino.id} className="gerenciartreino-card">
+                <div className="gerenciartreino-card-content">
+                  <div className="gerenciartreino-card-title">{treino.titulo}</div>
+                  <div className="gerenciartreino-card-tags">
+                    {[...treino.tags, treino.sessaoTag].map((tag, index) => (
+                      <span key={index} className="gerenciartreino-tag">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="gerenciartreino-card-actions">
+                  <button 
+                    className="gerenciartreino-actions-btn"
+                    onClick={() => handleTreinoActions(treino)}
+                  >
+                    ⋮
                   </button>
                 </div>
               </div>
             ))}
+          </div>
 
-            {/* Finalizar como último item (coluna 3, segunda linha) */}
-            <div className="finalize-card">
-              <button className="btn-finalizar" onClick={handleFinalizar}>
-                Finalizar
-              </button>
+        </div>
+      </main>
+
+      {showModal && (
+        <div className="gerenciartreino-modal-overlay" onClick={closeModal}>
+          <div 
+            className="gerenciartreino-modal-content" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="gerenciartreino-modal-header">
+              <h3>Ações</h3>
+            </div>
+            <div className="gerenciartreino-modal-actions">
+              <button className="gerenciartreino-modal-btn edit-btn">Editar</button>
+              <button className="gerenciartreino-modal-btn duplicate-btn">Duplicar</button>
+              <button className="gerenciartreino-modal-btn remove-btn">Remover</button>
             </div>
           </div>
         </div>
-      </div>
-      <Footer />
-    </>
+      )}
+
+    </div>
   );
 };
 
 export default GerenciarTreino;
+

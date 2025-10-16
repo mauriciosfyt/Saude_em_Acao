@@ -1,143 +1,111 @@
+/* --- ALTERAÇÃO: Todas as classes foram renomeadas para evitar conflitos --- */
+
 .adicionar-aluno-container {
-  background-color: #d9d9d9;
-  min-height: 100vh;
-  padding: 40px;
+  flex-grow: 1;
+  padding: 70px;
+  background-color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  margin-left: 260px;
+}
+
+.aluno-main-title {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #2D2D2D;
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.aluno-form-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+}
+
+.aluno-image-upload-section {
+  flex-shrink: 0;
+}
+
+.aluno-image-placeholder {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  /* --- ALTERAÇÃO: Removida a borda azul para ser fiel à imagem --- */
+  border: none;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  box-sizing: border-box;
+  align-items: center;
+  cursor: pointer;
 }
 
-.adicionar-aluno-content {
+.aluno-form-fields-section {
   width: 100%;
-  max-width: 600px;
-  background-color: #FFFFFF;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 450px;
 }
 
-.adicionar-aluno-content h1 {
-  font-size: 28px;
-  font-weight: 600;
-  color: #172B4D;
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.form-aluno {
+.aluno-form-group {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-group label {
-  font-size: 14px;
+.aluno-form-group label {
+  font-size: 1.1em;
+  color: #333;
   font-weight: 500;
-  color: #172B4D;
+  width: 150px;
+  flex-shrink: 0;
 }
 
-.form-group input {
-  padding: 12px 16px;
-  border: 1px solid #DFE1E6;
-  border-radius: 8px;
-  font-size: 16px;
-  background-color: #FAFBFC;
+.aluno-form-group input {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 2px solid #ced4da;
+  font-size: 1em;
+  background-color: transparent;
+  transition: border-color 0.3s ease;
+}
+
+.aluno-form-group input:focus {
   outline: none;
-  transition: border-color 0.2s ease-in-out;
+  border-bottom-color: #007bff;
 }
 
-.form-group input:focus {
-  border-color: #007BFF;
-  background-color: #FFFFFF;
-}
-
-.form-group input::placeholder {
-  color: #AAB2BD;
-}
-
-.form-actions {
+.aluno-action-buttons {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #DFE1E6;
+  justify-content: flex-end;
+  gap: 40px;
+  margin-top: 40px;
+  /* Alinhamento dos botões com a área do formulário */
+  padding-right: calc((100% - 450px - 180px - 60px) / 2);
 }
 
-.btn-cancelar {
-  background-color: #6C757D;
-  color: #FFFFFF;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background-color 0.2s ease-in-out;
+.aluno-cancel-button,
+.aluno-save-button {
+   background-color: #fff;
+    color: #fff;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 12px 0px 12px 0;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 500;
+    transition: background 0.2s;
+    box-shadow: none;
 }
 
-.btn-cancelar:hover {
-  background-color: #5A6268;
+.aluno-cancel-button:hover,
+.aluno-save-button:hover {
+  opacity: 0.85;
 }
 
-.btn-salvar {
-  background-color: #007BFF;
-  color: #FFFFFF;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background-color 0.2s ease-in-out;
+.aluno-cancel-button {
+  background-color: #dc3545; /* Vermelho */
 }
 
-.btn-salvar:hover {
-  background-color: #0056B3;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-  .adicionar-aluno-container {
-    padding: 20px 15px;
-  }
-  
-  .adicionar-aluno-content {
-    padding: 24px;
-  }
-  
-  .form-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .btn-cancelar,
-  .btn-salvar {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .adicionar-aluno-content {
-    padding: 20px;
-  }
-  
-  .adicionar-aluno-content h1 {
-    font-size: 24px;
-  }
+.aluno-save-button {
+  background-color: #28a745; /* Verde */
 }
