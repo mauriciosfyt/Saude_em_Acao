@@ -21,7 +21,7 @@ const LojaCarrinho = ({ navigation }) => {
     {
       id: 1,
       name: 'WHEY PROTEIN',
-      price: 50.00,
+      price: 89.90,
       quantity: 1,
       image: require('../../../../assets/banner_whey.png'),
       selected: true,
@@ -29,7 +29,7 @@ const LojaCarrinho = ({ navigation }) => {
     {
       id: 2,
       name: 'CREATINA',
-      price: 50.00,
+      price: 65.50,
       quantity: 1,
       image: require('../../../../assets/banner_creatina.png'),
       selected: true,
@@ -37,7 +37,7 @@ const LojaCarrinho = ({ navigation }) => {
     {
       id: 3,
       name: 'VITAMINA D3',
-      price: 50.00,
+      price: 45.00,
       quantity: 1,
       image: require('../../../../assets/banner_vitaminas.png'),
       selected: true,
