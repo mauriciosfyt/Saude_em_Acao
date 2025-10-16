@@ -12,7 +12,7 @@ import SobrenosLoja from '../pages/SobreNos_loja/index.jsx';
 import Carrinho from '../pages/Carrinho/index.jsx';
 import Planos from '../pages/Planos/index.jsx';
 import Erro404 from '../pages/Erro404/erro_404.jsx';
-import ReservasEfetuadas from '../pages/Tela Adm/Reservas_Efetuada/index.jsx';
+
 import GerenciarProduto from '../pages/Tela Adm/GerenciarProduto/index.jsx';
 
 import CategoriaCreatina from '../pages/CategoriaCreatina/index.jsx';
@@ -20,8 +20,11 @@ import CategoriaCamisa from '../pages/CategoriaCamisa/index.jsx';
 import CategoriaVitaminas from '../pages/CategoriaVitaminas/index.jsx';
 import CategoriaWhey from '../pages/CategoriaWhey/index.jsx';
 import Professores from '../pages/Professores/index.jsx';
+import GerenciarReservas from '../pages/Tela Adm/Gerenciar_Reservas/index.jsx';
 
-import CadastroProduto from '../pages/Tela Adm/Adicionar_Produto/index.jsx';
+
+import AdicionarTreino from '../pages/Tela Adm/AdicionarTreino/index.jsx';
+import AdicionarProduto from '../pages/Tela Adm/Adicionar_Produto/index.jsx';
 import GerenciarPersonal from '../pages/Tela Adm/GerenciarPersonal/GerenciarPersonal.jsx';
 import AdicionarPersonal from '../pages/Tela Adm/AdicionarProfessor/AdicionarPersonal.jsx';
 import Dashboard from '../pages/Tela Adm/Dashboard/index.jsx';
@@ -33,6 +36,7 @@ import EditarProduto from '../pages/Tela Adm/Editar_Produto/index.jsx';
 import EditarPersonal from '../pages/Tela Adm/EditarPersonal/EditarPersonal.jsx';
 import GerenciarTreino from '../pages/Tela Adm/GerenciarTreino/index.jsx';
 import PersonalizarTreino from '../pages/Tela Adm/PersonalizarTreino/index.jsx';
+import ReservasPendentes from '../pages/Tela Adm/Reservas_Pendentes/ReservasPendentes.jsx';
 import ThayFit from '../pages/ThayFit/ThayFit.jsx';
 import Pilates from '../pages/Pilates/Pilates.jsx';
 import Funcional from '../pages/Funcional/Funcional.jsx';
@@ -40,14 +44,14 @@ import Funcional from '../pages/Funcional/Funcional.jsx';
 const AppRoutes = () => {
   return (
     <Router>
-      <ScrollToTop /> {/* adicione aqui */}
+      <ScrollToTop /> 
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/Loja" element={<Loja />} />
         <Route path="/Perfil" element={<Perfil />} />
         <Route path="/PerfilAdm" element={<PerfilAdm />} />
         <Route path="/SobreNos" element={<SobreNos />} />
-  <Route path="/LojaProduto/:id" element={<LojaProduto />} />
+        <Route path="/LojaProduto/:id" element={<LojaProduto />} />
         <Route path="/SobrenosLoja" element={<SobrenosLoja />} />
         <Route path="/Carrinho" element={<Carrinho />} />
         <Route path="/Planos" element={<Planos />} />
@@ -62,9 +66,11 @@ const AppRoutes = () => {
         <Route path="/CategoriaCamisa" element={<CategoriaCamisa />} />
         <Route path="/CategoriaWhey" element={<CategoriaWhey />} />
         <Route path="/CategoriaVitaminas" element={<CategoriaVitaminas />} />
-        
-        <Route path="/ReservasEfetuadas" element={<ReservasEfetuadas />} /> {/* Adicione esta linha */}
-        <Route path="/CadastrarProduto" element={<CadastroProduto />} /> {/* Adicione esta linha */}
+       
+        <Route path="/AdicionarTreino" element={<AdicionarTreino />} /> {/* Adicione esta linha */}
+        <Route path="/ReservasPendentes" element={<ReservasPendentes />} /> {/* Adicione esta linha */}
+        <Route path="/GerenciarReservas" element={<GerenciarReservas />} /> {/* Adicione esta linha */}
+        <Route path="/AdicionarProduto" element={<AdicionarProduto />} /> {/* Adicione esta linha */}
         <Route path="/GerenciarProduto" element={<GerenciarProduto />} /> {/* Adicione esta linha */}
         <Route path="/GerenciarPersonal" element={<GerenciarPersonal />} /> {/* Adicione esta linha */}
         <Route path="/AdicionarPersonal" element={<AdicionarPersonal />} /> {/* Adicione esta linha */}
