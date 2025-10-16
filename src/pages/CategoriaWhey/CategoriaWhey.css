@@ -28,6 +28,7 @@
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
+  margin-bottom: 150px; /* <<< ADICIONE ESTA LINHA */
 }
 
 .produtos-grid {
@@ -39,6 +40,8 @@
   width: 100%;
   max-width: 1200px;
   margin: 5% 0 0 0;
+  padding: 0 16px; 
+  box-sizing: border-box;
 }
 
 .produto-card {
@@ -53,6 +56,7 @@
   min-height: 400px;
   box-sizing: border-box;
   transition: box-shadow 0.3s, transform 0.3s;
+  flex-grow: 1;
 }
 
 .produto-card:hover {
@@ -118,234 +122,92 @@
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
 }
 
-.lista-produtos {
-  margin: 40px auto 20px auto;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  background-color: #d9d9d9;
-  max-width: 1400px;
-  width: 100%;
-}
 
-.produto-lista-card {
-  display: flex;
-  align-items: center;
-  background-color: white;
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  gap: 20px;
-}
-
-.produto-lista-img {
-  width: 160px;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-
-.produto-lista-info {
-  flex: 1;
-}
-
-.produto-lista-nome {
-  font-size: 1.2rem;
-  margin: 0 0 8px 0;
-}
-
-.produto-lista-preco {
-  font-weight: bold;
-  font-size: 1.2rem;
-  color: black;
-}
-
-@media (max-width: 600px) {
-
-  .banner-gradient-categoria-camisa,
-  .banner-gradient-categoria-creatina {
-    min-height: unset;
-    background: linear-gradient(180deg,
-        #000000 0%,
-        #002E99 15%,
-        #D9D9D9 27%);
-  }
-
-  .categoria-container {
-    margin-bottom: 80px;
-  }
-
-  .lista-produtos {
-    margin: 32px auto 20px auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 600px;
-    width: 90%;
-  }
-
-  .produto-lista-img {
-    width: 100px;
-  }
-
-  .produto-lista-nome {
-    font-size: 0.8rem;
-    margin: 0 0 8px 0;
-  }
-
-  .produto-lista-preco {
-    font-size: 0.8rem;
-  }
-
-  .produtos-grid {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    max-width: 97vw;
-    align-items: center;
-  }
-
-  .produto-card {
-    width: 100%;
-    max-width: 340px;
-    min-width: 0;
-    min-height: 0;
-    padding: 14px 6px 14px 6px;
-  }
-
-  .produto-img {
-    width: 100px;
-    height: 100px;
-    margin-bottom: 12px;
-  }
-
-  .produto-card-content {
-    min-height: 32px;
-    margin-bottom: 10px;
-  }
-
-  .produto-card-footer {
-    gap: 6px;
-  }
-
-  .btn-reservar {
-    font-size: 0.98rem;
-    padding: 10px 0;
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 900px) {
-
-  .banner-gradient-categoria-camisa,
-  .banner-gradient-categoria-creatina {
-    min-height: unset;
-        background: linear-gradient(180deg,
-        #000000 0%,
-        #002E99 15%,
-        #D9D9D9 43%);
-  }
-
-  .categoria-container {
-    margin-bottom: 80px;
-  }
-
-  .lista-produtos {
-    margin: 32px auto 20px auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 600px;
-    width: 90%;
-  }
-
-  .produto-lista-img {
-    width: 100px;
-  }
-
-  .produto-lista-nome {
-    font-size: 1rem;
-    margin: 0 0 8px 0;
-  }
-
-  .produto-lista-preco {
-    font-size: 1rem;
-  }
-
-  .produtos-grid {
-    flex-direction: column;
-    gap: 26px;
-    max-width: 100vw;
-    align-items: center;
-  }
-
-  .produto-card {
-    width: 100%;
-    max-width: 340px;
-    min-width: 0;
-    min-height: 0;
-    padding: 14px 6px 14px 6px;
-  }
-
-  .produto-img {
-    width: 100px;
-    height: 100px;
-    margin-bottom: 12px;
-  }
-
-  .produto-card-content {
-    min-height: 32px;
-    margin-bottom: 10px;
-  }
-
-  .produto-card-footer {
-    gap: 6px;
-  }
-
-  .btn-reservar {
-    font-size: 0.98rem;
-    padding: 10px 0;
-    max-width: 100%;
-  }
-}
+/* MEDIA QUERIES */
 
 @media (max-width: 1280px) {
   .produtos-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 32px;
-    justify-content: center;
-    align-items: stretch;
-    width: 100%;
     max-width: 1000px;
-    align-items: center;
   }
 
   .produto-img {
     width: 180px;
     height: 180px;
-    object-fit: contain;
-    border-radius: 10px;
-    margin-bottom: 18px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    background: #f6f6f6;
   }
 
   .categoria-container {
     margin-bottom: 150px;
     min-height: 50vh;
   }
+}
 
-  .lista-produtos {
-    margin: 32px auto 20px auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 800px;
-    width: 90%;
+@media (max-width: 900px) {
+  .banner-gradient-categoria-camisa,
+  .banner-gradient-categoria-creatina {
+    background: linear-gradient(180deg,
+        #000000 0%,
+        #002E99 15%,
+        #D9D9D9 43%);
   }
 
-  .produto-lista-img {
+  .produtos-grid {
+    gap: 16px;
+  }
+
+  .categoria-container{
+    margin-bottom: 80px; /* Sobrescreve o valor para telas menores */
+  }
+
+  .produto-card {
+    width: calc(50% - 8px); 
+    max-width: 260px; 
+    min-width: 160px; 
+    min-height: 0;
+    padding: 14px;
+    font-size: 0.9rem;
+  }
+
+  .produto-nome, .produto-preco {
+      font-size: 1rem;
+  }
+  
+  .produto-img {
     width: 120px;
+    height: 120px;
+    margin-bottom: 12px;
   }
+
+  .produto-card-content {
+    min-height: 32px;
+    margin-bottom: 10px;
+  }
+
+  .produto-card-footer {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 600px) {
+    .banner-gradient-categoria-camisa,
+    .banner-gradient-categoria-creatina {
+        background: linear-gradient(180deg,
+            #000000 0%,
+            #002E99 15%,
+            #D9D9D9 27%);
+    }
+
+    .produtos-grid {
+        gap: 12px;
+        padding: 0 12px;
+    }
+
+    .produto-card {
+        width: calc(50% - 6px); 
+        min-width: 150px;
+    }
+
+    .btn-reservar {
+        font-size: 0.98rem;
+        padding: 10px 0;
+    }
 }
