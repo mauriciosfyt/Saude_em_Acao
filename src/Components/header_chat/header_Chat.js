@@ -46,10 +46,6 @@ const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
               <Ionicons name="chatbubble-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Chat</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("Mensalidades")}>
-              <Ionicons name="card-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Mensalidades</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("Loja")}>
               <Ionicons name="cart-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Loja</Text>
