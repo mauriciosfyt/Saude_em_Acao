@@ -14,7 +14,7 @@ const theme = {
 // Array com os itens da barra de navegação para facilitar a manutenção
 const navItems = [
     { name: 'home', screen: 'Loja', isNested: false }, // alterado para false
-    { name: 'shopping-cart', screen: 'LojaReservas', isNested: false },
+    { name: 'shopping-cart', screen: 'LojaCarrinho', isNested: false },
     { name: 'heart', screen: 'LojaFavoritos', isNested: false },
 ];
 
