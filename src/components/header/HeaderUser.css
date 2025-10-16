@@ -46,12 +46,7 @@
   padding: 12px 24px;
 }
 
-.nav-left {
-  position: absolute;
-  left: 24px;
-  top: 50%;
-  transform: translateY(-50%);
-}
+/* nav-left removido - menu lateral eliminado */
 
 .nav-center {
   display: flex;
@@ -75,70 +70,7 @@
 }
 
 
-/* =================================================================== */
-/* --- LÓGICA DO MENU LATERAL (SAINDO DA ESQUERDA) --- */
-/* =================================================================== */
-
-/* Ícone de hambúrguer sempre visível */
-.user-menu-icon {
-  display: block;
-  font-size: 24px;
-  cursor: pointer;
-  color: #000;
-}
-
-/* Estiliza o menu lateral */
-.user-sidebar {
-  display: block;
-  position: fixed;
-  top: 0;
-  left: -280px;
-  width: 280px;
-  height: 100%;
-  background: linear-gradient(to bottom, #004DFF, #000000);
-  transition: left 0.35s ease;
-  z-index: 1000;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-}
-
-.user-sidebar.is-open {
-  left: 0;
-}
-
-.user-sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  /* LINHA REMOVIDA DAQUI */
-}
-
-.user-sidebar-logo {
-  height: 50px;
-}
-
-.user-sidebar-close-btn {
-  font-size: 24px;
-  cursor: pointer;
-  color: white;
-}
-
-.user-sidebar-navlist {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.user-sidebar-navlist li a {
-  display: block;
-  padding: 18px 24px;
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-  /* LINHA REMOVIDA DAQUI */
-}
-
-/* Celulares pequenos: até 480px */
+/* Responsividade simplificada (menu lateral removido) */
 @media (max-width: 480px) {
   .logo-img {
     height: 40px;
@@ -146,14 +78,6 @@
 
   .icon {
     font-size: 20px;
-  }
-
-  .user-menu-icon {
-    font-size: 18px;
-  }
-
-  .nav-left {
-    left: 16px;
   }
 
   .nav-links {
@@ -169,17 +93,12 @@
   }
 }
 
-/* Tablets e celulares médios: 481px até 768px */
 @media (min-width: 481px) and (max-width: 768px) {
   .logo-img {
     height: 40px;
   }
 
   .icon {
-    font-size: 20px;
-  }
-
-  .user-menu-icon {
     font-size: 20px;
   }
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import logo from "../../assets/logo_dia.png";
 import "./styles.css";
 import "./modal_login.css";
@@ -82,7 +83,19 @@ function HomeHeader() {
             Fazer login
           </button>
         </div>
+        
       </header>
+
+      {/* Menu horizontal */}
+      <nav className="nav-links">
+        <div className="nav-center">
+          <Link to="/">Home</Link>
+          <Link to="/Loja">Loja</Link>
+          <Link to="/Planos">Planos</Link>
+          <Link to="/Professores">Personal</Link>
+          <Link to="/SobreNos">Sobre nós</Link>
+        </div>
+      </nav>
 
       {/* Modais separados */}
       {showModal && (

@@ -33,6 +33,9 @@ import EditarProduto from '../pages/Tela Adm/Editar_Produto/index.jsx';
 import EditarPersonal from '../pages/Tela Adm/EditarPersonal/EditarPersonal.jsx';
 import GerenciarTreino from '../pages/Tela Adm/GerenciarTreino/index.jsx';
 import PersonalizarTreino from '../pages/Tela Adm/PersonalizarTreino/index.jsx';
+import ThayFit from '../pages/ThayFit/ThayFit.jsx';
+import Pilates from '../pages/Pilates/Pilates.jsx';
+import Funcional from '../pages/Funcional/Funcional.jsx';
 
 const AppRoutes = () => {
   return (
@@ -51,6 +54,9 @@ const AppRoutes = () => {
         <Route path="/Professores" element={<Professores />} />
         <Route path="/Reservas" element={<Reservas />} /> {/* Adicione esta linha */}
         <Route path="*" element={<Erro404 />} /> {/* Adicione esta linha */}
+        <Route path="/ThayFit" element={<ThayFit/>} /> {/* Adicione esta linha */}
+        <Route path="/Pilates" element={<Pilates/>} /> {/* Adicione esta linha */}
+        <Route path="/Funcional" element={<Funcional/>} /> {/* Adicione esta linha */}
 
         <Route path="/CategoriaCreatina" element={<CategoriaCreatina />} />
         <Route path="/CategoriaCamisa" element={<CategoriaCamisa />} />
