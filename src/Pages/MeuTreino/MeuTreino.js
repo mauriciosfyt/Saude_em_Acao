@@ -16,7 +16,7 @@ import { useTreinos } from '../../context/TreinosContext';
 const MeuTreino = ({ navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
   const [modalConcluido, setModalConcluido] = useState({ visivel: false, dia: '' });
-  const { treinosConcluidos, marcarTreinoComoConcluido } = useTreinos();
+  const { treinosConcluidos, treinosIncompletos, marcarTreinoComoConcluido, marcarTreinoComoIncompleto } = useTreinos();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -72,20 +72,37 @@ const MeuTreino = ({ navigation }) => {
   };
 
   const handleIniciarTreino = (treino) => {
+    // Só bloqueia se o treino estiver completamente concluído
     if (treinosConcluidos.has(treino.dia)) {
       setModalConcluido({ visivel: true, dia: treino.dia });
       return;
     }
+    // Permite acesso a treinos incompletos ou novos
     if (treino.dia === 'Segunda-Feira') {
-      navigation.navigate('TreinoSegunda', { onTreinoConcluido: marcarTreinoComoConcluido });
+      navigation.navigate('TreinoSegunda', { 
+        onTreinoConcluido: marcarTreinoComoConcluido,
+        onTreinoIncompleto: marcarTreinoComoIncompleto 
+      });
     } else if (treino.dia === 'Terça-Feira') {
-      navigation.navigate('TreinoTerca', { onTreinoConcluido: marcarTreinoComoConcluido });
+      navigation.navigate('TreinoTerca', { 
+        onTreinoConcluido: marcarTreinoComoConcluido,
+        onTreinoIncompleto: marcarTreinoComoIncompleto 
+      });
     } else if (treino.dia === 'Quarta-Feira') {
-      navigation.navigate('TreinoQuarta', { onTreinoConcluido: marcarTreinoComoConcluido });
+      navigation.navigate('TreinoQuarta', { 
+        onTreinoConcluido: marcarTreinoComoConcluido,
+        onTreinoIncompleto: marcarTreinoComoIncompleto 
+      });
     } else if (treino.dia === 'Quinta-Feira') {
-      navigation.navigate('TreinoQuinta', { onTreinoConcluido: marcarTreinoComoConcluido });
+      navigation.navigate('TreinoQuinta', { 
+        onTreinoConcluido: marcarTreinoComoConcluido,
+        onTreinoIncompleto: marcarTreinoComoIncompleto 
+      });
     } else if (treino.dia === 'Sexta-Feira') {
-      navigation.navigate('TreinoSexta', { onTreinoConcluido: marcarTreinoComoConcluido });
+      navigation.navigate('TreinoSexta', { 
+        onTreinoConcluido: marcarTreinoComoConcluido,
+        onTreinoIncompleto: marcarTreinoComoIncompleto 
+      });
     }
   };
 
@@ -132,19 +149,23 @@ const MeuTreino = ({ navigation }) => {
             <TouchableOpacity
               style={[
                 styles?.iniciarButton || { backgroundColor: '#405CBA', borderRadius: 8, padding: 12, marginTop: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-                treinosConcluidos.has(treino.dia) && (styles?.concluidoButton || { backgroundColor: '#4CAF50' })
+                treinosConcluidos.has(treino.dia) && (styles?.concluidoButton || { backgroundColor: '#4CAF50' }),
+                treinosIncompletos.has(treino.dia) && (styles?.incompletoButton || { backgroundColor: '#FF9800' })
               ]}
               onPress={() => !treinosConcluidos.has(treino.dia) && handleIniciarTreino(treino)}
               disabled={treinosConcluidos.has(treino.dia)}
             >
               <Text style={[
                 styles?.iniciarButtonText || { color: 'white', fontWeight: 'bold', marginRight: 8 },
-                treinosConcluidos.has(treino.dia) && (styles?.concluidoButtonText || { color: '#fff' })
+                treinosConcluidos.has(treino.dia) && (styles?.concluidoButtonText || { color: '#fff' }),
+                treinosIncompletos.has(treino.dia) && (styles?.incompletoButtonText || { color: '#fff' })
               ]}>
-                {treinosConcluidos.has(treino.dia) ? 'Concluído' : 'Iniciar'}
+                {treinosConcluidos.has(treino.dia) ? 'Concluído' : 
+                 treinosIncompletos.has(treino.dia) ? 'Incompleto' : 'Iniciar'}
               </Text>
               <Ionicons
-                name={treinosConcluidos.has(treino.dia) ? "checkmark-circle" : "arrow-forward"}
+                name={treinosConcluidos.has(treino.dia) ? "checkmark-circle" : 
+                      treinosIncompletos.has(treino.dia) ? "time-outline" : "arrow-forward"}
                 size={16}
                 color="white"
               />
@@ -186,10 +207,6 @@ const MeuTreino = ({ navigation }) => {
             <TouchableOpacity style={[styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }, styles?.menuItemAtivo || {}]} onPress={() => handleNavegar("MeuTreino")}>
               <Ionicons name="fitness-outline" size={24} color="#405CBA" />
               <Text style={[styles?.menuItemText || { marginLeft: 8 }, styles?.menuItemTextAtivo || { color: '#405CBA', fontWeight: 'bold' }]}>Meus Treinos</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }} onPress={() => handleNavegar("Mensalidades")}>
-              <Ionicons name="card-outline" size={24} color="#333" />
-              <Text style={styles?.menuItemText || { marginLeft: 8 }}>Mensalidades</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
