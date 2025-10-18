@@ -1,4 +1,3 @@
-// src/main/java/br/com/saudeemacao/api/service/EmailService.java
 package br.com.saudeemacao.api.service;
 
 import jakarta.mail.MessagingException;
