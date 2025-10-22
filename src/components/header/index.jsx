@@ -23,7 +23,7 @@ const HeaderUser = () => {
         <div className="nav-center">
           <Link to="/">Home</Link>
           <Link to="/Loja">Loja</Link>
-          <Link to="/Planos">Planos</Link>
+          <Link to="/" state={{ scrollTo: 'planos' }}>Planos</Link>
           <Link to="/Professores">Personal</Link>
           <Link to="/SobreNos">Sobre nós</Link>
         </div>

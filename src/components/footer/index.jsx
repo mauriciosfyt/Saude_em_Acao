@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import "./Footer.css";
 import logo from "../../assets/logo1.png";
 import emailIcon from "../../assets/icones/Email.png";
@@ -104,7 +104,7 @@ const Footer = () => {
               <a href="/Professores" className="footer-link">Personal</a>
             </div>
             <div>
-              <a href="/Planos" className="footer-link">Planos</a>
+                <Link to="/" state={{ scrollTo: 'planos' }} className="footer-link">Planos</Link>
             </div>
             <div>
               <a href={getSobreNosLink()} className="footer-link">Sobre nós</a>
