@@ -7,10 +7,10 @@ import GraficoA from '../../../components/Administrador/Dasboard/GraficoA';
 import ProductCard from '../../../components/Administrador/Dasboard/ProductCard';
 
 // Importar as imagens
-import camisaImg from '../../../assets/icones/Camisa.png';
-import preTreinoImg from '../../../assets/icones/Pré-Treino.png';
-import wheyImg from '../../../assets/icones/Whey protain.png';
-import vitaminaImg from '../../../assets/icones/vitamina.png';
+import camisaImg from '/src/assets/icones/Camisa.png';
+import preTreinoImg from '/src/assets/icones/Pré-Treino.png';
+import wheyImg from '/src/assets/icones/Whey protain.png';
+import vitaminaImg from '/src/assets/icones/Vitamina.png';
 
 
 const Dashboard = () => {

@@ -72,6 +72,29 @@
   transition: transform 0.3s ease;
 }
 
+/* Quando um Link envolve o card, garantimos que ele seja um bloco e herde estilo */
+.card-link {
+  display: block;
+  border-radius: 15px;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Impede que o hover global de links altere a cor/fonte dos títulos dentro dos cards */
+.card-link, .card {
+  color: inherit; /* mantém a cor do texto definida no card */
+}
+.card-link:hover, .card:hover {
+  text-decoration: none; /* evita sublinhado */
+  color: inherit; /* não muda a cor do texto */
+}
+.card-link .largeTitle, .card .largeTitle, .card-link .smallTitle, .card .smallTitle {
+  color: #ffffff; /* garante título branco por cima da imagem */
+}
+.card-link:focus {
+  outline: 3px solid rgba(100,108,255,0.25); /* foco visível sem alterar fonte */
+}
+
 .card:hover {
   transform: scale(1.03); /* Efeito de zoom sutil no hover */
   cursor: pointer;
