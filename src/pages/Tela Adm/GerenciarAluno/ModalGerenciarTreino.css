@@ -27,7 +27,7 @@
   z-index: 100000; /* manter acima de tudo */
 }
 
-.modal-title {
+.modal-title-adm {
   font-size: 15px;
   font-weight: 700;
   margin: 2px 0 14px 0;
@@ -43,13 +43,13 @@
   padding: 0 6px;
 }
 
-.modal-label {
+.modal-label-adm {
   font-size: 12px;
   color: #111;
   margin-bottom: 6px;
 }
 
-.modal-input {
+.modal-input-adm {
   width: 100%;
   padding: 10px 6px 6px 6px;
   border: none;
@@ -62,7 +62,7 @@
   appearance: none; /* padrão compatível */
 }
 
-.modal-input::placeholder { color: rgba(0,0,0,0.35); }
+.modal-input-adm::placeholder { color: rgba(0,0,0,0.35); }
 
 .modal-list {
   overflow-y: auto;
@@ -109,7 +109,7 @@
   margin-bottom: 8px;
 }
 
-.tag {
+.tag-admin {
   background: #9b9b9b;
   color: #080808;
   padding: 6px 12px;
@@ -146,12 +146,28 @@
 
 .btn-back {
   background: #ff0f0f;
-  color: #fff;
+ color: #fff;
+    border: none;
+    padding: 8px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-end;
+    transition: background 0.2s;
+    font-size: 0.95rem;
+    border-radius: 12px 0px 12px 0;
 }
 
 .btn-choose {
   background: #4fc24f;
   color: #fff;
+    border: none;
+    padding: 8px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-end;
+    transition: background 0.2s;
+    font-size: 0.95rem;
+    border-radius: 12px 0px 12px 0;
 }
 
 /* make sure inner content respects the rounded corners */

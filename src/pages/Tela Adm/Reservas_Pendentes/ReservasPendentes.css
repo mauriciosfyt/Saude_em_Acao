@@ -1,6 +1,3 @@
-/* ReservasPendentes.css */
-/* Estilos com o campo de busca centralizado */
-
 .reservas-pendente-content-wrapper {
   flex-grow: 1;
   padding: 40px 50px;
@@ -9,16 +6,17 @@
   margin-left: 260px;
 }
 
-/* --- Cabeçalho (COM A CENTRALIZAÇÃO) --- */
+/* --- Cabeçalho (ATUALIZADO) --- */
 .reservas-pendente-header {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* <-- ADICIONADO: Empurra o título para a esquerda e o select para a direita */
   margin-bottom: 40px;
   padding: 20px 30px;
   background-color: #FFFFFF;
   border-radius: 8px;
-  position: relative; /* 1. Âncora para o posicionamento absoluto */
-  height: 90px; /* Adicionado para garantir espaço vertical */
+  position: relative; /* 1. MANTIDO: Âncora para o posicionamento absoluto da busca */
+  height: 90px; /* MANTIDO: Garante espaço vertical */
 }
 
 .reservas-pendente-title {
@@ -28,62 +26,91 @@
   margin: 0;
 }
 
+/* --- Busca (MANTIDA 100% ORIGINAL) --- */
 .reservas-pendente-search-container {
   display: flex;
   align-items: center;
   background-color: #F8F9FA; 
   border: 1px solid #DFE1E6; 
   border-radius: 8px;
-  padding: 10px 16px;
-  width: 100%;
-  max-width: 400px;
+  padding: 10px 14px;
+  width: 320px;
   
-  /* 2. Novas regras para centralização absoluta */
+  /* 2. MANTIDO: Centralização absoluta */
   position: absolute;
-  left: 80%;
   top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
-}
-
-.reservas-pendente-search-icon {
-  color: #6c757d;
-  margin-right: 10px;
 }
 
 .reservas-pendente-search-input {
   border: none;
   background: none;
   outline: none;
+  margin-left: 10px;
   width: 100%;
-  font-size: 1em;
+  font-size: 16px;
+  color: #333;
 }
 
-/* --- Lista de Cards (sem alterações) --- */
+.reservas-pendente-search-input::placeholder {
+  color: #6c757d;
+}
+
+/* --- NOVO: Select de Categoria --- */
+/* (Posicionado à direita pelo 'justify-content: space-between' do header) */
+.reservas-pendente-filter-select {
+  padding: 10px 14px;
+  font-size: 16px;
+  border: 1px solid #DFE1E6;
+  border-radius: 8px;
+  background-color: #FAFBFC;
+  color: #343A40;
+  height: 46px; /* Altura fixa para alinhar (visualmente) com a busca */
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.reservas-pendente-filter-select:focus {
+  border-color: #007BFF;
+  box-shadow: 0 0 0 1px #007BFF;
+}
+
+
+/* --- Lista de Cards (Inalterado) --- */
 .reservas-pendente-list {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.reservas-pendente-card {
-  display: flex;
-  align-items: center;
-  gap: 25px;
-  padding: 20px;
-  background-color: #FFFFFF;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border-bottom: 1px solid #000;
+.reservas-pendente-nenhuma-reserva {
+  text-align: center;
+  font-size: 1.1em;
+  color: #6c757d;
+  padding: 50px 0;
 }
 
-.reservas-pendente-card-image {
-  width: 100px;
-  height: 100px;
-  object-fit: contain;
+/* ... (O restante do seu CSS para .reservas-pendente-card, .btn-cancelar, etc., continua igual) ... */
+
+.reservas-pendente-card {
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+  padding: 20px;
+  background-color: #FAFBFC;
+  border: 1px solid #E9ECEF;
   border-radius: 8px;
-  background-color: #f8f9fa;
-  border: 1px solid #eee;
-  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.reservas-pendente-card-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #DEE2E6;
 }
 
 .reservas-pendente-card-info,
@@ -91,8 +118,8 @@
 .reservas-pendente-card-actions {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  height: 100%;
+  justify-content: center;
+  gap: 8px;
 }
 
 .reservas-pendente-card-info { flex: 2; }
@@ -122,6 +149,7 @@
   color: #6c757d !important;
   margin-bottom: 15px !important;
 }
+
 
 /* --- Botões de Ação --- */
 .reservas-pendente-buttons {

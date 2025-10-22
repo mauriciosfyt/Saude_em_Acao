@@ -1,72 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Importei o useEffect
 import './ReservasPendentes.css'; // Aponta para o CSS com as classes renomeadas
 
 // Componentes e Ícones
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { FaSearch } from "react-icons/fa";
 
-// Mock de dados
+// Mock de dados ATUALIZADO com as novas categorias
 const mockReservasInicial = [
-    { id: 1, nome: "Roberto Alves", produto: "Camiseta preta growth", quantidade: "3X", tamanho: "M", preco: "R$50,00", data: "01/01/2025", email: "roberto@gmail.com", telefone: "(11) 12345-6789", imagem: "https://i.imgur.com/8L4m5p3.png", status: "Pendente" },
-    { id: 4, nome: "Ana Souza", produto: "Legging fitness preta", quantidade: "2X", tamanho: "M", preco: "R$70,00", data: "10/02/2025", email: "anasouza@gmail.com", telefone: "(11) 98765-4321", imagem: "https://i.imgur.com/JzJ9zL1.png", status: "Pendente" },
-    { id: 3, nome: "Roberto Alves", produto: "Camiseta preta growth", quantidade: "2X", tamanho: "G", preco: "R$150,00", data: "01/01/2025", email: "roberto@gmail.com", telefone: "(11) 12345-6789", imagem: "https://i.imgur.com/8L4m5p3.png", status: "Pendente" },
-    { id: 5, nome: "Ana Souza", produto: "Legging fitness preta", quantidade: "1X", tamanho: "P", preco: "R$40,00", data: "10/02/2025", email: "anasouza@gmail.com", telefone: "(11) 98765-4321", imagem: "https://i.imgur.com/JzJ9zL1.png", status: "Pendente" },
-    { id: 2, nome: "Maria Inacia", produto: "Shake protein 15g", quantidade: "1X", tamanho: "G", preco: "R$10,50", data: "25/03/2025", email: "mariainacia@gmail.com", telefone: "(11) 12345-6789", imagem: "https://i.imgur.com/JzJ9zL1.png", status: "Efetuada" },
+    { id: 1, nome: "Roberto Alves", produto: "Camiseta preta growth", categoria: "Camisetas", quantidade: "3X", tamanho: "M", preco: "R$50,00", data: "01/01/2025", email: "roberto@gmail.com", telefone: "(11) 12345-6789", imagem: "https://i.imgur.com/8L4m5p3.png", status: "Pendente" },
+    { id: 4, nome: "Ana Souza", produto: "Legging fitness preta", categoria: "Camisetas", quantidade: "2X", tamanho: "M", preco: "R$70,00", data: "10/02/2025", email: "anasouza@gmail.com", telefone: "(11) 98765-4321", imagem: "https://i.imgur.com/JzJ9zL1.png", status: "Pendente" },
+    { id: 3, nome: "Roberto Alves", produto: "Camiseta preta growth", categoria: "Camisetas", quantidade: "2X", tamanho: "G", preco: "R$150,00", data: "01/01/2025", email: "roberto@gmail.com", telefone: "(11) 12345-6789", imagem: "https://i.imgur.com/8L4m5p3.png", status: "Pendente" },
+    { id: 5, nome: "Carlos Lima", produto: "Whey Protein 1kg", categoria: "Whey Protein", quantidade: "1X", tamanho: "N/A", preco: "R$120,00", data: "12/02/2025", email: "carlos@gmail.com", telefone: "(11) 99999-8888", imagem: "https://i.imgur.com/example.png", status: "Pendente" },
+    { id: 6, nome: "Maria Oliveira", produto: "Creatina Monohidratada", categoria: "Creatina", quantidade: "1X", tamanho: "N/A", preco: "R$80,00", data: "15/02/2025", email: "maria@gmail.com", telefone: "(11) 77777-6666", imagem: "https://i.imgur.com/example2.png", status: "Pendente" }
 ];
 
 const ReservasPendentes = () => {
     const [reservas, setReservas] = useState(mockReservasInicial);
-    const [searchTerm, setSearchTerm] = useState("");
+    const [termoBusca, setTermoBusca] = useState('');
+    const [categoria, setCategoria] = useState(''); // NOVO STATE
+    const [reservasFiltradas, setReservasFiltradas] = useState([]); // NOVO STATE
 
-    const handleStatusChange = (reservaId, novoStatus) => {
-        const acao = novoStatus === 'Efetuada' ? 'aprovar' : 'cancelar';
-        if (window.confirm(`Tem certeza que deseja ${acao} esta reserva?`)) {
-            setReservas(prevReservas =>
-                prevReservas.map(reserva =>
-                    reserva.id === reservaId ? { ...reserva, status: novoStatus } : reserva
-                )
-            );
-        }
+    const handleStatusChange = (id, novoStatus) => {
+        setReservas(prevReservas =>
+            prevReservas.map(reserva =>
+                reserva.id === id ? { ...reserva, status: novoStatus } : reserva
+            )
+        );
     };
 
-    const filteredReservas = reservas
-        .filter(reserva => reserva.status === 'Pendente')
-        .filter(reserva =>
-            reserva.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            reserva.produto.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    // NOVO USEEFFECT PARA FILTRAGEM DUPLA
+    useEffect(() => {
+        let filtradas = reservas.filter(reserva => reserva.status === 'Pendente');
+
+        // Filtro por Termo de Busca
+        if (termoBusca) {
+            filtradas = filtradas.filter(reserva =>
+                reserva.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
+                reserva.produto.toLowerCase().includes(termoBusca.toLowerCase())
+            );
+        }
+
+        // Filtro por Categoria
+        if (categoria) {
+            filtradas = filtradas.filter(reserva => reserva.categoria === categoria);
+        }
+
+        setReservasFiltradas(filtradas);
+    }, [termoBusca, categoria, reservas]); // Dependências atualizadas
 
     return (
         <div style={{ display: 'flex' }}>
             <MenuAdm />
             <main className="reservas-pendente-content-wrapper">
-                {/* Cabeçalho */}
+                
                 <div className="reservas-pendente-header">
-                    <h1 className="reservas-pendente-title">Reservas Pendentes</h1>
+                    <h1 className="reservas-pendente-title">Reservas</h1>
+
+                    {/* Barra de pesquisa (permanece centralizada) */}
                     <div className="reservas-pendente-search-container">
-                        <FaSearch className="reservas-pendente-search-icon" />
+                        <FaSearch style={{ color: '#6c757d', fontSize: '16px' }} />
                         <input
                             className="reservas-pendente-search-input"
                             type="text"
-                            placeholder="Buscar em pendentes..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Pesquisar por nome ou produto..."
+                            value={termoBusca}
+                            onChange={(e) => setTermoBusca(e.target.value)}
                         />
                     </div>
+                    
+                    {/* NOVO SELECT DE CATEGORIA (adicionado ao final) */}
+                    <select 
+                        className="reservas-pendente-filter-select" 
+                        value={categoria} 
+                        onChange={(e) => setCategoria(e.target.value)}
+                    >
+                        <option value="">Todas Categorias</option>
+                        <option value="Camisetas">Camisetas</option>
+                        <option value="Whey Protein">Whey Protein</option>
+                        <option value="Creatina">Creatina</option>
+                        <option value="Vitaminas">Vitaminas</option>
+                    </select>
                 </div>
 
-                {/* Lista de Cards */}
+
                 <div className="reservas-pendente-list">
-                    {filteredReservas.length > 0 ? (
-                        filteredReservas.map(reserva => (
+                    {/* Renderiza as reservas FILTRADAS */}
+                    {reservasFiltradas.length > 0 ? (
+                        reservasFiltradas.map(reserva => (
                             <div key={reserva.id} className="reservas-pendente-card">
-                                <img src={reserva.imagem} alt={reserva.produto} className="reservas-pendente-card-image" />
+                                <img src={reserva.imagem} alt={reserva.produto} className="reservas-pendente-card-img" />
                                 
                                 <div className="reservas-pendente-card-info">
-                                    <p><strong>Nome:</strong> {reserva.nome}</p>
-                                    <p><strong>Produto:</strong> {reserva.produto}</p>
-                                    <p><strong>Email:</strong> {reserva.email}</p>
-                                    <p><strong>Telefone:</strong> {reserva.telefone}</p>
+                                    <p><strong>{reserva.produto}</strong></p>
+                                    <p>Cliente: {reserva.nome}</p>
+                                    <p>Email: {reserva.email}</p>
+                                    <p>Telefone: {reserva.telefone}</p>
                                 </div>
 
                                 <div className="reservas-pendente-card-details">
