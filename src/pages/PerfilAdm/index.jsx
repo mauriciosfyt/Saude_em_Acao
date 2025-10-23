@@ -56,7 +56,10 @@ const PerfilAdm = () => {
           <p><strong>Senha:</strong> XXXXXX</p>
         </div>
 
-        <button className="logout-btn">Desconectar</button>
+        <div className="actions-row">
+          <button className="logout-btn">Desconectar</button>
+          <button className="manage-btn">Gerenciar</button>
+        </div>
       </div>
 
       <Footer />

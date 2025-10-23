@@ -107,8 +107,8 @@
   line-height: 1.5;
 }
 
-.logout-btn {
-  background: #0070f3;
+.logout-btn,
+.manage-btn {
   color: #fff;
   border: none;
   border-radius: 12px 0 12px 0;
@@ -118,10 +118,32 @@
   cursor: pointer;
   transition: background 0.2s;
   margin-bottom: 35px;
+  width: 160px; /* Largura fixa para ambos os botões */
+}
+
+.logout-btn {
+  background: #0070f3;
 }
 
 .logout-btn:hover {
   background-color: #003FCC;
+}
+
+/* Row de ações (Desconectar + Gerenciar) */
+.actions-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 35px;
+}
+
+.manage-btn {
+  background: #4BBF4A; /* verde */
+}
+
+.manage-btn:hover {
+  background-color: #3aa43c;
 }
 
 .perfil-wave {
@@ -266,6 +288,10 @@
   .logout-btn {
     width: 50%;
   }
+
+    .manage-btn {
+      width: 50%;
+    }
 
   .perfil-status,
   .produtos-reservados-label,

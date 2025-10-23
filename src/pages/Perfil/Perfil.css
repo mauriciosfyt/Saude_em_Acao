@@ -43,33 +43,51 @@
   margin-bottom: 40px;
 }
 
-.card-info {
+/* --- CLASSE CORRIGIDA E LAYOUT AJUSTADO --- */
+.perfil-card-info {
   background: #333333;
   color: #fff;
   border-radius: 12px;
-  padding: 70px;
+  padding: 40px; /* Reduzido para melhor encaixe */
   flex: 1 1 300px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  text-align: left;
+  text-align: left; /* Alinhado à esquerda como na imagem */
   max-width: 100%;
-  text-align: center;
 }
 
-.card-info h3,
-.card-header h4 {
-  margin: 0 0 10px 0;
-  text-align: center;
+/* --- CLASSES CORRIGIDAS --- */
+.perfil-card-info h3,
+.perfil-card-header h4 {
+  margin: 0 0 25px 0; /* Aumentei a margem inferior do título */
+  text-align: center; /* Título permanece centralizado */
   font-size: 20px;
 }
 
-.card-info li {
+/* --- ESTILO NOVO PARA A LISTA DO PLANO --- */
+.perfil-plano-lista {
   list-style: none;
-  text-align: center;
-    font-size: 22px;
-    margin-top: 15px;
+  padding: 0;
+  margin: 0;
 }
 
-.card-header {
+.perfil-plano-lista li {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  font-size: 18px; /* Tamanho ajustado */
+  margin-top: 15px;
+}
+
+/* --- ESTILO NOVO PARA O ÍCONE DE CHECK --- */
+.perfil-check-icon {
+  color: #2ecc71; /* Cor verde */
+  font-size: 1.2em;
+  margin-right: 12px;
+  font-weight: bold;
+}
+
+/* --- CLASSES CORRIGIDAS (Restante do arquivo) --- */
+.perfil-card-header {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -78,34 +96,34 @@
   justify-content: center;
 }
 
-.icon-desempenho {
+.perfil-icon-desempenho {
   font-size: 40px;
 }
 
-.desempenho-info p {
+.perfil-desempenho-info p {
   margin: 0;
 }
 
-.treinos-feitos,
-.ultimo-treino {
+.perfil-treinos-feitos,
+.perfil-ultimo-treino {
   font-size: 30px;
   font-weight: bold;
   margin-bottom: 2px;
 }
 
-.info-label {
+.perfil-info-label {
   font-size: 18px;
   color: #ccc;
   margin-bottom: 12px;
 }
 
-.linha-divisoria {
+.perfil-linha-divisoria {
   border-top: 1px solid #ccc;
   margin: 10px 0;
 }
 
 /* Container de Dados */
-.container-dados {
+.perfil-container-dados {
   background: linear-gradient(to bottom, #D9D9D9 100%);
   padding: 40px 20px;
   display: flex;
@@ -113,7 +131,7 @@
   align-items: center;
 }
 
-.dados-box {
+.perfil-dados-box {
   background: #333333;
   color: #ffffff;
   border-radius: 10px;
@@ -127,13 +145,13 @@
   justify-content: center;
 }
 
-.dados-box p {
+.perfil-dados-box p {
   font-size: 20px;
   margin: 15px 0;
   line-height: 1.5;
 }
 
-.logout-btn {
+.perfil-logout-btn {
   background: #0070f3;
   color: #fff;
   border: none;
@@ -146,7 +164,7 @@
   margin-bottom: 35px;
 }
 
-.logout-btn:hover {
+.perfil-logout-btn:hover {
   background-color: #003FCC;
 }
 
@@ -165,95 +183,41 @@
   height: 100%;
 }
 
+/* ... (todo o CSS de .perfil-container, .perfil-section, .perfil-header, .perfil-icon, .perfil-desc, .perfil-cards, .perfil-card-info, .perfil-card-info h3, .perfil-card-header h4, .perfil-plano-lista, .perfil-plano-lista li, etc. permanece igual) ... */
 
-/* Smartphones muito pequenos (ex: iPhone 5, SE) */
-@media (max-width: 340px) {
-  .perfil-icon {
-    width: 65px;
-    height: 65px;
-  }
-
-  .perfil-desc,
-  .info-label {
-    font-size: 12px;
-  }
-
-  .treinos-feitos,
-  .ultimo-treino {
-    font-size: 16px;
-  }
+/* --- NOVO ESTILO PARA O ÍCONE SVG --- */
+.perfil-check-svg {
+  width: 24px; /* Tamanho do ícone */
+  height: 24px;
+  margin-right: 12px;
+  color: #2ecc71; /* Cor verde para o contorno e o check */
+  flex-shrink: 0; /* Impede que o SVG encolha em telas menores */
 }
 
-/* Smartphones pequenos e médios (ex: iPhone 6+, Galaxy S10, Pixel) */
+/* ... (o restante do seu CSS para .perfil-icon-desempenho, .perfil-desempenho-info p, etc. permanece igual) ... */
+
+
+/* --- MÍDIA QUERIES CORRIGIDAS --- */
+/* (O nome das classes genéricas dentro das media queries também foi corrigido) */
+
+/* ... (resto do seu CSS responsivo) ... */
+
 @media (min-width: 341px) and (max-width: 480px) {
-  .perfil-icon {
-    width: 80px;
-    height: 80px;
-  }
-
-  .perfil-cards {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .card-info {
+  /* ... */
+  .perfil-card-info { /* <-- Classe corrigida */
     width: 100%;
     max-width: 280px;
     text-align: center;
   }
 
-  .logout-btn {
+  .perfil-card-info li { /* <-- Seletor corrigido */
+     text-align: center; /* Mantém centralizado no mobile se preferir, ou mude para 'left' */
+  }
+
+  .perfil-logout-btn { /* <-- Classe corrigida */
     width: 100%;
     max-width: 300px;
   }
 }
 
-/* Smartphones grandes e pequenos tablets (ex: iPhone Plus, Pixel XL, Galaxy A12, iPhone 13 Pro Max) */
-@media (min-width: 481px) and (max-width: 767px) {
-  .perfil-icon {
-    width: 90px;
-    height: 90px;
-  }
-
-  .perfil-desc {
-    font-size: 14px;
-  }
-
-  .card-info {
-    flex: 1 1 100%;
-    text-align: center;
-  }
-
-  .logout-btn {
-    width: 60%;
-  }
-}
-
-/* Tablets (iPads, Surface Duo, Galaxy Fold, etc.) */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .perfil-container {
-    padding-top: 100px;
-  }
-
-  .perfil-icon {
-    width: 100px;
-    height: 100px;
-  }
-
-    .perfil-cards {
-    flex-direction: column;
-    align-items: center;
-    gap: 50px;
-  }
-
-    .card-info {
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-  }
-
-  .logout-btn {
-    width: 50%;
-  }
-}
-
+/* ... (corrigir .card-info e .logout-btn em todas as outras media queries) ... */

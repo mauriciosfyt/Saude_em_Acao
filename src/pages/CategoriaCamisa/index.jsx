@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header_Login from "../../components/header_loja"; // Supondo que este seja o header correto
 import Footer from "../../components/footer";
@@ -16,6 +16,8 @@ import "./CategoriaCamisa.css";
 
 const CategoriaCamisa = () => {
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 11; // ajuste conforme desejar
 
   // Array de produtos unificado e expandido para preencher o grid
   const todosOsProdutos = [
@@ -41,6 +43,22 @@ const CategoriaCamisa = () => {
     navigate("/LojaProduto");
   };
 
+  // Paginação
+  const totalPages = Math.max(1, Math.ceil(todosOsProdutos.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const visibleProducts = todosOsProdutos.slice(startIndex, startIndex + itemsPerPage);
+
+  const gotoPage = (page) => {
+    const p = Math.max(1, Math.min(totalPages, page));
+    setCurrentPage(p);
+    // rolar para topo do grid ao mudar de página
+    const el = document.querySelector('.categoria-container');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handlePrev = () => gotoPage(currentPage - 1);
+  const handleNext = () => gotoPage(currentPage + 1);
+
   return (
     <div className="categoria-camisa">
       <Header_Login />
@@ -52,7 +70,7 @@ const CategoriaCamisa = () => {
         {/* Grid de produtos principal e único */}
         <div className="categoria-container">
           <div className="produtos-grid">
-            {todosOsProdutos.map((produto) => (
+            {visibleProducts.map((produto) => (
               <div
                 className="produto-card"
                 key={produto.id}
@@ -77,6 +95,43 @@ const CategoriaCamisa = () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Controles de paginação */}
+          <div className="pagination">
+            <div className="pagination-pages">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  className={`pagination-number ${p === currentPage ? 'active' : ''}`}
+                  onClick={() => gotoPage(p)}
+                  aria-current={p === currentPage ? 'page' : undefined}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+
+            <div className="pagination-caption">Próxima tela...</div>
+
+            {/* botões Prev/Next mantidos para acessibilidade, visíveis em telas pequenas */}
+            <button
+              className="pagination-btn mobile-only"
+              onClick={handlePrev}
+              disabled={currentPage === 1}
+              aria-label="Página anterior"
+            >
+              Anterior
+            </button>
+
+            <button
+              className="pagination-btn mobile-only"
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+              aria-label="Próxima página"
+            >
+              Próximo
+            </button>
           </div>
         </div>
       </div>
