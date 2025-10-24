@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          IMAGE="mindtrack/mindtracking-api:latest"
+          IMAGE="saudeemacao/saudeemacao-api:latest"
           echo "Running image: ${IMAGE}"
           docker run -d --restart always --name saudeemacao --network saude-net -p 80:3000 \
             -e CLOUDINARY_API_KEY='${{ secrets.CLOUDINARY_API_KEY }}' \
