@@ -1,0 +1,87 @@
+/* Container principal do menu */
+.menu-wrapper-personal {
+  width: 260px;
+  height: 100vh; /* Garante que o menu tenha exatamente a altura da tela */
+  background-color: #2D2D2D;
+  color: #EAEAEA;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+
+/* Seção do perfil */
+.profile-section-personal {
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex-shrink: 0; /* Impede que o perfil encolha */
+}
+
+.avatar-circle-personal {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #C4C4C4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.user-name-personal {
+  margin: 0;
+  font-weight: 500;
+  color: #EAEAEA;
+}
+
+/* Navegação */
+.navigation-personal {
+  /* --- ALTERAÇÃO PRINCIPAL --- */
+  flex-grow: 1; /* Faz esta seção ocupar todo o espaço vertical restante */
+  overflow-y: auto; /* Adiciona uma barra de rolagem APENAS se o conteúdo for maior que o espaço */
+  padding-bottom: 20px; /* Garante um respiro no final da lista */
+}
+
+/* Estilização da barra de rolagem (opcional, mas melhora o visual) */
+.navigation-personal::-webkit-scrollbar {
+  width: 6px;
+}
+.navigation::-webkit-scrollbar-track {
+  background: transparent;
+}
+.navigation-personal::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 10px;
+}
+
+
+/* Itens do menu */
+.menu-item-personal {
+  display: block;
+  padding: 18px 30px;
+  text-decoration: none;
+  color: #BDBDBD;
+  font-weight: 500;
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.menu-item-personal:hover {
+  background-color: #3a3a3a;
+  color: #FFFFFF;
+}
+
+/* --- ALTERAÇÃO --- Estilo do item ativo gerenciado pelo NavLink */
+.menu-item-personal.active {
+  background-color: #0d6efd; /* Cor verde para destaque */
+  color: #FFFFFF;
+  border-left-color: #0d6efd;
+}
