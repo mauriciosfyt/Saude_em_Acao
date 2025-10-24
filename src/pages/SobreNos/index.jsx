@@ -12,11 +12,11 @@ import "slick-carousel/slick/slick-theme.css";
 import banner from "../../assets/banners/banner_sobreNos.svg";
 import img1 from "../../assets/academia.jpeg";
 import img2 from "../../assets/academia2.jpeg";
-import cardImg1 from "../../assets/academia.jpeg";
-import cardImg2 from "../../assets/academia2.jpeg";
-import cardImg3 from "../../assets/academia3.jpeg";
-import cardImg4 from "../../assets/academia4.jpeg";
-import cardImg5 from "../../assets/academia5.jpeg";
+import cardImg1 from "../../assets/Constancia.jpeg";
+import cardImg2 from "../../assets/Alimentacao.jpeg";
+import cardImg3 from "../../assets/Hidratar.jpeg";
+import cardImg4 from "../../assets/Descanso.jpeg";
+import cardImg5 from "../../assets/Parabens.jpeg";
 
 // 🔹 Lista de dicas
 const DICAS = [
