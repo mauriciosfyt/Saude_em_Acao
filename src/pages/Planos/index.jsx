@@ -3,14 +3,14 @@ import "./planos.css";
 
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
-import Header_nLogin from "../../components/header_loja_nLogin";
+import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
 import ProdutosSection from "../../components/produtos";
 
 const Planos = () => {
   return (
     <>
-      <Header_nLogin />
+     <HeaderUser />
 
       <section className="planos-container">
         <div className="planos-header">

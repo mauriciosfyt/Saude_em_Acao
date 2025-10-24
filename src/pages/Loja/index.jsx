@@ -17,7 +17,7 @@ import Header_nLogin from '../../components/header_loja_nLogin';
 import ProdutosSection from "../../components/produtos";
 
 const sportsData = [
-  { id: 'main', title: 'Qual seu esporte?', imageUrl: esporte, size: 'large', link: null },
+  { id: 'main', title: 'Qual seu esporte?', imageUrl: esporte, size: 'large', link: '/SobreNosLoja' },
   { id: 'bike', title: 'Bike', imageUrl: bike, size: 'small', link: '/CategoriaCamisa', categoriaTitle: 'Camisetas de Alta Performance para Ciclismo' },
   { id: 'intense', title: 'Circuito intenso', imageUrl: circuito, size: 'small', link: '/CategoriaWhey', categoriaTitle: 'Whey Protein para Recuperação Pós-Treino Intenso' },
   { id: 'bodybuilding', title: 'Musculação', imageUrl: musculacao, size: 'small', link: '/CategoriaVitaminas', categoriaTitle: 'Vitaminas e Suplementos para Aumento de Performance Muscular' },
