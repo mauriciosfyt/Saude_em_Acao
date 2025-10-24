@@ -12,6 +12,7 @@ import SobrenosLoja from '../pages/SobreNos_loja/index.jsx';
 import Carrinho from '../pages/Carrinho/index.jsx';
 import Planos from '../pages/Planos/index.jsx';
 import Erro404 from '../pages/Erro404/erro_404.jsx';
+import PerfilPersonal from '../pages/PerfilPersonal/PerfilPersonal.jsx';
 
 import GerenciarProduto from '../pages/Tela Adm/GerenciarProduto/index.jsx';
 
@@ -41,6 +42,10 @@ import ThayFit from '../pages/ThayFit/ThayFit.jsx';
 import Pilates from '../pages/Pilates/Pilates.jsx';
 import Funcional from '../pages/Funcional/Funcional.jsx';
 
+import AdministrarAluno from '../pages/Tela_Personal/AdministrarAluno/AdministrarAluno.jsx';
+import AdministrarTreino from '../pages/Tela_Personal/AdministrarTreino/AdministrarTreino.jsx';
+import ImplementarTreino from '../pages/Tela_Personal/implementarTreino/implementarTreino.jsx';
+
 const AppRoutes = () => {
   return (
     <Router>
@@ -50,6 +55,7 @@ const AppRoutes = () => {
         <Route path="/Loja" element={<Loja />} />
         <Route path="/Perfil" element={<Perfil />} />
         <Route path="/PerfilAdm" element={<PerfilAdm />} />
+         <Route path="/PerfilPersonal" element={<PerfilPersonal />} />
         <Route path="/SobreNos" element={<SobreNos />} />
         <Route path="/LojaProduto/:id" element={<LojaProduto />} />
         <Route path="/SobrenosLoja" element={<SobrenosLoja />} />
@@ -82,8 +88,11 @@ const AppRoutes = () => {
         <Route path="/EditarPersonal" element={<EditarPersonal />} /> {/* Nova rota */}
         <Route path="/GerenciarTreino" element={<GerenciarTreino />} /> {/* Nova rota */}
         <Route path="/PersonalizarTreino" element={<PersonalizarTreino />} />
-        
-        
+
+         <Route path="/AdministrarAluno" element={<AdministrarAluno />} />
+         <Route path="/AdministrarTreino" element={<AdministrarTreino />} />
+         <Route path="/ImplementarTreino" element={<ImplementarTreino />} />
+
         {/* Adicione outras rotas conforme necessário */}
       </Routes>
     </Router>
