@@ -1,23 +1,51 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# =================================================================
+# ARQUIVO DE CREDENCIAIS E SEGREDOS
+# A linha mais importante! Impede que seus segredos vazem.
+# =================================================================
+.env
 
-### STS ###
+
+# =================================================================
+# ARQUIVOS DE BUILD E DEPENDÊNCIAS (Maven / Gradle)
+# Ignora as pastas que contêm o código compilado e os pacotes.
+# =================================================================
+/target/
+/build/
+*.class
+
+# Exceção: O Maven Wrapper é necessário para construir o projeto
+# de forma consistente em qualquer máquina, então NÃO o ignoramos.
+!/.mvn/wrapper/maven-wrapper.jar
+
+
+# =================================================================
+# LOGS
+# Ignora arquivos de log gerados durante a execução.
+# =================================================================
+*.log
+logs/
+
+
+# =================================================================
+# ARQUIVOS DE CONFIGURAÇÃO DE IDEs
+# Evita que as configurações pessoais do seu editor de código
+# sejam enviadas para o repositório.
+# =================================================================
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse / Spring Tool Suite (STS) ###
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
 .sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
 
 ### NetBeans ###
 /nbproject/private/
@@ -25,9 +53,13 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
 ### VS Code ###
 .vscode/
+
+
+# =================================================================
+# ARQUIVOS GERADOS PELO SISTEMA OPERACIONAL
+# =================================================================
+.DS_Store
+Thumbs.db

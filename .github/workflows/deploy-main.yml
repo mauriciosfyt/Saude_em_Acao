@@ -1,0 +1,64 @@
+name: Build and Deploy Saude em Ação
+
+on:
+  push:
+    branches:
+      - backend
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t saudeemacao/saudeemacao-api:latest .
+
+      - name: Push Docker image
+        run: docker push saudeemacao/saudeemacao-api:latest
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Login to Docker Hub (deploy host)
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Create Docker network (if not exists)
+        run: |
+          if ! docker network inspect saude-net &> /dev/null; then
+            docker network create saude-net;
+          fi
+
+      - name: Stop and remove old container (if running)
+        run: |
+          docker stop saudeemacao-api || true
+          docker rm saudeemacao-api || true
+
+      - name: Pull latest API image
+        run: docker pull saudeemacao/saudeemacao-api:latest
+
+      - name: Run API container with secrets
+        shell: bash
+        run: |
+          set -euxo pipefail
+          IMAGE="mindtrack/mindtracking-api:latest"
+          echo "Running image: ${IMAGE}"
+          docker run -d --restart always --name saudeemacao --network saude-net -p 80:3000 \
+            -e CLOUDINARY_API_KEY='${{ secrets.CLOUDINARY_API_KEY }}' \
+            -e CLOUDINARY_API_SECRET='${{ secrets.CLOUDINARY_API_SECRET }}' \
+            -e CLOUDINARY_CLOUD_NAME='${{ secrets.CLOUDINARY_CLOUD_NAME }}' \
+            -e SERVER_PORT='${{ secrets.SERVER_PORT }}' \
+            -e SPRING_APPLICATION_NAME='${{ secrets.SPRING_APPLICATION_NAME }}' \
+            -e SPRING_DATA_MONGODB_URI='${{ secrets.SPRING_DATA_MONGODB_URI }}' \
+            -e SPRING_MAIL_HOST='${{ secrets.SPRING_MAIL_HOST }}' \
+            -e SPRING_MAIL_PASSWORD='${{ secrets.SPRING_MAIL_PASSWORD }}' \
+            -e SPRING_MAIL_PORT='${{ secrets.SPRING_MAIL_PORT }}' \
+            -e SPRING_MAIL_USERNAME='${{ secrets.SPRING_MAIL_USERNAME }}' \
+            -e SPRING_SECURITY_JWT_EXPIRATION='${{ secrets.SPRING_SECURITY_JWT_EXPIRATION }}' \
+            -e SPRING_SECURITY_JWT_SECRET='${{ secrets.SPRING_SECURITY_JWT_SECRET }}' \
+            "${IMAGE}"
