@@ -11,9 +11,9 @@ import Header_nLogin from "../../components/header_loja_nLogin";
 import Header_Login from "../../components/header_loja";
 
 const CategoriaVitaminas = () => {
-  const navigate = useNavigate();
 
-  // Array de produtos unificado e expandido para preencher o grid
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 8;
   const todosOsProdutos = [
     { id: 1, nome: "Regata Machão Branca", preco: "R$ 89,90", imagem: product1 },
     { id: 2, nome: "Regata Machão Preta", preco: "R$ 89,90", imagem: product2 },
@@ -31,7 +31,39 @@ const CategoriaVitaminas = () => {
     { id: 14, nome: "Regata de Basquete Preta", preco: "R$ 129,90", imagem: product2 },
     { id: 15, nome: "Regata Machão Preta", preco: "R$ 89,90", imagem: product3 },
     { id: 16, nome: "Camisa Manga Longa Preta", preco: "R$ 119,90", imagem: product1 },
+    { id: 17, nome: "Regata Machão Branca", preco: "R$ 89,90", imagem: product1 },
+    { id: 18, nome: "Regata Machão Preta", preco: "R$ 89,90", imagem: product2 },
+    { id: 19, nome: "Camisa Manga Longa Preta", preco: "R$ 119,90", imagem: product3 },
+    { id: 20, nome: "Camisa Manga Longa Verde", preco: "R$ 119,90", imagem: product1 },
+    { id: 21, nome: "Camisa Dry Fit Verde", preco: "R$ 99,90", imagem: product2 },
+    { id: 22, nome: "Camisa Manga Longa Branca", preco: "R$ 119,90", imagem: product3 },
+    { id: 23, nome: "Regata Cavada Branca", preco: "R$ 79,90", imagem: product1 },
+    { id: 24, nome: "Regata Cavada Roxa", preco: "R$ 79,90", imagem: product2 },
+    { id: 25, nome: "Regata Machão Cinza", preco: "R$ 89,90", imagem: product3 },
+    { id: 26, nome: "Regata de Basquete Branca", preco: "R$ 129,90", imagem: product1 },
+    { id: 27, nome: "Camisa Dry Fit Verde Musgo", preco: "R$ 99,90", imagem: product2 },
+    { id: 28, nome: "Camisa Manga Longa Rosa", preco: "R$ 119,90", imagem: product3 },
+    { id: 29, nome: "Camisa Manga Longa Rosa", preco: "R$ 119,90", imagem: product1 },
+    { id: 30, nome: "Regata de Basquete Preta", preco: "R$ 129,90", imagem: product2 },
+    { id: 31, nome: "Regata Machão Preta", preco: "R$ 89,90", imagem: product3 },
+    { id: 32, nome: "Camisa Manga Longa Preta", preco: "R$ 119,90", imagem: product1 },
+    { id: 33, nome: "Regata Machão Branca", preco: "R$ 89,90", imagem: product1 },
+    { id: 34, nome: "Regata Machão Preta", preco: "R$ 89,90", imagem: product2 },
   ];
+
+  const totalPages = Math.max(1, Math.ceil(todosOsProdutos.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const visibleProducts = todosOsProdutos.slice(startIndex, startIndex + itemsPerPage);
+
+  const gotoPage = (page) => {
+    const p = Math.max(1, Math.min(totalPages, page));
+    setCurrentPage(p);
+    const el = document.querySelector('.categoria-container');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handlePrev = () => gotoPage(currentPage - 1);
+  const handleNext = () => gotoPage(currentPage + 1);
 
   const irParaDetalhes = () => {
     navigate("/LojaProduto");
@@ -48,12 +80,11 @@ const CategoriaVitaminas = () => {
         {/* Grid de produtos principal e único */}
         <div className="categoria-container">
           <div className="produtos-grid">
-            {todosOsProdutos.map((produto) => (
+            {visibleProducts.map((produto) => (
               <div
                 className="produto-card"
                 key={produto.id}
                 onClick={(e) => {
-                  // Previne a navegação se o clique for no botão
                   if (e.target.closest(".btn-reservar")) return;
                   irParaDetalhes();
                 }}
@@ -73,6 +104,22 @@ const CategoriaVitaminas = () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Controles de paginação */}
+          <div className="pagination">
+            <div className="pagination-pages">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  className={`pagination-number ${p === currentPage ? 'active' : ''}`}
+                  onClick={() => gotoPage(p)}
+                  aria-current={p === currentPage ? 'page' : undefined}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

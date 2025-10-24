@@ -17,7 +17,7 @@ import "./CategoriaCamisa.css";
 const CategoriaCamisa = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 11; // ajuste conforme desejar
+  const itemsPerPage = 8; // ajuste conforme desejar
 
   // Array de produtos unificado e expandido para preencher o grid
   const todosOsProdutos = [
@@ -37,6 +37,24 @@ const CategoriaCamisa = () => {
     { id: 14, nome: "Regata de Basquete Preta", preco: "R$ 129,90", imagem: product2 },
     { id: 15, nome: "Regata Machão Preta", preco: "R$ 89,90", imagem: product3 },
     { id: 16, nome: "Camisa Manga Longa Preta", preco: "R$ 119,90", imagem: product1 },
+    { id: 17, nome: "Camisa Dry Fit Verde Musgo", preco: "R$ 99,90", imagem: product2 },
+    { id: 18, nome: "Camisa Manga Longa Rosa", preco: "R$ 119,90", imagem: product3 },
+    { id: 19, nome: "Camisa Manga Longa Rosa", preco: "R$ 119,90", imagem: product1 },
+    { id: 20, nome: "Regata de Basquete Preta", preco: "R$ 129,90", imagem: product2 },
+    { id: 21, nome: "Regata Machão Preta", preco: "R$ 89,90", imagem: product3 },
+    { id: 22, nome: "Camisa Manga Longa Preta", preco: "R$ 119,90", imagem: product1 },
+    { id: 23, nome: "Camisa Dry Fit Verde Musgo", preco: "R$ 99,90", imagem: product2 },
+    { id: 24, nome: "Camisa Manga Longa Rosa", preco: "R$ 119,90", imagem: product3 },
+    { id: 25, nome: "Camisa Manga Longa Rosa", preco: "R$ 119,90", imagem: product1 },
+    { id: 26, nome: "Regata de Basquete Preta", preco: "R$ 129,90", imagem: product2 },
+    { id: 27, nome: "Regata Machão Preta", preco: "R$ 89,90", imagem: product3 },
+    { id: 28, nome: "Camisa Manga Longa Preta", preco: "R$ 119,90", imagem: product1 },
+    { id: 29, nome: "Camisa Dry Fit Verde Musgo", preco: "R$ 99,90", imagem: product2 },
+    { id: 30, nome: "Camisa Manga Longa Rosa", preco: "R$ 119,90", imagem: product3 },
+    { id: 31, nome: "Camisa Manga Longa Rosa", preco: "R$ 119,90", imagem: product1 },
+    { id: 32, nome: "Regata de Basquete Preta", preco: "R$ 129,90", imagem: product2 },
+    { id: 33, nome: "Regata Machão Preta", preco: "R$ 89,90", imagem: product3 },
+    { id: 34, nome: "Camisa Manga Longa Preta", preco: "R$ 119,90", imagem: product1 },
   ];
 
   const irParaDetalhes = () => {
@@ -111,27 +129,6 @@ const CategoriaCamisa = () => {
                 </button>
               ))}
             </div>
-
-            <div className="pagination-caption">Próxima tela...</div>
-
-            {/* botões Prev/Next mantidos para acessibilidade, visíveis em telas pequenas */}
-            <button
-              className="pagination-btn mobile-only"
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-              aria-label="Página anterior"
-            >
-              Anterior
-            </button>
-
-            <button
-              className="pagination-btn mobile-only"
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-              aria-label="Próxima página"
-            >
-              Próximo
-            </button>
           </div>
         </div>
       </div>
