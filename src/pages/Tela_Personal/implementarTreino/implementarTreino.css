@@ -1,0 +1,472 @@
+/* --- Variáveis de Cor e Fontes --- */
+:root {
+  --color-primary: #2563eb;
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-text-dark: #1f2937;
+  --color-text-medium: #6b7280;
+  --color-text-light: #9ca3af;
+  --color-bg-main: #f3f4f6;
+  --color-bg-content: #ffffff;
+  --color-border: #d1d5db;
+  --color-row-bg: #f9fafb;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* --- Layout Principal --- */
+.adicionartreino-page-personal {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-bg-content);
+  /* Fundo branco da página inteira */
+  font-family: var(--font-family);
+}
+
+.adicionartreino-main-content-personal {
+  flex-grow: 1;
+  padding: 2.5rem;
+  margin-left: 260px;
+}
+
+/* Wrapper para controlar tamanho e centralização */
+.adicionartreino-form-wrapper-personal {
+  width: 100%;
+  max-width: 1100px;
+  /* Largura máxima para o formulário */
+  margin: 0 auto;
+  /* Centraliza o formulário na área de conteúdo */
+  /* As propriedades visuais que criavam a separação foram removidas */
+}
+
+
+/* --- Formulário Geral --- */
+.adicionartreino-form-title-personal {
+ font-size: 2.2em;
+  font-weight: bold;
+  color: #2D2D2D;
+  margin: 0;
+  margin-bottom: 40px;
+  margin-top: 20px;
+}
+
+.adicionartreino-form-container-personal {
+  margin-bottom: 2rem;
+}
+
+.adicionartreino-form-row-personal {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.adicionartreino-form-row-personal-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.adicionartreino-form-row-personal-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.adicionartreino-form-field-personal {
+  display: flex;
+  flex-direction: column;
+}
+
+.adicionartreino-form-field-personal label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--color-text-medium);
+  margin-bottom: 0.25rem;
+}
+
+.adicionartreino-form-field-personal input,
+.adicionartreino-form-field-personal select {
+  padding: 0.5rem 0;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  outline: none;
+  color: var(--color-text-dark);
+  background-color: transparent;
+  font-size: 1rem;
+  width: 100%;
+  border-radius: 0;
+}
+
+.adicionartreino-form-field-personal select {
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="%236b7280"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>');
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1.25rem;
+  padding-right: 2rem;
+}
+
+.adicionartreino-form-field-personal input:focus,
+.adicionartreino-form-field-personal select:focus {
+  border-bottom-color: var(--color-primary);
+}
+
+/* --- Abas de Navegação --- */
+.adicionartreino-tabs-nav-personal {
+  display: flex;
+  gap: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+.adicionartreino-tab-button-personal {
+  padding-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-text-medium);
+  border-bottom: 3px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.adicionartreino-tab-button-personal.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* --- Seção de Exercícios --- */
+.adicionartreino-add-exercise-btn-personal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--color-success);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 20px 0px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background-color 0.2s;
+}
+
+.adicionartreino-add-exercise-btn-personal:hover {
+  background-color: #5FC248;
+}
+
+/* Layout do Grid de Exercícios */
+.adicionartreino-exercise-header-personal,
+.adicionartreino-exercise-row-personal {
+  display: grid;
+  align-items: center;
+  gap: 1.5rem;
+  grid-template-columns: 40px 3fr 1fr 1fr 1fr 1fr 2fr 80px;
+}
+
+.adicionartreino-exercise-header-personal {
+  padding: 0 24px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.adicionartreino-exercise-row-personal {
+  background: #dadada;
+  border-radius: 20px;
+  margin-bottom: 18px;
+  padding: 18px 24px;
+}
+
+/* transition target for FLIP animation */
+.adicionartreino-exercise-row-personal {
+  will-change: transform;
+}
+
+/* dragging feedback */
+.adicionartreino-exercise-row-personal.dragging {
+  opacity: 0.85;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  transform: translateZ(0) scale(1.01);
+}
+
+.adicionartreino-exercise-row-personal .adicionartreino-field-content-personal {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* Impede que o conteúdo empurre o grid */
+}
+
+.adicionartreino-mobile-label-personal {
+  display: none;
+  /* Escondido por padrão no desktop */
+}
+
+.adicionartreino-exercise-row-personal input {
+  border: none;
+  border-bottom: 1px solid #222;
+  background: transparent;
+  width: 100%;
+  padding: 0.25rem 0;
+  font-size: 1rem;
+  outline: none;
+  color: #222;
+}
+
+.adicionartreino-exercise-row-personal input:focus {
+  border-bottom-color: #2563eb;
+}
+
+.adicionartreino-inline-input-wrapper-personal {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid #222;
+}
+
+.adicionartreino-inline-input-wrapper-personal:focus-within {
+  border-bottom-color: #2563eb;
+}
+
+.adicionartreino-inline-input-wrapper-personal input {
+  border: none;
+  flex-grow: 1;
+}
+
+/* --- Setas de Reordenação --- */
+.adicionartreino-reorder-arrows-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  gap: 4px;
+  height: 100%;
+}
+
+.adicionartreino-arrow-up-personal,
+.adicionartreino-arrow-down-personal {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+}
+
+.adicionartreino-arrow-up-personal {
+  border-bottom: 16px solid #222;
+}
+
+.adicionartreino-arrow-down-personal {
+  border-top: 16px solid #222;
+}
+
+/* --- Botões de Ação --- */
+.adicionartreino-actions-col-personal {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.adicionartreino-icon-btn-personal {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+.adicionartreino-icon-btn-personal:hover .adicionartreino-edit-icon {
+  color: #2563eb;
+}
+
+.adicionartreino-icon-btn-personal:hover .adicionartreino-trash-icon {
+  color: #ef4444;
+}
+
+/* Reorder arrow buttons */
+.adicionartreino-reorder-arrows-personal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.adicionartreino-arrow-btn-personal {
+  width: 28px;
+  height: 28px;
+  border-radius: 0;
+  border: none;
+  background: transparent; /* remove white square */
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.adicionartreino-arrow-btn-personal:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* arrow-up/down classes not needed when using SVG/image icons */
+
+/* New arrow svg styling (thin black arrows) */
+.adicionartreino-arrow-svg-personal {
+  display: block;
+  margin: 3px;
+  color: #111; /* black arrows per mock */
+}
+.adicionartreino-arrow-svg-personal path { fill: currentColor; }
+
+/* Central blue handle with two horizontal lines */
+.adicionartreino-handle-personal {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+/* sizing for image-based arrow icons (if you provide PNG/SVG files) */
+.adicionartreino-arrow-img-personal {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+/* shift the handle lines to the left and make them more prominent */
+.adicionartreino-handle-line-personal {
+  display: block;
+  width: 22px;
+  height: 4px;
+  background: linear-gradient(90deg, #0ea5e9, #2563eb); /* blue gradient */
+  border-radius: 2px;
+}
+
+/* make the reorder column align more left to mimic the mock spacing */
+.adicionartreino-reorder-col-personal {
+  justify-self: center;
+  padding-left: 0;
+}
+
+/* Slight hover effect for arrow buttons and handle */
+.adicionartreino-arrow-btn-personal:hover {
+  background: transparent; /* keep transparent on hover */
+}
+
+/* subtle hover effect on SVG (slight scale) */
+.adicionartreino-arrow-btn-personal .adicionartreino-arrow-svg-personal,
+.adicionartreino-arrow-btn-personal:hover .adicionartreino-arrow-img-personal {
+  transform: scale(1.06);
+}
+
+.adicionartreino-arrow-svg-personal,
+.adicionartreino-arrow-img-personal {
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.adicionartreino-handle-personal:hover .adicionartreino-handle-line-personal {
+  transform: translateX(1px);
+}
+
+/* extra icon button beside the handle */
+/* extra-icon styles removed (not used) */
+
+
+/* --- Botões do Rodapé --- */
+.adicionartreino-footer-buttons-personal {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+}
+
+.adicionartreino-btn-personal {
+  color: #fff;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 12px 0px 12px 0;
+    /* Apenas duas pontas arredondadas */
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: background 0.2s;
+    box-shadow: none;
+}
+
+.adicionartreino-btn-cancel-personal {
+  background-color: #ef4444;
+}
+
+.adicionartreino-btn-cancel-personal:hover {
+  background-color: #b91c1c;
+}
+
+.adicionartreino-btn-save-personal {
+  background-color: #22c55e;
+}
+
+.adicionartreino-btn-save-personal:hover {
+  background-color: #059669;
+}
+
+
+/* --- Media Queries --- */
+@media (max-width: 1200px) {
+
+  .adicionartreino-exercise-header-personal,
+  .adicionartreino-exercise-row-personal {
+    gap: 1rem;
+    padding: 12px 18px;
+    grid-template-columns: 40px 2.5fr 1fr 1fr 1fr 1fr 1.5fr 80px;
+  }
+}
+
+@media (max-width: 992px) {
+  .adicionartreino-exercise-header-personal {
+    display: none;
+  }
+
+  .adicionartreino-exercise-row-personal {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .adicionartreino-reorder-col-personal,
+  .adicionartreino-actions-col-personal {
+    grid-column: span 2;
+  }
+
+  .adicionartreino-mobile-label-personal {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .adicionartreino-page-personal {
+    flex-direction: column;
+  }
+
+  .adicionartreino-main-content-personal {
+    padding: 1.5rem 1rem;
+    margin-left: 0;
+  }
+
+  .adicionartreino-form-wrapper-personal {
+    padding: 1.5rem;
+  }
+
+  .adicionartreino-form-row-personal-2,
+  .adicionartreino-form-row-personal-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .adicionartreino-exercise-row-personal {
+    grid-template-columns: 1fr;
+  }
+
+  .adicionartreino-reorder-col-personal,
+  .adicionartreino-actions-col-personal {
+    grid-column: span 1;
+  }
+}
