@@ -88,7 +88,7 @@ const createStyles = (isDark) => {
       borderTopLeftRadius: 0,
       borderTopRightRadius: 50,
       borderBottomLeftRadius: 0,
-      borderBottomRightRadius: 50,
+      borderBottomRightRadius: 0,
     },
 
     // Card de Treino
@@ -166,63 +166,38 @@ const createStyles = (isDark) => {
       marginRight: 5,
     },
 
-    // Estilos do Menu Modal
-    menuOverlay: {
-      flex: 1,
-      backgroundColor: colors.overlay,
-      justifyContent: 'flex-end',
-      alignItems: 'flex-end',
-    },
-
-    menuContent: {
-      backgroundColor: colors.menuBg,
-      borderTopRightRadius: 20,
-      borderBottomRightRadius: 20,
-      paddingHorizontal: 20,
-      paddingVertical: 30,
-      width: 250,
-      height: '100%',
-      shadowColor: '#000',
-      shadowOffset: { width: 2, height: 0 },
-      shadowOpacity: isDark ? 0.2 : 0.1,
-      shadowRadius: 3.84,
-      elevation: 5,
-      borderLeftWidth: isDark ? 1 : 0,
-      borderColor: isDark ? colors.cardBorder : 'transparent',
-    },
-
-    menuTitle: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: colors.menuTitle,
-      marginBottom: 20,
-      textAlign: 'center',
-    },
-
-    menuItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 15,
-      paddingHorizontal: 10,
-      borderRadius: 10,
-      marginBottom: 5,
-    },
-
-    menuItemAtivo: {
-      backgroundColor: colors.menuItemActiveBg,
-    },
-
-    menuItemText: {
-      fontSize: 16,
-      color: colors.menuItemText,
-      marginLeft: 15,
-      fontWeight: '500',
-    },
-
-    menuItemTextAtivo: {
-      color: colors.primary,
-      fontWeight: '600',
-    },
+    // Estilos do Modal
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    alignItems: "flex-end",
+  },
+  menuContent: {
+    height: "100%",
+    width: "75%",
+    paddingTop: 80,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: -2, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  menuTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 30,
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
+  },
+  menuItemText: {
+    fontSize: 18,
+    marginLeft: 15,
+    fontWeight: "500",
+  },
   });
 };
 
