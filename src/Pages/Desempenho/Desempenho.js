@@ -77,42 +77,166 @@ const Desempenho = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Menu lateral/modal — fica escuro quando isDark */}
-      <Modal animationType="fade" transparent visible={menuVisivel} onRequestClose={handleFecharMenu}>
+      {/* Menu lateral/modal — adaptado para ficar igual ao HeaderProfessores */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={menuVisivel}
+        onRequestClose={handleFecharMenu}
+      >
         <TouchableOpacity
-          style={[styles.menuOverlay, { backgroundColor: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)' }]}
+          style={styles.menuOverlay}
           onPress={handleFecharMenu}
           activeOpacity={1}
         >
           <View
-            style={[styles.menuContent, { backgroundColor: isDark ? '#1A1F2E' : '#FFFFFF' }]}
-            onStartShouldSetResponder={() => true}
+            style={[
+              styles.menuContent,
+              { backgroundColor: isDark ? "#2c2c2c" : "#FFFFFF" },
+            ]}
           >
-            <Text style={[styles.menuTitle, { color: isDark ? '#FFFFFF' : '#333' }]}>Menu</Text>
-
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Home')}>
-              <Ionicons name="home-outline" size={20} color={isDark ? '#FFFFFF' : '#333'} />
-              <Text style={[styles.menuItemText, { color: isDark ? '#FFFFFF' : '#333' }]}>Home</Text>
+            <Text
+              style={[
+                styles.menuTitle,
+                { color: isDark ? "#E6E8F3" : "#333333" },
+              ]}
+            >
+              Menu
+            </Text>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Home")}
+            >
+              <Ionicons
+                name="home-outline"
+                size={24}
+                color={isDark ? "#D3D8EB" : "#333333"}
+              />
+              <Text
+                style={[
+                  styles.menuItemText,
+                  { color: isDark ? "#D3D8EB" : "#333333" },
+                ]}
+              >
+                Home
+              </Text>
             </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Perfil')}>
-              <Ionicons name="person-outline" size={20} color={isDark ? '#FFFFFF' : '#333'} />
-              <Text style={[styles.menuItemText, { color: isDark ? '#FFFFFF' : '#333' }]}>Meu Perfil</Text>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Perfil")}
+            >
+              <Ionicons
+                name="person-outline"
+                size={24}
+                color={isDark ? "#D3D8EB" : "#333333"}
+              />
+              <Text
+                style={[
+                  styles.menuItemText,
+                  { color: isDark ? "#D3D8EB" : "#333333" },
+                ]}
+              >
+                Meu Perfil
+              </Text>
             </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Chat')}>
-              <Ionicons name="chatbubble-outline" size={20} color={isDark ? '#FFFFFF' : '#333'} />
-              <Text style={[styles.menuItemText, { color: isDark ? '#FFFFFF' : '#333' }]}>Chat</Text>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Chat")}
+            >
+              <Ionicons
+                name="chatbubble-outline"
+                size={24}
+                color={isDark ? "#D3D8EB" : "#333333"}
+              />
+              <Text
+                style={[
+                  styles.menuItemText,
+                  { color: isDark ? "#D3D8EB" : "#333333" },
+                ]}
+              >
+                Chat
+              </Text>
             </TouchableOpacity>
-
-            <TouchableOpacity style={[styles.menuItem, styles.menuItemActive]} onPress={() => handleNavegar('Desempenho')}>
-              <Ionicons name="bar-chart-outline" size={20} color="#405CBA" />
-              <Text style={[styles.menuItemText, styles.menuItemTextActive]}>Desempenho</Text>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("LojaProdutos")}
+            >
+              <Ionicons
+                name="cart-outline"
+                size={24}
+                color={isDark ? "#D3D8EB" : "#333333"}
+              />
+              <Text
+                style={[
+                  styles.menuItemText,
+                  { color: isDark ? "#D3D8EB" : "#333333" },
+                ]}
+              >
+                Loja
+              </Text>
             </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Inicial')}>
-              <Ionicons name="log-out-outline" size={20} color="#E24B4B" />
-              <Text style={[styles.menuItemText, { color: '#E24B4B' }]}>Sair</Text>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("LojaFavoritos")}
+            >
+              <Ionicons
+                name="heart-outline"
+                size={24}
+                color={isDark ? "#D3D8EB" : "#333333"}
+              />
+              <Text
+                style={[
+                  styles.menuItemText,
+                  { color: isDark ? "#D3D8EB" : "#333333" },
+                ]}
+              >
+                Favoritos
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("LojaReservas")}
+            >
+              <Ionicons
+                name="bookmark-outline"
+                size={24}
+                color={isDark ? "#D3D8EB" : "#333333"}
+              />
+              <Text
+                style={[
+                  styles.menuItemText,
+                  { color: isDark ? "#D3D8EB" : "#333333" },
+                ]}
+              >
+                Reservas
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Desempenho")}
+            >
+              <Ionicons
+                name="bar-chart-outline"
+                size={24}
+                color={isDark ? "#D3D8EB" : "#333333"}
+              />
+              <Text
+                style={[
+                  styles.menuItemText,
+                  { color: isDark ? "#D3D8EB" : "#333333" },
+                ]}
+              >
+                Desempenho
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handleNavegar("Inicial")}
+            >
+              <Ionicons name="log-out-outline" size={24} color="#dc3545" />
+              <Text style={[styles.menuItemText, { color: "#dc3545" }]}>
+                Sair
+              </Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
