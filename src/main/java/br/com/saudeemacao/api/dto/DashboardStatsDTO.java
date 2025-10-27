@@ -1,5 +1,3 @@
-// src/main/java/br.com.saudeemacao.api/dto/DashboardStatsDTO.java
-
 package br.com.saudeemacao.api.dto;
 
 import lombok.AllArgsConstructor;
@@ -14,10 +12,12 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DashboardStatsDTO {
+    // Métricas existentes
     private long totalAlunos;
     private Map<String, Long> contagemPorPlano;
-    // ALTERAÇÃO: De long para Map para agrupar por categoria.
     private Map<String, Long> estoquePorCategoria;
-    private long totalReservas;
-    private Map<String, Long> reservasPorProduto;
+
+    // NOVAS MÉTRICAS DE VENDAS
+    private double totalVendasGerais; // Total em R$
+    private Map<String, Long> totalVendasPorProduto; // Total em unidades por produto
 }

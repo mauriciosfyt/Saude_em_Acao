@@ -11,4 +11,8 @@ public interface TreinoRepository extends MongoRepository<Treino, String> {
 
     // Encontra todos os treinos criados por um responsável específico
     List<Treino> findByResponsavelId(String responsavelId);
+
+    // NOVOS MÉTODOS
+    List<Treino> findByNomeContainingIgnoreCase(String nome);
+    List<Treino> findByTipoDeTreinoContainingIgnoreCase(String tipo);
 }

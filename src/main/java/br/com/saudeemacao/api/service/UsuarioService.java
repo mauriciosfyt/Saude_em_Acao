@@ -148,6 +148,14 @@ public class UsuarioService {
                 .collect(Collectors.toList());
     }
 
+    // NOVO MÉTODO: para buscar por perfil e nome
+    public List<UsuarioSaidaDTO> buscarPorPerfilENome(EPerfil perfil, String nome, PageRequest pageable) {
+        Page<Usuario> usuariosPage = repo.findByPerfilAndNomeContainingIgnoreCase(perfil, nome, pageable);
+        return usuariosPage.getContent().stream()
+                .map(this::toUsuarioSaidaDTO)
+                .collect(Collectors.toList());
+    }
+
     public Usuario buscarPorId(String id) {
         return repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + id));

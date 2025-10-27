@@ -7,6 +7,7 @@ import br.com.saudeemacao.api.model.EnumProduto.ESabor;
 import br.com.saudeemacao.api.model.EnumProduto.ETamanho;
 import br.com.saudeemacao.api.model.Produto;
 import br.com.saudeemacao.api.repository.ProdutoRepository;
+import br.com.saudeemacao.api.repository.ReservaRepository;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,9 +28,11 @@ import java.util.stream.Collectors;
 public class ProdutoService {
 
     private final ProdutoRepository repository;
+    private final ReservaRepository reservaRepository;
     private final Cloudinary cloudinary;
 
-    // Novo método auxiliar para converter String para LocalDateTime
+    // ... (métodos parseDate e aplicarPromocaoSeAtiva) ...
+
     private LocalDateTime parseDate(String dateString, String fieldName) {
         if (dateString == null || dateString.isBlank()) {
             return null;
@@ -39,7 +44,6 @@ public class ProdutoService {
         }
     }
 
-    // Novo método para aplicar a promoção antes de retornar o produto
     private Produto aplicarPromocaoSeAtiva(Produto produto) {
         if (produto.getPrecoPromocional() != null &&
                 produto.getDataInicioPromocao() != null &&
@@ -47,10 +51,7 @@ public class ProdutoService {
 
             LocalDateTime now = LocalDateTime.now();
 
-            // Verifica se a data atual está entre o início e o fim da promoção
             if (now.isAfter(produto.getDataInicioPromocao()) && now.isBefore(produto.getDataFimPromocao())) {
-                // Se estiver ativa, substitui o preço principal pelo promocional para o front-end
-                // Mas, o preço original permanece no objeto para referência
                 produto.setPreco(produto.getPrecoPromocional());
             }
         }
@@ -63,8 +64,27 @@ public class ProdutoService {
                 .collect(Collectors.toList());
     }
 
-    public List<Produto> getProdutosPorCategoria(ECategoria categoria) {
-        return repository.findByCategoria(categoria).stream()
+
+    public List<Produto> getProdutosPorNome(String nome) {
+        return repository.findByNomeContainingIgnoreCase(nome).stream()
+                .map(this::aplicarPromocaoSeAtiva)
+                .collect(Collectors.toList());
+    }
+
+    public List<Produto> getProdutosDestaques() {
+        List<Map<String, Object>> popularidade = reservaRepository.findProdutosMaisReservados();
+        List<String> idsDosProdutosPopulares = popularidade.stream()
+                .map(p -> p.get("produtoId").toString())
+                .collect(Collectors.toList());
+
+        if (idsDosProdutosPopulares.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Produto> produtos = repository.findAllById(idsDosProdutosPopulares);
+
+        return produtos.stream()
+                .sorted(Comparator.comparingInt(p -> idsDosProdutosPopulares.indexOf(p.getId())))
                 .map(this::aplicarPromocaoSeAtiva)
                 .collect(Collectors.toList());
     }
@@ -75,6 +95,7 @@ public class ProdutoService {
         return aplicarPromocaoSeAtiva(produto);
     }
 
+    // ... (demais métodos: create, update, delete, etc.) ...
     public Produto create(ProdutoDTO dto) throws IOException {
         validarCamposObrigatorios(dto);
 
@@ -84,16 +105,12 @@ public class ProdutoService {
         produto.setNome(dto.getNome());
         produto.setDescricao(dto.getDescricao());
         produto.setPreco(dto.getPreco());
-
-        // Atribui os novos campos de promoção, convertendo as Strings para LocalDateTime
         produto.setPrecoPromocional(dto.getPrecoPromocional());
         produto.setDataInicioPromocao(parseDate(dto.getDataInicioPromocao(), "dataInicioPromocao"));
         produto.setDataFimPromocao(parseDate(dto.getDataFimPromocao(), "dataFimPromocao"));
-
         produto.setImg(imgUrl);
         produto.setCategoria(dto.getCategoria());
 
-        // Configuração do estoque baseada na categoria
         switch (dto.getCategoria()) {
             case CAMISETAS:
                 if (dto.getEstoquePorTamanho() == null || dto.getEstoquePorTamanho().isEmpty()) {
@@ -147,7 +164,6 @@ public class ProdutoService {
             produto.setPreco(dto.getPreco());
         }
 
-        // Atualiza os novos campos de promoção
         if (dto.getPrecoPromocional() != null) {
             produto.setPrecoPromocional(dto.getPrecoPromocional());
         }
@@ -162,7 +178,6 @@ public class ProdutoService {
             throw new IllegalArgumentException("Alteração de categoria não permitida via atualização.");
         }
 
-        // Atualização do estoque baseada na categoria existente
         switch (produto.getCategoria()) {
             case CAMISETAS:
                 if (dto.getEstoquePorTamanho() != null) {
@@ -299,7 +314,6 @@ public class ProdutoService {
         if (dto.getImg() == null || dto.getImg().isEmpty()) {
             throw new IllegalArgumentException("Imagem é obrigatória");
         }
-        // Validação de estoque específica por categoria
         switch (dto.getCategoria()) {
             case CAMISETAS:
                 if (dto.getEstoquePorTamanho() == null || dto.getEstoquePorTamanho().isEmpty()) {
@@ -335,7 +349,6 @@ public class ProdutoService {
                 break;
         }
 
-        // Validação da promoção
         if (dto.getPrecoPromocional() != null) {
             if (dto.getPrecoPromocional() <= 0) {
                 throw new IllegalArgumentException("Preço promocional deve ser maior que zero");
@@ -350,7 +363,6 @@ public class ProdutoService {
                     throw new IllegalArgumentException("Data de fim da promoção não pode ser anterior à data de início.");
                 }
             } catch (IllegalArgumentException e) {
-                // Re-lança a exceção para manter o fluxo
                 throw e;
             }
         }

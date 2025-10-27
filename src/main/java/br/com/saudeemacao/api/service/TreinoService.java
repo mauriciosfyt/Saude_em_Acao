@@ -2,15 +2,17 @@ package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.TreinoDTO;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
-import br.com.saudeemacao.api.model.EPerfil;
-import br.com.saudeemacao.api.model.Treino;
-import br.com.saudeemacao.api.model.Usuario;
+import br.com.saudeemacao.api.model.*;
+import br.com.saudeemacao.api.repository.HistoricoTreinoRepository;
 import br.com.saudeemacao.api.repository.TreinoRepository;
 import br.com.saudeemacao.api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 @Service
@@ -19,6 +21,7 @@ public class TreinoService {
 
     private final TreinoRepository treinoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final HistoricoTreinoRepository historicoTreinoRepository;
 
     private Usuario getUsuarioAutenticado(UserDetails userDetails) {
         return usuarioRepository.findByEmail(userDetails.getUsername())
@@ -52,11 +55,22 @@ public class TreinoService {
         return treinoRepository.findAll();
     }
 
+    public List<Treino> buscarPorNome(String nome) {
+        return treinoRepository.findByNomeContainingIgnoreCase(nome);
+    }
+
+    public List<Treino> buscarPorTipo(String tipo) {
+        return treinoRepository.findByTipoDeTreinoContainingIgnoreCase(tipo);
+    }
+
+    public List<Treino> buscarPorResponsavel(String responsavelId) {
+        return treinoRepository.findByResponsavelId(responsavelId);
+    }
+
     public Treino atualizarTreino(String id, TreinoDTO dto, UserDetails userDetails) {
         Treino treinoExistente = buscarPorId(id);
         Usuario usuarioAutenticado = getUsuarioAutenticado(userDetails);
 
-        // Validação: Apenas o responsável ou um admin pode atualizar o treino.
         if (!treinoExistente.getResponsavel().getId().equals(usuarioAutenticado.getId()) &&
                 usuarioAutenticado.getPerfil() != EPerfil.ADMIN) {
             throw new SecurityException("Você não tem permissão para atualizar este treino.");
@@ -78,12 +92,39 @@ public class TreinoService {
         Treino treinoExistente = buscarPorId(id);
         Usuario usuarioAutenticado = getUsuarioAutenticado(userDetails);
 
-        // Validação: Apenas o responsável ou um admin pode deletar o treino.
         if (!treinoExistente.getResponsavel().getId().equals(usuarioAutenticado.getId()) &&
                 usuarioAutenticado.getPerfil() != EPerfil.ADMIN) {
             throw new SecurityException("Você não tem permissão para deletar este treino.");
         }
 
         treinoRepository.deleteById(id);
+    }
+
+    public HistoricoTreino registrarTreinoRealizado(String treinoId, UserDetails userDetails) {
+        Usuario aluno = getUsuarioAutenticado(userDetails);
+        Treino treino = buscarPorId(treinoId);
+
+        HistoricoTreino historico = HistoricoTreino.builder()
+                .aluno(aluno)
+                .treino(treino)
+                .dataRealizacao(LocalDateTime.now())
+                .build();
+
+        historicoTreinoRepository.save(historico);
+
+        aluno.setDataUltimoTreino(historico.getDataRealizacao());
+        usuarioRepository.save(aluno);
+
+        return historico;
+    }
+
+    public List<HistoricoTreino> buscarDesempenhoSemanal(UserDetails userDetails) {
+        Usuario aluno = getUsuarioAutenticado(userDetails);
+
+        LocalDateTime hoje = LocalDateTime.now();
+        LocalDateTime inicioDaSemana = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate().atStartOfDay();
+        LocalDateTime fimDaSemana = hoje.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).toLocalDate().atTime(23, 59, 59);
+
+        return historicoTreinoRepository.findByAlunoIdAndDataRealizacaoBetween(aluno.getId(), inicioDaSemana, fimDaSemana);
     }
 }

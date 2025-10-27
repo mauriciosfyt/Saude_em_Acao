@@ -3,6 +3,7 @@ package br.com.saudeemacao.api.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity // Essencial para @PreAuthorize funcionar nos controllers
 public class SegurancaFilterChain {
 
     @Autowired
@@ -34,9 +35,50 @@ public class SegurancaFilterChain {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // =================================================================
-                        // === TODAS AS ROTAS DESBLOQUEADAS ================================
+                        // === 1. ROTAS PÚBLICAS (NÃO EXIGEM AUTENTICAÇÃO) ================
                         // =================================================================
-                        .requestMatchers("/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/aluno").permitAll() // Cadastro de aluno é público
+                        .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/treinos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/treinos/{id}").permitAll()
+
+                        // =================================================================
+                        // === 2. ROTAS DE ADMIN (EXIGEM PERFIL 'ADMIN') ===================
+                        // =================================================================
+                        .requestMatchers(HttpMethod.GET, "/api/aluno").hasRole("ADMIN") // <-- SUA SOLICITAÇÃO
+                        .requestMatchers(HttpMethod.PUT, "/api/aluno/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/aluno/{id}").hasRole("ADMIN")
+                        .requestMatchers("/api/professor/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/produtos").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/produtos/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/produtos/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/reservas").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/reservas/stats").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/aprovar").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/rejeitar").hasRole("ADMIN")
+                        .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+
+                        // =================================================================
+                        // === 3. ROTAS DE PROFESSOR OU ADMIN ==============================
+                        // =================================================================
+                        .requestMatchers(HttpMethod.POST, "/api/treinos").hasAnyRole("PROFESSOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/treinos/{id}").hasAnyRole("PROFESSOR", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/treinos/{id}").hasAnyRole("PROFESSOR", "ADMIN")
+
+                        // =================================================================
+                        // === 4. ROTAS DE ALUNO (EXIGEM PERFIL 'ALUNO') ====================
+                        // =================================================================
+                        .requestMatchers(HttpMethod.POST, "/api/reservas").hasRole("ALUNO")
+                        .requestMatchers(HttpMethod.GET, "/api/minhas").hasRole("ALUNO")
+                        .requestMatchers(HttpMethod.POST, "/api/treinos/{id}/realizar").hasRole("ALUNO")
+                        .requestMatchers(HttpMethod.GET, "/api/treinos/desempenho-semanal").hasRole("ALUNO")
+
+                        // =================================================================
+                        // === 5. QUALQUER OUTRA ROTA EXIGE AUTENTICAÇÃO ===================
+                        // =================================================================
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(segurancaFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

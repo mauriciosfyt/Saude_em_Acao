@@ -9,6 +9,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,6 +23,8 @@ public class UsuarioPerfilDTO {
     private String fotoPerfil;
     private EPerfil perfil;
     private EPlano plano;
+    private LocalDateTime dataUltimoTreino;
+
 
     public UsuarioPerfilDTO(Usuario usuario) {
         this.nome = usuario.getNome();
@@ -30,5 +34,6 @@ public class UsuarioPerfilDTO {
         this.fotoPerfil = usuario.getFotoPerfil();
         this.perfil = usuario.getPerfil();
         this.plano = usuario.getPlano();
+        this.dataUltimoTreino = usuario.getDataUltimoTreino();
     }
 }

@@ -26,5 +26,8 @@ public interface UsuarioRepository extends MongoRepository<Usuario, String> {
     @Query("{ 'perfil': ?0 }")
     Page<Usuario> findByPerfil(EPerfil perfil, Pageable pageable);
 
+    // NOVO MÉTODO: Busca usuários por perfil e nome (contendo, case-insensitive).
+    Page<Usuario> findByPerfilAndNomeContainingIgnoreCase(EPerfil perfil, String nome, Pageable pageable);
+
     long countByPerfil(EPerfil perfil);
 }

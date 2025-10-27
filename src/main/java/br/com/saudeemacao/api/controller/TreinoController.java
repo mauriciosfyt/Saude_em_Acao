@@ -1,6 +1,7 @@
 package br.com.saudeemacao.api.controller;
 
 import br.com.saudeemacao.api.dto.TreinoDTO;
+import br.com.saudeemacao.api.model.HistoricoTreino;
 import br.com.saudeemacao.api.model.Treino;
 import br.com.saudeemacao.api.service.TreinoService;
 import jakarta.validation.Valid;
@@ -10,14 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -41,7 +35,21 @@ public class TreinoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Treino>> buscarTodos() {
+    public ResponseEntity<List<Treino>> buscarTodos(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) String responsavelId) {
+
+        if (nome != null && !nome.isBlank()) {
+            return ResponseEntity.ok(treinoService.buscarPorNome(nome));
+        }
+        if (tipo != null && !tipo.isBlank()) {
+            return ResponseEntity.ok(treinoService.buscarPorTipo(tipo));
+        }
+        if (responsavelId != null && !responsavelId.isBlank()) {
+            return ResponseEntity.ok(treinoService.buscarPorResponsavel(responsavelId));
+        }
+
         return ResponseEntity.ok(treinoService.buscarTodos());
     }
 
@@ -56,5 +64,22 @@ public class TreinoController {
     public ResponseEntity<Void> deletarTreino(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails) {
         treinoService.deletarTreino(id, userDetails);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/realizar")
+    @PreAuthorize("hasRole('ALUNO')")
+    public ResponseEntity<HistoricoTreino> registrarTreinoRealizado(
+            @PathVariable String id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        HistoricoTreino historico = treinoService.registrarTreinoRealizado(id, userDetails);
+        return ResponseEntity.status(HttpStatus.CREATED).body(historico);
+    }
+
+    @GetMapping("/desempenho-semanal")
+    @PreAuthorize("hasRole('ALUNO')")
+    public ResponseEntity<List<HistoricoTreino>> getDesempenhoSemanal(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        List<HistoricoTreino> desempenho = treinoService.buscarDesempenhoSemanal(userDetails);
+        return ResponseEntity.ok(desempenho);
     }
 }
