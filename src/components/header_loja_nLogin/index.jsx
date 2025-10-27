@@ -90,7 +90,7 @@ const Header_nLogin = () => {
             <div className="search-bar">
               <input
                 type="text"
-                placeholder="Buscar por nome ou tipo de produto"
+                placeholder="Buscar pelo nome do produto"
               />
               <button className="search-button">
                 <FaSearch className="icon_navegacao" />
@@ -107,7 +107,7 @@ const Header_nLogin = () => {
             <div className="search-bar">
               <input
                 type="text"
-                placeholder="Buscar por nome ou tipo de produto"
+                placeholder="Buscar pelo nome do produto"
               />
               <button className="search-button">
                 <FaSearch className="icon_navegacao" />
