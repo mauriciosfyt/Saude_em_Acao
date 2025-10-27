@@ -9,7 +9,9 @@ export default function App() {
   return (
     <FavoritosProvider>
       <TreinosProvider>
-        <Routes />
+        <ThemeProvider>
+          <Routes />
+        </ThemeProvider>
       </TreinosProvider>
     </FavoritosProvider>
   );
