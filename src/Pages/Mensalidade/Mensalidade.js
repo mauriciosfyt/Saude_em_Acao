@@ -11,14 +11,13 @@ import {
   Modal,
   useColorScheme,
 } from "react-native";
-import { useThemePreference } from "../../context/ThemeContext";
+import { useTheme } from "../../context/ThemeContext";
 // Usaremos Ionicons para manter a consistência com a tela Desempenho
 import { Ionicons } from "@expo/vector-icons";
 
 const Mensalidades = ({ navigation }) => {
   const colorScheme = useColorScheme();
-  const { isDark: forcedDark } = useThemePreference();
-  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
+  const { isDark, colors } = useTheme();
   const [menuVisivel, setMenuVisivel] = useState(false);
 
   // Funções de controle do menu e navegação

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../context/ThemeContext';
 
 const HeaderProfessores = ({ title, onBackPress, navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
+  const { isDark } = useTheme();
 
   const handleAbrirMenu = () => {
     setMenuVisivel(true);
@@ -35,56 +37,56 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
           activeOpacity={1}
         >
     
-          <View style={styles.menuContent}>
-            <Text style={styles.menuTitle}>Menu</Text>
+          <View style={[styles.menuContent, { backgroundColor: isDark ? '#1A1F2E' : '#FFFFFF' }]}>
+            <Text style={[styles.menuTitle, { color: isDark ? '#E6E8F3' : '#333333' }]}>Menu</Text>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Home")}
             >
-            <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Home</Text>
+            <Ionicons name="home-outline" size={24} color={isDark ? '#D3D8EB' : '#333333'} />
+              <Text style={[styles.menuItemText, { color: isDark ? '#D3D8EB' : '#333333' }]}>Home</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Perfil")}
             >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meu Perfil</Text>
+              <Ionicons name="person-outline" size={24} color={isDark ? '#D3D8EB' : '#333333'} />
+              <Text style={[styles.menuItemText, { color: isDark ? '#D3D8EB' : '#333333' }]}>Meu Perfil</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Chat")}
             >
-              <Ionicons name="chatbubble-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Chat</Text>
+              <Ionicons name="chatbubble-outline" size={24} color={isDark ? '#D3D8EB' : '#333333'} />
+              <Text style={[styles.menuItemText, { color: isDark ? '#D3D8EB' : '#333333' }]}>Chat</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("LojaProdutos")}
             >
-              <Ionicons name="cart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Loja</Text>
+              <Ionicons name="cart-outline" size={24} color={isDark ? '#D3D8EB' : '#333333'} />
+              <Text style={[styles.menuItemText, { color: isDark ? '#D3D8EB' : '#333333' }]}>Loja</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("LojaFavoritos")}
             >
-              <Ionicons name="heart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Favoritos</Text>
+              <Ionicons name="heart-outline" size={24} color={isDark ? '#D3D8EB' : '#333333'} />
+              <Text style={[styles.menuItemText, { color: isDark ? '#D3D8EB' : '#333333' }]}>Favoritos</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("LojaReservas")}
             >
-              <Ionicons name="bookmark-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Reservas</Text>
+              <Ionicons name="bookmark-outline" size={24} color={isDark ? '#D3D8EB' : '#333333'} />
+              <Text style={[styles.menuItemText, { color: isDark ? '#D3D8EB' : '#333333' }]}>Reservas</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Desempenho")}
             >
-              <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Desempenho</Text>
+              <Ionicons name="bar-chart-outline" size={24} color={isDark ? '#D3D8EB' : '#333333'} />
+              <Text style={[styles.menuItemText, { color: isDark ? '#D3D8EB' : '#333333' }]}>Desempenho</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
@@ -102,7 +104,7 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
       <View>
         <View style={styles.header}>
           <TouchableOpacity onPress={onBackPress} style={styles.iconButton}>
-            <Ionicons name="arrow-back" size={24} color="#000000" />
+            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
           </TouchableOpacity>
           
           <Image
@@ -112,11 +114,11 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
           />
           
           <TouchableOpacity onPress={handleAbrirMenu} style={styles.iconButton}>
-            <Ionicons name="menu" size={28} color="#000000" />
+            <Ionicons name="menu" size={28} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
         
-        <Text style={styles.pageTitle}>{title}</Text>
+        <Text style={[styles.pageTitle, { color: '#FFFFFF' }]}>{title}</Text>
       </View>
     </>
   );
@@ -148,7 +150,6 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
     textAlign: 'center',
     marginTop: 10,
     marginBottom: 20,
@@ -163,7 +164,6 @@ const styles = StyleSheet.create({
   menuContent: {
     height: "100%",
     width: "75%",
-    backgroundColor: "white",
     paddingTop: 80,
     paddingHorizontal: 20,
     shadowColor: "#000",
@@ -176,7 +176,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 30,
-    color: "#333",
   },
   menuItem: {
     flexDirection: "row",
@@ -186,7 +185,6 @@ const styles = StyleSheet.create({
   menuItemText: {
     fontSize: 18,
     marginLeft: 15,
-    color: "#333",
     fontWeight: "500",
   },
 });

@@ -14,12 +14,11 @@ import { Ionicons } from "@expo/vector-icons";
 import styles from "../Styles/PlanoBasicoStyles";
 import screenStyles from "../Styles/TelaPlanosStyles";
 import Header from "./header_planos/Header";
-import { useThemePreference } from "../context/ThemeContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function PlanoBasico({ navigation, onContratar }) {
   const colorScheme = useColorScheme();
-  const { isDark: forcedDark } = useThemePreference();
-  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
+  const { isDark, colors } = useTheme();
   const handleContratar = () => {
     if (onContratar) onContratar();
   };

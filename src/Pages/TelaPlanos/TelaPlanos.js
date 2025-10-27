@@ -13,12 +13,11 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import styles from "../../Styles/TelaPlanosStyles";
 import Header from "../../Components/header_planos/Header";
-import { useThemePreference } from "../../context/ThemeContext";
+import { useTheme } from "../../context/ThemeContext";
 
 const TelaPlanos = ({ navigation }) => {
   const colorScheme = useColorScheme();
-  const { isDark: forcedDark } = useThemePreference();
-  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
+  const { isDark, colors } = useTheme();
   const onBack = () => navigation && navigation.goBack();
 
   const onSaibaMais = (plano) => {

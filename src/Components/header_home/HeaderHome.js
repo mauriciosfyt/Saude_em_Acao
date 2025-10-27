@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Image, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemePreference } from '../../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 
 // Constantes de cores para o componente
 const COLORS = {
@@ -11,8 +11,7 @@ const COLORS = {
 
 const HeaderHome = ({ onProfilePress }) => {
   const colorScheme = useColorScheme();
-  const { isDark: forcedDark } = useThemePreference();
-  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
+  const { isDark, colors } = useTheme();
   return (
     <View style={[styles.header, isDark && { backgroundColor: '#2B2B2B' }]}>
       {/* 1. Adicionamos um 'espaçador' invisível aqui para empurrar a logo para o centro */}

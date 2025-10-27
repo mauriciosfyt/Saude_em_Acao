@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import styles from "../../Styles/MeuPlanoStyles";
+import createStyles from "../../Styles/MeuPlanoStyles";
+import { useTheme } from "../../context/ThemeContext";
 
 const Plano = ({ navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(isDark);
 
   const handleAbrirMenu = () => setMenuVisivel(true);
   const handleFecharMenu = () => setMenuVisivel(false);
@@ -13,8 +16,12 @@ const Plano = ({ navigation }) => {
     if (navigation) navigation.navigate(nomeDaTela);
   };
 
+  const menuBg = isDark ? "#1F2430" : "#FFFFFF";
+  const overlayBg = isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.2)";
+  const logoutColor = "#E24B4B";
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Fundo diagonal */}
       <View style={styles.diagonalBg} />
       {/* Header */}
@@ -23,11 +30,11 @@ const Plano = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation && navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#222" />
+          <Ionicons name="arrow-back" size={24} color={colors.headerText} />
         </TouchableOpacity>
-        <Text style={styles.title}>Meu plano</Text>
+        <Text style={[styles.title, { color: colors.headerText }]}>Meu plano</Text>
         <TouchableOpacity style={styles.menuButton} onPress={handleAbrirMenu}>
-          <Ionicons name="menu" size={28} color="#222" />
+          <Ionicons name="menu" size={28} color={colors.headerText} />
         </TouchableOpacity>
       </View>
 
@@ -35,20 +42,20 @@ const Plano = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Card do plano */}
         <View style={styles.cardPlano}>
-          <Text style={styles.planoAtivo}>Plano ativo</Text>
-          <Text style={styles.nomePlano}>Essencial</Text>
+          <Text style={[styles.planoAtivo, { color: colors.textSecondary }]}>Plano ativo</Text>
+          <Text style={[styles.nomePlano, { color: '#405CBA' }]}>Essencial</Text>
           <View style={styles.beneficiosList}>
             <View style={styles.beneficioItem}>
               <Ionicons name="checkmark-circle" size={28} color="#4CAF50" />
-              <Text style={styles.beneficioText}>Funcional</Text>
+              <Text style={[styles.beneficioText, { color: colors.textPrimary }]}>Funcional</Text>
             </View>
             <View style={styles.beneficioItem}>
               <Ionicons name="checkmark-circle" size={28} color="#4CAF50" />
-              <Text style={styles.beneficioText}>Thay Fit</Text>
+              <Text style={[styles.beneficioText, { color: colors.textPrimary }]}>Thay Fit</Text>
             </View>
             <View style={styles.beneficioItem}>
               <Ionicons name="checkmark-circle" size={28} color="#4CAF50" />
-              <Text style={styles.beneficioText}>Pilates</Text>
+              <Text style={[styles.beneficioText, { color: colors.textPrimary }]}>Pilates</Text>
             </View>
           </View>
         </View>
@@ -56,27 +63,27 @@ const Plano = ({ navigation }) => {
         {/* Informações do plano */}
         <View style={styles.infoRow}>
           <View style={styles.infoBox}>
-            <Text style={styles.infoLabel}>Data de renovação:</Text>
-            <Text style={styles.infoValue}>25/09/2025</Text>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Data de renovação:</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>25/09/2025</Text>
           </View>
           <View style={styles.infoBox}>
-            <Text style={styles.infoLabel}>Vencimento:</Text>
-            <Text style={styles.infoValue}>25/10/2025</Text>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Vencimento:</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>25/10/2025</Text>
           </View>
         </View>
         <View style={styles.infoRow}>
           <View style={styles.infoBox}>
-            <Text style={styles.infoLabel}>Inicio da academia:</Text>
-            <Text style={styles.infoValue}>25/08/2025</Text>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Inicio da academia:</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>25/08/2025</Text>
           </View>
           <View style={styles.infoBox}>
-            <Text style={styles.infoLabel}>Duração:</Text>
-            <Text style={styles.infoValue}>2 meses</Text>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Duração:</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>2 meses</Text>
           </View>
         </View>
 
         {/* Botão de renovar */}
-            <TouchableOpacity
+        <TouchableOpacity
           style={styles.renovarButton}
           onPress={() => handleNavegar("TelaPlanos")}
         >
@@ -92,67 +99,76 @@ const Plano = ({ navigation }) => {
         onRequestClose={handleFecharMenu}
       >
         <TouchableOpacity
-          style={styles.menuOverlay}
+          style={[styles.menuOverlay, { backgroundColor: overlayBg }]}
           onPress={handleFecharMenu}
           activeOpacity={1}
         >
-          <View style={styles.menuContent}>
-            <Text style={styles.menuTitle}>Menu</Text>
+          <View
+            style={[
+              styles.menuContent,
+              {
+                backgroundColor: menuBg,
+                borderColor: isDark ? "rgba(255,255,255,0.06)" : "#E9ECEF",
+              },
+            ]}
+            onStartShouldSetResponder={() => true} // impede fechamento ao clicar no conteúdo
+          >
+            <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>Menu</Text>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Home")}
             >
-              <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Home</Text>
+              <Ionicons name="home-outline" size={24} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Home</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Perfil")}
             >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meu Perfil</Text>
+              <Ionicons name="person-outline" size={24} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Meu Perfil</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Chat")}
             >
-              <Ionicons name="chatbubble-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Chat</Text>
+              <Ionicons name="chatbubble-outline" size={24} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Chat</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("LojaProdutos")}
             >
-              <Ionicons name="cart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Loja</Text>
+              <Ionicons name="cart-outline" size={24} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Loja</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("LojaFavoritos")}
             >
-              <Ionicons name="heart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Favoritos</Text>
+              <Ionicons name="heart-outline" size={24} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Favoritos</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("LojaReservas")}
             >
-              <Ionicons name="bookmark-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Reservas</Text>
+              <Ionicons name="bookmark-outline" size={24} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Reservas</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Desempenho")}
             >
-              <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Desempenho</Text>
+              <Ionicons name="bar-chart-outline" size={24} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Desempenho</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Inicial")}
             >
-              <Ionicons name="log-out-outline" size={24} color="#dc3545" />
-              <Text style={[styles.menuItemText, { color: "#dc3545" }]}>
+              <Ionicons name="log-out-outline" size={24} color={logoutColor} />
+              <Text style={[styles.menuItemText, { color: logoutColor }]}>
                 Sair
               </Text>
             </TouchableOpacity>

@@ -12,18 +12,9 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // 1. Importando o novo componente HeaderChat
 import HeaderChat from '../../Components/header_chat/header_Chat';
+import { useTheme } from '../../context/ThemeContext';
 
-// --- Constantes de Cores e Dados ---
-const COLORS = {
-  primary: '#3F51B5',
-  lightBlue: '#A8C5FF',
-  background: '#FFFFFF',
-  textLight: '#FFFFFF',
-  textDark: '#333333',
-  gray: '#B0B0B0',
-  lightGray: '#F0F0F0',
-  dateBackground: '#E1E9F6',
-};
+// --- Dados Mock ---
 
 const MOCK_MESSAGES = [
   { id: '1', type: 'text', text: 'Olá, tudo bem?', sender: 'me' },
@@ -39,22 +30,22 @@ const MOCK_MESSAGES = [
 // O antigo componente 'CustomHeader' foi removido daqui.
 
 // --- Componente de Entrada de Mensagem ---
-const MessageInput = () => {
+const MessageInput = ({ colors }) => {
   return (
-    <View style={styles.inputContainer}>
+    <View style={[styles.inputContainer, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
       <TouchableOpacity style={styles.iconButton}>
-        <Icon name="camera-outline" size={24} color={COLORS.gray} />
+        <Icon name="camera-outline" size={24} color={colors.textSecondary} />
       </TouchableOpacity>
       <TouchableOpacity style={styles.iconButton}>
-        <Icon name="image-outline" size={24} color={COLORS.gray} />
+        <Icon name="image-outline" size={24} color={colors.textSecondary} />
       </TouchableOpacity>
       <TextInput
-        style={styles.textInput}
+        style={[styles.textInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary }]}
         placeholder="Digite uma mensagem..."
-        placeholderTextColor={COLORS.gray}
+        placeholderTextColor={colors.textSecondary}
       />
       <TouchableOpacity style={styles.iconButton}>
-        <Icon name="microphone" size={24} color={COLORS.gray} />
+        <Icon name="microphone" size={24} color={colors.textSecondary} />
       </TouchableOpacity>
     </View>
   );
@@ -63,19 +54,21 @@ const MessageInput = () => {
 // --- Componente Principal da Tela de Chat ---
 // 2. A tela agora recebe 'navigation' como propriedade
 const Chat = ({ navigation }) => {
+  const { colors, isDark } = useTheme();
+  
   const renderItem = ({ item }) => {
     const isSender = item.sender === 'me';
     
     if (item.type === 'date') {
       return (
-        <View style={styles.dateSeparatorContainer}>
-          <Text style={styles.dateSeparatorText}>{item.date}</Text>
+        <View style={[styles.dateSeparatorContainer, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.dateSeparatorText, { color: colors.primary }]}>{item.date}</Text>
         </View>
       );
     }
     
     if (item.type === 'audio') {
-      const iconColor = isSender ? COLORS.textLight : COLORS.textDark;
+      const iconColor = isSender ? '#FFFFFF' : colors.textPrimary;
       const Waveform = () => (
         <View style={styles.waveformContainer}>
           {[0.6, 0.8, 0.7, 0.9, 0.5, 1, 0.6, 0.8, 0.5, 0.7].map((h, i) => (
@@ -86,7 +79,11 @@ const Chat = ({ navigation }) => {
 
       return (
         <View style={[styles.messageRow, isSender ? styles.senderRow : styles.receiverRow]}>
-          <View style={[styles.audioBubble, isSender ? styles.senderBubble : styles.receiverBubble]}>
+          <View style={[
+            styles.audioBubble, 
+            isSender ? [styles.senderBubble, { backgroundColor: colors.primary }] : 
+            [styles.receiverBubble, { backgroundColor: isDark ? '#3A3A3A' : '#E3F2FD' }]
+          ]}>
             <Text>🎤</Text>
             <Waveform />
             {!isSender && <View style={{width: 24}} />}
@@ -97,8 +94,15 @@ const Chat = ({ navigation }) => {
 
     return (
       <View style={[styles.messageRow, isSender ? styles.senderRow : styles.receiverRow]}>
-        <View style={[styles.textBubble, isSender ? styles.senderBubble : styles.receiverBubble]}>
-          <Text style={isSender ? styles.senderText : styles.receiverText}>
+        <View style={[
+          styles.textBubble, 
+          isSender ? [styles.senderBubble, { backgroundColor: colors.primary }] : 
+          [styles.receiverBubble, { backgroundColor: isDark ? '#3A3A3A' : '#E3F2FD' }]
+        ]}>
+          <Text style={[
+            isSender ? styles.senderText : styles.receiverText,
+            { color: isSender ? '#FFFFFF' : colors.textPrimary }
+          ]}>
             {item.text}
           </Text>
         </View>
@@ -107,7 +111,7 @@ const Chat = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* 3. Usando o novo HeaderChat e passando as props necessárias */}
       <HeaderChat
         chatTitle="Equipe de Suporte"
@@ -122,7 +126,7 @@ const Chat = ({ navigation }) => {
         style={styles.messageList}
       />
       
-      <MessageInput />
+      <MessageInput colors={colors} />
     </SafeAreaView>
   );
 };
@@ -132,7 +136,6 @@ const styles = StyleSheet.create({
   // Estilos Gerais
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
   
   // 4. Os estilos do header antigo (headerContainer, etc.) foram removidos.
@@ -166,18 +169,16 @@ const styles = StyleSheet.create({
     minWidth: '60%',
   },
   senderBubble: {
-    backgroundColor: COLORS.primary,
     borderTopLeftRadius: 5,
   },
   receiverBubble: {
-    backgroundColor: COLORS.lightBlue,
     borderTopRightRadius: 5,
   },
   senderText: {
-    color: COLORS.textLight,
+    color: '#FFFFFF',
   },
   receiverText: {
-    color: COLORS.textDark,
+    color: '#333333',
   },
   waveformContainer: {
     flexDirection: 'row',
@@ -192,33 +193,27 @@ const styles = StyleSheet.create({
   },
   dateSeparatorContainer: {
     alignSelf: 'center',
-    backgroundColor: COLORS.dateBackground,
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 5,
     marginVertical: 10,
   },
   dateSeparatorText: {
-    color: COLORS.primary,
     fontSize: 12,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderTopWidth: 1,
-    borderTopColor: COLORS.lightGray,
   },
   textInput: {
     flex: 1,
     height: 40,
-    backgroundColor: COLORS.background,
     borderRadius: 20,
     paddingHorizontal: 15,
     marginHorizontal: 10,
-    borderColor: COLORS.lightGray,
     borderWidth: 1,
   },
   iconButton: {

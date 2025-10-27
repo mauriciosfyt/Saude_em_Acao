@@ -1,9 +1,9 @@
 import { StyleSheet } from 'react-native';
 
-const styles = StyleSheet.create({
+const createStyles = (isDark) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#405CBA',
+    backgroundColor: isDark ? '#4A69BD' : '#405CBA',
   },
   
   // Seção Superior
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   // Seção Inferior
   bottomSection: {
     flex: 0.6,
-    backgroundColor: 'white',
+    backgroundColor: isDark ? '#333333' : 'white',
     borderTopLeftRadius: 50,
     borderTopRightRadius: 0,
     paddingHorizontal: 20,
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
 
   content: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: isDark ? '#333333' : 'white',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
   },
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 30,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: isDark ? '#555555' : '#e5e7eb',
   },
 
   avatarContainer: {
@@ -210,42 +210,42 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: isDark ? '#333333' : '#f3f4f6',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
-    borderColor: '#405CBA',
+    borderColor: isDark ? '#FFFFFF' : '#3B82F6',
   },
 
   editAvatarButton: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: '#405CBA',
+    backgroundColor: '#4A69BD',
     width: 32,
     height: 32,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: 'white',
+    borderColor: isDark ? '#333333' : 'white',
   },
 
   userName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: isDark ? '#FFFFFF' : '#1f2937',
     marginBottom: 5,
   },
 
   userEmail: {
     fontSize: 16,
-    color: '#6b7280',
+    color: isDark ? '#9CA3AF' : '#6b7280',
     marginBottom: 20,
   },
 
   editProfileButton: {
-    backgroundColor: '#405CBA',
+    backgroundColor: '#4A69BD',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 25,
@@ -261,13 +261,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: isDark ? '#555555' : '#e5e7eb',
   },
 
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: isDark ? '#FFFFFF' : '#1f2937',
     marginBottom: 20,
   },
 
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: isDark ? '#555555' : '#f3f4f6',
   },
 
   infoLabelContainer: {
@@ -288,14 +288,14 @@ const styles = StyleSheet.create({
 
   profileInfoLabel: {
     fontSize: 16,
-    color: '#374151',
+    color: isDark ? '#FFFFFF' : '#374151',
     marginLeft: 12,
     flex: 1,
   },
 
   profileInfoValue: {
     fontSize: 16,
-    color: '#1f2937',
+    color: isDark ? '#FFFFFF' : '#1f2937',
     fontWeight: '500',
     textAlign: 'right',
     flex: 1,
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
 
   statCard: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: isDark ? '#444444' : '#f8fafc',
     padding: 20,
     borderRadius: 12,
     alignItems: 'center',
@@ -323,13 +323,13 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#405CBA',
+    color: '#4A69BD',
     marginBottom: 5,
   },
 
   statLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    color: isDark ? '#FFFFFF' : '#6b7280',
     textAlign: 'center',
   },
 
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
   },
 
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: isDark ? '#333333' : 'white',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '80%',
@@ -354,13 +354,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: isDark ? '#555555' : '#e5e7eb',
   },
 
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: isDark ? '#FFFFFF' : '#1f2937',
   },
 
   configList: {
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: isDark ? '#555555' : '#f3f4f6',
   },
 
   configItemLeft: {
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
 
   configItemText: {
     fontSize: 16,
-    color: '#374151',
+    color: isDark ? '#FFFFFF' : '#374151',
     marginLeft: 12,
   },
 
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
 
   configDivider: {
     height: 1,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: isDark ? '#555555' : '#e5e7eb',
     marginVertical: 10,
   },
 
@@ -411,19 +411,19 @@ const styles = StyleSheet.create({
   editFieldLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
+    color: isDark ? '#FFFFFF' : '#374151',
     marginBottom: 8,
   },
 
   editFieldInput: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: isDark ? '#555555' : '#d1d5db',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#1f2937',
-    backgroundColor: '#ffffff',
+    color: isDark ? '#FFFFFF' : '#1f2937',
+    backgroundColor: isDark ? '#444444' : '#ffffff',
   },
 
   selectContainer: {
@@ -437,20 +437,20 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    backgroundColor: '#ffffff',
+    borderColor: isDark ? '#555555' : '#d1d5db',
+    backgroundColor: isDark ? '#444444' : '#ffffff',
     minWidth: 100,
     alignItems: 'center',
   },
 
   selectOptionSelected: {
-    backgroundColor: '#405CBA',
-    borderColor: '#405CBA',
+    backgroundColor: '#4A69BD',
+    borderColor: '#4A69BD',
   },
 
   selectOptionText: {
     fontSize: 14,
-    color: '#374151',
+    color: isDark ? '#FFFFFF' : '#374151',
     fontWeight: '500',
   },
 
@@ -471,15 +471,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    backgroundColor: '#ffffff',
+    borderColor: isDark ? '#555555' : '#d1d5db',
+    backgroundColor: isDark ? '#444444' : '#ffffff',
     alignItems: 'center',
   },
 
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#374151',
+    color: isDark ? '#FFFFFF' : '#374151',
   },
 
   saveButton: {
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 8,
-    backgroundColor: '#405CBA',
+    backgroundColor: '#4A69BD',
     alignItems: 'center',
   },
 
@@ -498,6 +498,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default styles;
-
-
+export default createStyles;

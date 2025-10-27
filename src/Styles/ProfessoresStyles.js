@@ -3,7 +3,7 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 48) / 2;
 
-export default StyleSheet.create({
+const createStyles = (isDark) => StyleSheet.create({
   logo: {
     width: 45,
     height: 45,
@@ -12,7 +12,7 @@ export default StyleSheet.create({
   pageTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#000000',
+    color: isDark ? '#FFFFFF' : '#333333',
     textAlign: 'center',
     marginTop: 12,
     marginBottom: 20,
@@ -51,14 +51,14 @@ export default StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: isDark ? '#333333' : '#FFFFFF',
   },
   container: {
     flex: 1,
   },
   // --- FORMA AZUL ATUALIZADA ---
   blueShape: {
-    backgroundColor: '#405CBA',
+    backgroundColor: '#4A69BD',
     width: width * 2,
     height: '90%',
     position: 'absolute',
@@ -91,7 +91,7 @@ export default StyleSheet.create({
   },
   card: {
     width: cardWidth,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: isDark ? '#444444' : '#FFFFFF',
     borderRadius: 20,
     padding: 16,
     alignItems: 'center',
@@ -116,9 +116,10 @@ export default StyleSheet.create({
   professorName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: isDark ? '#FFFFFF' : '#333',
     marginBottom: 16,
     textAlign: 'center',
   },
 });
 
+export default createStyles;

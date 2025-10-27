@@ -1,29 +1,16 @@
-import React , { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  SafeAreaView,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  StatusBar,
-  Modal,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import styles from '../../Styles/MeuTreinoStyle';
-import { useTreinos } from '../../context/TreinosContext';
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, ScrollView, Modal, SafeAreaView, StatusBar, Image } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import createStyles from "../../Styles/MeuTreinoStyle";
+import { useTheme } from "../../context/ThemeContext";
+import { useTreinos } from "../../context/TreinosContext";
 
 const MeuTreino = ({ navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
   const [modalConcluido, setModalConcluido] = useState({ visivel: false, dia: '' });
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(isDark);
   const { treinosConcluidos, treinosIncompletos, marcarTreinoComoConcluido, marcarTreinoComoIncompleto } = useTreinos();
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      console.log('DEBUG: Tela MeuTreino ganhou foco');
-    });
-    return unsubscribe;
-  }, [navigation]);
 
   const treinos = [
     {
@@ -118,47 +105,47 @@ const MeuTreino = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles?.container || { flex: 1, backgroundColor: '#fff' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#4A90E2" />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
       {/* Header */}
-      <View style={styles?.header || { backgroundColor: '#4A90E2', padding: 16 }}>
-        <View style={styles?.headerContent || { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="white" />
+            <Ionicons name="arrow-back" size={24} color={colors.headerText} />
           </TouchableOpacity>
-          <Text style={styles?.headerTitle || { color: 'white', fontSize: 20, fontWeight: 'bold' }}>Meus Treinos</Text>
+          <Text style={[styles.headerTitle, { color: colors.headerText }]}>Meus Treinos</Text>
           <TouchableOpacity onPress={handleAbrirMenu}>
-            <Ionicons name="menu" size={24} color="white" />
+            <Ionicons name="menu" size={24} color={colors.headerText} />
           </TouchableOpacity>
         </View>
-        <View style={styles?.greetingSection || { marginTop: 8 }}>
-          <Text style={styles?.greeting || { color: 'white', fontSize: 16 }}>Olá Aluno!</Text>
-          <Text style={styles?.date || { color: 'white', fontSize: 14 }}>{getCurrentDate()}</Text>
+        <View style={styles.greetingSection}>
+          <Text style={[styles.greeting, { color: colors.headerText }]}>Olá Aluno!</Text>
+          <Text style={[styles.date, { color: colors.headerText }]}>{getCurrentDate()}</Text>
         </View>
       </View>
 
       {/* Lista de Treinos */}
-      <ScrollView style={styles?.content || { flex: 1, padding: 16 }}>
+      <ScrollView style={styles.content}>
         {treinos.map((treino) => (
-          <View key={treino.id} style={styles?.treinoCard || { backgroundColor: '#eee', borderRadius: 8, marginBottom: 16, padding: 16 }}>
-            <Image source={treino.imagem} style={styles?.treinoImage || { width: '100%', height: 120, borderRadius: 8 }} />
-            <View style={styles?.treinoInfo || { marginTop: 8 }}>
-              <Text style={styles?.treinoDia || { fontSize: 18, fontWeight: 'bold' }}>{treino.dia}</Text>
-              <Text style={styles?.treinoGrupos || { fontSize: 16 }}>{treino.grupos}</Text>
+          <View key={treino.id} style={styles.treinoCard}>
+            <Image source={treino.imagem} style={styles.treinoImage} />
+            <View style={styles.treinoInfo}>
+              <Text style={[styles.treinoDia, { color: colors.textPrimary }]}>{treino.dia}</Text>
+              <Text style={[styles.treinoGrupos, { color: colors.textSecondary }]}>{treino.grupos}</Text>
             </View>
             <TouchableOpacity
               style={[
-                styles?.iniciarButton || { backgroundColor: '#405CBA', borderRadius: 8, padding: 12, marginTop: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-                treinosConcluidos.has(treino.dia) && (styles?.concluidoButton || { backgroundColor: '#4CAF50' }),
-                treinosIncompletos.has(treino.dia) && (styles?.incompletoButton || { backgroundColor: '#FF9800' })
+                styles.iniciarButton,
+                treinosConcluidos.has(treino.dia) && styles.concluidoButton,
+                treinosIncompletos.has(treino.dia) && { backgroundColor: '#FF9800' }
               ]}
               onPress={() => !treinosConcluidos.has(treino.dia) && handleIniciarTreino(treino)}
               disabled={treinosConcluidos.has(treino.dia)}
             >
               <Text style={[
-                styles?.iniciarButtonText || { color: 'white', fontWeight: 'bold', marginRight: 8 },
-                treinosConcluidos.has(treino.dia) && (styles?.concluidoButtonText || { color: '#fff' }),
-                treinosIncompletos.has(treino.dia) && (styles?.incompletoButtonText || { color: '#fff' })
+                styles.iniciarButtonText,
+                treinosConcluidos.has(treino.dia) && styles.concluidoButtonText,
+                treinosIncompletos.has(treino.dia) && { color: '#fff' }
               ]}>
                 {treinosConcluidos.has(treino.dia) ? 'Concluído' : 
                  treinosIncompletos.has(treino.dia) ? 'Incompleto' : 'Iniciar'}
@@ -182,31 +169,31 @@ const MeuTreino = ({ navigation }) => {
         onRequestClose={handleFecharMenu}
       >
         <TouchableOpacity
-          style={styles?.menuOverlay || { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }}
+          style={[styles.menuOverlay, { backgroundColor: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)' }]}
           onPress={handleFecharMenu}
           activeOpacity={1}
         >
-          <View style={styles?.menuContent || { backgroundColor: 'white', borderRadius: 16, padding: 24, margin: 32 }}>
-            <Text style={styles?.menuTitle || { fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>Menu</Text>
-            <TouchableOpacity style={styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }} onPress={() => handleNavegar("MainTabs")}>
-              <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={styles?.menuItemText || { marginLeft: 8 }}>Home</Text>
+          <View style={[styles.menuContent, { backgroundColor: isDark ? '#1F2430' : 'white' }]}>
+            <Text style={[styles.menuTitle, { color: colors.textPrimary }]}>Menu</Text>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar("MainTabs")}>
+              <Ionicons name="home-outline" size={24} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Home</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }} onPress={() => handleNavegar("Perfil")}>
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles?.menuItemText || { marginLeft: 8 }}>Meu Perfil</Text>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar("Perfil")}>
+              <Ionicons name="person-outline" size={24} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Meu Perfil</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }} onPress={() => handleNavegar("Chat")}>
-              <Ionicons name="chatbubble-ellipses-outline" size={24} color="#333" />
-              <Text style={styles?.menuItemText || { marginLeft: 8 }}>Chat</Text>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar("Chat")}>
+              <Ionicons name="chatbubble-ellipses-outline" size={24} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Chat</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }} onPress={() => handleNavegar("Desempenho")}>
-              <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={styles?.menuItemText || { marginLeft: 8 }}>Desempenho</Text>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar("Desempenho")}>
+              <Ionicons name="bar-chart-outline" size={24} color={colors.textSecondary} />
+              <Text style={[styles.menuItemText, { color: colors.textPrimary }]}>Desempenho</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles?.menuItem || { flexDirection: 'row', alignItems: 'center', marginBottom: 12 }, styles?.menuItemAtivo || {}]} onPress={() => handleNavegar("MeuTreino")}>
-              <Ionicons name="fitness-outline" size={24} color="#405CBA" />
-              <Text style={[styles?.menuItemText || { marginLeft: 8 }, styles?.menuItemTextAtivo || { color: '#405CBA', fontWeight: 'bold' }]}>Meus Treinos</Text>
+            <TouchableOpacity style={[styles.menuItem, styles.menuItemAtivo]} onPress={() => handleNavegar("MeuTreino")}>
+              <Ionicons name="fitness-outline" size={24} color={colors.primary} />
+              <Text style={[styles.menuItemText, styles.menuItemTextAtivo]}>Meus Treinos</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -220,19 +207,19 @@ const MeuTreino = ({ navigation }) => {
         onRequestClose={fecharModalConcluido}
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: 'white', borderRadius: 16, padding: 24, alignItems: 'center', width: 300 }}>
+          <View style={[styles.modalContent, { backgroundColor: colors.cardBg }]}>
             <Ionicons name="checkmark-circle" size={48} color="#4CAF50" style={{ marginBottom: 12 }} />
-            <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 }}>
+            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
               Treino Concluído!
             </Text>
-            <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 24 }}>
+            <Text style={[styles.modalMessage, { color: colors.textSecondary }]}>
               O treino de {modalConcluido.dia} já foi finalizado hoje.
             </Text>
             <TouchableOpacity
-              style={{ backgroundColor: '#405CBA', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 32, width: '100%' }}
+              style={styles.modalButton}
               onPress={fecharModalConcluido}
             >
-              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>OK</Text>
+              <Text style={styles.modalButtonText}>OK</Text>
             </TouchableOpacity>
           </View>
         </View>

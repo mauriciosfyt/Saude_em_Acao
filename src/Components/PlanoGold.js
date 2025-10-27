@@ -4,12 +4,11 @@ import { View, Text, TouchableOpacity, SafeAreaView, StatusBar, ImageBackground,
 import cardStyles from '../Styles/PlanoGoldStyles';
 import screenStyles from '../Styles/TelaPlanosStyles';
 import Header from "./header_planos/Header";
-import { useThemePreference } from "../context/ThemeContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function PlanoGold({ navigation, onContratar }) {
   const colorScheme = useColorScheme();
-  const { isDark: forcedDark } = useThemePreference();
-  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
+  const { isDark, colors } = useTheme();
   const handleContratar = () => { if (onContratar) onContratar(); };
   const onBack = () => navigation && navigation.goBack && navigation.goBack();
 

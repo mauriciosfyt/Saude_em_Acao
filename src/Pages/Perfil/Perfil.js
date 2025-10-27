@@ -1,5 +1,6 @@
 import { scheduleNotification } from '../../Components/Notifications';
 import React, { useState } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 import { playSuccessSound, TestSoundButton, setSoundEnabled } from '../../Components/Sounds';
 
 import {
@@ -16,7 +17,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import styles from '../../Styles/PerfilStyles';
+import createStyles from '../../Styles/PerfilStyles';
 
 const Perfil = ({ navigation }) => {
   const [configModalVisible, setConfigModalVisible] = useState(false);
@@ -24,17 +25,17 @@ const Perfil = ({ navigation }) => {
   const [notificacoes, setNotificacoes] = useState(true);
   const [som, setSom] = useState(true);
   const [vibracao, setVibracao] = useState(false);
-  const [modoEscuro, setModoEscuro] = useState(false);
-
+  const { isDark, colors, toggleTheme } = useTheme();
+  const styles = createStyles(isDark);
 
   // Dados mockados do usuário
   const [dadosUsuario, setDadosUsuario] = useState({
-    nome: 'João Silva',
-    email: 'joao.silva@email.com',
-    idade: 28,
-    peso: 75,
+    nome: 'Heleno Brito',
+    email: 'heleno.bt@gmail.com',
+    idade: 17,
+    peso: 90,
     altura: 175,
-    objetivo: 'Perder peso e ganhar massa muscular',
+    objetivo: 'Perder peso',
     nivelAtividade: 'Intermediário',
   });
 
@@ -168,7 +169,7 @@ const handleVoltar = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
+      <StatusBar barStyle="light-content" backgroundColor="#4A69BD" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -186,7 +187,7 @@ const handleVoltar = () => {
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
-              <Ionicons name="person" size={60} color="#405CBA" />
+              <Ionicons name="person" size={60} color={isDark ? "#FFFFFF" : "#405CBA"} />
             </View>
             <TouchableOpacity style={styles.editAvatarButton}>
               <Ionicons name="camera" size={20} color="white" />
@@ -207,7 +208,7 @@ const handleVoltar = () => {
 
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
-              <Ionicons name="calendar-outline" size={20} color="#405CBA" />
+              <Ionicons name="calendar-outline" size={20} color={isDark ? "#FFFFFF" : "#405CBA"} />
               <Text style={styles.profileInfoLabel}>Idade</Text>
             </View>
             <Text style={styles.profileInfoValue}>{dadosUsuario.idade} anos</Text>
@@ -215,7 +216,7 @@ const handleVoltar = () => {
 
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
-              <Ionicons name="scale-outline" size={20} color="#405CBA" />
+              <Ionicons name="scale-outline" size={20} color={isDark ? "#FFFFFF" : "#405CBA"} />
               <Text style={styles.profileInfoLabel}>Peso</Text>
             </View>
             <Text style={styles.profileInfoValue}>{dadosUsuario.peso} kg</Text>
@@ -223,7 +224,7 @@ const handleVoltar = () => {
 
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
-              <Ionicons name="resize-outline" size={20} color="#405CBA" />
+              <Ionicons name="resize-outline" size={20} color={isDark ? "#FFFFFF" : "#405CBA"} />
               <Text style={styles.profileInfoLabel}>Altura</Text>
             </View>
             <Text style={styles.profileInfoValue}>{dadosUsuario.altura} cm</Text>
@@ -231,7 +232,7 @@ const handleVoltar = () => {
 
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
-              <Ionicons name="flag-outline" size={20} color="#405CBA" />
+              <Ionicons name="flag-outline" size={20} color={isDark ? "#FFFFFF" : "#405CBA"} />
               <Text style={styles.profileInfoLabel}>Objetivo</Text>
             </View>
             <Text style={styles.profileInfoValue}>{dadosUsuario.objetivo}</Text>
@@ -239,7 +240,7 @@ const handleVoltar = () => {
 
           <View style={styles.infoRow}>
             <View style={styles.infoLabelContainer}>
-              <Ionicons name="fitness-outline" size={20} color="#405CBA" />
+              <Ionicons name="fitness-outline" size={20} color={isDark ? "#FFFFFF" : "#405CBA"} />
               <Text style={styles.profileInfoLabel}>Nível de Atividade</Text>
             </View>
             <Text style={styles.profileInfoValue}>{dadosUsuario.nivelAtividade}</Text>
@@ -252,12 +253,12 @@ const handleVoltar = () => {
 
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>156</Text>
+              <Text style={styles.statNumber}>157</Text>
               <Text style={styles.statLabel}>Treinos Completos</Text>
             </View>
 
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>23</Text>
+              <Text style={styles.statNumber}>19</Text>
               <Text style={styles.statLabel}>Dias Ativos</Text>
             </View>
           </View>
@@ -340,7 +341,7 @@ const handleVoltar = () => {
               {/* Notificações */}
               <View style={styles.configItem}>
                 <View style={styles.configItemLeft}>
-                  <Ionicons name="notifications-outline" size={24} color="#405CBA" />
+                  <Ionicons name="notifications-outline" size={24} color="#4A69BD" />
                   <Text style={styles.configItemText}>Notificações</Text>
                 </View>
 
@@ -359,7 +360,7 @@ const handleVoltar = () => {
                         }
                       }
                     }}
-                    trackColor={{ false: '#e5e7eb', true: '#405CBA' }}
+                    trackColor={{ false: '#e5e7eb', true: '#4A69BD' }}
                     thumbColor={notificacoes ? '#ffffff' : '#f3f4f6'}
                   />
 
@@ -380,7 +381,7 @@ const handleVoltar = () => {
                         }
                       }}
                     >
-                      <Ionicons name="notifications" size={22} color="#405CBA" />
+                      <Ionicons name="notifications" size={22} color="#4A69BD" />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -393,7 +394,7 @@ const handleVoltar = () => {
 {/* Som */}
 <View style={styles.configItem}>
   <View style={styles.configItemLeft}>
-    <Ionicons name="volume-high-outline" size={24} color="#405CBA" />
+    <Ionicons name="volume-high-outline" size={24} color="#4A69BD" />
     <Text style={styles.configItemText}>Som</Text>
   </View>
 
@@ -401,7 +402,7 @@ const handleVoltar = () => {
     <Switch
       value={som}
       onValueChange={(v) => { setSom(v); setSoundEnabled(v); }}
-      trackColor={{ false: '#e5e7eb', true: '#405CBA' }}
+      trackColor={{ false: '#e5e7eb', true: '#4A69BD' }}
       thumbColor={som ? '#ffffff' : '#f3f4f6'}
     />
 
@@ -416,13 +417,13 @@ const handleVoltar = () => {
               {/* Vibração */}
               <View style={styles.configItem}>
                 <View style={styles.configItemLeft}>
-                  <Ionicons name="phone-portrait-outline" size={24} color="#405CBA" />
+                  <Ionicons name="phone-portrait-outline" size={24} color="#4A69BD" />
                   <Text style={styles.configItemText}>Vibração</Text>
                 </View>
                 <Switch
                   value={vibracao}
                   onValueChange={setVibracao}
-                  trackColor={{ false: '#e5e7eb', true: '#405CBA' }}
+                  trackColor={{ false: '#e5e7eb', true: '#4A69BD' }}
                   thumbColor={vibracao ? '#ffffff' : '#f3f4f6'}
                 />
               </View>
@@ -430,21 +431,21 @@ const handleVoltar = () => {
               {/* Modo Escuro */}
               <View style={styles.configItem}>
                 <View style={styles.configItemLeft}>
-                  <Ionicons name="moon-outline" size={24} color="#405CBA" />
+                  <Ionicons name={isDark ? 'moon' : 'moon-outline'} size={24} color="#4A69BD" />
                   <Text style={styles.configItemText}>Modo Escuro</Text>
                 </View>
                 <Switch
-                  value={modoEscuro}
-                  onValueChange={setModoEscuro}
-                  trackColor={{ false: '#e5e7eb', true: '#405CBA' }}
-                  thumbColor={modoEscuro ? '#ffffff' : '#f3f4f6'}
+                  value={!!isDark}
+                  onValueChange={(v) => toggleTheme()}
+                  trackColor={{ false: '#e5e7eb', true: '#4A69BD' }}
+                  thumbColor={isDark ? '#ffffff' : '#f3f4f6'}
                 />
               </View>
 
               {/* Privacidade */}
               <TouchableOpacity style={styles.configItem} onPress={handlePrivacidade}>
                 <View style={styles.configItemLeft}>
-                  <Ionicons name="shield-outline" size={24} color="#405CBA" />
+                  <Ionicons name="shield-outline" size={24} color="#4A69BD" />
                   <Text style={styles.configItemText}>Privacidade</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
@@ -453,7 +454,7 @@ const handleVoltar = () => {
               {/* Sobre */}
               <TouchableOpacity style={styles.configItem} onPress={handleSobre}>
                 <View style={styles.configItemLeft}>
-                  <Ionicons name="information-circle-outline" size={24} color="#405CBA" />
+                  <Ionicons name="information-circle-outline" size={24} color="#4A69BD" />
                   <Text style={styles.configItemText}>Sobre</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#9ca3af" />

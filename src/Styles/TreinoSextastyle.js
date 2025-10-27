@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1A1A1A', // fundo escuro como no site
   },
 
   // Header sem cor de fundo, apenas seta e menu
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   // Conteúdo Principal
   content: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#3A3A3A', // mesmo tom dos cards de exercício
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     borderBottomLeftRadius: 40,
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
 
   // Cards de Exercícios
   exercicioCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#3A3A3A', // sobretom cinza escuro
     borderRadius: 15,
     padding: 15,
     marginBottom: 10,
@@ -118,14 +118,14 @@ const styles = StyleSheet.create({
   exercicioNome: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#FFFFFF', // branco para contraste
     flexShrink: 1,
     flexWrap: 'wrap',
   },
 
   exercicioDetalhes: {
     fontSize: 14,
-    color: '#666',
+    color: '#D9D9D9', // cinza claro para contraste
     marginBottom: 2,
   },
 
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
 
   progressText: {
     fontSize: 16,
-    color: '#333',
+    color: '#FFFFFF', // branco para contraste
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -208,9 +208,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 20,
     paddingVertical: 20,
-    backgroundColor: '#F5F5F5',
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
+    backgroundColor: '#1A1A1A', // <--- Altere para a mesma cor do `styles.container`
+    borderTopWidth: 0,
+    borderTopColor: 'transparent',
   },
 
   comecarButton: {
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   },
 
   menuContent: {
-    backgroundColor: 'white',
+    backgroundColor: '#1A1F2E', // fundo escuro
     borderTopRightRadius: 20,
     borderBottomRightRadius: 20,
     paddingHorizontal: 20,
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     height: '100%',
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 3.84,
     elevation: 5,
   },
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   menuTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#FFFFFF', // branco para contraste
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
 
   menuItemText: {
     fontSize: 16,
-    color: '#333',
+    color: '#FFFFFF', // branco para contraste
     marginLeft: 15,
     fontWeight: '500',
   },

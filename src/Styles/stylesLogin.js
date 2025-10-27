@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 const stylesLogin = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#2C2C2C', // Fundo cinza escuro
   },
   keyboardView: {
     flex: 1,
@@ -15,31 +15,31 @@ const stylesLogin = StyleSheet.create({
     paddingTop: 30,
     paddingBottom: 15,
     marginTop: 30,
-    backgroundColor: '#fff',
+    backgroundColor: '#2C2C2C', // Fundo cinza escuro
   },
   botaoVoltar: {
     padding: 8,
   },
   iconeVoltar: {
     fontSize: 24,
-    color: '#333',
+    color: '#FFFFFF', // Ícone branco
   },
   tituloHeader: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: '#FFFFFF', // Texto branco
     marginLeft: 15,
   },
   conteudo: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#2C2C2C', // Fundo cinza escuro
     paddingHorizontal: 30,
     paddingTop: 100,
   },
   titulo: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#FFFFFF', // Texto branco
     textAlign: 'center',
     marginBottom: 30,
     marginTop: -35,
@@ -51,20 +51,21 @@ const stylesLogin = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
+    color: '#FFFFFF', // Texto branco
     marginBottom: 8,
   },
   campo: {
-    backgroundColor: '#D9D9D9',
+    backgroundColor: '#D9D9D9', // Campo cinza claro
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: '#D9D9D9',
+    color: '#000000', // Texto preto nos campos
   },
   botaoEntrar: {
-    backgroundColor: '#405CBA',
+    backgroundColor: '#405CBA', // Azul vibrante
     borderRadius: 12,
     paddingVertical: 16,
     marginTop: 20,
@@ -79,24 +80,25 @@ const stylesLogin = StyleSheet.create({
     elevation: 8,
   },
   textoBotaoEntrar: {
-    color: '#fff',
+    color: '#FFFFFF', // Texto branco no botão
     fontSize: 18,
     fontWeight: '600',
   },
   linhaSeparadora: {
-    height: 3,
-    backgroundColor: '#e0e0e0',
+    height: 1,
+    backgroundColor: '#FFFFFF', // Linha branca fina
     marginVertical: 25,
     width: '100%',
+    opacity: 0.3,
   },
   rodape: {
-    backgroundColor: '#fff',
+    backgroundColor: '#2C2C2C', // Fundo cinza escuro
     paddingHorizontal: 30,
     paddingVertical: 20,
   },
   textoPoliticas: {
     fontSize: 12,
-    color: '#666',
+    color: '#D9D9D9', // Texto cinza claro
     textAlign: 'center',
     lineHeight: 18,
   },
@@ -119,7 +121,7 @@ const stylesLogin = StyleSheet.create({
     width: '90%',
     maxHeight: '90%',
     minHeight: '70%',
-    backgroundColor: '#fff',
+    backgroundColor: '#2C2C2C', // Fundo cinza escuro
     borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -134,7 +136,7 @@ const stylesLogin = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#2C2C2C', // Fundo cinza escuro
   },
   logoHeader: {
     width: 36,
@@ -148,12 +150,12 @@ const stylesLogin = StyleSheet.create({
   },
   iconeVoltarCard: {
     fontSize: 24,
-    color: '#333',
+    color: '#FFFFFF', // Ícone branco
   },
   tituloCard: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: '#FFFFFF', // Texto branco
     textAlign: 'center',
     marginTop: 4,
     marginBottom: 8,
@@ -166,7 +168,7 @@ const stylesLogin = StyleSheet.create({
   cardButtonContainer: {
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#2C2C2C', // Fundo cinza escuro
   },
   cardButton: {
     height: 44,
@@ -175,7 +177,7 @@ const stylesLogin = StyleSheet.create({
     borderColor: '#405CBA',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#2C2C2C', // Fundo cinza escuro
   },
   cardButtonText: {
     color: '#405CBA',
@@ -191,7 +193,7 @@ const stylesLogin = StyleSheet.create({
   },
   textoCard: {
     fontSize: 14,
-    color: '#333',
+    color: '#FFFFFF', // Texto branco
     lineHeight: 20,
     marginBottom: 15,
     textAlign: 'justify',

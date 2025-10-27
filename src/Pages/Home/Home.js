@@ -5,25 +5,23 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  ImageBackground,
   StatusBar,
-  Image,
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Svg, Path, Circle } from 'react-native-svg';
+import { useTheme } from '../../context/ThemeContext';
 
 
-// 1. Importe o novo componente HeaderHome
-import HeaderHome from '../../Components/header_home/HeaderHome';
 // --- Constantes de Tema ---
 const COLORS = {
-  primary: '#3A3A3A',
-  secondary: '#4A90E2',
+  primary: '#2C2C2C', // Fundo cinza escuro
+  secondary: '#405CBA', // Azul vibrante
   white: '#FFFFFF',
-  lightGray: '#F4F4F6',
-  gray: '#A9A9A9',
+  lightGray: '#2C2C2C', // Fundo cinza escuro
+  gray: '#D9D9D9', // Cinza claro para textos secundários
+  cardBackground: '#3A3A3A', // Fundo dos cards (cinza médio)
 };
 
 const SIZES = {
@@ -36,22 +34,22 @@ const SIZES = {
 };
 
 // --- Componente FeatureButton ---
-const FeatureButton = ({ iconName, label, onPress }) => {
+const FeatureButton = ({ iconName, label, onPress, colors }) => {
   return (
-    <TouchableOpacity style={styles.featureButtonContainer} onPress={onPress}>
-      <MaterialCommunityIcons name={iconName} size={40} color={COLORS.secondary} />
-      <Text style={styles.featureButtonLabel}>{label}</Text>
+    <TouchableOpacity style={[styles.featureButtonContainer, { backgroundColor: colors.cardBackground }]} onPress={onPress}>
+      <MaterialCommunityIcons name={iconName} size={40} color={colors.primary} />
+      <Text style={[styles.featureButtonLabel, { color: colors.textPrimary }]}>{label}</Text>
     </TouchableOpacity>
   );
 };
 
 // --- Card de Analytics (gráficos simulados) ---
-const AnalyticsCard = ({ onPress }) => {
+const AnalyticsCard = ({ onPress, colors }) => {
   const bars = [40, 25, 55, 60, 52];
   const weekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
   return (
-    <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={styles.analyticsCard}>
-      <Text style={styles.analyticsMonth}>Janeiro,2025</Text>
+    <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={[styles.analyticsCard, { backgroundColor: colors.cardBackground }]}>
+      <Text style={[styles.analyticsMonth, { color: colors.textPrimary }]}>Janeiro,2025</Text>
       <View style={styles.analyticsInner}>
         {/* Área (esquerda) */}
         <View style={styles.areaWrapper}>
@@ -77,31 +75,31 @@ const AnalyticsCard = ({ onPress }) => {
                 .join(' ')}`;
               return (
                 <>
-                  <Path d={areaPath} fill="#3FA2FF" />
-                  <Path d={linePath} fill="none" stroke="#4A90E2" strokeWidth={2} />
+                  <Path d={areaPath} fill={colors.primary} />
+                  <Path d={linePath} fill="none" stroke={colors.primary} strokeWidth={2} />
                   {pts.map((p, idx) => (
-                    <Circle key={idx} cx={p.x} cy={p.y} r={3} fill="#FFFFFF" stroke="#4A90E2" strokeWidth={1.5} />
+                    <Circle key={idx} cx={p.x} cy={p.y} r={3} fill="#FFFFFF" stroke={colors.primary} strokeWidth={1.5} />
                   ))}
                 </>
               );
             })()}
           </Svg>
-          <Text style={styles.monthLabel}>Janeiro</Text>
+          <Text style={[styles.monthLabel, { color: colors.textPrimary }]}>Janeiro</Text>
         </View>
 
         {/* Divisor */}
-        <View style={styles.analyticsDivider} />
+        <View style={[styles.analyticsDivider, { backgroundColor: colors.divider }]} />
 
         {/* Barras (direita) */}
         <View style={styles.barWrapper}>
           <View style={styles.barsRow}>
             {bars.map((h, idx) => (
-              <View key={idx} style={[styles.bar, { height: h }]} />
+              <View key={idx} style={[styles.bar, { height: h, backgroundColor: colors.primary }]} />
             ))}
           </View>
           <View style={styles.weekdaysRow}>
             {weekdays.map((d) => (
-              <Text key={d} style={styles.weekdayText}>{d}</Text>
+              <Text key={d} style={[styles.weekdayText, { color: colors.textPrimary }]}>{d}</Text>
             ))}
           </View>
         </View>
@@ -112,6 +110,7 @@ const AnalyticsCard = ({ onPress }) => {
 
 // --- Componente Principal da Tela: Home ---
 const Home = ({ navigation }) => {
+  const { colors, isDark } = useTheme();
   const features = [
     { id: 1, icon: 'account-group-outline', label: 'Professores', screen: 'Professores' },
     { id: 2, icon: 'weight-lifter', label: 'Meus treinos', screen: 'MeuTreino' },
@@ -119,36 +118,147 @@ const Home = ({ navigation }) => {
     { id: 4, icon: 'account-circle-outline', label: 'Meu plano', screen: 'Plano' },
   ];
 
+  // Criar estilos dinâmicos baseados no tema
+  const dynamicStyles = StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    container: {
+      flex: 1,
+      paddingHorizontal: SIZES.medium,
+    },
+    headerInline: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: SIZES.small,
+      marginBottom: SIZES.small,
+      paddingHorizontal: 0,
+    },
+    logoContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    logoText: {
+      fontSize: SIZES.large,
+      fontWeight: '700',
+      color: colors.textPrimary,
+      textShadowColor: isDark ? 'rgba(64, 92, 186, 0.3)' : 'transparent',
+      textShadowOffset: { width: 0, height: 0 },
+      textShadowRadius: 10,
+    },
+    welcomeSection: {
+      marginTop: SIZES.small,
+      marginBottom: SIZES.large,
+    },
+    h1: {
+      fontSize: SIZES.xlarge,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+    },
+    body2: {
+      fontSize: SIZES.font,
+      color: colors.textSecondary,
+      marginTop: SIZES.base / 2,
+    },
+    analyticsCard: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 16,
+      paddingVertical: SIZES.medium,
+      paddingHorizontal: SIZES.medium,
+      marginBottom: SIZES.large,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: isDark ? 0.15 : 0.08,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    analyticsMonth: {
+      position: 'absolute',
+      top: 8,
+      right: 12,
+      color: colors.textPrimary,
+      fontSize: 12,
+    },
+    monthLabel: {
+      marginTop: 8,
+      fontSize: 12,
+      color: colors.textPrimary,
+      fontWeight: '600',
+    },
+    analyticsDivider: {
+      width: 1,
+      height: 110,
+      backgroundColor: colors.divider,
+      marginHorizontal: SIZES.base,
+      opacity: 0.3,
+    },
+    weekdayText: {
+      fontSize: 10,
+      color: colors.textPrimary,
+    },
+    featureButtonContainer: {
+      backgroundColor: colors.cardBackground,
+      width: '48%',
+      padding: SIZES.medium,
+      borderRadius: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: SIZES.medium,
+      aspectRatio: 1,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: isDark ? 0.15 : 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    featureButtonLabel: {
+      fontSize: SIZES.medium,
+      fontWeight: '500',
+      color: colors.textPrimary,
+      marginTop: SIZES.base,
+    },
+  });
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaView style={dynamicStyles.safeArea}>
+      <StatusBar barStyle={colors.statusBar} />
       <ScrollView
-        style={styles.container}
+        style={dynamicStyles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: SIZES.large }}
       >
-        {/* 2. Use o novo componente HeaderHome aqui */}
-        <HeaderHome 
-          onProfilePress={() => navigation.navigate('Perfil')}
-
-        />
+        {/* Cabeçalho com logo OP e ícone de perfil */}
+        <View style={dynamicStyles.headerInline}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
+          </TouchableOpacity>
+          <View style={dynamicStyles.logoContainer}>
+            <Text style={dynamicStyles.logoText}>OP</Text>
+          </View>
+          <TouchableOpacity onPress={() => navigation.navigate('Perfil')}>
+            <Ionicons name="person-circle-outline" size={32} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
 
         {/* --- Mensagem de Boas-Vindas --- */}
-        <View style={styles.welcomeSection}>
-          <Text style={styles.h1}>Que bom ter você aqui!</Text>
-          <Text style={styles.body2}>Seja bem vindo a academia saúde em ação!</Text>
+        <View style={dynamicStyles.welcomeSection}>
+          <Text style={dynamicStyles.h1}>Que bom ter você aqui!</Text>
+          <Text style={dynamicStyles.body2}>Seja bem vindo a academia saúde em ação!</Text>
         </View>
 
         {/* --- Card com Gráficos --- */}
-        <AnalyticsCard onPress={() => navigation.navigate('Desempenho')} />
+        <AnalyticsCard onPress={() => navigation.navigate('Desempenho')} colors={colors} />
 
         {/* --- Grade de Funcionalidades --- */}
-        <View style={styles.featuresGrid}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: SIZES.small }}>
           {features.map((feature) => (
             <FeatureButton
               key={feature.id}
               iconName={feature.icon}
               label={feature.label}
+              colors={colors}
               onPress={() => {
                 if(feature.screen === 'Perfil'){
                   navigation.navigate('Perfil')
@@ -171,13 +281,32 @@ const Home = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.primary, // Fundo cinza escuro
   },
   container: {
     flex: 1,
     paddingHorizontal: SIZES.medium,
   },
-  // 3. Os estilos 'header' e 'logoImage' antigos foram removidos daqui
+  headerInline: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: SIZES.small,
+    marginBottom: SIZES.small,
+    paddingHorizontal: 0,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoText: {
+    fontSize: SIZES.large,
+    fontWeight: '700',
+    color: COLORS.white,
+    textShadowColor: 'rgba(64, 92, 186, 0.3)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
   welcomeSection: {
     marginTop: SIZES.small,
     marginBottom: SIZES.large,
@@ -185,22 +314,22 @@ const styles = StyleSheet.create({
   h1: {
     fontSize: SIZES.xlarge,
     fontWeight: 'bold',
-    color: COLORS.primary,
+    color: COLORS.white, // Texto branco
   },
   body2: {
     fontSize: SIZES.font,
-    color: COLORS.gray,
+    color: COLORS.gray, // Cinza claro
     marginTop: SIZES.base / 2,
   },
   analyticsCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.cardBackground, // Fundo cinza médio
     borderRadius: 16,
     paddingVertical: SIZES.medium,
     paddingHorizontal: SIZES.medium,
     marginBottom: SIZES.large,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -208,7 +337,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 12,
-    color: COLORS.gray,
+    color: COLORS.white, // Texto branco
     fontSize: 12,
   },
   analyticsInner: {
@@ -236,14 +365,15 @@ const styles = StyleSheet.create({
   monthLabel: {
     marginTop: 8,
     fontSize: 12,
-    color: COLORS.primary,
+    color: COLORS.white, // Texto branco
     fontWeight: '600',
   },
   analyticsDivider: {
     width: 1,
     height: 110,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.gray, // Linha cinza claro
     marginHorizontal: SIZES.base,
+    opacity: 0.3,
   },
   barWrapper: {
     flex: 1,
@@ -259,7 +389,7 @@ const styles = StyleSheet.create({
   bar: {
     width: 18,
     borderRadius: 4,
-    backgroundColor: '#AFC0D9',
+    backgroundColor: '#405CBA', // Azul vibrante
   },
   weekdaysRow: {
     flexDirection: 'row',
@@ -269,7 +399,7 @@ const styles = StyleSheet.create({
   },
   weekdayText: {
     fontSize: 10,
-    color: COLORS.gray,
+    color: COLORS.white, // Texto branco
   },
   featuresGrid: {
     flexDirection: 'row',
@@ -278,7 +408,7 @@ const styles = StyleSheet.create({
     marginTop: SIZES.small,
   },
   featureButtonContainer: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.cardBackground, // Fundo cinza médio
     width: '48%',
     padding: SIZES.medium,
     borderRadius: 15,
@@ -288,14 +418,14 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 3.84,
     elevation: 5,
   },
   featureButtonLabel: {
     fontSize: SIZES.medium,
     fontWeight: '500',
-    color: COLORS.primary,
+    color: COLORS.white, // Texto branco
     marginTop: SIZES.base,
   },
 });

@@ -14,11 +14,23 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import HeaderSeta from '../../Components/header_seta/header_seta';
 import styles from '../../Styles/TreinoSextastyle';
 import { playSuccessSound } from '../../Components/Sounds';
+import { useTheme } from '../../context/ThemeContext';
 
 // ...restante do código permanece igual...
 
 const TreinoSexta = ({ navigation, route }) => {
   console.log('Renderizando TreinoSexta');
+  const { isDark, colors } = useTheme();
+  const theme = {
+    contentBg: isDark ? '#2B2F36' : '#F5F5F5',
+    cardBg: isDark ? '#3A3F47' : '#FFFFFF',
+    cardBorder: isDark ? '#525862' : 'rgba(0,0,0,0.08)',
+    textPrimary: isDark ? '#FFFFFF' : '#000000',
+    textSecondary: isDark ? '#C9CEDA' : '#666666',
+    modalBg: isDark ? '#1A1F2E' : '#FFFFFF',
+    modalTitle: isDark ? '#FFFFFF' : '#000000',
+    modalText: isDark ? '#C9CEDA' : '#222222',
+  };
   // Exercícios de sexta-feira: Costas e Abdomen
   const exercicios = {
     costas: [
@@ -182,20 +194,21 @@ const TreinoSexta = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#405CBA" />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor="#405CBA" />
 
       {/* Header com seta de voltar e menu */}
       <HeaderSeta navigation={navigation} mesAno={null} />
 
+
       {/* Conteúdo Principal */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.content, { backgroundColor: theme.contentBg }]} showsVerticalScrollIndicator={false}>
         {/* Seção Costas */}
         <View style={styles.secaoContainer}>
           <View style={styles.secaoHeader}>
             <Text style={styles.secaoTitle}>Costas</Text>
           </View>
           {exercicios.costas.map((exercicio) => (
-            <View key={exercicio.id} style={styles.exercicioCard}>
+            <View key={exercicio.id} style={[styles.exercicioCard, { backgroundColor: theme.cardBg, borderColor: theme.cardBorder, borderWidth: 1 }]}>
               <TouchableOpacity 
                 style={styles.checkbox}
                 onPress={() => toggleExercicio(exercicio.id)}
@@ -211,11 +224,11 @@ const TreinoSexta = ({ navigation, route }) => {
               )}
               <View style={styles.exercicioInfo}>
                 <View style={styles.exercicioNomeContainer}>
-                  <Text style={styles.exercicioNome}>{exercicio.id} {exercicio.nome}</Text>
+                  <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>{exercicio.id} {exercicio.nome}</Text>
                 </View>
-                <Text style={styles.exercicioDetalhes}>Série: {exercicio.series}</Text>
-                <Text style={styles.exercicioDetalhes}>Repetição: {exercicio.repeticoes}</Text>
-                <Text style={styles.exercicioDetalhes}>Carga: {exercicio.carga}(kg)</Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Série: {exercicio.series}</Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Repetição: {exercicio.repeticoes}</Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Carga: {exercicio.carga}(kg)</Text>
               </View>
               <TouchableOpacity style={styles.infoButton} onPress={() => handleAbrirModalExercicio(exercicio)}>
                 <Ionicons name="information-circle" size={24} color="#405CBA" />
@@ -229,7 +242,7 @@ const TreinoSexta = ({ navigation, route }) => {
             <Text style={styles.secaoTitle}>Abdomen</Text>
           </View>
           {exercicios.abdomen.map((exercicio) => (
-            <View key={exercicio.id} style={styles.exercicioCard}>
+            <View key={exercicio.id} style={[styles.exercicioCard, { backgroundColor: theme.cardBg, borderColor: theme.cardBorder, borderWidth: 1 }]}>
               <TouchableOpacity 
                 style={styles.checkbox}
                 onPress={() => toggleExercicio(exercicio.id)}
@@ -245,11 +258,11 @@ const TreinoSexta = ({ navigation, route }) => {
               )}
               <View style={styles.exercicioInfo}>
                 <View style={styles.exercicioNomeContainer}>
-                  <Text style={styles.exercicioNome}>{exercicio.id} {exercicio.nome}</Text>
+                  <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>{exercicio.id} {exercicio.nome}</Text>
                 </View>
-                <Text style={styles.exercicioDetalhes}>Série: {exercicio.series}</Text>
-                <Text style={styles.exercicioDetalhes}>Repetição: {exercicio.repeticoes}</Text>
-                <Text style={styles.exercicioDetalhes}>Carga: {exercicio.carga}(kg)</Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Série: {exercicio.series}</Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Repetição: {exercicio.repeticoes}</Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Carga: {exercicio.carga}(kg)</Text>
               </View>
               <TouchableOpacity style={styles.infoButton} onPress={() => handleAbrirModalExercicio(exercicio)}>
                 <Ionicons name="information-circle" size={24} color="#405CBA" />
@@ -301,15 +314,15 @@ const TreinoSexta = ({ navigation, route }) => {
         onRequestClose={handleFecharModalExercicio}
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: '#fff', borderRadius: 20, padding: 20, width: 320, alignItems: 'flex-start', elevation: 10 }}>
-            <Text style={{ color: '#888', fontSize: 13, marginBottom: 8, fontWeight: 'bold' }}>Sobre o Exercício</Text>
+          <View style={{ backgroundColor: theme.modalBg, borderRadius: 20, padding: 20, width: 320, alignItems: 'flex-start', elevation: 10 }}>
+            <Text style={{ color: theme.modalText, fontSize: 13, marginBottom: 8, fontWeight: 'bold' }}>Sobre o Exercício</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
               <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#405CBA', marginRight: 8 }} />
-              <Text style={{ fontWeight: 'bold', fontSize: 17, color: '#222' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 17, color: theme.modalTitle }}>
                 {modalExercicio.exercicio?.nome}
               </Text>
             </View>
-            <Text style={{ fontSize: 15, color: '#222', marginBottom: 16 }}>
+            <Text style={{ fontSize: 15, color: theme.modalText, marginBottom: 16 }}>
               {modalExercicio.exercicio?.descricao || 'Descrição do exercício.'}
             </Text>
             <TouchableOpacity onPress={handleFecharModalExercicio} style={{ alignSelf: 'flex-end', marginTop: 8 }}>
@@ -327,14 +340,14 @@ const TreinoSexta = ({ navigation, route }) => {
         onRequestClose={handleCancelarFinalizar}
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: 'white', borderRadius: 16, padding: 20, alignItems: 'center', width: 280 }}>
+          <View style={{ backgroundColor: theme.modalBg, borderRadius: 16, padding: 20, alignItems: 'center', width: 280 }}>
             <MaterialIcons name="check-circle" size={40} color="#405CBA" style={{ marginBottom: 12 }} />
-            <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginBottom: 16 }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginBottom: 16, color: theme.modalTitle }}>
               Finalizar treino?
             </Text>
             <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
               <TouchableOpacity
-                style={{ backgroundColor: '#F0F0F0', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20, flex: 0.45 }}
+                style={{ backgroundColor: isDark ? '#2B2F36' : '#F0F0F0', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20, flex: 0.45 }}
                 onPress={handleCancelarFinalizar}
               >
                 <Text style={{ color: '#405CBA', fontWeight: 'bold', fontSize: 14, textAlign: 'center' }}>Cancelar</Text>
@@ -358,12 +371,12 @@ const TreinoSexta = ({ navigation, route }) => {
         onRequestClose={handleFecharAviso}
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: 'white', borderRadius: 16, padding: 24, alignItems: 'center', width: 300 }}>
+          <View style={{ backgroundColor: theme.modalBg, borderRadius: 16, padding: 24, alignItems: 'center', width: 300 }}>
             <MaterialIcons name="error-outline" size={48} color="#F5A623" style={{ marginBottom: 12 }} />
-            <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 8 }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 8, color: theme.modalTitle }}>
               Você ainda não completou todos os exercícios.
             </Text>
-            <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 24 }}>
+            <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 24, color: theme.modalText }}>
               Complete todos os exercícios antes de finalizar o treino.
             </Text>
             <TouchableOpacity

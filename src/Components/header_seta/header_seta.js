@@ -1,28 +1,28 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../../context/ThemeContext";
 
-const DesempenhoHeader = ({ navigation, mesAno }) => {
+const DesempenhoHeader = ({ navigation, mesAno, isDark }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
+  const { colors } = useTheme();
 
   const handleVoltar = () => {
-    if (navigation) {
-      navigation.goBack();
-    }
+    if (navigation) navigation.goBack();
   };
 
-  const handleAbrirMenu = () => {
-    setMenuVisivel(true);
-  };
-
-  const handleFecharMenu = () => {
-    setMenuVisivel(false);
-  };
+  const handleAbrirMenu = () => setMenuVisivel(true);
+  const handleFecharMenu = () => setMenuVisivel(false);
 
   const handleNavegar = (nomeDaTela) => {
     handleFecharMenu();
     navigation.navigate(nomeDaTela);
   };
+
+  const iconColor = isDark ? "#FFFFFF" : "#000000";
+  const menuTextColor = isDark ? "#FFFFFF" : "#333333";
+  const menuBg = isDark ? "#2C2C2C" : "#FFFFFF";
+  const overlayColor = isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
 
   return (
     <>
@@ -33,82 +33,57 @@ const DesempenhoHeader = ({ navigation, mesAno }) => {
         onRequestClose={handleFecharMenu}
       >
         <TouchableOpacity
-          style={styles.menuOverlay}
+          style={[styles.menuOverlay, { backgroundColor: overlayColor }]}
           onPress={handleFecharMenu}
           activeOpacity={1}
         >
-          <View style={styles.menuContent}>
-            <Text style={styles.menuTitle}>Menu</Text>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Home")}
-            >
-              <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Home</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Perfil")}
-            >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meu Perfil</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Chat")}
-            >
-              <Ionicons name="chatbubble-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Chat</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("LojaProdutos")}
-            >
-              <Ionicons name="cart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Loja</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("LojaFavoritos")}
-            >
-              <Ionicons name="heart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Favoritos</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("LojaReservas")}
-            >
-              <Ionicons name="bookmark-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Reservas</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Desempenho")}
-            >
-              <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Desempenho</Text>
-            </TouchableOpacity>
+          <View style={[styles.menuContent, { backgroundColor: menuBg }]}>
+            <Text style={[styles.menuTitle, { color: menuTextColor }]}>Menu</Text>
+
+            {[
+              { name: "home-outline", text: "Home", screen: "Home" },
+              { name: "person-outline", text: "Meu Perfil", screen: "Perfil" },
+              { name: "chatbubble-outline", text: "Chat", screen: "Chat" },
+              { name: "cart-outline", text: "Loja", screen: "LojaProdutos" },
+              { name: "heart-outline", text: "Favoritos", screen: "LojaFavoritos" },
+              { name: "bookmark-outline", text: "Reservas", screen: "LojaReservas" },
+              { name: "bar-chart-outline", text: "Desempenho", screen: "Desempenho" },
+            ].map((item) => (
+              <TouchableOpacity
+                key={item.screen}
+                style={styles.menuItem}
+                onPress={() => handleNavegar(item.screen)}
+              >
+                <Ionicons name={item.name} size={24} color={menuTextColor} />
+                <Text style={[styles.menuItemText, { color: menuTextColor }]}>
+                  {item.text}
+                </Text>
+              </TouchableOpacity>
+            ))}
+
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Inicial")}
             >
               <Ionicons name="log-out-outline" size={24} color="#dc3545" />
-              <Text style={[styles.menuItemText, { color: "#dc3545" }]}>
-                Sair
-              </Text>
+              <Text style={[styles.menuItemText, { color: "#dc3545" }]}>Sair</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
+
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerButton} onPress={handleVoltar}>
-          <Ionicons name="arrow-back" size={24}  color='Black'/>
+          <Ionicons name="arrow-back" size={24} color={iconColor} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.headerButton} onPress={handleAbrirMenu}>
-          <Ionicons name="menu" size={28}  color='Black' />
+          <Ionicons name="menu" size={28} color={iconColor} />
         </TouchableOpacity>
       </View>
-      <Text style={styles.monthYearText}>{mesAno}</Text>
+
+      {mesAno && (
+        <Text style={[styles.monthYearText, { color: iconColor }]}>{mesAno}</Text>
+      )}
     </>
   );
 };
@@ -116,13 +91,11 @@ const DesempenhoHeader = ({ navigation, mesAno }) => {
 const styles = StyleSheet.create({
   menuOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
     alignItems: "flex-end",
   },
   menuContent: {
     height: "100%",
     width: "75%",
-    backgroundColor: "white",
     paddingTop: 80,
     paddingHorizontal: 20,
     shadowColor: "#000",
@@ -135,7 +108,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 30,
-    color: "#333",
   },
   menuItem: {
     flexDirection: "row",
@@ -145,10 +117,8 @@ const styles = StyleSheet.create({
   menuItemText: {
     fontSize: 18,
     marginLeft: 15,
-    color: "#333",
     fontWeight: "500",
   },
-
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -163,7 +133,6 @@ const styles = StyleSheet.create({
   monthYearText: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "white",
     textAlign: "left",
   },
 });

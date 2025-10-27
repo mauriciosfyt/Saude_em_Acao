@@ -1,12 +1,12 @@
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
+  // Container principal
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    // backgroundColor removido — agora controlado pelo tema no componente
   },
 
-  // Header sem cor de fundo, apenas seta e menu
   header: {
     backgroundColor: 'transparent',
     paddingTop: 16,
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#405CBA', // Azul para manter padrão visual
+    color: '#405CBA',
   },
 
   menuButton: {
@@ -40,13 +40,13 @@ const styles = StyleSheet.create({
   // Conteúdo Principal
   content: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
     paddingHorizontal: 20,
     paddingTop: 20,
+    // backgroundColor removido — controlado pelo tema no componente
   },
 
   // Seções de Exercícios
@@ -71,30 +71,27 @@ const styles = StyleSheet.create({
 
   // Cards de Exercícios
   exercicioCard: {
-    backgroundColor: '#ffffff',
     borderRadius: 15,
     padding: 15,
     marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000000ff',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
+    // Cores aplicadas dinamicamente no componente (theme.cardBg)
   },
 
   checkbox: {
     width: 24,
-  height: 24,
-  borderRadius: 12,
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: 'transparent', // sem fundo
-  marginRight: 15,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    marginRight: 15,
   },
 
   exercicioImage: {
@@ -111,14 +108,14 @@ const styles = StyleSheet.create({
   exercicioNome: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 5,
+    // Cor controlada via tema no componente
   },
 
   exercicioDetalhes: {
     fontSize: 14,
-    color: '#666',
     marginBottom: 2,
+    // Cor controlada via tema no componente
   },
 
   infoButton: {
@@ -127,22 +124,23 @@ const styles = StyleSheet.create({
 
   // Modal Sobre o Exercício
   modalExercicioContainer: {
-    backgroundColor: '#fff',
     borderRadius: 20,
     padding: 24,
     width: '85%',
     alignItems: 'flex-start',
   },
+
   modalExercicioTitulo: {
-    color: '#888',
     fontSize: 12,
     marginBottom: 8,
   },
+
   modalExercicioNomeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
   },
+
   modalExercicioPonto: {
     width: 10,
     height: 10,
@@ -150,19 +148,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#405CBA',
     marginRight: 8,
   },
+
   modalExercicioNome: {
     fontWeight: 'bold',
     fontSize: 16,
   },
+
   modalExercicioDescricao: {
     fontSize: 15,
-    color: '#222',
     marginBottom: 16,
   },
+
   modalExercicioFechar: {
     alignSelf: 'flex-end',
     marginTop: 8,
   },
+
   modalExercicioFecharTexto: {
     color: '#405CBA',
     fontWeight: 'bold',
@@ -177,7 +178,6 @@ const styles = StyleSheet.create({
 
   progressText: {
     fontSize: 16,
-    color: '#333',
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -200,9 +200,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 20,
     paddingVertical: 20,
-    backgroundColor: '#F5F5F5',
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
+    borderTopWidth: 0,
+    borderTopColor: 'transparent',
+    // Cor aplicada dinamicamente no componente conforme tema
   },
 
   comecarButton: {
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
 
-  // Estilos do Menu Modal
+  // Menu lateral
   menuOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -247,7 +247,6 @@ const styles = StyleSheet.create({
   },
 
   menuContent: {
-    backgroundColor: 'white',
     borderTopRightRadius: 20,
     borderBottomRightRadius: 20,
     paddingHorizontal: 20,
@@ -256,15 +255,15 @@ const styles = StyleSheet.create({
     height: '100%',
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 3.84,
     elevation: 5,
+    // backgroundColor definido via tema
   },
 
   menuTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -280,7 +279,6 @@ const styles = StyleSheet.create({
 
   menuItemText: {
     fontSize: 16,
-    color: '#333',
     marginLeft: 15,
     fontWeight: '500',
   },

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DesempenhoHeader from '../../Components/header_seta/header_seta';
 import {
   View,
@@ -9,16 +9,15 @@ import {
   Image,
   Modal,
   StyleSheet,
-  useColorScheme,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
-import { useThemePreference } from '../../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
+import createStyles from '../../Styles/DesempenhoStyles';
 
 const Desempenho = ({ navigation }) => {
-  const colorScheme = useColorScheme();
-  const { isDark: forcedDark } = useThemePreference();
-  const isDark = forcedDark === undefined ? colorScheme === 'dark' : forcedDark;
+  const [menuVisivel, setMenuVisivel] = useState(false);
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(isDark);
   const dadosDesempenho = {
     mesAno: 'Outubro, 2025',
     progressoGeral: 50,
@@ -27,169 +26,99 @@ const Desempenho = ({ navigation }) => {
     ultimoTreino: '20/31',
   };
 
-  // Header e menu agora estão em um componente separado
+  const handleAbrirMenu = () => setMenuVisivel(true);
+  const handleFecharMenu = () => setMenuVisivel(false);
+  const handleNavegar = (tela) => {
+    handleFecharMenu();
+    if (navigation) navigation.navigate(tela);
+  };
+
+  const logoutColor = '#E24B4B';
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle={'light-content'} backgroundColor={'#405CBA'} />
-      <View style={[styles.topSection, { backgroundColor: '#405CBA' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.primary }]}>
+      <StatusBar barStyle={'light-content'} backgroundColor={colors.primary} />
+      <View style={[styles.topSection, { backgroundColor: colors.primary }]}>
         <DesempenhoHeader navigation={navigation} paddingHorizontal={2} />
-        <Text paddingHorizontal={20} style={[styles.monthYearText]}>{dadosDesempenho.mesAno} </Text>
+        <Text paddingHorizontal={20} style={[styles.monthYearText, { color: colors.headerText }]}>{dadosDesempenho.mesAno} </Text>
         <View paddingHorizontal={20} style={styles.progressContainer}>
-          <View style={[styles.progressBar, { backgroundColor: '#1e40af' }]}>
+          <View style={[styles.progressBar, { backgroundColor: colors.headerText }]}>
             <View style={[styles.progressFill, { width: `${dadosDesempenho.progressoGeral}%` }]} />
           </View>
-          <Text style={styles.progressText}>{dadosDesempenho.progressoGeral}%</Text>
+          <Text style={[styles.progressText, { color: colors.headerText }]}>{dadosDesempenho.progressoGeral}%</Text>
         </View>
       </View>
-      <View style={[styles.bottomSection, isDark && { backgroundColor: '#3A3A3A' }]}>
+      <View style={[styles.bottomSection, { backgroundColor: colors.background }]}>
         <View style={styles.progressTitleContainer}>
-          <Text style={[styles.progressTitle, isDark && { color: '#FFFFFF' }]}>Progresso</Text>
+          <Text style={[styles.progressTitle, { color: colors.textPrimary }]}>Progresso</Text>
           <Image source={require('../../../assets/icons/imageGráficoProgresso.png')} style={styles.progressTitleIcon} />
         </View>
         <View style={styles.cardsContainer}>
           <View style={styles.cardRow}>
-            <View style={[styles.iconCard, isDark && { backgroundColor: '#2563eb' }]}>
+            <View style={[styles.iconCard, { backgroundColor: colors.primary }]}>
               <Image source={require('../../../assets/icons/imageGráfico.png')} style={styles.iconImage} />
             </View>
-            <View style={[styles.infoCard, isDark && { backgroundColor: '#2B2B2B' }]}>
-              <Text style={[styles.infoLabel, isDark && { color: '#D1D5DB' }]}>Treinos realizados esse mês</Text>
-              <Text style={[styles.infoValue, isDark && { color: '#FFFFFF' }]}>
+            <View style={[styles.infoCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Treinos realizados esse mês</Text>
+              <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
                 {dadosDesempenho.treinosRealizados}/{dadosDesempenho.treinosTotal}
               </Text>
             </View>
           </View>
           <View style={styles.cardRow}>
-            <View style={[styles.iconCard, isDark && { backgroundColor: '#2563eb' }]}>
+            <View style={[styles.iconCard, { backgroundColor: colors.primary }]}>
               <Image source={require('../../../assets/icons/imageGráfico.png')} style={styles.iconImage} />
             </View>
-            <View style={[styles.infoCard, isDark && { backgroundColor: '#2B2B2B' }]}>
-              <Text style={[styles.infoLabel, isDark && { color: '#D1D5DB' }]}>Ultimo treino realizado</Text>
-              <Text style={[styles.infoValue, isDark && { color: '#FFFFFF' }]}>{dadosDesempenho.ultimoTreino}</Text>
+            <View style={[styles.infoCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Ultimo treino realizado</Text>
+              <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{dadosDesempenho.ultimoTreino}</Text>
             </View>
           </View>
         </View>
       </View>
+
+      {/* Menu lateral/modal — fica escuro quando isDark */}
+      <Modal animationType="fade" transparent visible={menuVisivel} onRequestClose={handleFecharMenu}>
+        <TouchableOpacity
+          style={[styles.menuOverlay, { backgroundColor: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)' }]}
+          onPress={handleFecharMenu}
+          activeOpacity={1}
+        >
+          <View
+            style={[styles.menuContent, { backgroundColor: isDark ? '#1A1F2E' : '#FFFFFF' }]}
+            onStartShouldSetResponder={() => true}
+          >
+            <Text style={[styles.menuTitle, { color: isDark ? '#FFFFFF' : '#333' }]}>Menu</Text>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Home')}>
+              <Ionicons name="home-outline" size={20} color={isDark ? '#FFFFFF' : '#333'} />
+              <Text style={[styles.menuItemText, { color: isDark ? '#FFFFFF' : '#333' }]}>Home</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Perfil')}>
+              <Ionicons name="person-outline" size={20} color={isDark ? '#FFFFFF' : '#333'} />
+              <Text style={[styles.menuItemText, { color: isDark ? '#FFFFFF' : '#333' }]}>Meu Perfil</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Chat')}>
+              <Ionicons name="chatbubble-outline" size={20} color={isDark ? '#FFFFFF' : '#333'} />
+              <Text style={[styles.menuItemText, { color: isDark ? '#FFFFFF' : '#333' }]}>Chat</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.menuItem, styles.menuItemActive]} onPress={() => handleNavegar('Desempenho')}>
+              <Ionicons name="bar-chart-outline" size={20} color="#405CBA" />
+              <Text style={[styles.menuItemText, styles.menuItemTextActive]}>Desempenho</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Inicial')}>
+              <Ionicons name="log-out-outline" size={20} color="#E24B4B" />
+              <Text style={[styles.menuItemText, { color: '#E24B4B' }]}>Sair</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  // --- Estilos Originais da Tela (sem alterações) ---
-  container: {
-    flex: 1,
-    backgroundColor: '#405CBA',
-  },
-  topSection: {
-    flex: 0.4,
-    paddingTop: 10,
-    paddingBottom: 0,
-    justifyContent: 'space-between',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 40,
-  },
-  headerButton: {
-    padding: 8,
-  },
-  monthYearText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: 'white',
-    textAlign: 'left',
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  progressBar: {
-    flex: 1,
-    height: 8,
-    backgroundColor: '#405CBA',
-    borderRadius: 4,
-    marginRight: 15,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: 'white',
-    borderRadius: 4,
-  },
-  progressText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-    minWidth: 50,
-  },
-  bottomSection: {
-    flex: 0.6,
-    backgroundColor: 'white',
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 0,
-    paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 20,
-  },
-  progressTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 25,
-  },
-  progressTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginRight: 10,
-  },
-  progressTitleIcon: {
-    width: 16,
-    height: 16,
-    resizeMode: 'contain',
-  },
-  cardsContainer: {
-    flex: 1,
-  },
-  cardRow: {
-    flexDirection: 'row',
-    marginBottom: 15,
-    alignItems: 'center',
-  },
-  iconCard: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#405CBA',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-    elevation: 5,
-  },
-  iconImage: {
-    width: 26,
-    height: 26,
-    tintColor: '#ffffff',
-    resizeMode: 'contain',
-  },
-  infoCard: {
-    flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 15,
-    elevation: 5,
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 5,
-  },
-  infoValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
-  },
-});
 
 export default Desempenho;
