@@ -35,7 +35,7 @@ const GerenciarPersonal = () => {
           <h1 className="personal-title">Personal</h1>
           <div className="personal-search-container">
             <SearchIcon />
-            <input className="personal-search-input" type="text" placeholder="Pesquisa" />
+            <input className="personal-search-input" type="text" placeholder="Pesquisar nome do personal" />
           </div>
           <Link to="/AdicionarPersonal" className="personal-add-button-link">
             <button className="personal-add-button">Novo Personal</button>

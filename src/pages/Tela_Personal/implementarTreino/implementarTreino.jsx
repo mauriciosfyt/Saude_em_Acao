@@ -1,5 +1,5 @@
 import React, { useState, useRef} from 'react';
-import MenuPersonal from '../../../components/MenuPersonal/menuPersonal';
+import MenuPersonal from '../../../components/MenuPersonal/MenuPersonal';
 import './implementarTreino.css';
 import baixo from '../../../assets/icones/down-arrow.svg';
 import cima  from '../../../assets/icones/up-arrow.svg';

@@ -43,7 +43,7 @@ const GerenciarReservas = () => {
                         <input
                             className="reservas-search-input"
                             type="text"
-                            placeholder="Pesquisa por nome ou produto"
+                            placeholder="Pesquisar nome do usuário"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />

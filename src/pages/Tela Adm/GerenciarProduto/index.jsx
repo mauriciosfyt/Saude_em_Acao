@@ -127,7 +127,7 @@ const GerenciarProduto = () => {
               <input
                 className="produto-search-input"
                 type="text"
-                placeholder="Pesquisa"
+                placeholder="Pesquisar nome do produto"
                 value={termoBusca}
                 onChange={(e) => setTermoBusca(e.target.value)}
               />
@@ -142,7 +142,6 @@ const GerenciarProduto = () => {
               <option value="CAMISETAS">Camiseta</option>
               <option value="VITAMINAS">Vitaminas</option>
               <option value="CREATINA">Creatina</option>
-              <option value="PreTreino">Pré-Treino</option>
             </select>
           </div>
           <Link to="/AdicionarProduto" className="produto-add-button-link">

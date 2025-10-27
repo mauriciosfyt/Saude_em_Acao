@@ -62,7 +62,7 @@ const ReservasPendentes = () => {
                         <input
                             className="reservas-pendente-search-input"
                             type="text"
-                            placeholder="Pesquisar por nome ou produto..."
+                            placeholder="Pesquisar nome do usuário"
                             value={termoBusca}
                             onChange={(e) => setTermoBusca(e.target.value)}
                         />

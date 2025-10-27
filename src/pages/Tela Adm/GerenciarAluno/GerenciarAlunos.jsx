@@ -60,7 +60,7 @@ const GerenciarAlunos = () => {
           <h1 className="alunos-title">Alunos</h1>
           <div className="alunos-search-container">
             <SearchIcon />
-            <input className="alunos-search-input" type="text" placeholder="Pesquisa" />
+            <input className="alunos-search-input" type="text" placeholder="Pesquisar nome do aluno" />
           </div>
           <Link to="/AdicionarAluno" className="alunos-add-button-link">
             <button className="alunos-add-button">Novo Aluno</button>

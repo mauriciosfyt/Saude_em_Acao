@@ -1,9 +1,12 @@
 import HeaderUser from "../../components/header";
+import { useNavigate } from 'react-router-dom';
 import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import './PerfilAdm.css';
 
 const PerfilAdm = () => {
+  const navigate = useNavigate();
+
   return (
     <div>
       <HeaderUser />
@@ -58,7 +61,7 @@ const PerfilAdm = () => {
 
         <div className="actions-row">
           <button className="logout-btn">Desconectar</button>
-          <button className="manage-btn">Gerenciar</button>
+          <button className="manage-btn" onClick={() => navigate('/Dashboard')}>Gerenciar</button>
         </div>
       </div>
 

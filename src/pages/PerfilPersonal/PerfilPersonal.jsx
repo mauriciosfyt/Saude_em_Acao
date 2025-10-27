@@ -1,9 +1,12 @@
 import HeaderUser from "../../components/header";
+import { useNavigate } from 'react-router-dom';
 import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import './PerfilPersonal.css';
 
 const PerfilPersonal = () => {
+  const navigate = useNavigate();
+
   return (
     <div>
       <HeaderUser />
@@ -39,7 +42,7 @@ const PerfilPersonal = () => {
 
         <div className="actions-row-personal">
           <button className="logout-btn-personal">Desconectar</button>
-          <button className="manage-btn-personal">Gerenciar</button>
+          <button className="manage-btn-personal" onClick={() => navigate('/AdministrarAluno')}>Gerenciar</button>
         </div>
       </div>
 
