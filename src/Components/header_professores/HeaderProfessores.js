@@ -37,7 +37,7 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
           activeOpacity={1}
         >
     
-          <View style={[styles.menuContent, { backgroundColor: isDark ? '#1A1F2E' : '#FFFFFF' }]}>
+          <View style={[styles.menuContent, { backgroundColor: isDark ? '#2c2c2c' : '#FFFFFF' }]}>
             <Text style={[styles.menuTitle, { color: isDark ? '#E6E8F3' : '#333333' }]}>Menu</Text>
             <TouchableOpacity
               style={styles.menuItem}
