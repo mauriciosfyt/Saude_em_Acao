@@ -1,6 +1,6 @@
 package br.com.saudeemacao.api.repository;
 
-import br.com.saudeemacao.api.model.EStatusReserva;
+import br.com.saudeemacao.api.model.EnumReserva.EStatusReserva;
 import br.com.saudeemacao.api.model.Reserva;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;

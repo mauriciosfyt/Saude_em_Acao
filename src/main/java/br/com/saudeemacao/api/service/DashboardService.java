@@ -1,8 +1,8 @@
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.DashboardStatsDTO;
-import br.com.saudeemacao.api.model.EPerfil;
-import br.com.saudeemacao.api.model.EStatusReserva;
+import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
+import br.com.saudeemacao.api.model.EnumReserva.EStatusReserva;
 import br.com.saudeemacao.api.model.Produto;
 import br.com.saudeemacao.api.model.Reserva;
 import br.com.saudeemacao.api.repository.ProdutoRepository;

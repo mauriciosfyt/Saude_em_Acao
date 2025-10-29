@@ -1,6 +1,7 @@
 package br.com.saudeemacao.api.dto;
 
-import br.com.saudeemacao.api.model.EPlano;
+import br.com.saudeemacao.api.model.EnumUsuario.ENivelAtividade;
+import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -8,7 +9,7 @@ import lombok.EqualsAndHashCode;
 import org.springframework.web.multipart.MultipartFile;
 
 @Data
-@EqualsAndHashCode(callSuper = true) // Importante para herança
+@EqualsAndHashCode(callSuper = true)
 public class AlunoCreateDTO extends UsuarioCreateDTO {
 
     @NotBlank(message = "CPF é obrigatório")
@@ -22,4 +23,15 @@ public class AlunoCreateDTO extends UsuarioCreateDTO {
 
     @NotNull(message = "Foto de perfil é obrigatória")
     private MultipartFile fotoPerfil;
+
+    // =================================================================
+    // === NOVOS CAMPOS - Opcionais no DTO, mas validados no serviço
+    // === se o plano for GOLD.
+    // =================================================================
+
+    private Integer idade;
+    private Integer peso;
+    private Integer altura;
+    private String objetivo;
+    private ENivelAtividade nivelAtividade;
 }

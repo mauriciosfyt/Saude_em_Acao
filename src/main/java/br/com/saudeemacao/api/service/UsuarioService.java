@@ -1,25 +1,28 @@
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.*;
-import br.com.saudeemacao.api.model.EPerfil;
-import br.com.saudeemacao.api.model.EPlano;
+
+import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
+import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
+import br.com.saudeemacao.api.model.EnumUsuario.EStatus;
 import br.com.saudeemacao.api.model.Usuario;
 import br.com.saudeemacao.api.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
+@Service("usuarioService")
 public class UsuarioService {
 
     @Autowired
@@ -31,7 +34,23 @@ public class UsuarioService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    // Métodos de criação específicos por perfil
+    // ... (Métodos de validação de permissão: isUsuarioGold, podeAtualizarPerfil) ...
+    public boolean isUsuarioGold(String username) {
+        Optional<Usuario> usuarioOpt = repo.findByEmail(username);
+        return usuarioOpt.map(usuario -> usuario.getPlano() == EPlano.GOLD).orElse(false);
+    }
+
+    public boolean podeAtualizarPerfil(String idDoPerfil, UserDetails userDetails) {
+        Usuario usuarioAutenticado = repo.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuário autenticado não encontrado."));
+
+        boolean isOwnerAndGold = usuarioAutenticado.getPerfil() == EPerfil.ALUNO &&
+                usuarioAutenticado.getPlano() == EPlano.GOLD &&
+                usuarioAutenticado.getId().equals(idDoPerfil);
+        return isOwnerAndGold;
+    }
+
+    // ... (Métodos de criação: criarAluno, criarProfessor, criarAdmin) ...
     public Usuario criarAluno(AlunoCreateDTO dto) throws IOException {
         validarCamposObrigatorios(dto.getNome(), dto.getEmail(), dto.getCpf(), dto.getTelefone(), dto.getSenha());
         validarCpf(dto.getCpf());
@@ -42,10 +61,15 @@ public class UsuarioService {
         usuario.setCpf(normalizarCpf(dto.getCpf()));
         usuario.setTelefone(normalizarTelefone(dto.getTelefone()));
         usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
-
-        // Ordem corrigida: perfil primeiro, depois o plano.
         usuario.setPerfil(EPerfil.ALUNO);
         usuario.setPlano(dto.getPlano());
+
+        if (dto.getPlano() == EPlano.GOLD) {
+            validarECarregarDadosPlanoGold(dto, usuario);
+            usuario.setStatusPlano(EStatus.ATIVO);
+            usuario.setDataInicioPlano(LocalDateTime.now());
+            usuario.setDataVencimentoPlano(LocalDateTime.now().plusMonths(1));
+        }
 
         if (dto.getFotoPerfil() != null && !dto.getFotoPerfil().isEmpty()) {
             String fotoUrl = cloudinaryService.uploadFile(dto.getFotoPerfil());
@@ -75,8 +99,7 @@ public class UsuarioService {
         return repo.save(usuario);
     }
 
-    public Usuario criarAdmin(UsuarioCreateDTO dto) { // Alterado aqui
-        // As validações do DTO já foram checadas pelo Spring.
+    public Usuario criarAdmin(UsuarioCreateDTO dto) {
         Usuario usuario = new Usuario();
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail().toLowerCase());
@@ -86,7 +109,7 @@ public class UsuarioService {
         return repo.save(usuario);
     }
 
-    // Método de atualização genérico
+    // ... (Método de atualização: atualizarUsuario) ...
     public Usuario atualizarUsuario(String id, UsuarioUpdateDTO dto, EPerfil perfilEsperado) throws IOException {
         Usuario usuarioExistente = buscarPorId(id);
 
@@ -118,11 +141,25 @@ public class UsuarioService {
             usuarioExistente.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        if (dto.getPlano() != null) {
-            if (usuarioExistente.getPerfil() != EPerfil.ALUNO) {
-                throw new RuntimeException("Plano só é permitido para alunos");
-            }
+        if (dto.getPlano() != null && usuarioExistente.getPerfil() == EPerfil.ALUNO) {
+            boolean eraGold = usuarioExistente.getPlano() == EPlano.GOLD;
+            boolean virouGold = dto.getPlano() == EPlano.GOLD;
+
             usuarioExistente.setPlano(dto.getPlano());
+
+            if (virouGold && !eraGold) {
+                usuarioExistente.setStatusPlano(EStatus.ATIVO);
+                usuarioExistente.setDataInicioPlano(LocalDateTime.now());
+                usuarioExistente.setDataVencimentoPlano(LocalDateTime.now().plusMonths(1));
+            }
+        }
+
+        if (usuarioExistente.getPlano() == EPlano.GOLD) {
+            if (dto.getIdade() != null) usuarioExistente.setIdade(dto.getIdade());
+            if (dto.getPeso() != null) usuarioExistente.setPeso(dto.getPeso());
+            if (dto.getAltura() != null) usuarioExistente.setAltura(dto.getAltura());
+            if (dto.getObjetivo() != null) usuarioExistente.setObjetivo(dto.getObjetivo());
+            if (dto.getNivelAtividade() != null) usuarioExistente.setNivelAtividade(dto.getNivelAtividade());
         }
 
         if (dto.getFotoPerfil() != null && !dto.getFotoPerfil().isEmpty()) {
@@ -140,7 +177,7 @@ public class UsuarioService {
         return repo.save(usuarioExistente);
     }
 
-    // Métodos de consulta
+    // ... (Métodos de consulta: buscarPorPerfil, buscarPorPerfilENome, etc.) ...
     public List<UsuarioSaidaDTO> buscarPorPerfil(EPerfil perfil, PageRequest pageable) {
         Page<Usuario> usuariosPage = repo.findByPerfil(perfil, pageable);
         return usuariosPage.getContent().stream()
@@ -148,7 +185,6 @@ public class UsuarioService {
                 .collect(Collectors.toList());
     }
 
-    // NOVO MÉTODO: para buscar por perfil e nome
     public List<UsuarioSaidaDTO> buscarPorPerfilENome(EPerfil perfil, String nome, PageRequest pageable) {
         Page<Usuario> usuariosPage = repo.findByPerfilAndNomeContainingIgnoreCase(perfil, nome, pageable);
         return usuariosPage.getContent().stream()
@@ -160,7 +196,6 @@ public class UsuarioService {
         return repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + id));
     }
-
 
     public Optional<Usuario> buscarPorEmail(String email) {
         return repo.findByEmail(email.toLowerCase());
@@ -178,7 +213,55 @@ public class UsuarioService {
         return new UsuarioPerfilDTO(usuario);
     }
 
-    // Métodos de exclusão
+    public PlanoGoldDetalhesDTO buscarDetalhesPlanoGold(UserDetails userDetails) {
+        Usuario usuario = repo.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado no sistema!"));
+
+        if (usuario.getPlano() != EPlano.GOLD) {
+            throw new AccessDeniedException("Acesso negado. Este recurso é exclusivo para alunos do plano Gold.");
+        }
+
+        LocalDateTime dataCadastro = usuario.getDataCadastro();
+        String duracao = calcularDuracao(dataCadastro);
+
+        // CORREÇÃO APLICADA AQUI: Mapeando os campos corretamente.
+        return PlanoGoldDetalhesDTO.builder()
+                .statusPlano(usuario.getStatusPlano())
+                .tipoPlano(usuario.getPlano())
+                .dataRenovacao(usuario.getDataInicioPlano()) // Início do ciclo atual
+                .dataVencimento(usuario.getDataVencimentoPlano()) // Fim do ciclo atual
+                .dataInicioAcademia(dataCadastro)
+                .duracaoAcademia(duracao)
+                .build();
+    }
+
+    /**
+     * NOVO MÉTODO:
+     * Renova a assinatura do plano Gold para o usuário autenticado.
+     */
+    public PlanoGoldDetalhesDTO renovarPlanoGold(UserDetails userDetails) {
+        Usuario usuario = repo.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado no sistema!"));
+
+        if (usuario.getPlano() != EPlano.GOLD) {
+            throw new AccessDeniedException("Apenas alunos do plano Gold podem renovar a assinatura.");
+        }
+
+        // Lógica de renovação: o novo início é o vencimento antigo.
+        LocalDateTime novoInicio = usuario.getDataVencimentoPlano();
+        LocalDateTime novoVencimento = novoInicio.plusMonths(1);
+
+        usuario.setDataInicioPlano(novoInicio);
+        usuario.setDataVencimentoPlano(novoVencimento);
+        usuario.setStatusPlano(EStatus.ATIVO); // Garante que o status fique ativo na renovação
+
+        repo.save(usuario);
+
+        // Retorna os detalhes atualizados para o usuário
+        return buscarDetalhesPlanoGold(userDetails);
+    }
+
+    // ... (Métodos de exclusão e atualização de senha) ...
     public void excluirPorId(String id) {
         if (!repo.existsById(id)) {
             throw new RuntimeException("Usuário não encontrado com ID: " + id);
@@ -211,7 +294,6 @@ public class UsuarioService {
         repo.delete(usuario);
     }
 
-    // Método de atualização de senha (para redefinição)
     public Usuario atualizarSenha(String email, String novaSenha) {
         Usuario usuario = repo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado para redefinição de senha."));
@@ -219,75 +301,63 @@ public class UsuarioService {
         return repo.save(usuario);
     }
 
+    // ... (Métodos privados auxiliares: calcularDuracao, validações, etc.) ...
+    private String calcularDuracao(LocalDateTime dataInicio) {
+        if (dataInicio == null) {
+            return "N/A";
+        }
+        Period periodo = Period.between(dataInicio.toLocalDate(), LocalDateTime.now().toLocalDate());
+        int anos = periodo.getYears();
+        int meses = periodo.getMonths();
+        int dias = periodo.getDays();
+
+        StringBuilder sb = new StringBuilder();
+        if (anos > 0) sb.append(anos).append(anos > 1 ? " anos, " : " ano, ");
+        if (meses > 0) sb.append(meses).append(meses > 1 ? " meses e " : " mês e ");
+        sb.append(dias).append(dias > 1 ? " dias" : " dia");
+
+        return sb.toString();
+    }
+
+    private void validarECarregarDadosPlanoGold(AlunoCreateDTO dto, Usuario usuario) {
+        if (dto.getIdade() == null || dto.getPeso() == null || dto.getAltura() == null ||
+                dto.getObjetivo() == null || dto.getObjetivo().isBlank() || dto.getNivelAtividade() == null) {
+            throw new IllegalArgumentException("Para o plano Gold, os campos: idade, peso, altura, objetivo e nível de atividade são obrigatórios.");
+        }
+        usuario.setIdade(dto.getIdade());
+        usuario.setPeso(dto.getPeso());
+        usuario.setAltura(dto.getAltura());
+        usuario.setObjetivo(dto.getObjetivo());
+        usuario.setNivelAtividade(dto.getNivelAtividade());
+    }
 
     private void validarCamposObrigatorios(String nome, String email, String cpf, String telefone, String senha) {
-        if (nome == null || nome.trim().isEmpty()) {
-            throw new RuntimeException("Nome é obrigatório");
-        }
-        if (email == null || email.trim().isEmpty()) {
-            throw new RuntimeException("Email é obrigatório");
-        }
-        if (cpf == null || cpf.trim().isEmpty()) {
-            throw new RuntimeException("CPF é obrigatório");
-        }
-        if (telefone == null || telefone.trim().isEmpty()) {
-            throw new RuntimeException("Telefone é obrigatório");
-        }
-        if (senha == null || senha.trim().isEmpty()) {
-            throw new RuntimeException("Senha é obrigatória");
-        }
+        if (nome == null || nome.trim().isEmpty()) throw new RuntimeException("Nome é obrigatório");
+        if (email == null || email.trim().isEmpty()) throw new RuntimeException("Email é obrigatório");
+        if (cpf == null || cpf.trim().isEmpty()) throw new RuntimeException("CPF é obrigatório");
+        if (telefone == null || telefone.trim().isEmpty()) throw new RuntimeException("Telefone é obrigatório");
+        if (senha == null || senha.trim().isEmpty()) throw new RuntimeException("Senha é obrigatória");
     }
 
     private void validarCpf(String cpf) {
         String cpfNormalizado = normalizarCpf(cpf);
-
-        if (cpfNormalizado.length() != 11 ||
-                cpfNormalizado.equals("00000000000") ||
-                cpfNormalizado.equals("11111111111") ||
-                cpfNormalizado.equals("22222222222") ||
-                cpfNormalizado.equals("33333333333") ||
-                cpfNormalizado.equals("44444444444") ||
-                cpfNormalizado.equals("55555555555") ||
-                cpfNormalizado.equals("66666666666") ||
-                cpfNormalizado.equals("77777777777") ||
-                cpfNormalizado.equals("88888888888") ||
-                cpfNormalizado.equals("99999999999")) {
+        if (cpfNormalizado.length() != 11 || cpfNormalizado.matches("(\\d)\\1{10}")) {
             throw new RuntimeException("CPF inválido");
         }
-
         try {
-            int soma = 0;
-            int peso = 10;
+            int[] pesos1 = {10, 9, 8, 7, 6, 5, 4, 3, 2};
+            int soma1 = 0;
+            for (int i = 0; i < 9; i++) soma1 += Integer.parseInt(cpfNormalizado.substring(i, i + 1)) * pesos1[i];
+            int resto1 = 11 - (soma1 % 11);
+            char dv1 = (resto1 >= 10) ? '0' : Character.forDigit(resto1, 10);
+            if (dv1 != cpfNormalizado.charAt(9)) throw new RuntimeException("CPF inválido");
 
-            for (int i = 0; i < 9; i++) {
-                int num = Integer.parseInt(cpfNormalizado.substring(i, i + 1));
-                soma += num * peso;
-                peso--;
-            }
-
-            int resto = 11 - (soma % 11);
-            String digitoVerificador1 = (resto == 10 || resto == 11) ? "0" : Integer.toString(resto);
-
-            if (!digitoVerificador1.equals(cpfNormalizado.substring(9, 10))) {
-                throw new RuntimeException("CPF inválido");
-            }
-
-            soma = 0;
-            peso = 11;
-
-            for (int i = 0; i < 10; i++) {
-                int num = Integer.parseInt(cpfNormalizado.substring(i, i + 1));
-                soma += num * peso;
-                peso--;
-            }
-
-            resto = 11 - (soma % 11);
-            String digitoVerificador2 = (resto == 10 || resto == 11) ? "0" : Integer.toString(resto);
-
-            if (!digitoVerificador2.equals(cpfNormalizado.substring(10, 11))) {
-                throw new RuntimeException("CPF inválido");
-            }
-
+            int[] pesos2 = {11, 10, 9, 8, 7, 6, 5, 4, 3, 2};
+            int soma2 = 0;
+            for (int i = 0; i < 10; i++) soma2 += Integer.parseInt(cpfNormalizado.substring(i, i + 1)) * pesos2[i];
+            int resto2 = 11 - (soma2 % 11);
+            char dv2 = (resto2 >= 10) ? '0' : Character.forDigit(resto2, 10);
+            if (dv2 != cpfNormalizado.charAt(10)) throw new RuntimeException("CPF inválido");
         } catch (NumberFormatException e) {
             throw new RuntimeException("CPF inválido");
         }
@@ -340,7 +410,12 @@ public class UsuarioService {
                 usuario.getTelefone(),
                 usuario.getFotoPerfil(),
                 usuario.getPerfil(),
-                usuario.getPlano()
+                usuario.getPlano(),
+                usuario.getIdade(),
+                usuario.getPeso(),
+                usuario.getAltura(),
+                usuario.getObjetivo(),
+                usuario.getNivelAtividade()
         );
     }
 }

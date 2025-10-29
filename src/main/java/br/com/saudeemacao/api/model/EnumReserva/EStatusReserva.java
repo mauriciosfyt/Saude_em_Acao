@@ -1,4 +1,4 @@
-package br.com.saudeemacao.api.model;
+package br.com.saudeemacao.api.model.EnumReserva;
 
 public enum EStatusReserva {
     PENDENTE,

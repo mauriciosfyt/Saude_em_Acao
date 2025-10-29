@@ -1,6 +1,7 @@
 package br.com.saudeemacao.api.controller;
 
 import br.com.saudeemacao.api.dto.TreinoDTO;
+import br.com.saudeemacao.api.dto.TreinoMetricasDTO;
 import br.com.saudeemacao.api.model.HistoricoTreino;
 import br.com.saudeemacao.api.model.Treino;
 import br.com.saudeemacao.api.service.TreinoService;
@@ -12,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -81,5 +83,19 @@ public class TreinoController {
             @AuthenticationPrincipal UserDetails userDetails) {
         List<HistoricoTreino> desempenho = treinoService.buscarDesempenhoSemanal(userDetails);
         return ResponseEntity.ok(desempenho);
+    }
+
+    /**
+     * NOVO ENDPOINT:
+     * Retorna as métricas de treino consolidadas.
+     * Acesso restrito a usuários com perfil ALUNO. A validação do plano
+     * GOLD é feita na camada de serviço.
+     */
+    @GetMapping("/minhas-metricas")
+    @PreAuthorize("hasRole('ALUNO')")
+    public ResponseEntity<TreinoMetricasDTO> getMinhasMetricas(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        TreinoMetricasDTO metricas = treinoService.getMetricasDeTreino(userDetails);
+        return ResponseEntity.ok(metricas);
     }
 }

@@ -2,7 +2,7 @@
 
 package br.com.saudeemacao.api.service;
 
-import br.com.saudeemacao.api.model.EStatusReserva;
+import br.com.saudeemacao.api.model.EnumReserva.EStatusReserva;
 import br.com.saudeemacao.api.model.Produto;
 import br.com.saudeemacao.api.model.Reserva;
 import br.com.saudeemacao.api.repository.ReservaRepository;

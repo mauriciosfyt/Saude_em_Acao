@@ -1,6 +1,6 @@
 package br.com.saudeemacao.api.repository;
 
-import br.com.saudeemacao.api.model.EPerfil;
+import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.Usuario;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

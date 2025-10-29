@@ -4,6 +4,7 @@ package br.com.saudeemacao.api.model;
 
 import br.com.saudeemacao.api.model.EnumProduto.ESabor;
 import br.com.saudeemacao.api.model.EnumProduto.ETamanho;
+import br.com.saudeemacao.api.model.EnumReserva.EStatusReserva;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

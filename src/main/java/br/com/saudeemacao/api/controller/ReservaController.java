@@ -3,7 +3,7 @@ package br.com.saudeemacao.api.controller;
 import br.com.saudeemacao.api.dto.ReservaAnaliseDTO;
 import br.com.saudeemacao.api.dto.ReservaSolicitacaoDTO;
 import br.com.saudeemacao.api.dto.ReservaStatsDTO;
-import br.com.saudeemacao.api.model.EStatusReserva;
+import br.com.saudeemacao.api.model.EnumReserva.EStatusReserva;
 import br.com.saudeemacao.api.model.Reserva;
 import br.com.saudeemacao.api.service.ReservaService;
 import jakarta.validation.Valid;

@@ -1,4 +1,4 @@
-package br.com.saudeemacao.api.model;
+package br.com.saudeemacao.api.model.EnumUsuario;
 
 public enum EPlano {
     BASICO,

@@ -1,7 +1,8 @@
 package br.com.saudeemacao.api.controller;
 
 import br.com.saudeemacao.api.dto.*;
-import br.com.saudeemacao.api.model.EPerfil;
+
+import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.Usuario;
 import br.com.saudeemacao.api.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -9,9 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -23,6 +26,7 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
+    // ... (Endpoints de /aluno, /professor, /admin) ...
     // ROTAS PARA ALUNOS
     @PostMapping("/aluno")
     public ResponseEntity<Usuario> criarAluno(@Valid @ModelAttribute AlunoCreateDTO dto) throws IOException {
@@ -43,15 +47,13 @@ public class UsuarioController {
     }
 
     @PutMapping("/aluno/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @usuarioService.podeAtualizarPerfil(#id, authentication.principal)")
     public ResponseEntity<Usuario> atualizarAluno(
             @PathVariable String id,
             @Valid @ModelAttribute UsuarioUpdateDTO dto) throws IOException {
         return ResponseEntity.ok(usuarioService.atualizarUsuario(id, dto, EPerfil.ALUNO));
     }
 
-    /**
-     * NOVO MÉTODO ADICIONADO
-     */
     @DeleteMapping("/aluno/{id}")
     public ResponseEntity<Void> excluirAluno(@PathVariable String id) {
         usuarioService.excluirPorId(id);
@@ -66,6 +68,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/professor")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR') or @usuarioService.isUsuarioGold(authentication.principal.username)")
     public ResponseEntity<List<UsuarioSaidaDTO>> listarProfessores(
             @RequestParam(defaultValue = "0") int pag,
             @RequestParam(defaultValue = "10") int qtd,
@@ -84,9 +87,6 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.atualizarUsuario(id, dto, EPerfil.PROFESSOR));
     }
 
-    /**
-     * NOVO MÉTODO ADICIONADO
-     */
     @DeleteMapping("/professor/{id}")
     public ResponseEntity<Void> excluirProfessor(@PathVariable String id) {
         usuarioService.excluirPorId(id);
@@ -114,14 +114,12 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.atualizarUsuario(id, dto, EPerfil.ADMIN));
     }
 
-    /**
-     * NOVO MÉTODO ADICIONADO
-     */
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<Void> excluirAdmin(@PathVariable String id) {
         usuarioService.excluirPorId(id);
         return ResponseEntity.noContent().build();
     }
+
 
     // ROTAS DE AUTOATENDIMENTO
     @GetMapping("/meu-perfil")
@@ -132,6 +130,25 @@ public class UsuarioController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/meu-plano/detalhes")
+    @PreAuthorize("hasRole('ALUNO')")
+    public ResponseEntity<PlanoGoldDetalhesDTO> getDetalhesPlanoGold(@AuthenticationPrincipal UserDetails userDetails) {
+        PlanoGoldDetalhesDTO detalhesDTO = usuarioService.buscarDetalhesPlanoGold(userDetails);
+        return ResponseEntity.ok(detalhesDTO);
+    }
+
+    /**
+     * NOVO ENDPOINT:
+     * Permite que um aluno do plano Gold simule a renovação de sua assinatura,
+     * estendendo a data de vencimento em um mês a partir do vencimento atual.
+     */
+    @PostMapping("/meu-plano/renovar")
+    @PreAuthorize("hasRole('ALUNO')")
+    public ResponseEntity<PlanoGoldDetalhesDTO> renovarPlano(@AuthenticationPrincipal UserDetails userDetails) {
+        PlanoGoldDetalhesDTO detalhesAtualizados = usuarioService.renovarPlanoGold(userDetails);
+        return ResponseEntity.ok(detalhesAtualizados);
     }
 
     @DeleteMapping("/me")

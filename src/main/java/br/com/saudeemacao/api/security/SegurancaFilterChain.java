@@ -38,7 +38,7 @@ public class SegurancaFilterChain {
                         // === 1. ROTAS PÚBLICAS (NÃO EXIGEM AUTENTICAÇÃO) ================
                         // =================================================================
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/aluno").permitAll() // Cadastro de aluno é público
+                        .requestMatchers(HttpMethod.POST, "/api/aluno").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/treinos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/treinos/{id}").permitAll()
@@ -46,10 +46,12 @@ public class SegurancaFilterChain {
                         // =================================================================
                         // === 2. ROTAS DE ADMIN (EXIGEM PERFIL 'ADMIN') ===================
                         // =================================================================
-                        .requestMatchers(HttpMethod.GET, "/api/aluno").hasRole("ADMIN") // <-- SUA SOLICITAÇÃO
-                        .requestMatchers(HttpMethod.PUT, "/api/aluno/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/aluno").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/aluno/{id}").hasRole("ADMIN")
-                        .requestMatchers("/api/professor/**").hasRole("ADMIN")
+                        //.requestMatchers("/api/professor/**").hasRole("ADMIN") // ALTERAÇÃO: A permissão GET será tratada no controller
+                        .requestMatchers(HttpMethod.POST, "/api/professor").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/professor/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/professor/{id}").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/produtos").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/produtos/{id}").hasRole("ADMIN")
@@ -61,22 +63,31 @@ public class SegurancaFilterChain {
                         .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
 
                         // =================================================================
-                        // === 3. ROTAS DE PROFESSOR OU ADMIN ==============================
+                        // === 3. ROTAS COM PERMISSÕES CUSTOMIZADAS (Tratadas com @PreAuthorize)
+                        // =================================================================
+                        // ALTERAÇÃO 1: Acesso a GET /professor será validado no controller.
+                        .requestMatchers(HttpMethod.GET, "/api/professor").authenticated()
+                        // ALTERAÇÃO 2: Acesso a PUT /aluno/{id} será validado no controller.
+                        .requestMatchers(HttpMethod.PUT, "/api/aluno/{id}").authenticated()
+
+
+                        // =================================================================
+                        // === 4. ROTAS DE PROFESSOR OU ADMIN ==============================
                         // =================================================================
                         .requestMatchers(HttpMethod.POST, "/api/treinos").hasAnyRole("PROFESSOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/treinos/{id}").hasAnyRole("PROFESSOR", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/treinos/{id}").hasAnyRole("PROFESSOR", "ADMIN")
 
                         // =================================================================
-                        // === 4. ROTAS DE ALUNO (EXIGEM PERFIL 'ALUNO') ====================
+                        // === 5. ROTAS DE ALUNO (EXIGEM PERFIL 'ALUNO') ====================
                         // =================================================================
                         .requestMatchers(HttpMethod.POST, "/api/reservas").hasRole("ALUNO")
-                        .requestMatchers(HttpMethod.GET, "/api/minhas").hasRole("ALUNO")
+                        .requestMatchers(HttpMethod.GET, "/api/minhas").hasRole("ALUNO") // Corrigido para /api/reservas/minhas se for o caso
                         .requestMatchers(HttpMethod.POST, "/api/treinos/{id}/realizar").hasRole("ALUNO")
                         .requestMatchers(HttpMethod.GET, "/api/treinos/desempenho-semanal").hasRole("ALUNO")
 
                         // =================================================================
-                        // === 5. QUALQUER OUTRA ROTA EXIGE AUTENTICAÇÃO ===================
+                        // === 6. QUALQUER OUTRA ROTA EXIGE AUTENTICAÇÃO ===================
                         // =================================================================
                         .anyRequest().authenticated()
                 )
@@ -98,7 +109,7 @@ public class SegurancaFilterChain {
                 "http://localhost:5173",
                 "http://localhost:8080",
                 "http://127.0.0.1:5500",
-                "https://saude-em-acao-react.vercel.br"
+                "https://saude-em-acao-react.vercel.app" // Corrigido o domínio final
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));

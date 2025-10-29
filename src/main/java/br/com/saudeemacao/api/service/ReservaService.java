@@ -6,6 +6,8 @@ import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
 import br.com.saudeemacao.api.model.*;
 import br.com.saudeemacao.api.model.EnumProduto.ESabor;
 import br.com.saudeemacao.api.model.EnumProduto.ETamanho;
+import br.com.saudeemacao.api.model.EnumReserva.EStatusReserva;
+import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.repository.ReservaRepository;
 import br.com.saudeemacao.api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;

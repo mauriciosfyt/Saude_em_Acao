@@ -1,10 +1,12 @@
 package br.com.saudeemacao.api.dto;
 
-import br.com.saudeemacao.api.model.EPlano;
+import br.com.saudeemacao.api.model.EnumUsuario.ENivelAtividade;
+import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
+
 
 @Data
 public class UsuarioUpdateDTO {
@@ -25,4 +27,14 @@ public class UsuarioUpdateDTO {
     private EPlano plano;
 
     private MultipartFile fotoPerfil;
+
+    // =================================================================
+    // === NOVOS CAMPOS - Para atualização de alunos GOLD
+    // =================================================================
+
+    private Integer idade;
+    private Integer peso;
+    private Integer altura;
+    private String objetivo;
+    private ENivelAtividade nivelAtividade;
 }
