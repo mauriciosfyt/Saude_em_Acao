@@ -1,11 +1,12 @@
-import React from 'react';
-import './GerenciarAlunos.css'; // O CSS correspondente com as classes novas
+import React, { useState, useEffect } from 'react';
+import './GerenciarAlunos.css';
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
 import ModalGerenciarTreino from './ModalGerenciarTreino';
+import { getAllAlunos, deleteAluno } from '../../../services/usuarioService'; // Importar as funções da API
+import { useAuth } from '../../../contexts/AuthContext'; // Importar o contexto de auth
 
-// Ícone de busca
+// Ícone de busca (mantido igual)
 const SearchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c757d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8"></circle>
@@ -13,23 +14,56 @@ const SearchIcon = () => (
     </svg>
 );
 
-// Dados mockados
-const alunosData = [
- { id: 1, nome: 'Pedro', email: 'Aluno0@gmail.com', funcao: 'Aluno' },
-  { id: 2, nome: 'Bruno', email: 'Aluno1@gmail.com', funcao: 'Aluno' },
-  { id: 3, nome: 'Cleiton', email: 'Aluno2@gmail.com', funcao: 'Aluno' },
-  { id: 4, nome: 'Senai', email: 'Aluno3@gmail.com', funcao: 'Aluno' },
-  { id: 5, nome: 'Japa', email: 'Aluno4@gmail.com', funcao: 'Aluno' },
-  { id: 6, nome: 'Heleno', email: 'Aluno5@gmail.com', funcao: 'Aluno' },
-  { id: 7, nome: 'Maumau', email: 'Aluno6@gmail.com', funcao: 'Aluno' },
-  { id: 8, nome: 'PH', email: 'Aluno7@gmail.com', funcao: 'Aluno' },
-  { id: 9, nome: 'Renato', email: 'Aluno8@gmail.com', funcao: 'Aluno' },
-];
+
 
 const GerenciarAlunos = () => {
+  const { user } = useAuth(); // Usar o contexto de autenticação
+  const [alunos, setAlunos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAluno, setSelectedAluno] = useState(null);
   const [selectedTreinos, setSelectedTreinos] = useState({});
+
+  
+
+  // Buscar alunos da API
+  const fetchAlunos = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      console.log(' Token sendo usado:', user?.token);
+      const alunosData = await getAllAlunos();
+      console.log(' Dados recebidos:', alunosData);
+      setAlunos(alunosData);
+    } catch (err) {
+      console.error(' Erro ao carregar alunos:', err);
+      setError('Erro ao carregar lista de alunos. Verifique sua conexão e permissões.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAlunos();
+  }, []);
+
+  // Função para deletar aluno
+  const handleDeleteAluno = async (id, nome) => {
+    if (window.confirm(`Tem certeza que deseja excluir o aluno ${nome}?`)) {
+      try {
+        await deleteAluno(id);
+        // Atualizar a lista após exclusão
+        fetchAlunos();
+        alert('Aluno excluído com sucesso!');
+      } catch (err) {
+        console.error('Erro ao excluir aluno:', err);
+        alert('Erro ao excluir aluno. Tente novamente.');
+      }
+    }
+  };
 
   const handleOpenModal = (aluno) => {
     setSelectedAluno(aluno);
@@ -41,74 +75,122 @@ const GerenciarAlunos = () => {
     setSelectedAluno(null);
   };
 
-  // Recebe o treino escolhido no modal e salva por aluno
   const handleChooseTreino = (treino) => {
     if (!selectedAluno) return;
     setSelectedTreinos(prev => ({ ...prev, [selectedAluno.id]: treino }));
-    // fechar é tratado por onClose do modal também
     setModalOpen(false);
     setSelectedAluno(null);
   };
+
+  // Filtrar alunos baseado na busca
+  const filteredAlunos = alunos.filter(aluno =>
+    aluno.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    aluno.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div style={{ display: 'flex' }}>
       <MenuAdm />
 
-      {/* --- ALTERAÇÃO: Classes renomeadas com prefixo 'alunos-' --- */}
       <main className="alunos-content-wrapper">
         <div className="alunos-header">
           <h1 className="alunos-title">Alunos</h1>
+          
+          {/* Barra de pesquisa */}
           <div className="alunos-search-container">
             <SearchIcon />
-            <input className="alunos-search-input" type="text" placeholder="Pesquisar nome do aluno" />
+            <input 
+              className="alunos-search-input" 
+              type="text" 
+              placeholder="Pesquisar nome  do aluno"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
+          
           <Link to="/AdicionarAluno" className="alunos-add-button-link">
             <button className="alunos-add-button">Novo Aluno</button>
           </Link>
         </div>
 
-        <table className="alunos-table">
-          <thead className="alunos-thead">
-            <tr>
-              <th>Nome:</th>
-              <th>Email</th>
-              <th>Função</th>
-              <th>Treino</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody className="alunos-tbody">
-            {alunosData.map(aluno => (
-              <tr key={aluno.id}>
-                <td>{aluno.nome}</td>
-                <td>{aluno.email}</td>
-                <td>{aluno.funcao}</td>
-                <td>
-                  <button
-                    className="alunos-treino-link"
-                    onClick={(e) => { e.preventDefault(); handleOpenModal(aluno); }}
-                    aria-label={`Gerenciar treino de ${aluno.nome}`}
-                  >
-                    Gerenciar
-                  </button>
-                  {selectedTreinos[aluno.id] && (
-                    <div className="treino-chosen" title={`Treino escolhido: ${selectedTreinos[aluno.id].title}`}>
-                      <span className="treino-dot" aria-hidden="true" />
-                      <span className="treino-title">{selectedTreinos[aluno.id].title}</span>
-                    </div>
-                  )}
-                </td>
-                <td>
-                  <a href="#" className="alunos-action-link-edit">Edit</a>
-                  <a href="#" className="alunos-action-link-delete">Delete</a>
-                </td>
+        {/* Estados de loading e erro */}
+        {loading && <div className="alunos-loading">Carregando alunos...</div>}
+        {error && <div className="alunos-error">{error}</div>}
+
+        {!loading && !error && (
+          <table className="alunos-table">
+            <thead className="alunos-thead">
+              <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Função</th>
+                <th>Treino</th>
+                <th>Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="alunos-tbody">
+              {filteredAlunos.length === 0 ? (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>
+                    {searchTerm ? 'Nenhum aluno encontrado para a pesquisa.' : 'Nenhum aluno cadastrado.'}
+                  </td>
+                </tr>
+              ) : (
+                filteredAlunos.map(aluno => (
+                  <tr key={aluno.id}>
+                    <td>{aluno.nome || 'N/A'}</td>
+                    <td>{aluno.email || 'N/A'}</td>
+                    <td>{aluno.funcao || 'Aluno'}</td>
+                    <td>
+                      <button
+                        className="alunos-treino-link"
+                        onClick={() => handleOpenModal(aluno)}
+                        aria-label={`Gerenciar treino de ${aluno.nome}`}
+                      >
+                        Gerenciar
+                      </button>
+                      {selectedTreinos[aluno.id] && (
+                        <div className="treino-chosen" title={`Treino escolhido: ${selectedTreinos[aluno.id].title}`}>
+                          <span className="treino-dot" aria-hidden="true" />
+                          <span className="treino-title">{selectedTreinos[aluno.id].title}</span>
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <Link 
+                        to={`/editar-aluno/${aluno.id}`} 
+                        className="alunos-action-link-edit"
+                      >
+                        Editar
+                      </Link>
+                      <button 
+                        className="alunos-action-link-delete"
+                        onClick={() => handleDeleteAluno(aluno.id, aluno.nome)}
+                        style={{ 
+                          background: 'none', 
+                          border: 'none', 
+                          color: '#dc3545', 
+                          cursor: 'pointer',
+                          textDecoration: 'underline'
+                        }}
+                      >
+                        Excluir
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </main>
-      {/* Modal renderizado aqui para ficar sobre a tela */}
-  <ModalGerenciarTreino open={modalOpen} onClose={handleCloseModal} aluno={selectedAluno} onChoose={handleChooseTreino} />
+
+      <ModalGerenciarTreino 
+        open={modalOpen} 
+        onClose={handleCloseModal} 
+        aluno={selectedAluno} 
+        onChoose={handleChooseTreino} 
+      />
     </div>
   );
 };

@@ -1,7 +1,9 @@
-import React from 'react';
-import './GerenciarPersonal.css'; // O CSS correspondente com as classes novas
+import React, { useState, useEffect } from 'react';
+import './GerenciarPersonal.css';
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { Link } from 'react-router-dom';
+import { getAllProfessores, deleteProfessor } from '../../../services/usuarioService';
+import { useAuth } from '../../../contexts/AuthContext';
 
 // Ícone de busca
 const SearchIcon = () => (
@@ -11,64 +13,176 @@ const SearchIcon = () => (
     </svg>
 );
 
-// Dados mockados
-const personalData = [
-{ id: 1, nome: 'Admin', email: 'Admin', funcao: 'Admin', status: 'Ativo' },
-  { id: 2, nome: 'Bruno', email: 'Personal1@gmail.com', funcao: 'Personal', status: 'Ativo' },
-  { id: 3, nome: 'Cleiton', email: 'Personal2@gmail.com', funcao: 'Personal', status: 'Ativo' },
-  { id: 4, nome: 'Senai', email: 'Personal3@gmail.com', funcao: 'Personal', status: 'Ativo' },
-  { id: 5, nome: 'Japa', email: 'Personal4@gmail.com', funcao: 'Personal', status: 'Ativo' },
-  { id: 6, nome: 'Heleno', email: 'Personal5@gmail.com', funcao: 'Personal', status: 'Ativo' },
-  { id: 7, nome: 'Maumau', email: 'Personal6@gmail.com', funcao: 'Personal', status: 'Ativo' },
-  { id: 8, nome: 'PH', email: 'Personal7@gmail.com', funcao: 'Personal', status: 'Ativo' },
-  { id: 9, nome: 'Renato', email: 'Personal8@gmail.com', funcao: 'Personal', status: 'Ativo' },
-];
-
 const GerenciarPersonal = () => {
+  const { user } = useAuth();
+  const [professores, setProfessores] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Buscar professores da API
+  const fetchProfessores = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      console.log('🔐 Iniciando busca de professores...');
+      
+      const professoresData = await getAllProfessores();
+      console.log('📦 Dados brutos da API:', professoresData);
+      
+      // Verificar se é um array
+      if (!Array.isArray(professoresData)) {
+        console.warn('⚠️ A API não retornou um array:', professoresData);
+        setProfessores([]);
+        return;
+      }
+      
+      // Transformar os dados para o formato esperado pelo componente
+      const professoresFormatados = professoresData.map(professor => ({
+        id: professor.id,
+        nome: professor.nome || 'N/A',
+        email: professor.email || 'N/A',
+        funcao: professor.funcao || 'Personal',
+        status: 'Ativo'
+      }));
+      
+      console.log('👥 Professores formatados:', professoresFormatados);
+      setProfessores(professoresFormatados);
+      
+    } catch (err) {
+      console.error('❌ Erro detalhado ao carregar professores:', err);
+      setError(`Erro ao carregar lista de personais: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfessores();
+  }, []);
+
+  // Função para deletar personal
+  const handleDeletePersonal = async (id, nome) => {
+    if (window.confirm(`Tem certeza que deseja excluir o personal ${nome}?`)) {
+      try {
+        await deleteProfessor(id);
+        fetchProfessores();
+        alert('Personal excluído com sucesso!');
+      } catch (err) {
+        console.error('Erro ao excluir personal:', err);
+        alert(`Erro ao excluir personal: ${err.message}`);
+      }
+    }
+  };
+
+  // Filtrar personais baseado na busca
+  const filteredPersonais = professores.filter(personal =>
+    personal.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    personal.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div style={{ display: 'flex' }}>
       <MenuAdm />
 
-      {/* --- ALTERAÇÃO: Classes renomeadas com prefixo 'personal-' --- */}
       <main className="personal-content-wrapper">
         <div className="personal-header">
           <h1 className="personal-title">Personal</h1>
+          
           <div className="personal-search-container">
             <SearchIcon />
-            <input className="personal-search-input" type="text" placeholder="Pesquisar nome do personal" />
+            <input 
+              className="personal-search-input" 
+              type="text" 
+              placeholder="Pesquisar nome  do personal"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
+          
           <Link to="/AdicionarPersonal" className="personal-add-button-link">
             <button className="personal-add-button">Novo Personal</button>
           </Link>
         </div>
 
-        <table className="personal-table">
-          <thead className="personal-thead">
-            <tr>
-              <th>Nome:</th>
-              <th>Email</th>
-              <th>Função</th>
-              <th>Status</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody className="personal-tbody">
-            {personalData.map(person => (
-              <tr key={person.id}>
-                <td>{person.nome}</td>
-                <td>{person.email}</td>
-                <td>{person.funcao}</td>
-                <td>
-                  <span className="personal-status-text">{person.status}</span>
-                </td>
-                <td>
-                  <a href="#" className="personal-action-link-edit">Edit</a>
-                  <a href="#" className="personal-action-link-delete">Delete</a>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Estados de loading e erro */}
+        {loading && (
+          <div className="personal-loading">
+            <div className="loading-spinner"></div>
+            Carregando personais...
+          </div>
+        )}
+        
+        {error && (
+          <div className="personal-error">
+            <strong>Erro:</strong> {error}
+            <button 
+              onClick={fetchProfessores}
+              className="retry-button"
+            >
+              Tentar Novamente
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <>
+            <table className="personal-table">
+              <thead className="personal-thead">
+                <tr>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Função</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody className="personal-tbody">
+                {filteredPersonais.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>
+                      {searchTerm ? 'Nenhum personal encontrado para a pesquisa.' : 'Nenhum personal cadastrado.'}
+                    </td>
+                  </tr>
+                ) : (
+                  filteredPersonais.map(personal => (
+                    <tr key={personal.id}>
+                      <td>{personal.nome}</td>
+                      <td>{personal.email}</td>
+                      <td>{personal.funcao}</td>
+                      <td>
+                        <span className="personal-status-text">{personal.status}</span>
+                      </td>
+                      <td>
+                        <Link 
+                          to={`/editar-personal/${personal.id}`}
+                          className="personal-action-link-edit"
+                        >
+                          Editar
+                        </Link>
+                        <button 
+                          className="personal-action-link-delete"
+                          onClick={() => handleDeletePersonal(personal.id, personal.nome)}
+                        >
+                          Excluir
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            
+            <div style={{ 
+              marginTop: '10px', 
+              fontSize: '12px', 
+              color: '#666',
+              textAlign: 'center'
+            }}>
+       
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
