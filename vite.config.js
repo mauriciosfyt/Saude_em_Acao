@@ -8,7 +8,7 @@ export default defineConfig({
     // Proxy /api requests to the backend to avoid CORS during development
     proxy: {
       '/api': {
-        target: 'https://saudeemacao.onrender.com',
+        target: 'http://34.205.11.57',
         changeOrigin: true,
         secure: false,
       },
