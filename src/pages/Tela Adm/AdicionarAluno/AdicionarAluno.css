@@ -38,6 +38,9 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  /* --- ADIÇÃO --- */
+  /* Garante que a imagem não transborde */
+  overflow: hidden; 
 }
 
 .aluno-form-fields-section {
@@ -77,35 +80,73 @@
 .aluno-action-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 40px;
+  gap: 20px;
   margin-top: 40px;
-  /* Alinhamento dos botões com a área do formulário */
-  padding-right: calc((100% - 450px - 180px - 60px) / 2);
 }
 
 .aluno-cancel-button,
 .aluno-save-button {
-   background-color: #fff;
-    color: #fff;
-    border: none;
-    padding: 8px 24px;
-    border-radius: 12px 0px 12px 0;
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: 500;
-    transition: background 0.2s;
-    box-shadow: none;
-}
-
-.aluno-cancel-button:hover,
-.aluno-save-button:hover {
-  opacity: 0.85;
+  padding: 12px 25px;
+  font-size: 1em;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .aluno-cancel-button {
-  background-color: #dc3545; /* Vermelho */
+  background-color: #f1f3f5;
+  color: #555;
+}
+
+.aluno-cancel-button:hover {
+  background-color: #e9ecef;
 }
 
 .aluno-save-button {
-  background-color: #28a745; /* Verde */
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.aluno-save-button:hover {
+  background-color: #0056b3;
+}
+
+
+/* --- 
+  NOVO CSS ADICIONADO 
+--- */
+
+/* 1. Regra para formatar a pré-visualização da imagem */
+.aluno-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Garante que a imagem cubra o círculo sem distorcer */
+}
+
+/* 2. Regra para estilizar o SELECT (Plano) igual ao INPUT */
+.aluno-form-group select {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 2px solid #ced4da;
+  font-size: 1em;
+  background-color: transparent;
+  transition: border-color 0.3s ease;
+  
+  /* Remove a aparência padrão do dropdown */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  /* Adiciona espaço para um ícone de seta (se você quiser adicionar um) */
+  /* background-image: url('data:image/svg+xml;charset=US-ASCII,...'); */
+  /* background-repeat: no-repeat; */
+  /* background-position: right 5px center; */
+}
+
+.aluno-form-group select:focus {
+  outline: none;
+  border-bottom-color: #007bff;
 }
