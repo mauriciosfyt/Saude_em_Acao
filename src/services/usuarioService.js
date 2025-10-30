@@ -15,26 +15,56 @@ const getAuthToken = () => {
 
 // --- Funções de Aluno ---
 
+
 /**
  * Cria um novo usuário com o perfil de Aluno.
  * Rota: POST /aluno
- * @param {object} dadosAluno - Os dados do aluno a serem criados.
+ * @param {FormData} dadosFormulario - Os dados do aluno (incluindo a imagem)
  */
-export const createAluno = async (dadosAluno) => {
+export const createAluno = async (dadosFormulario) => {
   try {
     const token = getAuthToken();
-    const response = await fetch(`${API_URL}/aluno`, {
+    if (!token) throw new Error('Token de autenticação não encontrado.');
+
+    console.log('Enviando dados do aluno (FormData)...');
+    
+    const response = await fetch(`${API_URL}/aluno`, { // Endpoint /aluno
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        // --- CORREÇÃO AQUI ---
+        // NÃO definimos 'Content-Type' para FormData
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(dadosAluno)
+      // --- CORREÇÃO AQUI ---
+      body: dadosFormulario // Envia o FormData
     });
-    if (!response.ok) throw new Error('Falha ao criar aluno.');
-    return await response.json();
+
+    // Usar a mesma lógica de resposta de texto
+    const responseText = await response.text();
+
+    if (!response.ok) {
+      // Se a resposta foi um erro, o texto é o JSON de erro
+      try {
+        const erroJson = JSON.parse(responseText);
+        // Lança o erro com a mensagem da API (que você viu)
+        throw new Error(JSON.stringify(erroJson)); 
+      } catch (e) {
+        throw new Error(responseText || 'Falha ao criar aluno.');
+      }
+    }
+    
+    // Sucesso
+    if (responseText.length === 0) {
+      return { success: true, message: 'Criado com sucesso.' };
+    }
+    try {
+      return JSON.parse(responseText);
+    } catch (e) {
+      return { success: true, message: responseText };
+    }
+
   } catch (error) {
-    console.error("Erro em createAluno:", error);
+    console.error('Erro em createAluno:', error);
     throw error;
   }
 };
@@ -112,23 +142,62 @@ export const deleteAluno = async (id) => {
 
 
 // --- Funções de Professor (seguem o mesmo padrão) ---
-
-export const createProfessor = async (dadosProfessor) => {
+/**
+ * Cria um novo usuário com o perfil de Professor.
+ * Rota: POST /professor
+ * @param {FormData} dadosFormulario - Os dados do professor (incluindo a imagem)
+ */
+export const createProfessor = async (dadosFormulario) => {
   try {
     const token = getAuthToken();
+    if (!token) throw new Error('Token de autenticação não encontrado.');
+
+    console.log('Enviando dados do professor (FormData)...');
+    
     const response = await fetch(`${API_URL}/professor`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        // NÃO definimos 'Content-Type' aqui.
+        // O navegador fará isso automaticamente para FormData
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(dadosProfessor)
+      body: dadosFormulario // Envia o FormData diretamente
     });
-    if (!response.ok) throw new Error('Falha ao criar professor.');
-    return await response.json();
+
+    // --- CORREÇÃO AQUI ---
+    // Vamos primeiro ler a resposta como TEXTO, pois sabemos que pode não ser JSON
+    const responseText = await response.text();
+
+    if (!response.ok) {
+      // Se a resposta foi um erro, tentamos parsar o texto como JSON
+      // Se falhar, apenas usamos o texto como mensagem de erro
+      try {
+        const erroJson = JSON.parse(responseText);
+        throw new Error(erroJson.message || 'Falha ao criar professor.');
+      } catch (e) {
+        throw new Error(responseText || 'Falha ao criar professor.');
+      }
+    }
+    
+    // Se a resposta FOI OK e o texto está vazio (comum para 201 Created)
+    if (responseText.length === 0) {
+      return { success: true, message: 'Criado com sucesso.' };
+    }
+
+    // Se o texto NÃO está vazio, tentamos parsar como JSON
+    try {
+      return JSON.parse(responseText);
+    } catch (e) {
+      // Se falhar o parse (o seu caso: "Unexpected token 'W'...")
+      // não tem problema. Apenas retornamos um objeto de sucesso
+      // com a string que a API nos deu.
+      return { success: true, message: responseText };
+    }
+    // --- FIM DA CORREÇÃO ---
+
   } catch (error) {
-    console.error("Erro em createProfessor:", error);
-    throw error;
+    console.error('Erro em createProfessor:', error);
+    throw error; // Repassa o erro para o handleSubmit
   }
 };
 
@@ -173,21 +242,51 @@ export const getAllProfessores = async () => {
   }
 };
 
-export const updateProfessor = async (id, dadosProfessor) => {
+/**
+ * Atualiza um usuário existente com o perfil de Professor.
+ * Rota: PUT /professor/{id}
+ * @param {string} id - O ID (CPF) do professor a ser atualizado.
+ * @param {FormData} dadosFormulario - Os dados do professor (incluindo a imagem)
+ */
+export const updateProfessor = async (id, dadosFormulario) => {
   try {
     const token = getAuthToken();
-    const response = await fetch(`${API_URL}/professor/${id}`, {
-      method: 'PUT',
+    if (!token) throw new Error('Token de autenticação não encontrado.');
+
+    console.log(`Enviando atualização para o professor (ID/CPF: ${id})...`);
+    
+    const response = await fetch(`${API_URL}/professor/${id}`, { // <-- URL com ID (CPF)
+      method: 'PUT', // <-- Método PUT
       headers: {
-        'Content-Type': 'application/json',
+        // Novamente, sem 'Content-Type' para FormData
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(dadosProfessor)
+      body: dadosFormulario 
     });
-    if (!response.ok) throw new Error('Falha ao atualizar professor.');
-    return await response.json();
+
+    const responseText = await response.text();
+
+    if (!response.ok) {
+      try {
+        const erroJson = JSON.parse(responseText);
+        throw new Error(erroJson.message || 'Falha ao atualizar professor.');
+      } catch (e) {
+        throw new Error(responseText || 'Falha ao atualizar professor.');
+      }
+    }
+    
+    // Lidar com resposta de sucesso (que pode ser texto)
+    if (responseText.length === 0) {
+      return { success: true, message: 'Atualizado com sucesso.' };
+    }
+    try {
+      return JSON.parse(responseText);
+    } catch (e) {
+      return { success: true, message: responseText };
+    }
+
   } catch (error) {
-    console.error(`Erro ao atualizar professor ${id}:`, error);
+    console.error('Erro em updateProfessor:', error);
     throw error;
   }
 };
@@ -238,7 +337,7 @@ export const updateAdmin = async (id, dadosAdmin) => {
 export const getUsuarioById = async (id) => {
   try {
     const token = getAuthToken();
-    const response = await fetch(`${API_URL}/usuario/${id}`, {
+    const response = await fetch(`${API_URL}/aluno/${id}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) throw new Error('Usuário não encontrado.');
