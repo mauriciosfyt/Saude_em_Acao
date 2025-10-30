@@ -107,6 +107,15 @@ export const redefinirSenhaEsquecida = async (codigo, novaSenha) => {
   }
 };
 
+export const logout = () => {
+  setAuthToken(null);
+  try {
+    // ALTERADO DE localStorage PARA sessionStorage
+    sessionStorage.removeItem('token');
+  } catch (e) {
+    // ignore
+  }
+};
 
 
 export default api;
