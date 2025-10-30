@@ -46,13 +46,29 @@ export const AuthProvider = ({ children }) => {
 
   // REMOVIDO: O useEffect que usava 'pagehide', pois sessionStorage faz a limpeza.
 
-  const login = (userData) => {
-    setIsAuthenticated(true);
-    setUser(userData);
-    // MUDANÇA: Salvar no sessionStorage
-    sessionStorage.setItem('token', userData.token); 
-    sessionStorage.setItem('userEmail', userData.email);
-  };
+const login = (userData) => {
+  console.log("🔐 Dados recebidos no login:", userData);
+
+  // Se o backend retornar apenas a string do token:
+  const token = typeof userData === 'string'
+    ? userData
+    : userData?.token || userData?.accessToken || userData?.jwt || userData?.tokenJwt;
+
+  if (!token) {
+    console.error("⚠️ Nenhum token JWT encontrado em userData:", userData);
+  } else {
+    console.log("✅ Token JWT detectado:", token);
+  }
+
+  setIsAuthenticated(true);
+  setUser({ email: userData.email || sessionStorage.getItem('userEmail'), token });
+
+  // Salva o token no sessionStorage
+  sessionStorage.setItem('token', token);
+  if (userData.email) sessionStorage.setItem('userEmail', userData.email);
+};
+
+
 
   const logout = () => {
     setIsAuthenticated(false);
