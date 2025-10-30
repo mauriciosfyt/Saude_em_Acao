@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // Hook para pegar o ID da URL
+import { useParams } from "react-router-dom";
 import Header_nLogin from "../../components/header_loja_nLogin";
+import Header_Login from "../../components/header_loja";
 import Footer from "../../components/footer";
 import ProdutosSection from "../../components/produtos";
-import { getProdutoById } from "../../services/produtoService"; // Importa a função do seu serviço
+import { getProdutoById } from "../../services/produtoService";
+import { useAuth } from "../../contexts/AuthContext";
 import "./LojaProduto.css";
 
 const LojaProduto = () => {
-  // Pega o parâmetro 'id' da URL (ex: /LojaProduto/12345)
   const { id } = useParams();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   // Cria estados para guardar os dados do produto, o status de carregamento e erros
   const [produto, setProduto] = useState(null);
@@ -46,11 +48,26 @@ const LojaProduto = () => {
     fetchProduto();
   }, [id]); // O [id] faz com que a busca seja refeita se o ID na URL mudar
 
+  // Mostra loading enquanto verifica autenticação
+  if (authLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '18px'
+      }}>
+        Carregando...
+      </div>
+    );
+  }
+
   // Renderiza uma mensagem de "Carregando..." enquanto espera a API
   if (loading) {
     return (
       <>
-        <Header_nLogin />
+        {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
         <div style={{ textAlign: 'center', padding: '150px' }}>Carregando produto...</div>
         <Footer />
       </>
@@ -61,7 +78,7 @@ const LojaProduto = () => {
   if (error) {
     return (
       <>
-        <Header_nLogin />
+        {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
         <div style={{ textAlign: 'center', padding: '150px', color: 'red' }}>Erro: {error}</div>
         <Footer />
       </>
@@ -76,7 +93,7 @@ const LojaProduto = () => {
   // Renderiza o componente com os dados dinâmicos do produto
   return (
     <>
-      <Header_nLogin />
+      {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
 
       <section className="product-hero">
         <div className="left-section">

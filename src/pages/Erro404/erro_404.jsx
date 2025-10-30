@@ -1,16 +1,37 @@
 // src/pages/Erro404/index.jsx
 import React from "react";
 import HeaderUser from "../../components/header";
+import Header_nLogin from "../../components/header_nLogin";
 import Footer from "../../components/footer";
 import "./Erro404.css";
+import { useAuth } from "../../contexts/AuthContext";
 
 // Imagem do erro
 import erro404 from "../../assets/banners/banner_404.svg"; // coloque sua imagem na pasta assets
 
 const Erro404 = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  // Mostra loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div className="erro-404">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px'
+        }}>
+          Carregando...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="erro-404">
-      <HeaderUser />
+      {isAuthenticated ? <HeaderUser /> : <Header_nLogin />}
 
       {/* Banner do erro */}
       <div className="banner-gradient-erro">

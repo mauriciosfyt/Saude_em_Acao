@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header_Login from "../../components/header_loja"; // Supondo que este seja o header correto
+import Header_Login from "../../components/header_loja";
+import Header_nLogin from "../../components/header_loja_nLogin";
 import Footer from "../../components/footer";
 import banner from "../../assets/banners/banner_camisetas.svg";
+import { useAuth } from "../../contexts/AuthContext";
 
 // Importe suas imagens de produtos aqui. Para este exemplo, usarei placeholders.
 import product1 from "../../assets/IMG PRODUTO.jpg";
@@ -16,6 +18,7 @@ import "./CategoriaCamisa.css";
 
 const CategoriaCamisa = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8; // ajuste conforme desejar
 
@@ -77,9 +80,26 @@ const CategoriaCamisa = () => {
   const handlePrev = () => gotoPage(currentPage - 1);
   const handleNext = () => gotoPage(currentPage + 1);
 
+  // Mostra loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div className="categoria-camisa">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px'
+        }}>
+          Carregando...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="categoria-camisa">
-      <Header_Login />
+      {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
       <div className="banner-gradient-categoria-camisa">
         <section className="banner">
           <img src={banner} alt="Banner Categoria Camisa" />

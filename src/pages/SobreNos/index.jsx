@@ -1,9 +1,11 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import Header_nLogin from "../../components/header_nLogin";
 import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
 import CardFlip from "../../components/CardFlip";
 import "./SobreNos.css";
+import { useAuth } from "../../contexts/AuthContext";
 
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -44,6 +46,7 @@ const DICAS = [
 
 const SobreNos = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
 
   // 🔹 Estado para controlar quais cartas estão viradas
   const [flippedCards, setFlippedCards] = useState(
@@ -87,9 +90,26 @@ const SobreNos = () => {
     return () => observer2.disconnect();
   }, []);
 
+  // Mostra loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div className="sobre-nos">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px'
+        }}>
+          Carregando...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="sobre-nos">
-      <HeaderUser />
+      {isAuthenticated ? <HeaderUser /> : <Header_nLogin />}
 
       <div className="banner-gradient-sobrenos">
         <section className="banner">

@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
+import Header_nLogin from "../../components/header_nLogin";
 import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
 import "./Pprofs.css";
 import { FaWhatsapp } from "react-icons/fa";
 import banner from "../../assets/banners/banner_profs.png";
 import { getAllProfessores } from "../../services/usuarioService";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function Equipe() {
+    const { isAuthenticated, loading: authLoading } = useAuth();
     const [membros, setMembros] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -39,9 +42,26 @@ export default function Equipe() {
         return url;
     };
 
+    // Mostra loading enquanto verifica autenticação
+    if (authLoading) {
+        return (
+            <div className="equipe-container">
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    height: '100vh',
+                    fontSize: '18px'
+                }}>
+                    Carregando...
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="equipe-container">
-            <HeaderUser />
+            {isAuthenticated ? <HeaderUser /> : <Header_nLogin />}
 
             {/* Banner principal com gradiente igual ao Sobre Nós */}
             <main className="profs-container">

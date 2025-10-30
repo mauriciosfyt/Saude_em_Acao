@@ -3,14 +3,35 @@ import "./planos.css";
 
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
+import Header_nLogin from "../../components/header_nLogin";
 import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
 import ProdutosSection from "../../components/produtos";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Planos = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  // Mostra loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div className="planos-container">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px'
+        }}>
+          Carregando...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-     <HeaderUser />
+      {isAuthenticated ? <HeaderUser /> : <Header_nLogin />}
 
       <section className="planos-container">
         <div className="planos-header">

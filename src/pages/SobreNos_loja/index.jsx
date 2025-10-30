@@ -6,14 +6,32 @@ import IconMusculo from "../../assets/icones/Tríceps-Azul.png";
 import IconCapsula from "../../assets/icones/Pílula-Azul.png";
 import IconGrafico from "../../assets/icones/gráfico-Azul.png";
 
-import Header_nLogin from "../../components/header_loja_nLogin"
+import Header_nLogin from "../../components/header_loja_nLogin";
+import Header_Login from "../../components/header_loja";
 import Footer from "../../components/footer";
+import { useAuth } from "../../contexts/AuthContext";
 
 const SobrenosLoja = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  // Mostra loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '18px'
+      }}>
+        Carregando...
+      </div>
+    );
+  }
+
   return (
     <>
-
-    <Header_nLogin />
+      {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
 
     <section className="sobrenos-container">
       <div className="sobrenos-content">

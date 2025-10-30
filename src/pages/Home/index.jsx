@@ -13,12 +13,16 @@ import React, { useRef, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 // ícones não utilizados removidos
 import Header_nLogin from "../../components/header_nLogin/index.jsx";
+import HeaderUser from "../../components/header/index.jsx"
 import Planos from "../../components/Planos";
+import { useAuth } from "../../contexts/AuthContext.jsx";
 
 function Home() {
   const historiaRef = useRef(null);
   const [showHistoria, setShowHistoria] = useState(false);
   const location = useLocation();
+
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
     const observer = new window.IntersectionObserver(
@@ -44,7 +48,7 @@ function Home() {
 
   return (
     <div className="home-container">
-      <Header_nLogin />
+      {isAuthenticated ? <HeaderUser/> : <Header_nLogin />}
 
       <main>
         {/* BANNER */}

@@ -3,16 +3,37 @@
 import React from 'react';
 import './ThayFit.css';
 import thayfitBanner from '../../assets/banners/banner_thayfit.svg';
-import Header from '../../components/header_nLogin';
+import Header_nLogin from '../../components/header_nLogin';
+import HeaderUser from '../../components/header';
 import Footer from '../../components/footer';
 import PlanosComponent from '../../components/Planos';
+import { useAuth } from '../../contexts/AuthContext';
 
 
 
 const ThayFit = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  // Mostra loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div className="thayfit-page">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px'
+        }}>
+          Carregando...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-     <Header />
+      {isAuthenticated ? <HeaderUser /> : <Header_nLogin />}
     <main className="thayfit-page">
      
       {/* Banner principal (igual ao da Home) */}

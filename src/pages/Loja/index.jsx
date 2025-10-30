@@ -13,6 +13,8 @@ import iconeWhey from "../../assets/icones/Whey protain.png";
 import iconeEnergia from "../../assets/icones/Pré-Treino.png";
 import Footer from '../../components/footer';
 import Header_nLogin from '../../components/header_loja_nLogin';
+import Header_Login from '../../components/header_loja';
+import { useAuth } from '../../contexts/AuthContext';
 
 import ProdutosSection from "../../components/produtos";
 
@@ -26,6 +28,7 @@ const sportsData = [
 
 
 const Loja = () => {
+  const { isAuthenticated, loading } = useAuth();
   const categorias = [
     { icon: iconeCamisa, link: "/CategoriaCamisa" },
     { icon: iconePote, link: "/CategoriaVitaminas" },
@@ -33,9 +36,26 @@ const Loja = () => {
     { icon: iconeEnergia, link: "/CategoriaCreatina" },
   ];
 
+  // Mostra loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div className="banner-gradient-loja">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px'
+        }}>
+          Carregando...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <Header_nLogin />
+      {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
 
       <div className="banner-gradient-loja">
         <section className="banner">

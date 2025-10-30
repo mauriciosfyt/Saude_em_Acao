@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
 import banner from "../../assets/banners/banner_whey.svg";
 import product1 from "../../assets/IMG PRODUTO.jpg";
@@ -9,9 +8,10 @@ import product3 from "../../assets/IMG PRODUTO3.jpg";
 import "../../pages/CategoriaVitaminas/Categorias.css";
 import Header_nLogin from "../../components/header_loja_nLogin";
 import Header_Login from "../../components/header_loja";
+import { useAuth } from "../../contexts/AuthContext";
 
 const CategoriaWhey = () => {
-
+  const { isAuthenticated, loading } = useAuth();
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 8;
   const todosOsProdutos = [
@@ -69,9 +69,26 @@ const CategoriaWhey = () => {
     navigate("/LojaProduto");
   };
 
+  // Mostra loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div className="categoria-camisa">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px'
+        }}>
+          Carregando...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="categoria-camisa">
-      <Header_Login />
+      {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
       <div className="banner-gradient-categoria-camisa">
         <section className="banner">
           <img src={banner} alt="Banner Categoria Camisa" />
