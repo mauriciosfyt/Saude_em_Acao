@@ -1,5 +1,5 @@
 // src/services/api.js
-// Centraliza as chamadas à API
+// Centraliza as chamadas à API e fornece helpers para autenticação
 
 import axios from 'axios';
 
@@ -7,17 +7,107 @@ import axios from 'axios';
 // Se não definida, usa caminho relativo (''), permitindo que o rewrite/proxy trate as requisições.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
-// Login padrão: autentica usuário se o usuario existe vai para o modal de token
-export const login = async (email, senha) => {
-  try {
-    const response = await axios.post(`${API_BASE_URL}/api/login`, {
-      email,
-      senha,
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response ? error.response.data : error;
+// Instância axios central
+const api = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+// Helper para configurar token de autorização nas próximas requisições
+export const setAuthToken = (token) => {
+  if (token) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common['Authorization'];
   }
 };
 
-// Outras funções de API podem ser adicionadas aqui
+// Login padrão: retorna os dados do servidor (espera token/usuario em response.data)
+export const login = async (email, senha) => {
+  try {
+    // Mantido por compatibilidade, mas recomenda-se usar `solicitarToken` para o fluxo em 2 passos
+    const response = await api.post('/api/login', { email, senha });
+    return response.data;
+  } catch (error) {
+    // Normaliza erro: se houver resposta do servidor, lança seu corpo
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
+
+// Passo 1 do login: envia email e senha; se estiverem corretas, servidor envia um código por e-mail
+export const solicitarToken = async (email, senha) => {
+  try {
+    const response = await api.post('/api/auth/solicitar-token', { email, senha });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
+
+// Valida o token de 5 dígitos (que já é o JWT)
+export const loginComToken = async (email, codigo) => {
+  try {
+    console.log('Validando token:', { email, token: codigo });
+    const response = await api.post('/api/auth/login-token', { email, token: codigo });
+    console.log('Token validado com sucesso!');
+    return response.data;
+  } catch (error) {
+    console.error('Erro na validação do token:', error);
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
+
+export const solicitarCodigoRecuperacao = async (email) => {
+  try {
+    // O backend deve validar o email e enviar um código
+    const response = await api.post('/api/auth/solicitar-recuperacao', { email });
+    return response.data; // Espera algo como { message: 'Código enviado...' }
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
+
+// Fluxo oficial conforme Rotas da API: POST http://34.205.11.57/api/auth/esqueci-senha/solicitar
+// Usa URL absoluta para não depender de configuração de proxy/baseURL
+export const solicitarEsqueciSenha = async (email) => {
+  try {
+    const response = await api.post('http://34.205.11.57/api/auth/esqueci-senha/solicitar', { email });
+    return response.data; // Ex.: { message: 'E-mail de recuperação enviado' }
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
+
+// Etapa 2: valida o código de 5 dígitos enviado ao e-mail
+export const validarCodigoEsqueciSenha = async (codigo) => {
+  try {
+    const response = await api.post('http://34.205.11.57/api/auth/esqueci-senha/validar-codigo', { codigo });
+    return response.data; // Ex.: { codigo: '123456' }
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
+
+// Etapa 3: redefine a senha usando o código validado na etapa 2
+// Rota: POST http://34.205.11.57/api/auth/esqueci-senha/redefinir/{codigo}
+// Envia apenas a nova senha no corpo da requisição
+export const redefinirSenhaEsquecida = async (codigo, novaSenha) => {
+  try {
+    const url = `http://34.205.11.57/api/auth/esqueci-senha/redefinir/${encodeURIComponent(codigo)}`;
+    const response = await api.post(url, { novaSenha });
+    return response.data; // Ex.: { message: 'Senha redefinida com sucesso' }
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
+
+
+
+export default api;
+

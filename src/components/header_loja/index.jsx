@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import "../header_loja_nLogin/Header_Login.css";
+import { useAuth } from "../../contexts/AuthContext";
 
 import { FaShoppingCart, FaUser, FaSearch } from "react-icons/fa";
 import logo from "../../assets/logo_dia.png";
 import { Link } from "react-router-dom";
 
 const Header = () => {
+  const { logout } = useAuth();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 799);
   // Estado para detectar mobile (mantido)
 
@@ -68,7 +70,6 @@ const Header = () => {
             </div>
 
             <div className="header-actions">
-            
               <Link to="/Perfil">
                 <FaUser className="icon" />
               </Link>
@@ -84,11 +85,11 @@ const Header = () => {
       {/* Navegação secundária */}
       <nav className="nav-links">
         <div className="nav-center">
-          <a href="/">Home</a>
-          <a href="/CategoriaWhey">Whey Protein</a>
-          <a href="/CategoriaCreatina">Creatina</a>
-          <a href="/CategoriaVitaminas">Vitaminas</a>
-          <a href="/CategoriaCamisa">Camisetas</a>
+          <Link to="/">Home</Link>
+          <Link to="/CategoriaWhey">Whey Protein</Link>
+          <Link to="/CategoriaCreatina">Creatina</Link>
+          <Link to="/CategoriaVitaminas">Vitaminas</Link>
+          <Link to="/CategoriaCamisa">Camisetas</Link>
         </div>
       </nav>
     </>

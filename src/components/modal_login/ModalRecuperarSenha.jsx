@@ -1,7 +1,12 @@
 import React from "react";
+import { solicitarEsqueciSenha } from "../../services/api";
 import logo from "../../assets/logo1.png";
 
 export default function RecoverModal({ onClose, onSend }) {
+  const [email, setEmail] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [mensagem, setMensagem] = React.useState("");
+  const [erro, setErro] = React.useState("");
   React.useEffect(() => {
     document.body.classList.add('modal-open');
     return () => {
@@ -9,8 +14,30 @@ export default function RecoverModal({ onClose, onSend }) {
     };
   }, []);
 
+  const handleSend = async () => {
+    setMensagem("");
+    setErro("");
+    if (!email) {
+      setErro("Por favor, digite seu e-mail.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await solicitarEsqueciSenha(email);
+      setMensagem(data?.message || "Se existir uma conta, enviaremos instruções por e-mail.");
+      if (typeof onSend === "function") {
+        onSend(email, data);
+      }
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.message || "Não foi possível solicitar a recuperação agora.");
+      setErro(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="modal-bg" onClick={onClose}>
+    <div className="modal-bg">
       <div className="modal-login" onClick={(e) => e.stopPropagation()}>
         <button
           className="modal-close-btn"
@@ -45,12 +72,21 @@ export default function RecoverModal({ onClose, onSend }) {
         <label htmlFor="recover-email" className="modal-label">
           Email de Recuperação
         </label>
-        <input id="recover-email" type="email" className="modal-input" placeholder="Digite seu e-mail" />
+        <input
+          id="recover-email"
+          type="email"
+          className="modal-input"
+          placeholder="Digite seu e-mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={loading}
+        />
         <button
           className="modal-btn"
-          onClick={onSend}
+          onClick={handleSend}
+          disabled={loading}
         >
-          ENVIAR
+          {loading ? "ENVIANDO..." : "ENVIAR"}
         </button>
       </div>
     </div>

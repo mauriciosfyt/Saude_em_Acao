@@ -1,7 +1,8 @@
 import React from "react";
+import { redefinirSenhaEsquecida } from "../../services/api";
 import logo from "../../assets/logo1.png";
 
-export default function ChangePasswordModal({ onClose, onChangePassword }) {
+export default function ChangePasswordModal({ onClose, onChangePassword, token, onOpenLogin }) {
   // Adiciona a classe 'modal-open' ao body do documento quando o componente é montado
   React.useEffect(() => {
     document.body.classList.add('modal-open');
@@ -12,8 +13,45 @@ export default function ChangePasswordModal({ onClose, onChangePassword }) {
     };
   }, []);
 
+  const [newPwd, setNewPwd] = React.useState("");
+  const [confirmPwd, setConfirmPwd] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [erro, setErro] = React.useState("");
+  const [mensagem, setMensagem] = React.useState("");
+
+  const handleChange = async () => {
+    setErro("");
+    setMensagem("");
+    if (!token) {
+      setErro("Token ausente.");
+      return;
+    }
+    if (!newPwd || !confirmPwd) {
+      setErro("Preencha a nova senha e a confirmação.");
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      setErro("As senhas não coincidem.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await redefinirSenhaEsquecida(token, newPwd);
+      setMensagem(data?.message || "Senha alterada com sucesso.");
+      if (typeof onChangePassword === "function") onChangePassword(data);
+      // Fecha este modal e abre o modal de login, se a prop existir
+      if (typeof onClose === "function") onClose();
+      if (typeof onOpenLogin === "function") onOpenLogin();
+    } catch (e) {
+      const msg = typeof e === "string" ? e : (e?.message || "Falha ao alterar senha.");
+      setErro(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="modal-bg" onClick={onClose}>
+    <div className="modal-bg">
       <div className="modal-login" onClick={(e) => e.stopPropagation()}>
         <button
           className="modal-close-btn"
@@ -52,6 +90,9 @@ export default function ChangePasswordModal({ onClose, onChangePassword }) {
           type="password"
           className="modal-input"
           placeholder="Nova senha"
+          value={newPwd}
+          onChange={(e) => setNewPwd(e.target.value)}
+          disabled={loading}
         />
         <label htmlFor="confirm-password" className="modal-label">Confirmar Senha</label>
         <input
@@ -59,13 +100,23 @@ export default function ChangePasswordModal({ onClose, onChangePassword }) {
           type="password"
           className="modal-input"
           placeholder="Confirmar senha"
+          value={confirmPwd}
+          onChange={(e) => setConfirmPwd(e.target.value)}
+          disabled={loading}
         />
         <button
           className="modal-btn"
-          onClick={onChangePassword}
+          onClick={handleChange}
+          disabled={loading}
         >
-          ALTERAR
+          {loading ? "ALTERANDO..." : "ALTERAR"}
         </button>
+        {erro ? (
+          <p style={{ color: "#d9534f", marginTop: "8px", fontSize: "0.9rem", textAlign: "center" }}>{erro}</p>
+        ) : null}
+        {mensagem ? (
+          <p style={{ color: "#28a745", marginTop: "8px", fontSize: "0.9rem", textAlign: "center" }}>{mensagem}</p>
+        ) : null}
       </div>
     </div>
   );

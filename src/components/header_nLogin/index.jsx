@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import logo from "../../assets/logo_dia.png";
 import "./styles.css";
 import "./modal_login.css";
-
+import { useAuth } from "../../contexts/AuthContext";
 
 // Importando os modais
 import ModalLogin from "../modal_login/ModalLogin";
@@ -13,12 +13,16 @@ import ModalCodigoRecuperacao from "../modal_login/ModalCodigoRecuperacao";
 import ModalAlterarSenha from "../modal_login/ModalAlterarSenha";
 
 function HomeHeader() {
+  const { isAuthenticated, logout } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showRecoverModal, setShowRecoverModal] = useState(false);
   const [showRecoverCodeModal, setShowRecoverCodeModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [code, setCode] = useState(["", "", "", ""]);
+  const [code, setCode] = useState(["", "", "", "", ""]);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [recoverEmail, setRecoverEmail] = useState("");
+  const [recoverToken, setRecoverToken] = useState("");
 
   // Controla o scroll do body quando qualquer modal está aberto
   useEffect(() => {
@@ -37,30 +41,35 @@ function HomeHeader() {
   }, [showModal, showCodeModal, showRecoverModal, showRecoverCodeModal, showChangePasswordModal]);
 
   const handleCodeChange = (value, idx) => {
+    // Aceita letras e números (alphanumeric). Mantém em maiúsculas para
+    // consistência e evita que caracteres inválidos limpem o campo.
     if (value.length > 1) return;
+    const sanitized = value.replace(/[^0-9a-zA-Z]/g, "").toUpperCase();
     const newCode = [...code];
-    newCode[idx] = value.replace(/[^0-9]/g, "");
+    newCode[idx] = sanitized;
     setCode(newCode);
-    if (value && idx < 3) {
+    if (sanitized && idx < 4) {
       document.getElementById(`code-input-${idx + 1}`)?.focus();
     }
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  // Chamado quando o ModalLogin chama `onLogin(email)`.
+  // Recebe o email e abre o modal de código.
+  const handleLogin = (emailParam) => {
+    if (emailParam) setLoginEmail(emailParam);
     setShowModal(false);
     setShowCodeModal(true);
   };
 
-  const handleRecover = (e) => {
-    e.preventDefault();
+  const handleRecover = (emailParam, _data) => {
+    if (emailParam) setRecoverEmail(emailParam);
     setShowRecoverModal(false);
     setShowRecoverCodeModal(true);
-    setCode(["", "", "", ""]);
+    setCode(["", "", "", "", ""]);
   };
 
-  const handleValidateRecoverCode = (e) => {
-    e.preventDefault();
+  const handleValidateRecoverCode = (_email, token) => {
+    if (token) setRecoverToken(token);
     setShowRecoverCodeModal(false);
     setShowChangePasswordModal(true);
   };
@@ -79,9 +88,15 @@ function HomeHeader() {
       <header className="header">
         <div className="logo-container">
           <img src={logo} alt="Logo da Empresa" className="logo" />
-          <button className="login-button" onClick={() => setShowModal(true)}>
-            Fazer login
-          </button>
+          {isAuthenticated ? (
+            <button className="login-button" onClick={logout}>
+              Sair
+            </button>
+          ) : (
+            <button className="login-button" onClick={() => setShowModal(true)}>
+              Fazer login
+            </button>
+          )}
         </div>
         
       </header>
@@ -112,6 +127,7 @@ function HomeHeader() {
       {showCodeModal && (
         <ModalCodigo
           code={code}
+          email={loginEmail}
           onClose={() => setShowCodeModal(false)}
           onChange={handleCodeChange}
         />
@@ -127,6 +143,7 @@ function HomeHeader() {
       {showRecoverCodeModal && (
         <ModalCodigoRecuperacao
           code={code}
+          email={recoverEmail}
           onClose={() => setShowRecoverCodeModal(false)}
           onChange={handleCodeChange}
           onValidate={handleValidateRecoverCode}
@@ -136,7 +153,12 @@ function HomeHeader() {
       {showChangePasswordModal && (
         <ModalAlterarSenha
           onClose={() => setShowChangePasswordModal(false)}
+          token={recoverToken}
           onChangePassword={() => {}}
+          onOpenLogin={() => {
+            setShowChangePasswordModal(false);
+            setShowModal(true);
+          }}
         />
       )}
     </>

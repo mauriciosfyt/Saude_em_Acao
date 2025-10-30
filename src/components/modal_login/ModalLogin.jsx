@@ -1,8 +1,6 @@
-
 import React, { useState } from "react";
 import logo from "../../assets/logo1.png";
-import { login } from "../../services/api";
-
+import { solicitarToken } from "../../services/api";
 
 export default function LoginModal({ onClose, onLogin, onRecover }) {
   const [email, setEmail] = useState("");
@@ -21,12 +19,15 @@ export default function LoginModal({ onClose, onLogin, onRecover }) {
     setLoading(true);
     setError("");
     try {
-      const data = await login(email, senha);
-      if (onLogin) onLogin(data); // Chama callback se existir
+  const data = await solicitarToken(email, senha);
+  // Quando o login via API for bem-sucedido, enviamos o email
+  // ao componente pai para que ele abra o modal de verificação
+  // com o email já conhecido.
+  if (onLogin) onLogin(email);
     } catch (err) {
-      setError(err?.message || "Erro ao fazer login");
+        setError(err?.message || "Erro ao fazer login");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 

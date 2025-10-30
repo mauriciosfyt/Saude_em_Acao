@@ -3,6 +3,8 @@ import "./Header_Login.css";
 import { FaShoppingCart, FaUser, FaSearch } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
 import logo from "../../assets/logo_dia.png";
+import { useAuth } from "../../contexts/AuthContext";
+import { Link } from "react-router-dom";
 
 // Importando os modais refatorados (nomes corrigidos sem espaços)
 import ModalLogin from "../../components/modal_login/ModalLogin";
@@ -12,42 +14,51 @@ import ModalCodigoRecuperacao from "../../components/modal_login/ModalCodigoRecu
 import ModalAlterarSenha from "../../components/modal_login/ModalAlterarSenha";
 
 const Header_nLogin = () => {
+  const { isAuthenticated, logout } = useAuth();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 799);
   const [showModal, setShowModal] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showRecoverModal, setShowRecoverModal] = useState(false);
   const [showRecoverCodeModal, setShowRecoverCodeModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [code, setCode] = useState(["", "", "", ""]);
+  const [code, setCode] = useState(["", "", "", "", ""]);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [recoverEmail, setRecoverEmail] = useState("");
+  const [recoverToken, setRecoverToken] = useState("");
 
   // Removi o useEffect que usava historiaRef e setShowHistoria
   // Se quiser esse efeito depois, me avisa!
 
   const handleCodeChange = (value, idx) => {
+    // Aceita letras e números (alphanumeric). Mantém em maiúsculas para
+    // consistência e evita que caracteres inválidos limpem o campo.
     if (value.length > 1) return;
+    const sanitized = value.replace(/[^0-9a-zA-Z]/g, "").toUpperCase();
     const newCode = [...code];
-    newCode[idx] = value.replace(/[^0-9]/g, "");
+    newCode[idx] = sanitized;
     setCode(newCode);
-    if (value && idx < 3) {
+    if (sanitized && idx < 4) {
       document.getElementById(`code-input-${idx + 1}`)?.focus();
     }
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  // Chamado quando o ModalLogin chama `onLogin(email)`.
+  // Recebe o email e abre o modal de código.
+  const handleLogin = (emailParam) => {
+    if (emailParam) setLoginEmail(emailParam);
     setShowModal(false);
     setShowCodeModal(true);
   };
 
-  const handleRecover = (e) => {
-    e.preventDefault();
+  const handleRecover = (emailParam, _data) => {
+    if (emailParam) setRecoverEmail(emailParam);
     setShowRecoverModal(false);
     setShowRecoverCodeModal(true);
-    setCode(["", "", "", ""]);
+    setCode(["", "", "", "", ""]);
   };
 
-  const handleValidateRecoverCode = (e) => {
-    e.preventDefault();
+  const handleValidateRecoverCode = (_email, token) => {
+    if (token) setRecoverToken(token);
     setShowRecoverCodeModal(false);
     setShowChangePasswordModal(true);
   };
@@ -83,9 +94,9 @@ const Header_nLogin = () => {
 
             <button
               className="login-button_loja"
-              onClick={() => setShowModal(true)}
+              onClick={isAuthenticated ? logout : () => setShowModal(true)}
             >
-              Fazer login
+              {isAuthenticated ? 'Sair' : 'Fazer login'}
             </button>
             <div className="search-bar">
               <input
@@ -116,9 +127,9 @@ const Header_nLogin = () => {
 
             <button
               className="login-button_loja"
-              onClick={() => setShowModal(true)}
+              onClick={isAuthenticated ? logout : () => setShowModal(true)}
             >
-              Fazer login
+              {isAuthenticated ? 'Sair' : 'Fazer login'}
             </button>
           </>
         )}
@@ -139,6 +150,7 @@ const Header_nLogin = () => {
       {showCodeModal && (
         <ModalCodigo
           code={code}
+          email={loginEmail}
           onClose={() => setShowCodeModal(false)}
           onChange={handleCodeChange}
         />
@@ -154,6 +166,7 @@ const Header_nLogin = () => {
       {showRecoverCodeModal && (
         <ModalCodigoRecuperacao
           code={code}
+          email={recoverEmail}
           onClose={() => setShowRecoverCodeModal(false)}
           onChange={handleCodeChange}
           onValidate={handleValidateRecoverCode}
@@ -163,18 +176,23 @@ const Header_nLogin = () => {
       {showChangePasswordModal && (
         <ModalAlterarSenha
           onClose={() => setShowChangePasswordModal(false)}
+          token={recoverToken}
           onChangePassword={() => {}}
+          onOpenLogin={() => {
+            setShowChangePasswordModal(false);
+            setShowModal(true);
+          }}
         />
       )}
 
     {/* Navegação secundária */}
       <nav className="nav-links">
         <div className="nav-center">
-          <a href="/">Home</a>
-          <a href="/CategoriaWhey">Whey Protein</a>
-          <a href="/CategoriaCreatina">Creatina</a>
-          <a href="/CategoriaVitaminas">Vitaminas</a>
-          <a href="/CategoriaCamisa">Camisetas</a>
+          <Link to="/">Home</Link>
+          <Link to="/CategoriaWhey">Whey Protein</Link>
+          <Link to="/CategoriaCreatina">Creatina</Link>
+          <Link to="/CategoriaVitaminas">Vitaminas</Link>
+          <Link to="/CategoriaCamisa">Camisetas</Link>
         </div>
       </nav>
     </>
