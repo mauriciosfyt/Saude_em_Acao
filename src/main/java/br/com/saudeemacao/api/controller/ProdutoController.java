@@ -1,6 +1,7 @@
 package br.com.saudeemacao.api.controller;
 
 import br.com.saudeemacao.api.dto.ProdutoDTO;
+import br.com.saudeemacao.api.model.EnumProduto.ECategoria;
 import br.com.saudeemacao.api.model.Produto;
 import br.com.saudeemacao.api.service.ProdutoService;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +21,21 @@ public class ProdutoController {
     private final ProdutoService service;
 
     @GetMapping
-    public ResponseEntity<List<Produto>> getAll(@RequestParam(required = false) String nome) {
-        // Se o parâmetro 'nome' for fornecido, busca por nome. Senão, lista todos.
+    public ResponseEntity<List<Produto>> getAll(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) ECategoria categoria) {
+
+        // Se o parâmetro 'categoria' for fornecido, busca por categoria.
+        if (categoria != null) {
+            return ResponseEntity.ok(service.getProdutosPorCategoria(categoria));
+        }
+
+        // Se o parâmetro 'nome' for fornecido, busca por nome.
         if (nome != null && !nome.isEmpty()) {
             return ResponseEntity.ok(service.getProdutosPorNome(nome));
         }
+
+        // Senão, lista todos.
         return ResponseEntity.ok(service.getAll());
     }
 

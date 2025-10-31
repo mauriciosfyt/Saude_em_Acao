@@ -101,15 +101,26 @@ public class AuthController {
     @PostMapping("/esqueci-senha/solicitar")
     public ResponseEntity<String> solicitarRedefinicaoSenha(@Valid @RequestBody RedefinirSenhaSolicitacaoDTO dto) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(dto.getEmail());
+
+        // **** ALTERAÇÃO PRINCIPAL AQUI ****
+        // Se o usuário com o e-mail fornecido não for encontrado,
+        // retorna um erro claro e o status HTTP 404.
         if (usuarioOpt.isEmpty()) {
-            return ResponseEntity.ok("Se o e-mail estiver cadastrado, um código de redefinição será enviado.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Usuário não encontrado com o e-mail fornecido.");
         }
+
+        // Se o usuário foi encontrado, o fluxo continua normalmente.
         try {
             TokenAcesso tokenAcesso = tokenAcessoService.gerarToken(dto.getEmail());
             emailService.enviarTokenRedefinicaoSenha(dto.getEmail(), tokenAcesso.getToken());
-            return ResponseEntity.ok("Se o e-mail estiver cadastrado, um código de redefinição será enviado.");
+
+            // A mensagem de sucesso agora pode ser mais direta.
+            return ResponseEntity.ok("Token de redefinição de senha enviado para o seu e-mail.");
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao enviar código de redefinição: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao enviar token de redefinição de senha: " + e.getMessage());
         }
     }
 

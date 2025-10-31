@@ -64,6 +64,12 @@ public class ProdutoService {
                 .collect(Collectors.toList());
     }
 
+    public List<Produto> getProdutosPorCategoria(ECategoria categoria) {
+        return repository.findByCategoria(categoria).stream()
+                .map(this::aplicarPromocaoSeAtiva)
+                .collect(Collectors.toList());
+    }
+
 
     public List<Produto> getProdutosPorNome(String nome) {
         return repository.findByNomeContainingIgnoreCase(nome).stream()

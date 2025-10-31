@@ -21,7 +21,6 @@ public class AlunoCreateDTO extends UsuarioCreateDTO {
     @NotNull(message = "Plano é obrigatório")
     private EPlano plano;
 
-    @NotNull(message = "Foto de perfil é obrigatória")
     private MultipartFile fotoPerfil;
 
     // =================================================================

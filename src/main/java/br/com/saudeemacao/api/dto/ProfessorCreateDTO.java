@@ -16,6 +16,5 @@ public class ProfessorCreateDTO extends UsuarioCreateDTO {
     @NotBlank(message = "Telefone é obrigatório")
     private String telefone;
 
-    @NotNull(message = "Foto de perfil é obrigatória")
     private MultipartFile fotoPerfil;
 }
