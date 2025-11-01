@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import logo from "../../assets/logo1.png";
 import { solicitarToken } from "../../services/api";
+import ErrorMessage from "./ErrorMessage";
 
 export default function LoginModal({ onClose, onLogin, onRecover }) {
   const [email, setEmail] = useState("");
@@ -90,7 +91,7 @@ export default function LoginModal({ onClose, onLogin, onRecover }) {
           value={senha}
           onChange={e => setSenha(e.target.value)}
         />
-        {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
+        <ErrorMessage message={error} />
         <a href="#" className="modal-link" onClick={onRecover}>
           Esqueci minha senha
         </a>

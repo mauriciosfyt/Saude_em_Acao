@@ -1,6 +1,7 @@
 import React from "react";
 import { redefinirSenhaEsquecida } from "../../services/api";
 import logo from "../../assets/logo1.png";
+import ErrorMessage from "./ErrorMessage";
 
 export default function ChangePasswordModal({ onClose, onChangePassword, token, onOpenLogin }) {
   // Adiciona a classe 'modal-open' ao body do documento quando o componente é montado
@@ -104,6 +105,7 @@ export default function ChangePasswordModal({ onClose, onChangePassword, token, 
           onChange={(e) => setConfirmPwd(e.target.value)}
           disabled={loading}
         />
+        <ErrorMessage message={erro} />
         <button
           className="modal-btn"
           onClick={handleChange}
@@ -111,12 +113,6 @@ export default function ChangePasswordModal({ onClose, onChangePassword, token, 
         >
           {loading ? "ALTERANDO..." : "ALTERAR"}
         </button>
-        {erro ? (
-          <p style={{ color: "#d9534f", marginTop: "8px", fontSize: "0.9rem", textAlign: "center" }}>{erro}</p>
-        ) : null}
-        {mensagem ? (
-          <p style={{ color: "#28a745", marginTop: "8px", fontSize: "0.9rem", textAlign: "center" }}>{mensagem}</p>
-        ) : null}
       </div>
     </div>
   );

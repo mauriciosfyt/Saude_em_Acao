@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import logo from "../../assets/logo1.png";
 import { loginComToken, setAuthToken } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
+import ErrorMessage from "./ErrorMessage";
 
 export default function CodeModal({
   code,
@@ -19,37 +20,34 @@ export default function CodeModal({
     };
   }, []);
 
-  const codeFields = Array.from({ length: 5 }, (_, idx) => code[idx] || "");
+  // Estado local para evitar acoplamento entre modais
+  const [localCode, setLocalCode] = React.useState(() => Array(5).fill(""));
+  const codeFields = localCode;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Sincroniza apenas inicialmente (se props.code existir)
+  useEffect(() => {
+    if (code && Array.isArray(code)) {
+      const next = Array.from({ length: 5 }, (_, i) => code[i] || "");
+      setLocalCode(next);
+    }
+  }, [code]);
 
   useEffect(() => {
     const el = document.getElementById("code-input-0");
     el?.focus?.();
   }, []);
 
-  // ✅ Corrigido: agora preenche todos os campos corretamente ao colar
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const paste = e.clipboardData?.getData("text") || "";
-    const chars = paste.replace(/[^0-9a-zA-Z]/g, "").toUpperCase().split("");
-
-    // Atualiza todos os campos de uma vez
-    for (let i = 0; i < 5; i++) {
-      onChange(chars[i] || "", i);
-    }
-
-    // Foca no último campo preenchido
-    const nextFocus = Math.min(chars.length, 5) - 1;
-    setTimeout(() => {
-      document.getElementById(`code-input-${nextFocus}`)?.focus();
-    }, 0);
-  };
-
   const handleKeyDown = (e, idx) => {
     if (e.key === "Backspace" && idx > 0) {
       e.preventDefault();
-      onChange("", idx);
+      setLocalCode((prev) => {
+        const next = [...prev];
+        next[idx] = "";
+        return next;
+      });
       const prevField = document.getElementById(`code-input-${idx - 1}`);
       prevField?.focus();
     }
@@ -62,7 +60,7 @@ export default function CodeModal({
       return;
     }
 
-    const codigo = (code || []).join("");
+    const codigo = (localCode || []).join("");
     if (codigo.length < 5) {
       setError("Digite o código completo de 5 dígitos.");
       return;
@@ -85,11 +83,11 @@ export default function CodeModal({
       if (onValidate) onValidate(data);
       onClose();
 
-      // 🔹 Limpa todos os campos após sucesso
-      for (let i = 0; i < 5; i++) onChange("", i);
+      // 🔹 Limpa apenas o estado local após sucesso
+      setLocalCode(Array(5).fill(""));
     } catch (err) {
       console.error("Erro na validação do token:", err);
-      setError(err?.message || "Código inválido ou erro na verificação.");
+      setError(err?.message || "Código inválido, tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -123,9 +121,7 @@ export default function CodeModal({
         >
           &times;
         </button>
-
         <img src={logo} alt="Logo" className="modal-logo" />
-
         <h4
           className="modal-boasvindas"
           style={{
@@ -138,7 +134,6 @@ export default function CodeModal({
           <span style={{ color: "#1062fe" }}>Saúde em Ação</span>, o lugar onde
           sua transformação começa
         </h4>
-
         <p
           className="modal-subtexto"
           style={{
@@ -150,7 +145,6 @@ export default function CodeModal({
         >
           Prepare-se para viver sua melhor versão.
         </p>
-
         <h2 className="modal-title" style={{ marginTop: "5%", marginBottom: "10%" }}>
           DIGITE O CÓDIGO
         </h2>
@@ -167,7 +161,12 @@ export default function CodeModal({
               value={digit}
               onChange={(e) => {
                 const value = e.target.value.toUpperCase();
-                onChange(value, idx);
+                // Atualiza apenas o estado local para evitar acoplamento entre modais
+                setLocalCode((prev) => {
+                  const next = [...prev];
+                  next[idx] = value.slice(-1) || "";
+                  return next;
+                });
                 if (value && idx < codeFields.length - 1) {
                   setTimeout(() => {
                     const nextField = document.getElementById(`code-input-${idx + 1}`);
@@ -176,7 +175,6 @@ export default function CodeModal({
                 }
               }}
               onKeyDown={(e) => handleKeyDown(e, idx)}
-              onPaste={handlePaste}
               style={{
                 textAlign: "center",
                 fontSize: "2rem",
@@ -189,7 +187,7 @@ export default function CodeModal({
           ))}
         </div>
 
-        {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
+        <ErrorMessage message={error} />
 
         <button className="modal-btn" onClick={handleValidateClick} disabled={loading}>
           {loading ? "Validando..." : "VALIDAR"}

@@ -1,6 +1,7 @@
 import React from "react";
 import logo from "../../assets/logo1.png";
 import { validarCodigoEsqueciSenha } from "../../services/api";
+import ErrorMessage from "./ErrorMessage";
 
 export default function RecoverCodeModal({
   code,
@@ -16,33 +17,35 @@ export default function RecoverCodeModal({
     };
   }, []);
 
-  const codeFields = Array.from({ length: 5 }, (_, idx) => code[idx] || "");
+  // Estado local para evitar acoplamento entre modais
+  const [localCode, setLocalCode] = React.useState(() => Array(5).fill(""));
+  const codeFields = localCode;
+
   const [loading, setLoading] = React.useState(false);
   const [erro, setErro] = React.useState("");
+
+  // Sincroniza apenas inicialmente (se props.code existir)
+  React.useEffect(() => {
+    if (code && Array.isArray(code)) {
+      const next = Array.from({ length: 5 }, (_, i) => code[i] || "");
+      setLocalCode(next);
+    }
+  }, [code]);
 
   React.useEffect(() => {
     const el = document.getElementById("recover-code-input-0");
     el?.focus?.();
   }, []);
 
-  // ✅ Corrigido: agora preenche todos os campos corretamente
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const paste = e.clipboardData?.getData("text") || "";
-    const chars = paste.replace(/[^0-9a-zA-Z]/g, "").toUpperCase().split("");
-
-    for (let i = 0; i < 5; i++) onChange(chars[i] || "", i);
-
-    const nextFocus = Math.min(chars.length, 5) - 1;
-    setTimeout(() => {
-      document.getElementById(`recover-code-input-${nextFocus}`)?.focus();
-    }, 0);
-  };
-
   const handleKeyDown = (e, idx) => {
     if (e.key === "Backspace" && idx > 0) {
       e.preventDefault();
-      onChange("", idx);
+      // Limpa apenas o campo local
+      setLocalCode((prev) => {
+        const next = [...prev];
+        next[idx] = "";
+        return next;
+      });
       const prevField = document.getElementById(`recover-code-input-${idx - 1}`);
       prevField?.focus();
     }
@@ -120,7 +123,12 @@ export default function RecoverCodeModal({
               value={digit}
               onChange={(e) => {
                 const value = e.target.value.toUpperCase();
-                onChange(value, idx);
+                // Atualiza apenas o estado local para evitar acoplamento entre modais
+                setLocalCode((prev) => {
+                  const next = [...prev];
+                  next[idx] = value.slice(-1) || "";
+                  return next;
+                });
                 if (value && idx < codeFields.length - 1) {
                   setTimeout(() => {
                     const nextField = document.getElementById(`recover-code-input-${idx + 1}`);
@@ -129,7 +137,6 @@ export default function RecoverCodeModal({
                 }
               }}
               onKeyDown={(e) => handleKeyDown(e, idx)}
-              onPaste={handlePaste}
               style={{
                 textAlign: "center",
                 fontSize: "2rem",
@@ -142,6 +149,8 @@ export default function RecoverCodeModal({
           ))}
         </div>
 
+        <ErrorMessage message={erro} />
+
         <button
           className="modal-btn"
           disabled={loading}
@@ -151,7 +160,7 @@ export default function RecoverCodeModal({
               setErro("E-mail não informado.");
               return;
             }
-            const codigo = codeFields.join("");
+            const codigo = localCode.join("");
             if (!codigo || codigo.length < codeFields.length) {
               setErro("Preencha todos os campos do código.");
               return;
@@ -159,21 +168,15 @@ export default function RecoverCodeModal({
             try {
               await validarCodigoEsqueciSenha(codigo);
               if (typeof onValidate === "function") onValidate(email, codigo);
-              // 🔹 Limpa todos os campos após sucesso
-              for (let i = 0; i < 5; i++) onChange("", i);
+              // 🔹 Limpa apenas o estado local após sucesso (não altera o pai)
+              setLocalCode(Array(5).fill(""));
             } catch (e) {
-              setErro(e?.message || "Código inválido ou erro na validação.");
+              setErro(e?.message || "Código inválido, tente novamente.");
             }
           }}
         >
           VALIDAR
         </button>
-
-        {erro && (
-          <p style={{ color: "#d9534f", marginTop: "8px", fontSize: "0.9rem", textAlign: "center" }}>
-            {erro}
-          </p>
-        )}
 
         <p
           style={{

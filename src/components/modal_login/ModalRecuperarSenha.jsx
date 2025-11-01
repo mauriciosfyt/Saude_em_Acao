@@ -1,6 +1,7 @@
 import React from "react";
 import { solicitarEsqueciSenha } from "../../services/api";
 import logo from "../../assets/logo1.png";
+import ErrorMessage from "./ErrorMessage";
 
 export default function RecoverModal({ onClose, onSend }) {
   const [email, setEmail] = React.useState("");
@@ -29,8 +30,14 @@ export default function RecoverModal({ onClose, onSend }) {
         onSend(email, data);
       }
     } catch (e) {
-      const msg = typeof e === "string" ? e : (e?.message || "Não foi possível solicitar a recuperação agora.");
-      setErro(msg);
+      console.error("Erro ao solicitar recuperação de senha:", e);
+      const status = e?.response?.status || e?.status;
+      if (status === 400) {
+        setErro("Requisição inválida (400). Digite um email valido.");
+      } else {
+        const msg = typeof e === "string" ? e : (e?.response?.data?.message || e?.message || "Não foi possível solicitar a recuperação agora.");
+        setErro(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -81,6 +88,12 @@ export default function RecoverModal({ onClose, onSend }) {
           onChange={(e) => setEmail(e.target.value)}
           disabled={loading}
         />
+        <ErrorMessage message={erro} />
+        {mensagem && (
+          <p style={{ color: "#28a745", marginTop: 8, fontSize: "0.9rem", textAlign: "center" }}>
+            {mensagem}
+          </p>
+        )}
         <button
           className="modal-btn"
           onClick={handleSend}
