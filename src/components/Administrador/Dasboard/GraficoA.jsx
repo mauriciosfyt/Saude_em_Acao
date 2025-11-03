@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import './GraficoA.css';
 
-const GraficoA = () => {
+const GraficoA = ({ mesAtual }) => {
   const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
   const valores = [850, 800, 700, 750, 780, 980, 520, 850, 800, 900, 950, 850];
   
   const maxValor = 1000;
   const chartWidth = 500;
   const chartHeight = 250;
+  const labelMes = useMemo(() => {
+    if (typeof mesAtual === 'number' && mesAtual >= 0 && mesAtual <= 11) return meses[mesAtual];
+    const now = new Date();
+    return meses[now.getMonth()];
+  }, [mesAtual]);
 
   return (
     <div className="grafico-a-card">
@@ -70,6 +75,7 @@ const GraficoA = () => {
             <div key={index} className="x-label">{mes}</div>
           ))}
         </div>
+        <div className="grafico-a-mes">Mês: {labelMes}</div>
       </div>
     </div>
   );

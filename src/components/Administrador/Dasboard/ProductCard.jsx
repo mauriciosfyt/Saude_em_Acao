@@ -2,7 +2,7 @@ import React from 'react';
 import { FaTshirt, FaBolt, FaFlask, FaPills, FaWineBottle, FaDumbbell, FaHeartbeat } from 'react-icons/fa';
 import './ProductCard.css';
 
-const ProductCard = ({ nome, preco, tipo, imagem }) => {
+const ProductCard = ({ nome, preco, tipo, imagem, total }) => {
   const getIcon = (tipo) => {
     switch (tipo) {
       case 'tshirt':
@@ -66,7 +66,11 @@ const ProductCard = ({ nome, preco, tipo, imagem }) => {
           </div>
         </div>
         <div className="product-info">
-          <span className="product-price">{preco}</span>
+          {total != null ? (
+            <span className="product-price">Total: {Number(total).toLocaleString('pt-BR')}</span>
+          ) : (
+            <span className="product-price">{preco}</span>
+          )}
         </div>
       </div>
     </div>
