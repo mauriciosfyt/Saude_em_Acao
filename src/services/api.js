@@ -74,11 +74,23 @@ export const solicitarCodigoRecuperacao = async (email) => {
 // Usa URL absoluta para não depender de configuração de proxy/baseURL
 export const solicitarEsqueciSenha = async (email) => {
   try {
-    const response = await api.post('http://34.205.11.57/api/auth/esqueci-senha/solicitar', { email });
-    return response.data; // Ex.: { message: 'E-mail de recuperação enviado' }
+    const response = await api.post('http://34.205.11.57/api/auth/esqueci-senha/solicitar', { 
+      email: email.trim().toLowerCase() 
+    });
+    
+    if (!response.data) {
+      throw new Error('Resposta inválida do servidor');
+    }
+    
+    return response.data;
   } catch (error) {
-    if (error.response && error.response.data) throw error.response.data;
-    throw error;
+    if (error.response?.status === 404) {
+      throw { response: { status: 404, data: { message: 'Email não encontrado.' } } };
+    }
+    if (error.response?.data) {
+      throw error;
+    }
+    throw new Error('Erro ao conectar com o servidor');
   }
 };
 
@@ -107,6 +119,15 @@ export const redefinirSenhaEsquecida = async (codigo, novaSenha) => {
   }
 };
 
+export const logout = () => {
+  setAuthToken(null);
+  try {
+    // ALTERADO DE localStorage PARA sessionStorage
+    sessionStorage.removeItem('token');
+  } catch (e) {
+    // ignore
+  }
+};
 
 
 export default api;
