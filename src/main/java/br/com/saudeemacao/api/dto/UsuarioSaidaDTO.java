@@ -1,8 +1,8 @@
 package br.com.saudeemacao.api.dto;
 
+import br.com.saudeemacao.api.model.EnumUsuario.ENivelAtividade;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
-import br.com.saudeemacao.api.model.EnumUsuario.ENivelAtividade;
 
 public record UsuarioSaidaDTO(
         String nome,
@@ -12,11 +12,9 @@ public record UsuarioSaidaDTO(
         String fotoPerfil,
         EPerfil perfil,
         EPlano plano,
-
-        // NOVOS CAMPOS
         Integer idade,
         Integer peso,
-        Integer altura,
+        Double altura, // <-- ALTERAÇÃO AQUI: De Integer para Double
         String objetivo,
         ENivelAtividade nivelAtividade
 ) {

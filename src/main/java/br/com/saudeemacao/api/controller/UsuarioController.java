@@ -139,15 +139,10 @@ public class UsuarioController {
         return ResponseEntity.ok(detalhesDTO);
     }
 
-    /**
-     * NOVO ENDPOINT:
-     * Permite que um aluno do plano Gold simule a renovação de sua assinatura,
-     * estendendo a data de vencimento em um mês a partir do vencimento atual.
-     */
-    @PostMapping("/meu-plano/renovar")
-    @PreAuthorize("hasRole('ALUNO')")
-    public ResponseEntity<PlanoGoldDetalhesDTO> renovarPlano(@AuthenticationPrincipal UserDetails userDetails) {
-        PlanoGoldDetalhesDTO detalhesAtualizados = usuarioService.renovarPlanoGold(userDetails);
+    @PostMapping("/aluno/{id}/renovar-plano")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PlanoGoldDetalhesDTO> renovarPlano(@PathVariable String id) {
+        PlanoGoldDetalhesDTO detalhesAtualizados = usuarioService.renovarPlanoGoldPorAdmin(id);
         return ResponseEntity.ok(detalhesAtualizados);
     }
 

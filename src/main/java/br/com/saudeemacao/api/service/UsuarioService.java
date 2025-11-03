@@ -1,7 +1,7 @@
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.*;
-
+import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
 import br.com.saudeemacao.api.model.EnumUsuario.EStatus;
@@ -34,7 +34,7 @@ public class UsuarioService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    // ... (Métodos de validação de permissão: isUsuarioGold, podeAtualizarPerfil) ...
+    // ... (outros métodos como criarAluno, criarProfessor, etc., continuam iguais)
     public boolean isUsuarioGold(String username) {
         Optional<Usuario> usuarioOpt = repo.findByEmail(username);
         return usuarioOpt.map(usuario -> usuario.getPlano() == EPlano.GOLD).orElse(false);
@@ -50,9 +50,8 @@ public class UsuarioService {
         return isOwnerAndGold;
     }
 
-    // ... (Métodos de criação: criarAluno, criarProfessor, criarAdmin) ...
     public Usuario criarAluno(AlunoCreateDTO dto) throws IOException {
-        validarCamposObrigatorios(dto.getNome(), dto.getEmail(), dto.getCpf(), dto.getTelefone(), dto.getSenha());
+        validarUnicidade(dto.getEmail(), dto.getCpf(), dto.getTelefone(), null);
         validarCpf(dto.getCpf());
 
         Usuario usuario = new Usuario();
@@ -80,7 +79,7 @@ public class UsuarioService {
     }
 
     public Usuario criarProfessor(ProfessorCreateDTO dto) throws IOException {
-        validarCamposObrigatorios(dto.getNome(), dto.getEmail(), dto.getCpf(), dto.getTelefone(), dto.getSenha());
+        validarUnicidade(dto.getEmail(), dto.getCpf(), dto.getTelefone(), null);
         validarCpf(dto.getCpf());
 
         Usuario usuario = new Usuario();
@@ -109,7 +108,6 @@ public class UsuarioService {
         return repo.save(usuario);
     }
 
-    // ... (Método de atualização: atualizarUsuario) ...
     public Usuario atualizarUsuario(String id, UsuarioUpdateDTO dto, EPerfil perfilEsperado) throws IOException {
         Usuario usuarioExistente = buscarPorId(id);
 
@@ -117,23 +115,22 @@ public class UsuarioService {
             throw new RuntimeException("Perfil do usuário não corresponde ao esperado");
         }
 
+        validarUnicidade(dto.getEmail(), dto.getCpf(), dto.getTelefone(), id);
+
         if (dto.getNome() != null && !dto.getNome().trim().isEmpty()) {
             usuarioExistente.setNome(dto.getNome());
         }
 
         if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
-            validarEmailUnico(dto.getEmail(), id);
             usuarioExistente.setEmail(dto.getEmail().toLowerCase());
         }
 
         if (dto.getCpf() != null && !dto.getCpf().trim().isEmpty()) {
             validarCpf(dto.getCpf());
-            validarCpfUnico(dto.getCpf(), id);
             usuarioExistente.setCpf(normalizarCpf(dto.getCpf()));
         }
 
         if (dto.getTelefone() != null && !dto.getTelefone().trim().isEmpty()) {
-            validarTelefoneUnico(dto.getTelefone(), id);
             usuarioExistente.setTelefone(normalizarTelefone(dto.getTelefone()));
         }
 
@@ -177,7 +174,6 @@ public class UsuarioService {
         return repo.save(usuarioExistente);
     }
 
-    // ... (Métodos de consulta: buscarPorPerfil, buscarPorPerfilENome, etc.) ...
     public List<UsuarioSaidaDTO> buscarPorPerfil(EPerfil perfil, PageRequest pageable) {
         Page<Usuario> usuariosPage = repo.findByPerfil(perfil, pageable);
         return usuariosPage.getContent().stream()
@@ -194,7 +190,7 @@ public class UsuarioService {
 
     public Usuario buscarPorId(String id) {
         return repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
     }
 
     public Optional<Usuario> buscarPorEmail(String email) {
@@ -213,6 +209,9 @@ public class UsuarioService {
         return new UsuarioPerfilDTO(usuario);
     }
 
+    // =================================================================
+    // === MÉTODO PÚBLICO ADICIONADO PARA CORRIGIR O ERRO =============
+    // =================================================================
     public PlanoGoldDetalhesDTO buscarDetalhesPlanoGold(UserDetails userDetails) {
         Usuario usuario = repo.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado no sistema!"));
@@ -221,50 +220,48 @@ public class UsuarioService {
             throw new AccessDeniedException("Acesso negado. Este recurso é exclusivo para alunos do plano Gold.");
         }
 
+        return buscarDetalhesPlanoGold(usuario); // Chama o método privado
+    }
+
+    public PlanoGoldDetalhesDTO renovarPlanoGoldPorAdmin(String alunoId) {
+        Usuario usuario = repo.findById(alunoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Aluno não encontrado com o ID: " + alunoId));
+
+        if (usuario.getPerfil() != EPerfil.ALUNO || usuario.getPlano() != EPlano.GOLD) {
+            throw new IllegalStateException("Esta ação só é permitida para alunos do plano Gold.");
+        }
+
+        LocalDateTime novoInicio = usuario.getDataVencimentoPlano() != null ? usuario.getDataVencimentoPlano() : LocalDateTime.now();
+        LocalDateTime novoVencimento = novoInicio.plusMonths(1);
+
+        usuario.setDataInicioPlano(novoInicio);
+        usuario.setDataVencimentoPlano(novoVencimento);
+        usuario.setStatusPlano(EStatus.ATIVO);
+
+        repo.save(usuario);
+
+        return buscarDetalhesPlanoGold(usuario);
+    }
+
+    private PlanoGoldDetalhesDTO buscarDetalhesPlanoGold(Usuario usuario) {
         LocalDateTime dataCadastro = usuario.getDataCadastro();
         String duracao = calcularDuracao(dataCadastro);
 
-        // CORREÇÃO APLICADA AQUI: Mapeando os campos corretamente.
         return PlanoGoldDetalhesDTO.builder()
                 .statusPlano(usuario.getStatusPlano())
                 .tipoPlano(usuario.getPlano())
-                .dataRenovacao(usuario.getDataInicioPlano()) // Início do ciclo atual
-                .dataVencimento(usuario.getDataVencimentoPlano()) // Fim do ciclo atual
+                .dataRenovacao(usuario.getDataInicioPlano())
+                .dataVencimento(usuario.getDataVencimentoPlano())
                 .dataInicioAcademia(dataCadastro)
                 .duracaoAcademia(duracao)
                 .build();
     }
 
-    /**
-     * NOVO MÉTODO:
-     * Renova a assinatura do plano Gold para o usuário autenticado.
-     */
-    public PlanoGoldDetalhesDTO renovarPlanoGold(UserDetails userDetails) {
-        Usuario usuario = repo.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado no sistema!"));
+    // ... (outros métodos como excluirPorId, excluirPorEmail, etc., continuam iguais)
 
-        if (usuario.getPlano() != EPlano.GOLD) {
-            throw new AccessDeniedException("Apenas alunos do plano Gold podem renovar a assinatura.");
-        }
-
-        // Lógica de renovação: o novo início é o vencimento antigo.
-        LocalDateTime novoInicio = usuario.getDataVencimentoPlano();
-        LocalDateTime novoVencimento = novoInicio.plusMonths(1);
-
-        usuario.setDataInicioPlano(novoInicio);
-        usuario.setDataVencimentoPlano(novoVencimento);
-        usuario.setStatusPlano(EStatus.ATIVO); // Garante que o status fique ativo na renovação
-
-        repo.save(usuario);
-
-        // Retorna os detalhes atualizados para o usuário
-        return buscarDetalhesPlanoGold(userDetails);
-    }
-
-    // ... (Métodos de exclusão e atualização de senha) ...
     public void excluirPorId(String id) {
         if (!repo.existsById(id)) {
-            throw new RuntimeException("Usuário não encontrado com ID: " + id);
+            throw new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id);
         }
 
         Usuario usuario = buscarPorId(id);
@@ -281,7 +278,7 @@ public class UsuarioService {
 
     public void excluirPorEmail(String email) {
         Usuario usuario = repo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário com e-mail " + email + " não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário com e-mail " + email + " não encontrado."));
 
         if (usuario.getFotoPerfil() != null) {
             try {
@@ -301,7 +298,6 @@ public class UsuarioService {
         return repo.save(usuario);
     }
 
-    // ... (Métodos privados auxiliares: calcularDuracao, validações, etc.) ...
     private String calcularDuracao(LocalDateTime dataInicio) {
         if (dataInicio == null) {
             return "N/A";
@@ -331,18 +327,10 @@ public class UsuarioService {
         usuario.setNivelAtividade(dto.getNivelAtividade());
     }
 
-    private void validarCamposObrigatorios(String nome, String email, String cpf, String telefone, String senha) {
-        if (nome == null || nome.trim().isEmpty()) throw new RuntimeException("Nome é obrigatório");
-        if (email == null || email.trim().isEmpty()) throw new RuntimeException("Email é obrigatório");
-        if (cpf == null || cpf.trim().isEmpty()) throw new RuntimeException("CPF é obrigatório");
-        if (telefone == null || telefone.trim().isEmpty()) throw new RuntimeException("Telefone é obrigatório");
-        if (senha == null || senha.trim().isEmpty()) throw new RuntimeException("Senha é obrigatória");
-    }
-
     private void validarCpf(String cpf) {
         String cpfNormalizado = normalizarCpf(cpf);
         if (cpfNormalizado.length() != 11 || cpfNormalizado.matches("(\\d)\\1{10}")) {
-            throw new RuntimeException("CPF inválido");
+            throw new IllegalArgumentException("CPF inválido. Verifique e tente novamente.");
         }
         try {
             int[] pesos1 = {10, 9, 8, 7, 6, 5, 4, 3, 2};
@@ -350,39 +338,38 @@ public class UsuarioService {
             for (int i = 0; i < 9; i++) soma1 += Integer.parseInt(cpfNormalizado.substring(i, i + 1)) * pesos1[i];
             int resto1 = 11 - (soma1 % 11);
             char dv1 = (resto1 >= 10) ? '0' : Character.forDigit(resto1, 10);
-            if (dv1 != cpfNormalizado.charAt(9)) throw new RuntimeException("CPF inválido");
+            if (dv1 != cpfNormalizado.charAt(9)) throw new IllegalArgumentException("CPF inválido. Verifique e tente novamente.");
 
             int[] pesos2 = {11, 10, 9, 8, 7, 6, 5, 4, 3, 2};
             int soma2 = 0;
             for (int i = 0; i < 10; i++) soma2 += Integer.parseInt(cpfNormalizado.substring(i, i + 1)) * pesos2[i];
             int resto2 = 11 - (soma2 % 11);
             char dv2 = (resto2 >= 10) ? '0' : Character.forDigit(resto2, 10);
-            if (dv2 != cpfNormalizado.charAt(10)) throw new RuntimeException("CPF inválido");
+            if (dv2 != cpfNormalizado.charAt(10)) throw new IllegalArgumentException("CPF inválido. Verifique e tente novamente.");
         } catch (NumberFormatException e) {
-            throw new RuntimeException("CPF inválido");
+            throw new IllegalArgumentException("CPF inválido. Verifique e tente novamente.");
         }
     }
 
-    private void validarEmailUnico(String email, String idExcluir) {
-        Optional<Usuario> usuarioExistente = repo.findByEmail(email.toLowerCase());
-        if (usuarioExistente.isPresent() && !usuarioExistente.get().getId().equals(idExcluir)) {
-            throw new RuntimeException("Email já cadastrado");
+    private void validarUnicidade(String email, String cpf, String telefone, String idExcluir) {
+        String erro = "Já existe um usuário cadastrado com este email, CPF ou telefone. Verifique os dados e tente novamente.";
+        if (email != null && !email.isBlank()) {
+            Optional<Usuario> usuarioEmail = repo.findByEmail(email.toLowerCase());
+            if (usuarioEmail.isPresent() && (idExcluir == null || !usuarioEmail.get().getId().equals(idExcluir))) {
+                throw new RuntimeException(erro);
+            }
         }
-    }
-
-    private void validarCpfUnico(String cpf, String idExcluir) {
-        String cpfNormalizado = normalizarCpf(cpf);
-        Optional<Usuario> usuarioExistente = repo.findByCpf(cpfNormalizado);
-        if (usuarioExistente.isPresent() && !usuarioExistente.get().getId().equals(idExcluir)) {
-            throw new RuntimeException("CPF já cadastrado");
+        if (cpf != null && !cpf.isBlank()) {
+            Optional<Usuario> usuarioCpf = repo.findByCpf(normalizarCpf(cpf));
+            if (usuarioCpf.isPresent() && (idExcluir == null || !usuarioCpf.get().getId().equals(idExcluir))) {
+                throw new RuntimeException(erro);
+            }
         }
-    }
-
-    private void validarTelefoneUnico(String telefone, String idExcluir) {
-        String telefoneNormalizado = normalizarTelefone(telefone);
-        Optional<Usuario> usuarioExistente = repo.findByTelefone(telefoneNormalizado);
-        if (usuarioExistente.isPresent() && !usuarioExistente.get().getId().equals(idExcluir)) {
-            throw new RuntimeException("Telefone já cadastrado");
+        if (telefone != null && !telefone.isBlank()) {
+            Optional<Usuario> usuarioTelefone = repo.findByTelefone(normalizarTelefone(telefone));
+            if (usuarioTelefone.isPresent() && (idExcluir == null || !usuarioTelefone.get().getId().equals(idExcluir))) {
+                throw new RuntimeException(erro);
+            }
         }
     }
 

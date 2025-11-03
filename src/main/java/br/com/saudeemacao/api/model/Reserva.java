@@ -47,5 +47,12 @@ public class Reserva {
      */
     private LocalDateTime dataRetirada;
 
+    /**
+     * NOVO CAMPO:
+     * Armazena a data e hora exatas em que a reserva foi concluída (retirada).
+     * Este campo será usado para os filtros de vendas no dashboard.
+     */
+    private LocalDateTime dataConclusao;
+
     private String motivoAnalise;
 }

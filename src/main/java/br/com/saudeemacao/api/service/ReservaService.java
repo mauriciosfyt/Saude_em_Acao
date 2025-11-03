@@ -3,11 +3,13 @@ package br.com.saudeemacao.api.service;
 import br.com.saudeemacao.api.dto.ReservaSolicitacaoDTO;
 import br.com.saudeemacao.api.dto.ReservaStatsDTO;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
-import br.com.saudeemacao.api.model.*;
 import br.com.saudeemacao.api.model.EnumProduto.ESabor;
 import br.com.saudeemacao.api.model.EnumProduto.ETamanho;
 import br.com.saudeemacao.api.model.EnumReserva.EStatusReserva;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
+import br.com.saudeemacao.api.model.Produto;
+import br.com.saudeemacao.api.model.Reserva;
+import br.com.saudeemacao.api.model.Usuario;
 import br.com.saudeemacao.api.repository.ReservaRepository;
 import br.com.saudeemacao.api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -84,8 +86,6 @@ public class ReservaService {
 
         reservaRepository.save(novaReserva);
 
-        // **** CORREÇÃO APLICADA AQUI ****
-        // O método correto é "buscarTodosAdmins"
         List<Usuario> admins = usuarioService.buscarTodosAdmins();
         for (Usuario admin : admins) {
             emailService.notificarAdminNovaReserva(admin.getEmail(), usuario.getNome(), produto.getNome());
@@ -143,6 +143,29 @@ public class ReservaService {
         emailService.notificarAlunoStatusReserva(reserva.getUsuario().getEmail(), reserva.getProduto().getNome(), "REJEITADA", motivoHtml);
 
         return reserva;
+    }
+
+    /**
+     * NOVO MÉTODO:
+     * Marca uma reserva como CONCLUÍDA.
+     * Isso deve ser feito quando o aluno retira o produto fisicamente.
+     *
+     * @param id O ID da reserva a ser concluída.
+     * @return A reserva com o status atualizado.
+     */
+    public Reserva concluirReserva(String id) {
+        Reserva reserva = reservaRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Reserva não encontrada."));
+
+        if (reserva.getStatus() != EStatusReserva.APROVADA) {
+            throw new IllegalStateException("Apenas reservas aprovadas podem ser concluídas. Status atual: " + reserva.getStatus());
+        }
+
+        reserva.setStatus(EStatusReserva.CONCLUIDA);
+        // **** ALTERAÇÃO AQUI: Preenchendo a data de conclusão ****
+        reserva.setDataConclusao(LocalDateTime.now());
+
+        return reservaRepository.save(reserva);
     }
 
     public void cancelarReserva(String id, UserDetails userDetails) {

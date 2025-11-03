@@ -1,6 +1,6 @@
 package br.com.saudeemacao.api.dto;
 
-import br.com.saudeemacao.api.model.*;
+import br.com.saudeemacao.api.model.Usuario;
 import br.com.saudeemacao.api.model.EnumUsuario.ENivelAtividade;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
@@ -25,12 +25,9 @@ public class UsuarioPerfilDTO {
     private EPlano plano;
     private LocalDateTime dataUltimoTreino;
 
-    // =================================================================
-    // === NOVOS CAMPOS - Retornados se o aluno for GOLD
-    // =================================================================
     private Integer idade;
     private Integer peso;
-    private Integer altura;
+    private Double altura; // <-- ALTERAÇÃO AQUI: De Integer para Double
     private String objetivo;
     private ENivelAtividade nivelAtividade;
 
@@ -45,11 +42,10 @@ public class UsuarioPerfilDTO {
         this.plano = usuario.getPlano();
         this.dataUltimoTreino = usuario.getDataUltimoTreino();
 
-        // Popula os campos GOLD apenas se o plano for correspondente
         if (usuario.getPlano() == EPlano.GOLD) {
             this.idade = usuario.getIdade();
             this.peso = usuario.getPeso();
-            this.altura = usuario.getAltura();
+            this.altura = usuario.getAltura(); // Agora esta linha funciona corretamente
             this.objetivo = usuario.getObjetivo();
             this.nivelAtividade = usuario.getNivelAtividade();
         }

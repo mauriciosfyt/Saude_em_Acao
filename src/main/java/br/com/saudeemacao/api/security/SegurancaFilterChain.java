@@ -69,6 +69,8 @@ public class SegurancaFilterChain {
                         .requestMatchers(HttpMethod.GET, "/api/professor").authenticated()
                         // ALTERAÇÃO 2: Acesso a PUT /aluno/{id} será validado no controller.
                         .requestMatchers(HttpMethod.PUT, "/api/aluno/{id}").authenticated()
+                        // ALTERAÇÃO 3: Adicionar a nova rota de admin
+                        .requestMatchers(HttpMethod.POST, "/api/aluno/{id}/renovar-plano").hasRole("ADMIN")
 
 
                         // =================================================================
@@ -82,7 +84,7 @@ public class SegurancaFilterChain {
                         // === 5. ROTAS DE ALUNO (EXIGEM PERFIL 'ALUNO') ====================
                         // =================================================================
                         .requestMatchers(HttpMethod.POST, "/api/reservas").hasRole("ALUNO")
-                        .requestMatchers(HttpMethod.GET, "/api/minhas").hasRole("ALUNO") // Corrigido para /api/reservas/minhas se for o caso
+                        .requestMatchers(HttpMethod.GET, "/api/reservas/minhas").hasRole("ALUNO") // Corrigido para /api/reservas/minhas se for o caso
                         .requestMatchers(HttpMethod.POST, "/api/treinos/{id}/realizar").hasRole("ALUNO")
                         .requestMatchers(HttpMethod.GET, "/api/treinos/desempenho-semanal").hasRole("ALUNO")
 

@@ -57,6 +57,11 @@ public class ReservaController {
         return ResponseEntity.ok(reservaService.rejeitarReserva(id, motivo));
     }
 
+    @PatchMapping("/{id}/concluir")
+    public ResponseEntity<Reserva> concluirReserva(@PathVariable String id) {
+        return ResponseEntity.ok(reservaService.concluirReserva(id));
+    }
+
     @PatchMapping("/{id}/cancelar")
     public ResponseEntity<Void> cancelarReserva(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails) {
         reservaService.cancelarReserva(id, userDetails);

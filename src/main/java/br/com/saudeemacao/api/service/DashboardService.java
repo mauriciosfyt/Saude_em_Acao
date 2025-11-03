@@ -1,8 +1,8 @@
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.DashboardStatsDTO;
-import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumReserva.EStatusReserva;
+import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.Produto;
 import br.com.saudeemacao.api.model.Reserva;
 import br.com.saudeemacao.api.repository.ProdutoRepository;
@@ -30,29 +30,21 @@ public class DashboardService {
         int anoParaFiltro = (ano != null && ano > 2000) ? ano : Year.now().getValue();
 
         // Define o intervalo de datas para o ano especificado
-        LocalDateTime inicioDoAno = LocalDateTime.of(anoParaFiltro, 1, 1, 0, 0);
+        LocalDateTime inicioDoAno = LocalDateTime.of(anoParaFiltro, 1, 1, 0, 0, 0);
         LocalDateTime fimDoAno = LocalDateTime.of(anoParaFiltro, 12, 31, 23, 59, 59);
 
-        // 1. Total de alunos cadastrados (geral, não depende do ano)
+        // 1. Métricas gerais (não dependem do ano)
         long totalAlunos = usuarioRepository.countByPerfil(EPerfil.ALUNO);
-
-        // 2. Quantidade de pessoas em cada plano (geral)
         Map<String, Long> contagemPorPlano = getContagemPorPlano();
-
-        // 3. Total de produtos em estoque por categoria (geral)
         Map<String, Long> estoquePorCategoria = getEstoquePorCategoria();
 
-        // Busca todas as vendas (reservas com status APROVADA ou CONCLUIDA) no ano especificado
-        // NOTA: Idealmente, deveria haver um status "CONCLUIDA" para vendas.
-        // Usaremos APROVADA como proxy para "venda".
-        List<Reserva> vendasDoAno = reservaRepository.findByStatusAndDataAnaliseBetween(
-                EStatusReserva.APROVADA, inicioDoAno, fimDoAno
+        // 2. Busca as vendas (reservas CONCLUÍDAS) no ano especificado, filtrando pela DATA DE CONCLUSÃO
+        List<Reserva> vendasDoAno = reservaRepository.findByStatusAndDataConclusaoBetween(
+                EStatusReserva.CONCLUIDA, inicioDoAno, fimDoAno
         );
 
-        // 4. Total de vendas gerais (R$)
+        // 3. Calcula as métricas de vendas com base nos dados corrigidos
         double totalVendasGerais = calcularTotalVendas(vendasDoAno);
-
-        // 5. Total de vendas por produto (unidades)
         Map<String, Long> vendasPorProduto = getVendasPorProduto(vendasDoAno);
 
         // Monta o DTO de resposta

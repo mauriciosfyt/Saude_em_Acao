@@ -8,14 +8,13 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId; // Importação necessária
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -33,7 +32,6 @@ public class Usuario implements UserDetails {
     @Id
     private String id;
 
-    // ... (campos existentes: nome, email, cpf, etc.) ...
     @NotBlank(message = "Nome é obrigatório")
     @Size(min = 2, max = 100, message = "Nome deve ter entre 2 e 100 caracteres")
     private String nome;
@@ -48,7 +46,7 @@ public class Usuario implements UserDetails {
     private String cpf;
 
     @NotBlank(message = "Senha é obrigatória")
-    @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres")
+    @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).*$",
             message = "A senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial"
@@ -64,43 +62,31 @@ public class Usuario implements UserDetails {
     @NotNull(message = "Perfil é obrigatório")
     private EPerfil perfil;
 
-    private EPlano plano; // Apenas para ALUNO
+    private EPlano plano;
 
     private LocalDateTime dataUltimoTreino;
 
-    // ... (Campos do plano Gold: idade, peso, altura, etc.) ...
-    @Min(value = 14, message = "A idade mínima para o plano Gold é 14 anos.")
-    @Max(value = 100, message = "A idade máxima para o plano Gold é 100 anos.")
+    @Min(value = 14, message = "A idade deve ser entre 14 e 100 anos.")
+    @Max(value = 100, message = "A idade deve ser entre 14 e 100 anos.")
     private Integer idade;
 
-    @Min(value = 25, message = "O peso mínimo deve ser 25 kg.")
-    @Max(value = 700, message = "O peso máximo deve ser 700 kg.")
-    private Integer peso; // Em kg
+    @Min(value = 20, message = "O peso deve estar entre 20 kg e 300 kg.")
+    @Max(value = 300, message = "O peso deve estar entre 20 kg e 300 kg.")
+    private Integer peso;
 
-    @Min(value = 100, message = "A altura mínima deve ser 100 cm.")
-    @Max(value = 230, message = "A altura máxima deve ser 230 cm.")
-    private Integer altura; // Em cm
+    @DecimalMin(value = "1.0", message = "A altura deve estar entre 1 e 3 metros.")
+    @DecimalMax(value = "3.0", message = "A altura deve estar entre 1 e 3 metros.")
+    private Double altura;
 
-    @Size(max = 300, message = "O objetivo deve ter no máximo 300 caracteres.")
+    @Size(min = 5, max = 200, message = "O campo objetivo deve ter entre 5 e 200 caracteres.")
     private String objetivo;
 
     private ENivelAtividade nivelAtividade;
-
-    // =================================================================
-    // === NOVOS CAMPOS - PARA O PAINEL DE DETALHES DO PLANO GOLD =====
-    // =================================================================
 
     private EStatus statusPlano;
     private LocalDateTime dataInicioPlano;
     private LocalDateTime dataVencimentoPlano;
 
-
-    /**
-     * LÓGICA ATUALIZADA:
-     * Garante que o plano só pode ser atribuído a ALUNOS.
-     * Se o plano for alterado para um que não seja GOLD, todos os campos
-     * específicos do plano GOLD são limpos para manter a consistência dos dados.
-     */
     public void setPlano(EPlano plano) {
         if (this.perfil != EPerfil.ALUNO && plano != null) {
             throw new IllegalArgumentException("Plano só é permitido para alunos");
@@ -108,25 +94,17 @@ public class Usuario implements UserDetails {
         this.plano = plano;
 
         if (plano != EPlano.GOLD) {
-            // Limpa dados de perfil
             this.idade = null;
             this.peso = null;
             this.altura = null;
             this.objetivo = null;
             this.nivelAtividade = null;
-            // Limpa dados de status do plano
             this.statusPlano = null;
             this.dataInicioPlano = null;
             this.dataVencimentoPlano = null;
         }
     }
 
-    /**
-     * NOVO MÉTODO:
-     * Calcula a data de cadastro (início na academia) a partir do ObjectId do MongoDB.
-     * O ObjectId contém um timestamp de sua criação.
-     * @return LocalDateTime da data de criação do usuário.
-     */
     public LocalDateTime getDataCadastro() {
         if (this.id == null) {
             return null;
@@ -137,8 +115,6 @@ public class Usuario implements UserDetails {
                 .toLocalDateTime();
     }
 
-
-    // ... (restante da classe UserDetails) ...
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + perfil.name()));
@@ -158,6 +134,8 @@ public class Usuario implements UserDetails {
     public boolean isAccountNonExpired() {
         return true;
     }
+
+
 
     @Override
     public boolean isAccountNonLocked() {

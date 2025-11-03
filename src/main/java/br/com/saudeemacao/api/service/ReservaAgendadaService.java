@@ -1,5 +1,3 @@
-// src/main/java/br/com.saudeemacao.api/service/ReservaAgendadaService.java
-
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.model.EnumReserva.EStatusReserva;
@@ -25,28 +23,27 @@ public class ReservaAgendadaService {
     private final EmailService emailService;
 
     /**
-     * LÓGICA COMPLETAMENTE ATUALIZADA:
-     * Roda todo dia às 03:00 da manhã para verificar e cancelar reservas que foram aprovadas
+     * LÓGICA ATUALIZADA:
+     * Roda todo dia às 03:00 da manhã para verificar e expirar reservas que foram aprovadas
      * mas não foram retiradas até a data limite (`dataRetirada`).
      */
-    @Scheduled(cron = "0 0 3 * * *")
+    @Scheduled(cron = "0 0 10 * * *")
     public void cancelarReservasNaoRetiradas() {
-        log.info("Iniciando tarefa agendada: Cancelar Reservas Não Retiradas...");
+        log.info("Iniciando tarefa agendada: Expirar Reservas Não Retiradas...");
 
-        // Busca todas as reservas que estão APROVADAS e cuja data de retirada já passou.
-        List<Reserva> reservasParaCancelar = reservaRepository.findByStatusAndDataRetiradaBefore(
+        List<Reserva> reservasParaExpirar = reservaRepository.findByStatusAndDataRetiradaBefore(
                 EStatusReserva.APROVADA,
                 LocalDateTime.now()
         );
 
-        if (reservasParaCancelar.isEmpty()) {
-            log.info("Nenhuma reserva para cancelar por não retirada foi encontrada.");
+        if (reservasParaExpirar.isEmpty()) {
+            log.info("Nenhuma reserva para expirar por não retirada foi encontrada.");
             return;
         }
 
-        log.info("{} reservas encontradas para cancelamento.", reservasParaCancelar.size());
+        log.info("{} reservas encontradas para expiração.", reservasParaExpirar.size());
 
-        for (Reserva reserva : reservasParaCancelar) {
+        for (Reserva reserva : reservasParaExpirar) {
             try {
                 Produto produto = reserva.getProduto();
                 String identificadorVariacao = null;
@@ -76,27 +73,27 @@ public class ReservaAgendadaService {
                         produto.getCategoria()
                 );
 
-                // 2. Atualiza o status da reserva para CANCELADA
-                reserva.setStatus(EStatusReserva.CANCELADA);
-                reserva.setMotivoAnalise("Cancelada automaticamente por não retirada no prazo.");
+                // 2. Atualiza o status da reserva para EXPIRADA
+                reserva.setStatus(EStatusReserva.EXPIRADA);
+                reserva.setMotivoAnalise("Expirada automaticamente por não retirada no prazo.");
                 reservaRepository.save(reserva);
 
-                // 3. Notifica o aluno sobre o cancelamento
-                String motivo = "<p>Sua reserva foi cancelada pois o prazo de retirada expirou. O produto retornou ao nosso estoque.</p>";
+                // 3. Notifica o aluno sobre a expiração
+                String motivo = "<p>Sua reserva expirou pois o prazo de retirada não foi cumprido. O produto retornou ao nosso estoque.</p>";
                 emailService.notificarAlunoStatusReserva(
                         reserva.getUsuario().getEmail(),
                         produto.getNome(),
-                        "CANCELADA",
+                        "EXPIRADA",
                         motivo
                 );
 
-                log.info("Reserva {} cancelada com sucesso. Estoque do produto {} incrementado.", reserva.getId(), produto.getId());
+                log.info("Reserva {} expirada com sucesso. Estoque do produto {} incrementado.", reserva.getId(), produto.getId());
 
             } catch (Exception e) {
                 // Loga o erro, mas continua o loop para não impedir que outras reservas sejam processadas
-                log.error("Erro ao cancelar a reserva {}: {}", reserva.getId(), e.getMessage(), e);
+                log.error("Erro ao expirar a reserva {}: {}", reserva.getId(), e.getMessage(), e);
             }
         }
-        log.info("Tarefa de cancelamento de reservas concluída.");
+        log.info("Tarefa de expiração de reservas concluída.");
     }
 }
