@@ -64,6 +64,17 @@ const ProdutosSection = () => {
     navigate(`/LojaProduto/${produtoId}`);
   };
 
+  // --- NOVA FUNÇÃO ADICIONADA ---
+  /**
+   * Navega para a página de carrinho, passando o ID do produto
+   * como um query param 'add'.
+   */
+  const adicionarAoCarrinho = (produtoId) => {
+    // A página /carrinho será responsável por ler este parâmetro
+    navigate(`/carrinho?add=${produtoId}`);
+  };
+  // --- FIM DA NOVA FUNÇÃO ---
+
   if (loading) {
     return (
       <section className="products-section">
@@ -86,13 +97,22 @@ const ProdutosSection = () => {
         {/* Mapeia o array de produtos (agora 1 por categoria) */}
         {produtos.map((produto) => (
           <div className="product-card" key={produto.id}>
-           <img src={fixImageUrl(produto.img)} alt={produto.nome} />
+            <img src={fixImageUrl(produto.img)} alt={produto.nome} />
             <h3>{produto.nome}</h3>
             <hr className="linha-produto" />
             <div className="preco-produto">POR {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(produto.preco)}</div>
             <div className="pagamento-produto">{produto.formaDePagamento || 'Consulte as opções de pagamento'}</div>
             <div className="botoes-produto">
-              <button className="buy-button">Adicionar ao carrinho</button>
+              
+              {/* --- BOTÃO MODIFICADO --- */}
+              <button 
+                className="buy-button" 
+                onClick={() => adicionarAoCarrinho(produto.id)}
+              >
+                Adicionar ao carrinho
+              </button>
+              {/* --- FIM DA MODIFICAÇÃO --- */}
+
               <button className="detalhes-button" onClick={() => irParaDetalhes(produto.id)}>
                 Detalhes
               </button>
