@@ -10,6 +10,7 @@ import { useAuth } from "../../contexts/AuthContext";
 
 // 3. Importar o serviço 'getAllProdutos'
 import { getAllProdutos } from "../../services/produtoService";
+// --- FIM DAS CORREÇÕES ---
 
 const CategoriaWhey = () => {
   const navigate = useNavigate();
@@ -24,7 +25,6 @@ const CategoriaWhey = () => {
   const [error, setError] = useState(null);
 
   // 6. Array de produtos estáticos removido
-  // const todosOsProdutos = [ ... ];
 
   // 7. useEffect ATUALIZADO para usar getAllProdutos
   useEffect(() => {
@@ -35,11 +35,9 @@ const CategoriaWhey = () => {
         // 1. Chama a API usando a função que busca TUDO
         const data = await getAllProdutos();
 
-        // 2. FILTRO NO FRONTEND (A SOLUÇÃO)
-        // Filtra a lista 'data' para manter apenas produtos da categoria "WHEY_PROTEIN"
-        // (Baseado no JSON da sua API que vimos anteriormente)
+        // 2. FILTRO NO FRONTEND
         const produtosFiltrados = data.filter(
-          (p) => p.categoria === "WHEY_PROTEIN" 
+          (p) => p.categoria === "WHEY_PROTEIN"
         );
 
         // Log de debug
@@ -60,7 +58,6 @@ const CategoriaWhey = () => {
 
         // 4. Seta o estado com os produtos corretos
         setProdutos(produtosFormatados);
-
       } catch (err) {
         console.error("Erro ao buscar todos os produtos (Whey):", err);
         setError(
@@ -94,23 +91,31 @@ const CategoriaWhey = () => {
     navigate(`/LojaProduto/${produtoId}`);
   };
 
+  // --- 1. FUNÇÃO ADICIONADA ---
+  /**
+   * Navega para a página de carrinho, passando o ID do produto
+   * como um query param 'add'.
+   */
+  const handleAdicionarAoCarrinho = (produtoId) => {
+    navigate(`/carrinho?add=${produtoId}`);
+  };
+  // --- FIM DA FUNÇÃO ADICIONADA ---
+
   // Helper de estilo para centralizar mensagens
   const centerStyle = {
-    display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    height: '50vh',
-    fontSize: '18px',
-    color: '#333'
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "50vh",
+    fontSize: "18px",
+    color: "#333",
   };
 
   // 10. Lidar com o loading de autenticação
   if (authLoading) {
     return (
       <div className="categoria-camisa">
-        <div style={{ ...centerStyle, height: '100vh' }}>
-          Carregando...
-        </div>
+        <div style={{ ...centerStyle, height: "100vh" }}>Carregando...</div>
       </div>
     );
   }
@@ -138,10 +143,8 @@ const CategoriaWhey = () => {
                   <div
                     className="produto-card"
                     key={produto.id}
-                    onClick={(e) => {
-                      if (e.target.closest(".btn-reservar")) return;
-                      irParaDetalhes(produto.id);
-                    }}
+                    // --- 2. ONCLICK DO CARD SIMPLIFICADO ---
+                    onClick={() => irParaDetalhes(produto.id)}
                     style={{ cursor: "pointer" }}
                   >
                     <img
@@ -154,7 +157,18 @@ const CategoriaWhey = () => {
                     </div>
                     <div className="produto-card-footer">
                       <p className="produto-preco">{produto.precoFormatado}</p>
-                      <button className="btn-reservar">Reservar</button>
+
+                      {/* --- 3. BOTÃO MODIFICADO --- */}
+                      <button
+                        className="btn-adicionar" // Classe atualizada
+                        onClick={(e) => {
+                          e.stopPropagation(); // Impede o clique de ir para o card
+                          handleAdicionarAoCarrinho(produto.id); // Chama a função do carrinho
+                        }}
+                      >
+                        Adicionar ao carrinho {/* Texto atualizado */}
+                      </button>
+                      {/* --- FIM DA MODIFICAÇÃO --- */}
                     </div>
                   </div>
                 ))}
@@ -171,7 +185,11 @@ const CategoriaWhey = () => {
                           className={`pagination-number ${
                             p === currentPage ? "active" : ""
                           }`}
-                          onClick={() => gotoPage(p)}
+                          // --- 4. STOPPROPAGATION ADICIONADO ---
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            gotoPage(p);
+                          }}
                           aria-current={p === currentPage ? "page" : undefined}
                         >
                           {p}

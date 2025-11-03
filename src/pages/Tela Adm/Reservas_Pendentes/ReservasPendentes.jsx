@@ -1,84 +1,148 @@
-import React, { useState, useEffect } from 'react'; // Importei o useEffect
-import './ReservasPendentes.css'; // Aponta para o CSS com as classes renomeadas
+import React, { useState, useEffect } from 'react';
+import './ReservasPendentes.css'; 
 
 // Componentes e Ícones
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { FaSearch } from "react-icons/fa";
 import { setAuthToken } from '../../../services/api';
-import { fetchReservas, fetchReservaStats } from '../../../services/reservasService';
 
-// Estado inicial vazio; dados virão da API
+// --- (MODIFICADO) Importa as funções de Ação corretas ---
+import { 
+    fetchReservas, 
+    fetchReservaStats, 
+    aprovarReserva, 
+    cancelarReserva 
+} from '../../../services/reservasService';
+// (Note que não importamos 'rejeitarReserva' porque não há um botão para isso)
+
+// --- (EXISTENTE) Importar o fixImageUrl ---
+import { fixImageUrl } from '../../../utils/image';
+
+// --- (EXISTENTE) Função para formatar a data ---
+const formatarData = (dataString) => {
+    if (!dataString) return 'Data indisponível';
+    try {
+        const data = new Date(dataString);
+        if (isNaN(data.getTime())) return dataString; 
+        
+        return new Intl.DateTimeFormat('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        }).format(data);
+    } catch (e) {
+        return dataString; 
+    }
+};
+
 
 const ReservasPendentes = () => {
     const [reservas, setReservas] = useState([]);
     const [termoBusca, setTermoBusca] = useState('');
-    const [categoria, setCategoria] = useState(''); // NOVO STATE
-    const [reservasFiltradas, setReservasFiltradas] = useState([]); // NOVO STATE
+    const [categoria, setCategoria] = useState('');
+    const [reservasFiltradas, setReservasFiltradas] = useState([]);
     const [loading, setLoading] = useState(false);
     const [erro, setErro] = useState('');
     const [stats, setStats] = useState(null);
 
-    const handleStatusChange = (id, novoStatus) => {
-        setReservas(prevReservas =>
-            prevReservas.map(reserva =>
-                reserva.id === id ? { ...reserva, status: novoStatus } : reserva
-            )
-        );
+    // --- (MODIFICADO) handleStatusChange agora usa as funções da API ---
+    // <-- MODIFICADO: Adicionado 'nomeProduto' como parâmetro
+    const handleStatusChange = async (id, acao, nomeProduto) => {
+        // Pega a ação (APROVADO ou CANCELADA) e confirma
+        const acaoNormalizada = acao.toUpperCase();
+        
+        // <-- NOVO: Define o verbo (Aprovar/Cancelar) para a confirmação
+        const verboAcao = acaoNormalizada === 'APROVADO' ? 'APROVAR' : 'CANCELAR';
+
+        // <-- MODIFICADO: Mensagem de confirmação usa o nome do produto
+        if (!window.confirm(`Tem certeza que deseja ${verboAcao} a reserva do produto "${nomeProduto}"?`)) {
+            return; // Usuário cancelou
+        }
+
+        try {
+            // 1. Chama a função de API correta basedo na 'acao'
+            if (acaoNormalizada === 'APROVADO') {
+                await aprovarReserva(id);
+            } else if (acaoNormalizada === 'CANCELADA') {
+                await cancelarReserva(id);
+            } else {
+                throw new Error(`Ação desconhecida: ${acaoNormalizada}`);
+            }
+
+            // 2. Se a API funcionou, remove o item da lista (pois não está mais pendente)
+            setReservas(prevReservas =>
+                prevReservas.filter(reserva => reserva.id !== id) 
+            );
+            
+            // 3. Atualiza os contadores de stats
+            fetchReservaStats().then(setStats); 
+
+            // <-- NOVO: Define o status (Aprovada/Cancelada) para o alerta de sucesso
+            const statusFinal = acaoNormalizada === 'APROVADO' ? 'APROVADA' : 'CANCELADA';
+
+            // <-- MODIFICADO: Mensagem de sucesso usa o nome do produto
+            alert(`A reserva do produto "${nomeProduto}" foi ${statusFinal} com sucesso!`);
+
+        } catch (erro) {
+            // 4. Se a API falhar, mostra o erro e NÃO muda nada na tela
+            console.error(`Erro ao ${acaoNormalizada} reserva ${id} (${nomeProduto}):`, erro);
+            // <-- MODIFICADO: Mensagem de falha também usa o nome
+            alert(`Falha ao ${verboAcao.toLowerCase()} a reserva para "${nomeProduto}": ${erro.message}`);
+        }
     };
 
-    // NOVO USEEFFECT PARA FILTRAGEM DUPLA
+    // useEffect de filtragem (sem alteração)
     useEffect(() => {
         let filtradas = reservas.filter(reserva => reserva.status === 'Pendente');
-
-        // Filtro por Termo de Busca
         if (termoBusca) {
             filtradas = filtradas.filter(reserva =>
                 reserva.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
                 reserva.produto.toLowerCase().includes(termoBusca.toLowerCase())
             );
         }
-
-        // Filtro por Categoria
         if (categoria) {
             filtradas = filtradas.filter(reserva => reserva.categoria === categoria);
         }
-
         setReservasFiltradas(filtradas);
-    }, [termoBusca, categoria, reservas]); // Dependências atualizadas
+    }, [termoBusca, categoria, reservas]); 
 
-    // Carrega dados reais da API: stats e lista de reservas pendentes
+    // useEffect de carregamento (sem alteração, mas importante)
     useEffect(() => {
         const carregar = async () => {
             setLoading(true);
             setErro('');
             try {
-                // Fail-safe: configura Authorization a partir do sessionStorage
                 try {
                     const token = sessionStorage.getItem('token');
                     if (token) setAuthToken(token);
                 } catch (_) {}
 
-                // Estatísticas gerais de reservas (pendentes, aprovadas, etc.)
                 const statsResp = await fetchReservaStats();
                 setStats(statsResp);
 
-                // Lista de reservas pendentes
                 const listaResp = await fetchReservas({ status: 'PENDENTE' });
+                
+                // --- DEBUG (Se data/imagem falharem, verifique o console F12) ---
+                console.log("LISTA A SER MAPEADA (lista):", JSON.stringify(listaResp?.content || listaResp, null, 2));
+
                 const lista = Array.isArray(listaResp?.content) ? listaResp.content : (Array.isArray(listaResp) ? listaResp : []);
 
-                // Normaliza itens para o formato do componente
                 const normalizado = lista.map((r) => {
+                    // (Ajuste estes campos se os nomes no console.log forem diferentes)
                     const produtoNome = r?.produto?.nome || r?.produtoNome || r?.nome || 'Produto';
                     const categoriaNome = r?.produto?.categoria || r?.categoria || '';
-                    const imagemUrl = r?.produto?.imagem || r?.imagem || '';
+                    const imagemUrl = r?.produto?.img || r?.produto?.imagem || r?.img || r?.imagem || '';
                     const cliente = r?.usuario?.nome || r?.cliente || r?.nomeUsuario || 'Cliente';
                     const email = r?.usuario?.email || r?.email || '';
                     const telefone = r?.usuario?.telefone || r?.telefone || '';
                     const quantidade = r?.quantidade ? `${r.quantidade}X` : '1X';
                     const tamanho = r?.tamanho || 'N/A';
                     const preco = r?.precoUnitario || r?.preco || '';
-                    const data = r?.data || r?.criadoEm || r?.createdAt || '';
+                    const data = r?.dataSolicitacao || r?.data || r?.criadoEm || r?.createdAt || new Date().toISOString();
                     const status = r?.status || 'Pendente';
+                    
                     return {
                         id: r?.id || Math.random().toString(36).slice(2),
                         nome: cliente,
@@ -87,10 +151,10 @@ const ReservasPendentes = () => {
                         quantidade,
                         tamanho,
                         preco: typeof preco === 'number' ? preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : String(preco || ''),
-                        data,
+                        data, 
                         email,
                         telefone,
-                        imagem: imagemUrl,
+                        imagem: imagemUrl, 
                         status: (status || '').charAt(0).toUpperCase() + (status || '').slice(1).toLowerCase(),
                     };
                 });
@@ -105,6 +169,7 @@ const ReservasPendentes = () => {
         carregar();
     }, []);
 
+    // JSX (com as correções de imagem/data e os novos botões)
     return (
         <div style={{ display: 'flex' }}>
             <MenuAdm />
@@ -112,8 +177,6 @@ const ReservasPendentes = () => {
                 
                 <div className="reservas-pendente-header">
                     <h1 className="reservas-pendente-title">Reservas</h1>
-
-                    {/* Barra de pesquisa (permanece centralizada) */}
                     <div className="reservas-pendente-search-container">
                         <FaSearch style={{ color: '#6c757d', fontSize: '16px' }} />
                         <input
@@ -124,20 +187,17 @@ const ReservasPendentes = () => {
                             onChange={(e) => setTermoBusca(e.target.value)}
                         />
                     </div>
-                    
-                    {/* NOVO SELECT DE CATEGORIA (adicionado ao final) */}
                     <select 
                         className="reservas-pendente-filter-select" 
                         value={categoria} 
                         onChange={(e) => setCategoria(e.target.value)}
                     >
                         <option value="">Todas Categorias</option>
-                        <option value="Camisetas">Camisetas</option>
-                        <option value="Whey Protein">Whey Protein</option>
-                        <option value="Creatina">Creatina</option>
-                        <option value="Vitaminas">Vitaminas</option>
+                        <option value="CAMISETAS">Camisetas</option>
+                        <option value="WHEY_PROTEIN">Whey Protein</option>
+                        <option value="CREATINA">Creatina</option>
+                        <option value="VITAMINAS">Vitaminas</option>
                     </select>
-                    {/* Exibe contadores básicos das stats, se disponíveis */}
                     {stats && (
                         <div style={{ position: 'absolute', right: 30, top: 8, display: 'flex', gap: 12, color: '#475569', fontSize: 14 }}>
                             {stats.pendentes != null && <span>Pendentes: {Number(stats.pendentes).toLocaleString('pt-BR')}</span>}
@@ -147,19 +207,20 @@ const ReservasPendentes = () => {
                     )}
                 </div>
 
-
                 <div className="reservas-pendente-list">
-                    {loading && (
-                        <p className="reservas-pendente-nenhuma-reserva">Carregando reservas...</p>
-                    )}
-                    {!!erro && !loading && (
-                        <p className="reservas-pendente-nenhuma-reserva">{erro}</p>
-                    )}
-                    {/* Renderiza as reservas FILTRADAS */}
+                    {loading && <p className="reservas-pendente-nenhuma-reserva">Carregando reservas...</p>}
+                    {!!erro && !loading && <p className="reservas-pendente-nenhuma-reserva">{erro}</p>}
+                    
                     {!loading && !erro && reservasFiltradas.length > 0 ? (
                         reservasFiltradas.map(reserva => (
                             <div key={reserva.id} className="reservas-pendente-card">
-                                <img src={reserva.imagem} alt={reserva.produto} className="reservas-pendente-card-img" />
+                                
+                                <img 
+                                    src={fixImageUrl(reserva.imagem)} 
+                                    alt={reserva.produto} 
+                                    className="reservas-pendente-card-img" 
+                                    onError={(e) => { e.target.src = 'https://placehold.co/100x100/f0f0f0/ccc?text=Sem+Img'; }}
+                                />
                                 
                                 <div className="reservas-pendente-card-info">
                                     <p><strong>{reserva.produto}</strong></p>
@@ -176,16 +237,22 @@ const ReservasPendentes = () => {
 
                                 <div className="reservas-pendente-card-actions">
                                     <p className="reservas-pendente-price">{reserva.preco}</p>
-                                    <p className="reservas-pendente-date">Data: {reserva.data}</p>
+                                    <p className="reservas-pendente-date">
+                                        Data: {formatarData(reserva.data)}
+                                    </p>
+
+                                    {/* --- (MODIFICADO) Botões com os status corretos --- */}
                                     <div className="reservas-pendente-buttons">
-                                        <button className="btn-cancelar" onClick={() => handleStatusChange(reserva.id, 'Cancelada')}>CANCELAR</button>
-                                        <button className="btn-aprovar" onClick={() => handleStatusChange(reserva.id, 'Efetuada')}>APROVAR</button>
+                                        {/* <-- MODIFICADO: Passando 'reserva.produto' */}
+                                        <button className="btn-cancelar" onClick={() => handleStatusChange(reserva.id, 'CANCELADA', reserva.produto)}>CANCELAR</button>
+                                        {/* <-- MODIFICADO: Passando 'reserva.produto' */}
+                                        <button className="btn-aprovar" onClick={() => handleStatusChange(reserva.id, 'APROVADO', reserva.produto)}>APROVAR</button>
                                     </div>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <p className="reservas-pendente-nenhuma-reserva">Nenhuma reserva pendente encontrada.</p>
+                        !loading && !erro && <p className="reservas-pendente-nenhuma-reserva">Nenhuma reserva pendente encontrada.</p>
                     )}
                 </div>
             </main>

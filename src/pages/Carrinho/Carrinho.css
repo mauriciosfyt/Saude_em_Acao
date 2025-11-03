@@ -428,3 +428,215 @@ body {
 
   
 }
+
+/*
+========================================
+--- Estilos do Modal de Seleção de Variação (COM ESCOPO) ---
+========================================
+/*
+========================================
+--- Estilos do Modal de Seleção de Variação ---
+========================================
+*/
+
+/* O Fundo Escuro (Overlay) */
+.modalcarrinho-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* O Conteúdo Branco do Modal */
+.modalcarrinho-content {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1rem; /* Espaçamento para não colar nas bordas em telas pequenas */
+  animation: scaleIn 0.2s ease-out;
+  
+  /* Ajuste para a imagem */
+  padding-top: 0; 
+  padding-left: 0;
+  padding-right: 0;
+  overflow: hidden; /* Garante que a imagem respeite o border-radius */
+}
+
+/* A Imagem no topo do Modal */
+.modalcarrinho-imagem {
+  width: 100%;
+  height: 250px; /* Altura padrão para desktop */
+  object-fit: cover;
+  background-color: #f0f0f0;
+  border-radius: 8px 8px 0 0; /* Arredonda apenas os cantos superiores */
+}
+
+/* Padding para o conteúdo (textos, form, botões) */
+.modalcarrinho-content h3,
+.modalcarrinho-content h4,
+.modalcarrinho-form-group,
+.modalcarrinho-buttons {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+/* Títulos do Modal */
+.modalcarrinho-content h3 {
+  padding-top: 2rem; /* Espaço acima do primeiro título */
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.modalcarrinho-content h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #007bff;
+  margin-top: -0.5rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
+}
+
+/* Grupo do Formulário (Label + Select) */
+.modalcarrinho-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modalcarrinho-form-group label {
+  font-weight: 600;
+  color: #555;
+}
+
+/* O Dropdown (Select) Estilizado */
+.modalcarrinho-form-group select {
+  font-size: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  
+  /* Seta do dropdown customizada */
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'292.4'%20height%3D'292.4'%3E%3Cpath%20fill%3D'%23007bff'%20d%3D'M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-13%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2013l128%20128c3.6%203.6%207.8%205.4%2013%205.4s9.4-1.8%2013-5.4l128-128c3.6-3.6%205.4-7.8%205.4-13%200-5-1.8-9.2-5.4-13z'%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem top 50%;
+  background-size: 0.65rem auto;
+}
+
+/* Container dos Botões */
+.modalcarrinho-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-bottom: 2rem; /* Adiciona padding inferior */
+}
+
+/* Estilo Base dos Botões do Modal */
+.modalcarrinho-buttons button {
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Botão de Cancelar (Secundário) */
+.modalcarrinho-btn-cancelar {
+  background-color: #f0f0f0;
+  color: #555;
+  border: 1px solid #ddd;
+}
+.modalcarrinho-btn-cancelar:hover {
+  background-color: #e0e0e0;
+}
+
+/* Botão de Confirmar (Primário) */
+.modalcarrinho-btn-confirmar {
+  background-color: #007bff;
+  color: white;
+}
+.modalcarrinho-btn-confirmar:hover {
+  background-color: #0056b3;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+
+/*
+========================================
+--- Media Query para Responsividade do Modal ---
+========================================
+*/
+@media (max-width: 767px) {
+
+  /* === Refinamentos do Modal para Mobile === */
+
+  .modalcarrinho-content {
+    gap: 0.75rem; /* Reduz o gap entre os elementos */
+    max-height: 90vh; /* Garante que o modal não ultrapasse a altura */
+    overflow-y: auto; /* Adiciona scroll se for muito alto */
+  }
+
+  .modalcarrinho-imagem {
+    height: 200px; /* Reduz a altura da imagem no mobile */
+  }
+
+  /* Reduz o padding interno no mobile */
+  .modalcarrinho-content h3,
+  .modalcarrinho-content h4,
+  .modalcarrinho-form-group,
+  .modalcarrinho-buttons {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .modalcarrinho-content h3 {
+    padding-top: 1.5rem; /* Reduz o padding do topo */
+    font-size: 1.25rem; /* Reduz fonte do título */
+  }
+
+  .modalcarrinho-content h4 {
+    font-size: 1rem; /* Reduz fonte do subtítulo */
+  }
+
+  /* Empilha os botões no mobile para facilitar o toque */
+  .modalcarrinho-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 1.5rem; /* Ajusta padding inferior */
+  }
+
+  .modalcarrinho-buttons button {
+    width: 100%; /* Faz os botões ocuparem a largura total */
+  }
+}

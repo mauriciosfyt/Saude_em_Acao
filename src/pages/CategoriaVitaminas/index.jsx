@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../../components/footer";
 import banner from "../../assets/banners/banner_vitaminas.svg";
 // 2. Imports de produtos estáticos removidos
-// import product1 from "../../assets/IMG PRODUTO.jpg";
-// ...
 import "./Categorias.css"; // Estilo compartilhado
 import Header_nLogin from "../../components/header_loja_nLogin";
 import Header_Login from "../../components/header_loja";
@@ -26,7 +24,6 @@ const CategoriaVitaminas = () => {
   const [error, setError] = useState(null);
 
   // 6. Array de produtos estáticos removido
-  // const todosOsProdutos = [ ... ];
 
   // 7. useEffect para buscar e FILTRAR dados da API
   useEffect(() => {
@@ -34,11 +31,10 @@ const CategoriaVitaminas = () => {
       setIsDataLoading(true);
       setError(null);
       try {
-        // 1. Chama a API (que sabemos que retorna todos os produtos)
+        // 1. Chama a API
         const data = await getProdutosByCategoria("VITAMINAS");
 
-        // 2. FILTRO NO FRONTEND (A SOLUÇÃO)
-        // Filtra a lista 'data' para manter apenas produtos da categoria "VITAMINAS"
+        // 2. FILTRO NO FRONTEND
         const produtosFiltrados = data.filter(
           (p) => p.categoria === "VITAMINAS"
         );
@@ -52,9 +48,7 @@ const CategoriaVitaminas = () => {
         // 3. Mapeia e formata APENAS os produtos filtrados
         const produtosFormatados = produtosFiltrados.map((prod) => ({
           ...prod,
-          // Usa 'prod.img' (baseado no JSON que você compartilhou)
-          imagem: prod.img,
-          // Formata o preço
+          imagem: prod.img, // Usa 'prod.img'
           precoFormatado: new Intl.NumberFormat("pt-BR", {
             style: "currency",
             currency: "BRL",
@@ -63,7 +57,6 @@ const CategoriaVitaminas = () => {
 
         // 4. Seta o estado com os produtos corretos
         setProdutos(produtosFormatados);
-
       } catch (err) {
         console.error("Erro ao buscar produtos da categoria 'VITAMINAS':", err);
         setError(
@@ -97,32 +90,40 @@ const CategoriaVitaminas = () => {
     navigate(`/LojaProduto/${produtoId}`);
   };
 
+  // --- 1. FUNÇÃO ADICIONADA (IGUAL A DE CAMISAS) ---
+  /**
+   * Navega para a página de carrinho, passando o ID do produto
+   * como um query param 'add'.
+   */
+  const handleAdicionarAoCarrinho = (produtoId) => {
+    navigate(`/carrinho?add=${produtoId}`);
+  };
+  // --- FIM DA FUNÇÃO ADICIONADA ---
+
   // Helper de estilo para centralizar mensagens
   const centerStyle = {
-    display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    height: '50vh',
-    fontSize: '18px',
-    color: '#333'
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "50vh",
+    fontSize: "18px",
+    color: "#333",
   };
 
   // 10. Lidar com o loading de autenticação
   if (authLoading) {
     return (
-      <div className="categoria-camisa"> {/* Reutilizando a classe, talvez renomear para "categoria-page" ? */}
-        <div style={{ ...centerStyle, height: '100vh' }}>
-          Carregando...
-        </div>
+      <div className="categoria-camisa">
+        <div style={{ ...centerStyle, height: "100vh" }}>Carregando...</div>
       </div>
     );
   }
 
   // 11. Renderização principal
   return (
-    <div className="categoria-camisa"> {/* Reutilizando a classe */}
+    <div className="categoria-camisa">
       {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
-      <div className="banner-gradient-categoria-camisa"> {/* Reutilizando a classe */}
+      <div className="banner-gradient-categoria-camisa">
         <section className="banner">
           <img src={banner} alt="Banner Categoria Vitaminas" />
         </section>
@@ -141,11 +142,8 @@ const CategoriaVitaminas = () => {
                   <div
                     className="produto-card"
                     key={produto.id}
-                    onClick={(e) => {
-                      if (e.target.closest(".btn-reservar")) return;
-                      // 13. Passar o ID do produto para a navegação
-                      irParaDetalhes(produto.id);
-                    }}
+                    // --- 2. ONCLICK DO CARD SIMPLIFICADO ---
+                    onClick={() => irParaDetalhes(produto.id)}
                     style={{ cursor: "pointer" }}
                   >
                     <img
@@ -159,8 +157,21 @@ const CategoriaVitaminas = () => {
                     </div>
                     <div className="produto-card-footer">
                       {/* 15. Usar o preço formatado */}
-                      <p className="produto-preco">{produto.precoFormatado}</p>
-                      <button className="btn-reservar">Reservar</button>
+                      <p className="produto-preco">
+                        {produto.precoFormatado}
+                      </p>
+
+                      {/* --- 3. BOTÃO MODIFICADO (IGUAL A DE CAMISAS) --- */}
+                      <button
+                        className="btn-adicionar" // Classe atualizada
+                        onClick={(e) => {
+                          e.stopPropagation(); // Impede o clique de ir para o card
+                          handleAdicionarAoCarrinho(produto.id); // Chama a função do carrinho
+                        }}
+                      >
+                        Adicionar ao carrinho {/* Texto atualizado */}
+                      </button>
+                      {/* --- FIM DA MODIFICAÇÃO --- */}
                     </div>
                   </div>
                 ))}
@@ -177,7 +188,11 @@ const CategoriaVitaminas = () => {
                           className={`pagination-number ${
                             p === currentPage ? "active" : ""
                           }`}
-                          onClick={() => gotoPage(p)}
+                          onClick={(e) => {
+                            // --- 4. STOPPROPAGATION ADICIONADO (BOA PRÁTICA) ---
+                            e.stopPropagation(); // Previne o clique do card
+                            gotoPage(p);
+                          }}
                           aria-current={p === currentPage ? "page" : undefined}
                         >
                           {p}

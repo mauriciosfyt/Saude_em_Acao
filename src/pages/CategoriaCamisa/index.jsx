@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // 1. Importar useEffect
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header_Login from "../../components/header_loja";
 import Header_nLogin from "../../components/header_loja_nLogin";
@@ -6,67 +6,47 @@ import Footer from "../../components/footer";
 import banner from "../../assets/banners/banner_camisetas.svg";
 import { useAuth } from "../../contexts/AuthContext";
 
-// 2. Importar o serviço da API
 import { getProdutosByCategoria } from "../../services/produtoService";
 
-// 3. As imagens estáticas não são mais necessárias
-// ...
-
-// Seus estilos importados
 import "../../pages/CategoriaVitaminas/Categorias.css";
 import "./CategoriaCamisa.css";
 
 const CategoriaCamisa = () => {
   const navigate = useNavigate();
-  // 4. Renomear 'loading' para evitar conflitos
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // 5. Estados para produtos da API, loading e erro
   const [produtos, setProdutos] = useState([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 6. Remover o array estático 'todosOsProdutos'
-  // const todosOsProdutos = [ ... ]; // <-- REMOVIDO
-
-  // 7. useEffect CORRIGIDO para buscar e FILTRAR dados da API
   useEffect(() => {
     const fetchProdutos = async () => {
       setIsDataLoading(true);
       setError(null);
       try {
-        // 1. Chama a API (que sabemos que retorna todos os 15 produtos)
         const data = await getProdutosByCategoria("CAMISETAS");
 
-        // 2. FILTRO NO FRONTEND (A SOLUÇÃO)
-        // Filtra a lista 'data' para manter apenas produtos da categoria "CAMISETAS"
+        // (O filtro no frontend estava correto, vamos mantê-lo)
         const produtosFiltrados = data.filter(
           (p) => p.categoria === "CAMISETAS"
         );
 
-        // Log de debug para ajudar
         console.log(`API retornou ${data.length} produtos.`);
         console.log(
           `Filtrados no frontend para ${produtosFiltrados.length} (categoria CAMISETAS).`
         );
 
-        // 3. Mapeia e formata APENAS os produtos filtrados
         const produtosFormatados = produtosFiltrados.map((prod) => ({
           ...prod,
-
-          // CORREÇÃO: O JSON da API usa 'img', não 'imagemUrl'
-          imagem: prod.img,
-
-          // Formata o preço (que vem como número, ex: 100)
+          imagem: prod.img, // Correção da API
           precoFormatado: new Intl.NumberFormat("pt-BR", {
             style: "currency",
             currency: "BRL",
           }).format(prod.preco),
         }));
 
-        // 4. Seta o estado com os produtos corretos
         setProdutos(produtosFormatados);
         
       } catch (err) {
@@ -83,14 +63,23 @@ const CategoriaCamisa = () => {
     };
 
     fetchProdutos();
-  }, []); // O array vazio [] garante que isso rode apenas uma vez
+  }, []);
 
-  // 8. Atualizar a função de navegação para usar o ID
   const irParaDetalhes = (produtoId) => {
-    navigate(`/LojaProduto/${produtoId}`); // Navega para a rota de detalhes do produto
+    navigate(`/LojaProduto/${produtoId}`);
   };
 
-  // 9. Paginação agora usa o estado 'produtos'
+  // --- NOVA FUNÇÃO ADICIONADA ---
+  /**
+   * Navega para a página de carrinho, passando o ID do produto
+   * como um query param 'add'.
+   */
+  const handleAdicionarAoCarrinho = (produtoId) => {
+    navigate(`/carrinho?add=${produtoId}`);
+  };
+  // --- FIM DA NOVA FUNÇÃO ---
+
+  // Lógica de Paginação (sem alteração)
   const totalPages = Math.max(1, Math.ceil(produtos.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const visibleProducts = produtos.slice(startIndex, startIndex + itemsPerPage);
@@ -102,29 +91,16 @@ const CategoriaCamisa = () => {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const handlePrev = () => gotoPage(currentPage - 1);
-  const handleNext = () => gotoPage(currentPage + 1);
+  // ... (handlePrev, handleNext, centerStyle - sem alteração)
 
-  // Helper de estilo para centralizar mensagens
-  const centerStyle = {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "50vh", // Altura menor pois o header/footer estão fora
-    fontSize: "18px",
-    color: "#333",
-  };
-
-  // 10. Lidar com o loading de autenticação
   if (authLoading) {
     return (
       <div className="categoria-camisa">
-        <div style={{ ...centerStyle, height: "100vh" }}>Carregando...</div>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>Carregando...</div>
       </div>
     );
   }
 
-  // 11. Renderização principal
   return (
     <div className="categoria-camisa">
       {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
@@ -134,29 +110,24 @@ const CategoriaCamisa = () => {
         </section>
 
         <div className="categoria-container">
-          {/* 12. Lidar com loading de DADOS e ERROS */}
           {isDataLoading ? (
-            <div style={centerStyle}>Carregando produtos...</div>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>Carregando produtos...</div>
           ) : error ? (
-            <div style={centerStyle}>{error}</div>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>{error}</div>
           ) : (
             <>
-              {/* Grid de produtos */}
               <div className="produtos-grid">
                 {visibleProducts.map((produto) => (
                   <div
                     className="produto-card"
                     key={produto.id}
-                    onClick={(e) => {
-                      if (e.target.closest(".btn-reservar")) return;
-                      // 13. Passar o ID do produto para a navegação
-                      irParaDetalhes(produto.id);
-                    }}
+                    // --- ONCLICK DO CARD SIMPLIFICADO ---
+                    // Agora ele só se preocupa em ir para os detalhes
+                    onClick={() => irParaDetalhes(produto.id)}
                     style={{ cursor: "pointer" }}
                   >
                     <img
-                      // 14. Usar a propriedade de imagem vinda da API
-                      src={produto.imagem} // (Agora mapeado de 'produto.img')
+                      src={produto.imagem}
                       alt={produto.nome}
                       className="produto-img"
                     />
@@ -164,15 +135,26 @@ const CategoriaCamisa = () => {
                       <h3 className="produto-nome">{produto.nome}</h3>
                     </div>
                     <div className="produto-card-footer">
-                      {/* 15. Usar o preço formatado */}
                       <p className="produto-preco">{produto.precoFormatado}</p>
-                      <button className="btn-reservar">Reservar</button>
+                      
+                      {/* --- BOTÃO MODIFICADO --- */}
+                      <button 
+                        className="btn-adicionar" // Classe atualizada
+                        onClick={(e) => {
+                          e.stopPropagation(); // Impede o clique de ir para o card
+                          handleAdicionarAoCarrinho(produto.id); // Chama a função do carrinho
+                        }}
+                      >
+                        Adicionar ao carrinho {/* Texto atualizado */}
+                      </button>
+                      {/* --- FIM DA MODIFICAÇÃO --- */}
+
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Controles de paginação (só mostra se houver mais de 1 página) */}
+              {/* Paginação (sem alteração) */}
               {totalPages > 1 && (
                 <div className="pagination">
                   <div className="pagination-pages">
@@ -183,7 +165,10 @@ const CategoriaCamisa = () => {
                           className={`pagination-number ${
                             p === currentPage ? "active" : ""
                           }`}
-                          onClick={() => gotoPage(p)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Previne o clique do card aqui também
+                            gotoPage(p);
+                          }}
                           aria-current={p === currentPage ? "page" : undefined}
                         >
                           {p}

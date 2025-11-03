@@ -181,7 +181,7 @@
 
 
 /* --- Cores dos Status --- */
-.status-efetuada { color: #2ecc71; font-weight: bold; }
+.status-aprovada { color: #2ecc71; font-weight: bold; }
 .status-cancelada { color: #e74c3c; font-weight: bold; }
 
 .nenhuma-reserva {
