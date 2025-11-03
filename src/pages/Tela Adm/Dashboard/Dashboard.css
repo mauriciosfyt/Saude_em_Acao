@@ -56,6 +56,55 @@
   gap: 20px;
 }
 
+/* Estatísticas (cards) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.stat-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-card .label {
+  color: #6b7a90;
+  font-size: 0.9rem;
+}
+
+.stat-card .value {
+  color: #1f2d3d;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.stat-card .delta {
+  font-size: 0.85rem;
+}
+
+.delta.up { color: #16a34a; }
+.delta.down { color: #ef4444; }
+
+/* Estados de carregamento/erro */
+.dashboard-loading,
+.dashboard-error {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.dashboard-error {
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
 /* Responsividade */
 @media (max-width: 1024px) {
   .top-charts {
@@ -63,6 +112,9 @@
   }
   .page-grid {
     grid-template-columns: 1fr; /* produtos vão para baixo */
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -73,5 +125,8 @@
   }
   .products-sidebar {
     flex-direction: column;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
 }
