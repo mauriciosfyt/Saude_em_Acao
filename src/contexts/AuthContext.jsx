@@ -15,25 +15,45 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Verifica se há token no sessionStorage ao inicializar (persistirá no refresh)
+  // Verifica se há token no sessionStorage ao inicializar e em alterações
   useEffect(() => {
     const checkAuth = () => {
       try {
-        // MUDANÇA: Usar sessionStorage
-        const token = sessionStorage.getItem('token'); 
-        const email = sessionStorage.getItem('userEmail'); 
-        
-        if (token && email) {
-          console.log('Token JWT encontrado no sessionStorage:', token);
+        console.log('🔍 Verificando autenticação...');
+        const token = sessionStorage.getItem('token');
+        const email = sessionStorage.getItem('userEmail');
+
+        // Log do estado atual
+        console.log('📦 Estado do sessionStorage:', {
+          tokenExists: !!token,
+          emailExists: !!email,
+          token: token ? `${token.slice(0, 10)}...` : null
+        });
+
+        if (token) {
+          // Verifica se o token é válido (tem formato JWT)
+          const isValidJWT = /^[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*$/.test(token);
+          
+          if (!isValidJWT) {
+            console.warn('⚠️ Token encontrado mas formato inválido');
+            setIsAuthenticated(false);
+            setUser(null);
+            return;
+          }
+
+          console.log('✅ Token JWT válido encontrado');
           setIsAuthenticated(true);
-          setUser({ token, email });
+          setUser({ token, email: email || 'no-email' });
+          
+          // Log do estado de autenticação
+          console.log('🔐 Estado de autenticação atualizado:', { isAuthenticated: true, hasUser: true });
         } else {
-          console.log('Nenhum token JWT encontrado no sessionStorage');
+          console.log('❌ Nenhum token JWT encontrado');
           setIsAuthenticated(false);
           setUser(null);
         }
       } catch (error) {
-        console.error('Erro ao verificar autenticação:', error);
+        console.error('❌ Erro ao verificar autenticação:', error);
         setIsAuthenticated(false);
         setUser(null);
       } finally {
@@ -41,31 +61,81 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
+    // Executa verificação inicial
     checkAuth();
+
+    // Adiciona listener para mudanças no storage
+    const handleStorageChange = (e) => {
+      if (e.key === 'token' || e.key === 'userEmail') {
+        console.log('🔄 Mudança detectada no storage:', e.key);
+        checkAuth();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Listener para logout disparado pela função performLogout na mesma aba
+    const handleAppLogout = () => {
+      console.log('🔔 Evento app-logout recebido, atualizando estado de autenticação');
+      setIsAuthenticated(false);
+      setUser(null);
+      setLoading(false);
+    };
+
+    window.addEventListener('app-logout', handleAppLogout);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('app-logout', handleAppLogout);
+    };
   }, []);
 
   // REMOVIDO: O useEffect que usava 'pagehide', pois sessionStorage faz a limpeza.
 
 const login = (userData) => {
-  console.log("🔐 Dados recebidos no login:", userData);
+  console.log("🔐 Iniciando login com dados:", userData);
 
-  // Se o backend retornar apenas a string do token:
-  const token = typeof userData === 'string'
-    ? userData
-    : userData?.token || userData?.accessToken || userData?.jwt || userData?.tokenJwt;
+  try {
+    // Se o backend retornar apenas a string do token:
+    const token = typeof userData === 'string'
+      ? userData
+      : userData?.token || userData?.accessToken || userData?.jwt || userData?.tokenJwt;
 
-  if (!token) {
-    console.error("⚠️ Nenhum token JWT encontrado em userData:", userData);
-  } else {
-    console.log("✅ Token JWT detectado:", token);
+    if (!token) {
+      console.error("⚠️ Nenhum token JWT encontrado em userData:", userData);
+      return;
+    }
+
+    // Verifica se o token tem formato JWT válido
+    const isValidJWT = /^[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*$/.test(token);
+    if (!isValidJWT) {
+      console.error("⚠️ Token fornecido não tem formato JWT válido");
+      return;
+    }
+
+    console.log("✅ Token JWT válido detectado");
+
+    // Extrai email do userData ou usa o existente
+    const email = userData.email || sessionStorage.getItem('userEmail');
+
+    // Atualiza o estado
+    setIsAuthenticated(true);
+    setUser({ email, token });
+
+    // Salva no sessionStorage
+    sessionStorage.setItem('token', token);
+    if (email) sessionStorage.setItem('userEmail', email);
+
+    console.log("✅ Login concluído com sucesso:", { 
+      isAuthenticated: true, 
+      hasToken: true,
+      hasEmail: !!email
+    });
+  } catch (error) {
+    console.error("❌ Erro durante o login:", error);
+    setIsAuthenticated(false);
+    setUser(null);
   }
-
-  setIsAuthenticated(true);
-  setUser({ email: userData.email || sessionStorage.getItem('userEmail'), token });
-
-  // Salva o token no sessionStorage
-  sessionStorage.setItem('token', token);
-  if (userData.email) sessionStorage.setItem('userEmail', userData.email);
 };
 
 
