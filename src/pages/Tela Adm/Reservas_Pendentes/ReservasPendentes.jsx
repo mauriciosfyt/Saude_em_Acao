@@ -4,21 +4,19 @@ import './ReservasPendentes.css'; // Aponta para o CSS com as classes renomeadas
 // Componentes e Ícones
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { FaSearch } from "react-icons/fa";
+import { setAuthToken } from '../../../services/api';
+import { fetchReservas, fetchReservaStats } from '../../../services/reservasService';
 
-// Mock de dados ATUALIZADO com as novas categorias
-const mockReservasInicial = [
-    { id: 1, nome: "Roberto Alves", produto: "Camiseta preta growth", categoria: "Camisetas", quantidade: "3X", tamanho: "M", preco: "R$50,00", data: "01/01/2025", email: "roberto@gmail.com", telefone: "(11) 12345-6789", imagem: "https://i.imgur.com/8L4m5p3.png", status: "Pendente" },
-    { id: 4, nome: "Ana Souza", produto: "Legging fitness preta", categoria: "Camisetas", quantidade: "2X", tamanho: "M", preco: "R$70,00", data: "10/02/2025", email: "anasouza@gmail.com", telefone: "(11) 98765-4321", imagem: "https://i.imgur.com/JzJ9zL1.png", status: "Pendente" },
-    { id: 3, nome: "Roberto Alves", produto: "Camiseta preta growth", categoria: "Camisetas", quantidade: "2X", tamanho: "G", preco: "R$150,00", data: "01/01/2025", email: "roberto@gmail.com", telefone: "(11) 12345-6789", imagem: "https://i.imgur.com/8L4m5p3.png", status: "Pendente" },
-    { id: 5, nome: "Carlos Lima", produto: "Whey Protein 1kg", categoria: "Whey Protein", quantidade: "1X", tamanho: "N/A", preco: "R$120,00", data: "12/02/2025", email: "carlos@gmail.com", telefone: "(11) 99999-8888", imagem: "https://i.imgur.com/example.png", status: "Pendente" },
-    { id: 6, nome: "Maria Oliveira", produto: "Creatina Monohidratada", categoria: "Creatina", quantidade: "1X", tamanho: "N/A", preco: "R$80,00", data: "15/02/2025", email: "maria@gmail.com", telefone: "(11) 77777-6666", imagem: "https://i.imgur.com/example2.png", status: "Pendente" }
-];
+// Estado inicial vazio; dados virão da API
 
 const ReservasPendentes = () => {
-    const [reservas, setReservas] = useState(mockReservasInicial);
+    const [reservas, setReservas] = useState([]);
     const [termoBusca, setTermoBusca] = useState('');
     const [categoria, setCategoria] = useState(''); // NOVO STATE
     const [reservasFiltradas, setReservasFiltradas] = useState([]); // NOVO STATE
+    const [loading, setLoading] = useState(false);
+    const [erro, setErro] = useState('');
+    const [stats, setStats] = useState(null);
 
     const handleStatusChange = (id, novoStatus) => {
         setReservas(prevReservas =>
@@ -47,6 +45,65 @@ const ReservasPendentes = () => {
 
         setReservasFiltradas(filtradas);
     }, [termoBusca, categoria, reservas]); // Dependências atualizadas
+
+    // Carrega dados reais da API: stats e lista de reservas pendentes
+    useEffect(() => {
+        const carregar = async () => {
+            setLoading(true);
+            setErro('');
+            try {
+                // Fail-safe: configura Authorization a partir do sessionStorage
+                try {
+                    const token = sessionStorage.getItem('token');
+                    if (token) setAuthToken(token);
+                } catch (_) {}
+
+                // Estatísticas gerais de reservas (pendentes, aprovadas, etc.)
+                const statsResp = await fetchReservaStats();
+                setStats(statsResp);
+
+                // Lista de reservas pendentes
+                const listaResp = await fetchReservas({ status: 'PENDENTE' });
+                const lista = Array.isArray(listaResp?.content) ? listaResp.content : (Array.isArray(listaResp) ? listaResp : []);
+
+                // Normaliza itens para o formato do componente
+                const normalizado = lista.map((r) => {
+                    const produtoNome = r?.produto?.nome || r?.produtoNome || r?.nome || 'Produto';
+                    const categoriaNome = r?.produto?.categoria || r?.categoria || '';
+                    const imagemUrl = r?.produto?.imagem || r?.imagem || '';
+                    const cliente = r?.usuario?.nome || r?.cliente || r?.nomeUsuario || 'Cliente';
+                    const email = r?.usuario?.email || r?.email || '';
+                    const telefone = r?.usuario?.telefone || r?.telefone || '';
+                    const quantidade = r?.quantidade ? `${r.quantidade}X` : '1X';
+                    const tamanho = r?.tamanho || 'N/A';
+                    const preco = r?.precoUnitario || r?.preco || '';
+                    const data = r?.data || r?.criadoEm || r?.createdAt || '';
+                    const status = r?.status || 'Pendente';
+                    return {
+                        id: r?.id || Math.random().toString(36).slice(2),
+                        nome: cliente,
+                        produto: produtoNome,
+                        categoria: categoriaNome,
+                        quantidade,
+                        tamanho,
+                        preco: typeof preco === 'number' ? preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : String(preco || ''),
+                        data,
+                        email,
+                        telefone,
+                        imagem: imagemUrl,
+                        status: (status || '').charAt(0).toUpperCase() + (status || '').slice(1).toLowerCase(),
+                    };
+                });
+                setReservas(normalizado);
+            } catch (e) {
+                const msg = typeof e === 'string' ? e : (e?.message || 'Erro ao carregar reservas.');
+                setErro(msg);
+            } finally {
+                setLoading(false);
+            }
+        };
+        carregar();
+    }, []);
 
     return (
         <div style={{ display: 'flex' }}>
@@ -80,12 +137,26 @@ const ReservasPendentes = () => {
                         <option value="Creatina">Creatina</option>
                         <option value="Vitaminas">Vitaminas</option>
                     </select>
+                    {/* Exibe contadores básicos das stats, se disponíveis */}
+                    {stats && (
+                        <div style={{ position: 'absolute', right: 30, top: 8, display: 'flex', gap: 12, color: '#475569', fontSize: 14 }}>
+                            {stats.pendentes != null && <span>Pendentes: {Number(stats.pendentes).toLocaleString('pt-BR')}</span>}
+                            {stats.aprovadas != null && <span>Aprovadas: {Number(stats.aprovadas).toLocaleString('pt-BR')}</span>}
+                            {stats.rejeitadas != null && <span>Rejeitadas: {Number(stats.rejeitadas).toLocaleString('pt-BR')}</span>}
+                        </div>
+                    )}
                 </div>
 
 
                 <div className="reservas-pendente-list">
+                    {loading && (
+                        <p className="reservas-pendente-nenhuma-reserva">Carregando reservas...</p>
+                    )}
+                    {!!erro && !loading && (
+                        <p className="reservas-pendente-nenhuma-reserva">{erro}</p>
+                    )}
                     {/* Renderiza as reservas FILTRADAS */}
-                    {reservasFiltradas.length > 0 ? (
+                    {!loading && !erro && reservasFiltradas.length > 0 ? (
                         reservasFiltradas.map(reserva => (
                             <div key={reserva.id} className="reservas-pendente-card">
                                 <img src={reserva.imagem} alt={reserva.produto} className="reservas-pendente-card-img" />
