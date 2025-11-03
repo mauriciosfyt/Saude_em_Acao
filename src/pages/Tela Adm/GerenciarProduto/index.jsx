@@ -138,7 +138,7 @@ const GerenciarProduto = () => {
               onChange={(e) => setCategoria(e.target.value)}
             >
               <option value="">Categoria</option>
-              <option value="WheyProtein">Whey Protein</option>
+              <option value="WHEY_PROTEIN">Whey Protein</option>
               <option value="CAMISETAS">Camiseta</option>
               <option value="VITAMINAS">Vitaminas</option>
               <option value="CREATINA">Creatina</option>
