@@ -1,11 +1,86 @@
+import React, { useEffect, useState } from "react";
 import HeaderUser from "../../components/header";
 import { useNavigate } from 'react-router-dom';
 import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import './PerfilPersonal.css';
+import { logout } from "../../services/api";
 
 const PerfilPersonal = () => {
   const navigate = useNavigate();
+  const [personalData, setPersonalData] = useState({
+    nome: "",
+    email: "",
+    numero: "",
+    perfil: "",
+  });
+
+  // Função para buscar o token salvo e decodificá-lo
+  const getDecodedToken = () => {
+    try {
+      // Procura o token no localStorage ou sessionStorage
+      let token =
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token") ||
+        "";
+
+      if (!token) {
+        // procura tokens salvos incorretamente (tipo tokeneyJ...)
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          const value = localStorage.getItem(key);
+          if (value && value.includes("eyJ")) {
+            token = value;
+            break;
+          }
+        }
+      }
+
+      if (!token) return null;
+
+      // Corrige tokens com prefixos tipo 'tokeneyJ...' ou 'Bearer eyJ...'
+      token = token.replace(/^token/i, "").trim();
+      if (token.toLowerCase().startsWith("bearer ")) {
+        token = token.slice(7);
+      }
+
+      const payload = JSON.parse(
+        atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+      );
+      return payload;
+    } catch (err) {
+      console.error("Erro ao decodificar token:", err);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const payload = getDecodedToken();
+    if (!payload) {
+      navigate("/"); // se não houver token, redireciona para login ou home
+      return;
+    }
+
+    // extrai dados comuns
+    const nome = payload.nome || payload.name || payload.sub?.split("@")[0] || "Personal";
+    const email = payload.email || payload.sub || "sem-email@dominio.com";
+    const perfil = payload.perfil || payload.role || payload.userRole || "PERSONAL";
+    const numero = payload.numero || payload.phone || "(00) 00000-0000";
+
+    setPersonalData({
+      nome,
+      email,
+      numero,
+      perfil,
+    });
+  }, [navigate]);
+
+  const handleLogout = () => {
+    logout();
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate("/");
+  };
 
   return (
     <div>
@@ -15,8 +90,8 @@ const PerfilPersonal = () => {
   <section className="perfil-section-personal">
     <div className="perfil-header-personal">
       <img src={perfilPhoto} alt="Foto do Perfil" className="perfil-foto-personal" />
-      <h2>OLÁ, NOME</h2>
-      <p className="perfil-status-personal">Ativo: Personal</p>
+      <h2>OLÁ, {personalData.nome.toUpperCase()}</h2>
+      <p className="perfil-status-personal">Ativo: {personalData.perfil}</p>
     </div>
 
   </section>
@@ -34,14 +109,14 @@ const PerfilPersonal = () => {
 
       <div className="container-dados">
         <div className="dados-box">
-          <p><strong>Nome:</strong> Mauricio Da silva Ferreira</p>
-          <p><strong>Email:</strong> maumau@gmail.com</p>
-          <p><strong>Número:</strong> (11)9604-34797</p>
-          <p><strong>Senha:</strong> XXXXXX</p>
+          <p><strong>Nome:</strong> {personalData.nome}</p>
+          <p><strong>Email:</strong> {personalData.email}</p>
+          <p><strong>Número:</strong> {personalData.numero}</p>
+          <p><strong>Senha:</strong> ********</p>
         </div>
 
         <div className="actions-row-personal">
-          <button className="logout-btn-personal">Desconectar</button>
+          <button className="logout-btn-personal" onClick={handleLogout}>Desconectar</button>
           <button className="manage-btn-personal" onClick={() => navigate('/AdministrarAluno')}>Gerenciar</button>
         </div>
       </div>
