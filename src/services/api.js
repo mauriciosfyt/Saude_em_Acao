@@ -82,42 +82,24 @@ export const solicitarEsqueciSenha = async (email) => {
   }
 };
 
-/**
- * Passo 2: Valida o código recebido por e-mail.
- * (Usado por ModalCodigoRecuperacao)
- */
-export const validarCodigoRecuperacao = async (email, codigo) => {
+// Etapa 2: valida o código de 5 dígitos enviado ao e-mail
+export const validarCodigoEsqueciSenha = async (codigo) => {
   try {
-    // O backend verifica se o código está correto e não expirou
-    const response = await api.post('/api/auth/validar-codigo-recuperacao', { email, codigo });
-    // O backend DEVE retornar um token temporário que autoriza a troca de senha
-    return response.data; // Espera algo como { resetToken: 'um-token-jwt-temporario' }
+    const response = await api.post('http://34.205.11.57/api/auth/esqueci-senha/validar-codigo', { codigo });
+    return response.data; // Ex.: { codigo: '123456' }
   } catch (error) {
     if (error.response && error.response.data) throw error.response.data;
     throw error;
   }
 };
 
-/**
- * Passo 3: Define a nova senha usando o token temporário de reset.
- * (Usado por ModalAlterarSenha)
- */
-export const resetarSenha = async (resetToken, novaSenha) => {
+// Etapa 3: redefine a senha usando o código validado na etapa 2
+// Rota: POST http://34.205.11.57/api/auth/esqueci-senha/redefinir/{codigo}
+// Envia apenas a nova senha no corpo da requisição
+export const redefinirSenhaEsquecida = async (codigo, novaSenha) => {
   try {
-    // O backend usa o resetToken para autorizar a mudança da senha
-    const response = await api.post('/api/auth/resetar-senha', { resetToken, novaSenha });
-    return response.data; // Espera algo como { message: 'Senha alterada com sucesso' }
-  } catch (error) {
-    if (error.response && error.response.data) throw error.response.data;
-    throw error;
-  }
-};
-
-// Confirma redefinição usando o token enviado por e-mail e a nova senha
-// Rota oficial: POST http://34.205.11.57/api/auth/esqueci-senha/confirmar
-export const confirmarRedefinicaoSenha = async (token, novaSenha) => {
-  try {
-    const response = await api.post('http://34.205.11.57/api/auth/esqueci-senha/confirmar', { token, novaSenha });
+    const url = `http://34.205.11.57/api/auth/esqueci-senha/redefinir/${encodeURIComponent(codigo)}`;
+    const response = await api.post(url, { novaSenha });
     return response.data; // Ex.: { message: 'Senha redefinida com sucesso' }
   } catch (error) {
     if (error.response && error.response.data) throw error.response.data;
@@ -125,13 +107,7 @@ export const confirmarRedefinicaoSenha = async (token, novaSenha) => {
   }
 };
 
-export const logout = () => {
-  setAuthToken(null);
-  try {
-    // ALTERADO DE localStorage PARA sessionStorage
-    sessionStorage.removeItem('token');
-  } catch (e) {
-    // ignore
-  }
-};
+
+
 export default api;
+
