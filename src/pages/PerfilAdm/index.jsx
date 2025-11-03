@@ -4,8 +4,8 @@ import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import "./PerfilAdm.css";
-import { logout } from "../../services/api";
 import { getMeuPerfil } from "../../services/usuarioService";
+import performLogout from "../../components/LogoutButton/LogoutButton";
 
 const PerfilAdm = () => {
   const navigate = useNavigate();
@@ -105,14 +105,6 @@ const PerfilAdm = () => {
     fetchProfile();
   }, [navigate]);
 
-  const handleLogout = () => {
-    logout();
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate("/");
-    // Força o reload da página após a navegação
-    window.location.reload();
-  };
 
   return (
     <div>
@@ -186,7 +178,7 @@ const PerfilAdm = () => {
         </div>
 
         <div className="actions-row">
-          <button className="logout-btn" onClick={handleLogout}>
+          <button className="logout-btn" onClick={() => performLogout(navigate)}>
             Desconectar
           </button>
           <button

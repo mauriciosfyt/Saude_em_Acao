@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import './PerfilPersonal.css';
-import { logout } from "../../services/api";
+import { getMeuPerfil } from "../../services/usuarioService";
+import performLogout from "../../components/LogoutButton/LogoutButton";
 
 const PerfilPersonal = () => {
   const navigate = useNavigate();
@@ -61,26 +62,54 @@ const PerfilPersonal = () => {
       return;
     }
 
-    // extrai dados comuns
-    const nome = payload.nome || payload.name || payload.sub?.split("@")[0] || "Personal";
-    const email = payload.email || payload.sub || "sem-email@dominio.com";
-    const perfil = payload.perfil || payload.role || payload.userRole || "PERSONAL";
-    const numero = payload.numero || payload.phone || "(00) 00000-0000";
+    // Tenta buscar os dados completos do usuário via API primeiro
+    const fetchProfile = async () => {
+      try {
+        const perfil = await getMeuPerfil();
+        console.log('Meu perfil de personal (API):', perfil);
 
-    setPersonalData({
-      nome,
-      email,
-      numero,
-      perfil,
-    });
+        const nomeApi = perfil.nome || perfil.name || perfil.usuario?.nome || perfil.user?.nome || perfil.fullName || perfil.nome_completo || perfil.nomeCompleto;
+        const emailApi = perfil.email || perfil.usuario?.email || perfil.user?.email || perfil.login;
+        const perfilApi = perfil.perfil || perfil.role || perfil.userRole || "PERSONAL";
+        const numeroApi = perfil.numero || perfil.telefone || perfil.phone || perfil.celular || perfil.phoneNumber;
+
+        setPersonalData({
+          nome: nomeApi || "",
+          email: emailApi || "",
+          perfil: perfilApi,
+          numero: numeroApi || "",
+        });
+      } catch (err) {
+        // Se a chamada à API falhar, faz fallback usando o token (já decodificado)
+        console.warn('Falha ao buscar perfil via API, usando token como fallback:', err);
+        console.log("Decoded token payload (Personal fallback):", payload);
+
+        const nome = 
+          payload.nome ||
+          payload.name ||
+          payload.user?.nome ||
+          payload.user?.name ||
+          payload.usuario?.nome ||
+          payload.fullName ||
+          payload.nome_completo ||
+          payload.nomeCompleto ||
+          "Personal";
+        const email = payload.email || payload.usuario?.email || payload.user?.email || payload.sub || "sem-email@dominio.com";
+        const perfil = payload.perfil || payload.role || payload.userRole || "PERSONAL";
+        const numero = payload.numero || payload.telefone || payload.phone || payload.celular || "(00) 00000-0000";
+
+        setPersonalData({
+          nome,
+          email,
+          numero,
+          perfil,
+        });
+      }
+    };
+
+    fetchProfile();
   }, [navigate]);
 
-  const handleLogout = () => {
-    logout();
-    localStorage.clear();
-    sessionStorage.clear();
-    navigate("/");
-  };
 
   return (
     <div>
@@ -116,7 +145,7 @@ const PerfilPersonal = () => {
         </div>
 
         <div className="actions-row-personal">
-          <button className="logout-btn-personal" onClick={handleLogout}>Desconectar</button>
+          <button className="logout-btn-personal" onClick={() => performLogout(navigate)}>Desconectar</button>
           <button className="manage-btn-personal" onClick={() => navigate('/AdministrarAluno')}>Gerenciar</button>
         </div>
       </div>

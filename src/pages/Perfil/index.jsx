@@ -4,7 +4,7 @@ import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import './Perfil.css'; // Importa o CSS corrigido
-import { logout } from "../../services/api";
+import performLogout from "../../components/LogoutButton/LogoutButton";
 import { getMeuPerfil } from "../../services/usuarioService";
 import { FaTimesCircle } from 'react-icons/fa';
 
@@ -147,19 +147,7 @@ const Perfil = () => {
     fetchProfile();
   }, [navigate]);
 
-  const handleLogout = () => {
-    // Remove dados específicos primeiro
-    localStorage.removeItem('token');
-    localStorage.removeItem('userEmail');
-    
-    // Limpa o restante do localStorage e sessionStorage
-    logout();
-    localStorage.clear();
-    sessionStorage.clear();
-
-    // Redireciona para a home
-    navigate("/");
-  };
+  // Logout agora é tratado pelo componente reutilizável LogoutButton
 
   // chave do plano em minúsculas (usada para condições de exibição)
   const planKey = (userData.plano || userData.perfil || '').toString().toLowerCase();
@@ -262,7 +250,7 @@ const Perfil = () => {
         </svg>
       </div>
 
-      <div className="perfil-container-dados">
+        <div className="perfil-container-dados">
         <div className="perfil-dados-box">
           <p><strong>Nome:</strong> {userData.nome}</p>
           <p><strong>Email:</strong> {userData.email}</p>
@@ -270,7 +258,7 @@ const Perfil = () => {
           <p><strong>Senha:</strong> ********</p>
         </div>
 
-        <button className="perfil-logout-btn" onClick={handleLogout}>Desconectar</button>
+        <button className="perfil-logout-btn" onClick={() => performLogout(navigate)}>Desconectar</button>
       </div>
 
       <Footer />
