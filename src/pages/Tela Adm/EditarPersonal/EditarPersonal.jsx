@@ -1,214 +1,161 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { FaSave, FaArrowLeft } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
 import './EditarPersonal.css';
+import MenuAdm from '../../../components/MenuAdm/MenuAdm';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getProfessorById, API_URL } from '../../../services/usuarioService'; // <-- adicionado API_URL
 
-import AdminHeader from '../../../components/header_admin';
-import Footer from "../../../components/footer";
+const PlusIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 5V19" stroke="#007bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5 12H19" stroke="#007bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 const EditarPersonal = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Pegar dados via state (se vierem) ou via localStorage (fallback)
-  const personalDoState = location.state?.personal;
+  const { id } = useParams();
+  
 
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
     cpf: '',
-    numero: '',
+    telefone: '',
     senha: '',
-    confirmarSenha: ''
+    confirmarSenha: '',
   });
 
+  const [imagemPreview, setImagemPreview] = useState(null);
+
+  // --- NOVO: buscar dados do personal ao montar e popular campos ---
   useEffect(() => {
-    let dados = personalDoState;
-    if (!dados) {
-      const salvo = localStorage.getItem('personalParaEditar');
-      if (salvo) dados = JSON.parse(salvo);
-    }
+    if (!id) return;
+    let mounted = true;
 
-    if (dados) {
-      setFormData({
-        nome: dados.nome || '',
-        email: dados.email || '',
-        cpf: dados.cpf || '',
-        numero: dados.numero || '',
-        senha: '',
-        confirmarSenha: ''
-      });
-    } else {
-      alert('Dados do personal não encontrados.');
-      navigate('/GerenciarPersonal');
-    }
-  }, [personalDoState, navigate]);
+    const fetchProfessor = async () => {
+      try {
+        const professor = await getProfessorById(id);
+        if (!mounted || !professor) return;
 
-  const handleInputChange = (e) => {
+        // Popular campos (ajuste conforme o formato retornado pela API)
+        setFormData(prev => ({
+          ...prev,
+          nome: professor.nome || professor.nomeCompleto || prev.nome || '',
+          email: professor.email || prev.email || '',
+          cpf: professor.cpf || professor.cpfProfessor || prev.cpf || '',
+          telefone: professor.telefone || professor.telefoneContato || prev.telefone || ''
+          // senha e confirmarSenha permanecem vazios por segurança
+        }));
+
+        // Popular preview da imagem (campo pode variar: fotoPerfil, foto, imagem, avatar)
+        const foto = professor.fotoPerfil || professor.foto || professor.imagem || professor.avatar || professor.urlFoto;
+        if (foto) {
+          // Se retornar URL absoluta, usa direto.
+          // Se retornar caminho relativo (ex: /uploads/xyz.jpg ou uploads/xyz.jpg), prefixa com a base do servidor (sem /api).
+          const baseServer = API_URL.replace(/\/api$/, ''); // ex: http://34.205.11.57
+          const isAbsolute = /^https?:\/\//i.test(foto);
+          const fotoUrl = isAbsolute ? foto : (foto.startsWith('/') ? `${baseServer}${foto}` : `${baseServer}/${foto}`);
+          setImagemPreview(fotoUrl);
+        }
+      } catch (err) {
+        console.error('Falha ao obter dados do personal:', err);
+        // Não interrompe a tela; campos permanecem como estão
+      }
+    };
+
+    fetchProfessor();
+    return () => { mounted = false; };
+  }, [id]);
+  // --- FIM NOVO ---
+  
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prevState => ({ ...prevState, [name]: value }));
+  };
+
+  const handleImagemChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagemPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCancelar = () => {
+    navigate('/GerenciarPersonal');
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!formData.nome || !formData.email || !formData.cpf || !formData.numero) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
-
-    // Validar senha somente se for alterar
-    if (formData.senha || formData.confirmarSenha) {
-      if (formData.senha !== formData.confirmarSenha) {
-        alert('As senhas não coincidem.');
-        return;
-      }
-      if (formData.senha.length < 6) {
-        alert('A senha deve ter pelo menos 6 caracteres.');
-        return;
-      }
-    }
-
-    const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
-    if (!cpfRegex.test(formData.cpf)) {
-      alert('Por favor, insira um CPF válido no formato 000.000.000-00');
-      return;
-    }
-
-    // Atualizar lista no localStorage
-    const personalParaEditar = JSON.parse(localStorage.getItem('personalParaEditar') || 'null') || personalDoState;
-    if (!personalParaEditar?.id) {
-      alert('Personal inválido.');
-      return;
-    }
-
-    const listaAtual = JSON.parse(localStorage.getItem('personal') || '[]');
-    const listaAtualizada = listaAtual.map(p => {
-      if (p.id === personalParaEditar.id) {
-        return {
-          ...p,
-          nome: formData.nome,
-          email: formData.email,
-          cpf: formData.cpf,
-          numero: formData.numero,
-          ...(formData.senha && { senha: formData.senha })
-        };
-      }
-      return p;
-    });
-
-    localStorage.setItem('personal', JSON.stringify(listaAtualizada));
-    localStorage.removeItem('personalParaEditar');
-
-    // Seta a flag para mostrar notificação de edição
-    localStorage.setItem('showPersonalEditado', 'true');
-
-    // Navegar de volta para Gerenciar Personal
-    navigate('/GerenciarPersonal');
-  };
-
-  const handleCancelar = () => {
-    localStorage.removeItem('personalParaEditar');
+    console.log('Dados do formulário:', formData);
+    console.log('ID do personal:', id);
     navigate('/GerenciarPersonal');
   };
 
   return (
-    <>
-      <AdminHeader />
-      <div className="editar-personal-container">
-        <main className="editar-personal-content">
-          <h1>Editar Personal</h1>
+    <div style={{ display: 'flex' }}>
+      <MenuAdm />
 
-          <form onSubmit={handleSubmit} className="form-personal">
-            <div className="form-group">
-              <label htmlFor="nome">Nome Completo *</label>
-              <input
-                type="text"
-                id="nome"
-                name="nome"
-                value={formData.nome}
-                onChange={handleInputChange}
-                placeholder="Digite o nome completo"
-                required
-              />
-            </div>
+      <main className="editar-personal-container">
+        <h1 className="editar-personal-title">Editar Personal</h1>
 
-            <div className="form-group">
-              <label htmlFor="email">E-mail *</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="Digite o e-mail"
-                required
-              />
-            </div>
+        <div className="editar-personal-form-layout">
+          <div className="editar-personal-image-section">
+            <label htmlFor="profile-pic" className="editar-personal-image-placeholder">
+              {imagemPreview ? (
+                <img src={imagemPreview} alt="Preview" className="editar-personal-image-preview" />
+              ) : (
+                <PlusIcon />
+              )}
+            </label>
+            <input 
+              type="file" 
+              id="profile-pic" 
+              style={{ display: 'none' }} 
+              onChange={handleImagemChange}
+              accept="image/png, image/jpeg, image/webp"
+            />
+          </div>
 
-            <div className="form-group">
-              <label htmlFor="cpf">CPF *</label>
-              <input
-                type="text"
-                id="cpf"
-                name="cpf"
-                value={formData.cpf}
-                onChange={handleInputChange}
-                placeholder="000.000.000-00"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="numero">Telefone *</label>
-              <input
-                type="tel"
-                id="numero"
-                name="numero"
-                value={formData.numero}
-                onChange={handleInputChange}
-                placeholder="(11) 98765-4321"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="senha">Nova Senha (opcional)</label>
-              <input
-                type="password"
-                id="senha"
-                name="senha"
-                value={formData.senha}
-                onChange={handleInputChange}
-                placeholder="Digite a nova senha"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="confirmarSenha">Confirmar Nova Senha</label>
-              <input
-                type="password"
-                id="confirmarSenha"
-                name="confirmarSenha"
-                value={formData.confirmarSenha}
-                onChange={handleInputChange}
-                placeholder="Confirme a nova senha"
-              />
-            </div>
-
-            <div className="form-actions">
-              <button type="button" className="btn-cancelar" onClick={handleCancelar}>
-                <FaArrowLeft size={14} /> CANCELAR
-              </button>
-              <button type="submit" className="btn-salvar">
-                <FaSave size={14} /> SALVAR ALTERAÇÕES
-              </button>
-            </div>
-          </form>
-        </main>
-      </div>
-      <Footer />
-    </>
+          <div className="editar-personal-fields-section">
+            <form onSubmit={handleSubmit}>
+              <div className="editar-personal-form-group">
+                <label htmlFor="nome">Nome</label>
+                <input type="text" id="nome" name="nome" value={formData.nome} onChange={handleChange} required />
+              </div>
+              <div className="editar-personal-form-group">
+                <label htmlFor="email">Email</label>
+                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+              </div>
+              <div className="editar-personal-form-group">
+                <label htmlFor="cpf">CPF</label>
+                <input type="text" id="cpf" name="cpf" value={formData.cpf} onChange={handleChange} required />
+              </div>
+              <div className="editar-personal-form-group">
+                <label htmlFor="telefone">Telefone</label>
+                <input type="tel" id="telefone" name="telefone" value={formData.telefone} onChange={handleChange} required />
+              </div>
+              <div className="editar-personal-form-group">
+                <label htmlFor="senha">Nova Senha</label>
+                <input type="password" id="senha" name="senha" value={formData.senha} onChange={handleChange} />
+              </div>
+              <div className="editar-personal-form-group">
+                <label htmlFor="confirmarSenha">Confirmar Nova Senha</label>
+                <input type="password" id="confirmarSenha" name="confirmarSenha" value={formData.confirmarSenha} onChange={handleChange} />
+              </div>
+              
+              <div className="editar-personal-actions">
+                <button type="button" className="editar-personal-cancel" onClick={handleCancelar}>
+                  Cancelar
+                </button>
+                <button type="submit" className="editar-personal-save">
+                  Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 };
 

@@ -37,14 +37,17 @@ const GerenciarPersonal = () => {
         return;
       }
       
-      // Transformar os dados para o formato esperado pelo componente
-      const professoresFormatados = professoresData.map(professor => ({
-        id: professor.id,
-        nome: professor.nome || 'N/A',
-        email: professor.email || 'N/A',
-        funcao: professor.funcao || 'Personal',
-        status: 'Ativo'
-      }));
+      // Ajuste: escolher um identificador disponível (id, _id, cpf, email, etc.)
+      const professoresFormatados = professoresData.map(professor => {
+        const resolvedId = professor.id ?? professor._id ?? professor.cpf ?? professor.cpfProfessor ?? professor.email ?? null;
+        return {
+          id: resolvedId,
+          nome: professor.nome || professor.nomeCompleto || professor.nomeUsuario || 'N/A',
+          email: professor.email || 'N/A',
+          funcao: professor.funcao || 'Personal',
+          status: 'Ativo'
+        };
+      });
       
       console.log('👥 Professores formatados:', professoresFormatados);
       setProfessores(professoresFormatados);
@@ -146,7 +149,7 @@ const GerenciarPersonal = () => {
                   </tr>
                 ) : (
                   filteredPersonais.map(personal => (
-                    <tr key={personal.id}>
+                    <tr key={personal.id || personal.email || Math.random()}>
                       <td>{personal.nome}</td>
                       <td>{personal.email}</td>
                       <td>{personal.funcao}</td>
@@ -155,7 +158,7 @@ const GerenciarPersonal = () => {
                       </td>
                       <td>
                         <Link 
-                          to={`/editar-personal/${personal.id}`}
+                          to={personal.id ? `/EditarPersonal/${personal.id}` : `/EditarPersonal/sem-id`}
                           className="personal-action-link-edit"
                         >
                           Editar

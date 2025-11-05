@@ -1,129 +1,229 @@
-.editar-personal-container {
-  background-color: #d9d9d9;
-  min-height: 100vh;
-  padding: 40px;
+/* --- ESTILO RESTAURADO PARA SER FIEL À IMAGEM ORIGINAL DO ADICIONAR PERSONAL --- */
+
+.adicionar-personal-container {
+  flex-grow: 1;
+  padding: 70px;
+  background-color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  margin-left: 260px;
+}
+
+.personal-main-title {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #2D2D2D;
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.personal-form-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+}
+
+.personal-image-upload-section {
+  flex-shrink: 0;
+}
+
+.personal-image-placeholder {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  border: 3px solid #007bff;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  box-sizing: border-box;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.editar-personal-content {
+.personal-image-placeholder:hover {
+  background-color: #dee2e6;
+}
+
+.personal-form-fields-section {
   width: 100%;
-  max-width: 600px;
-  background-color: #FFFFFF;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 450px;
 }
 
-.editar-personal-content h1 {
-  font-size: 28px;
-  font-weight: 600;
-  color: #172B4D;
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.form-personal {
+.personal-form-group {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  align-items: center;
+  margin-bottom: 25px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-group label {
-  font-size: 14px;
+.personal-form-group label {
+  font-size: 1.1em;
+  color: #333;
   font-weight: 500;
-  color: #172B4D;
+  width: 150px;
+  flex-shrink: 0;
 }
 
-.form-group input {
-  padding: 12px 16px;
-  border: 1px solid #DFE1E6;
-  border-radius: 8px;
-  font-size: 16px;
-  background-color: #FAFBFC;
+.personal-form-group input {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 2px solid #ced4da;
+  font-size: 1em;
+  background-color: transparent;
+  transition: border-color 0.3s ease;
+}
+
+.personal-form-group input:focus {
   outline: none;
-  transition: border-color 0.2s ease-in-out;
+  border-bottom-color: #007bff;
 }
 
-.form-group input:focus {
-  border-color: #007BFF;
+.personal-action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 40px;
+  margin-top: 40px;
+  padding-right: calc((100% - 450px - 180px - 60px) / 2);
+}
+
+.personal-cancel-button,
+.personal-save-button {
+   background-color: #fff;
+    color: #fff;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 12px 0px 12px 0;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 500;
+    transition: background 0.2s;
+    box-shadow: none;
+}
+
+.personal-cancel-button:hover,
+.personal-save-button:hover {
+  opacity: 0.85;
+}
+
+.personal-cancel-button {
+  background-color: #dc3545; /* Vermelho */
+}
+
+.personal-save-button {
+  background-color: #28a745; /* Verde */
+}
+
+/* --- ESTILO RESTAURADO PARA SER FIEL À IMAGEM ORIGINAL DO EDITAR PERSONAL --- */
+
+.editar-personal-container {
+  flex-grow: 1;
+  padding: 70px;
   background-color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  margin-left: 260px;
 }
 
-.form-group input::placeholder {
-  color: #AAB2BD;
+.editar-personal-title {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #2D2D2D;
+  margin-bottom: 50px;
+  text-align: center;
 }
 
-.form-actions {
+.editar-personal-form-layout {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #DFE1E6;
+  justify-content: center;
+  gap: 60px;
 }
 
-.btn-cancelar {
-  background-color: #6C757D;
-  color: #FFFFFF;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 14px;
+.editar-personal-image-section {
+  flex-shrink: 0;
+}
+
+.editar-personal-image-placeholder {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  border: 3px solid #007bff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.editar-personal-image-placeholder:hover {
+  background-color: #dee2e6;
+}
+
+.editar-personal-fields-section {
+  width: 100%;
+  max-width: 450px;
+}
+
+.editar-personal-form-group {
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: background-color 0.2s ease-in-out;
+  margin-bottom: 25px;
 }
 
-.btn-cancelar:hover {
-  background-color: #5A6268;
-}
-
-.btn-salvar {
-  background-color: #28A745;
-  color: #FFFFFF;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+.editar-personal-form-group label {
+  font-size: 1.1em;
+  color: #333;
   font-weight: 500;
-  font-size: 14px;
-  cursor: pointer;
+  width: 150px;
+  flex-shrink: 0;
+}
+
+.editar-personal-form-group input {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 2px solid #ced4da;
+  font-size: 1em;
+  background-color: transparent;
+  transition: border-color 0.3s ease;
+}
+
+.editar-personal-form-group input:focus {
+  outline: none;
+  border-bottom-color: #007bff;
+}
+
+.editar-personal-actions {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background-color 0.2s ease-in-out;
+  justify-content: flex-end;
+  gap: 40px;
+  margin-top: 40px;
+  padding-right: calc((100% - 450px - 180px - 60px) / 2);
 }
 
-.btn-salvar:hover {
-  background-color: #218838;
+.editar-personal-cancel,
+.editar-personal-save {
+  background-color: #fff;
+  color: #fff;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 12px 0px 12px 0;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 500;
+  transition: background 0.2s;
+  box-shadow: none;
 }
 
-@media (max-width: 768px) {
-  .editar-personal-container {
-    padding: 20px 15px;
-  }
-  .editar-personal-content {
-    padding: 24px;
-  }
-  .form-actions {
-    flex-direction: column;
-    gap: 12px;
-  }
-  .btn-cancelar,
-  .btn-salvar {
-    width: 100%;
-    justify-content: center;
-  }
+.editar-personal-cancel:hover,
+.editar-personal-save:hover {
+  opacity: 0.85;
+}
+
+.editar-personal-cancel {
+  background-color: #dc3545;
+}
+
+.editar-personal-save {
+  background-color: #28a745;
 }
