@@ -67,8 +67,6 @@ public class SegurancaFilterChain {
                         .requestMatchers(HttpMethod.GET, "/api/professor").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/aluno/{id}").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/aluno/{id}/renovar-plano").hasRole("ADMIN")
-
-                        // ALTERAÇÃO: ADICIONANDO AS NOVAS ROTAS DE BUSCA POR ID
                         .requestMatchers(HttpMethod.GET, "/api/aluno/{id}").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/professor/{id}").authenticated()
 

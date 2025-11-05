@@ -1,6 +1,12 @@
 package br.com.saudeemacao.api.service;
 
-import br.com.saudeemacao.api.dto.*;
+import br.com.saudeemacao.api.dto.AlunoCreateDTO;
+import br.com.saudeemacao.api.dto.PlanoGoldDetalhesDTO;
+import br.com.saudeemacao.api.dto.ProfessorCreateDTO;
+import br.com.saudeemacao.api.dto.UsuarioCreateDTO;
+import br.com.saudeemacao.api.dto.UsuarioPerfilDTO;
+import br.com.saudeemacao.api.dto.UsuarioSaidaDTO;
+import br.com.saudeemacao.api.dto.UsuarioUpdateDTO;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
@@ -34,7 +40,6 @@ public class UsuarioService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    // ... (outros métodos como criarAluno, criarProfessor, etc., continuam iguais)
     public boolean isUsuarioGold(String username) {
         Optional<Usuario> usuarioOpt = repo.findByEmail(username);
         return usuarioOpt.map(usuario -> usuario.getPlano() == EPlano.GOLD).orElse(false);
@@ -193,7 +198,6 @@ public class UsuarioService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
     }
 
-    // NOVO MÉTODO PARA BUSCAR UM USUÁRIO POR ID E PERFIL, RETORNANDO O DTO
     public UsuarioSaidaDTO buscarUsuarioDTOPorIdEPerfil(String id, EPerfil perfil) {
         Usuario usuario = buscarPorId(id);
         if (usuario.getPerfil() != perfil) {
@@ -226,7 +230,7 @@ public class UsuarioService {
             throw new AccessDeniedException("Acesso negado. Este recurso é exclusivo para alunos do plano Gold.");
         }
 
-        return buscarDetalhesPlanoGold(usuario); // Chama o método privado
+        return buscarDetalhesPlanoGold(usuario);
     }
 
     public PlanoGoldDetalhesDTO renovarPlanoGoldPorAdmin(String alunoId) {

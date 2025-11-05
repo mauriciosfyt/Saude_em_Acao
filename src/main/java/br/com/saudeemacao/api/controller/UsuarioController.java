@@ -1,6 +1,12 @@
 package br.com.saudeemacao.api.controller;
 
-import br.com.saudeemacao.api.dto.*;
+import br.com.saudeemacao.api.dto.AlunoCreateDTO;
+import br.com.saudeemacao.api.dto.PlanoGoldDetalhesDTO;
+import br.com.saudeemacao.api.dto.ProfessorCreateDTO;
+import br.com.saudeemacao.api.dto.UsuarioCreateDTO;
+import br.com.saudeemacao.api.dto.UsuarioPerfilDTO;
+import br.com.saudeemacao.api.dto.UsuarioSaidaDTO;
+import br.com.saudeemacao.api.dto.UsuarioUpdateDTO;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.Usuario;
 import br.com.saudeemacao.api.service.UsuarioService;
@@ -12,8 +18,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
@@ -44,7 +58,6 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.buscarPorPerfil(EPerfil.ALUNO, pageRequest));
     }
 
-    // NOVO ENDPOINT PARA BUSCAR ALUNO POR ID
     @GetMapping("/aluno/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UsuarioSaidaDTO> buscarAlunoPorId(@PathVariable String id) {
@@ -86,7 +99,6 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.buscarPorPerfil(EPerfil.PROFESSOR, pageRequest));
     }
 
-    // NOVO ENDPOINT PARA BUSCAR PROFESSOR POR ID
     @GetMapping("/professor/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR') or @usuarioService.isUsuarioGold(authentication.principal.username)")
     public ResponseEntity<UsuarioSaidaDTO> buscarProfessorPorId(@PathVariable String id) {

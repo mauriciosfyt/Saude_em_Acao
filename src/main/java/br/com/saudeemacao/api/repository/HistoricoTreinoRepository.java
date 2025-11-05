@@ -1,7 +1,6 @@
 package br.com.saudeemacao.api.repository;
 
 import br.com.saudeemacao.api.model.HistoricoTreino;
-import org.springframework.data.domain.Pageable; // Importar
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -37,13 +36,5 @@ public interface HistoricoTreinoRepository extends MongoRepository<HistoricoTrei
      * Essencial para o cálculo de dias consecutivos.
      */
     List<HistoricoTreino> findByAlunoIdOrderByDataRealizacaoDesc(String alunoId);
-
-    /**
-     * ======================= MODIFICAÇÃO AQUI =======================
-     * NOVO MÉTODO (CORREÇÃO DE PERFORMANCE):
-     * Busca os históricos de treino mais recentes de um aluno, limitado pelo Pageable.
-     * Essencial para o cálculo otimizado de dias consecutivos.
-     * ================================================================
-     */
-    List<HistoricoTreino> findByAlunoIdOrderByDataRealizacaoDesc(String alunoId, Pageable pageable);
 }
+
