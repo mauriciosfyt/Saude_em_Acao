@@ -193,6 +193,15 @@ public class UsuarioService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id));
     }
 
+    // NOVO MÉTODO PARA BUSCAR UM USUÁRIO POR ID E PERFIL, RETORNANDO O DTO
+    public UsuarioSaidaDTO buscarUsuarioDTOPorIdEPerfil(String id, EPerfil perfil) {
+        Usuario usuario = buscarPorId(id);
+        if (usuario.getPerfil() != perfil) {
+            throw new RecursoNaoEncontradoException(perfil.toString().toLowerCase() + " não encontrado com o ID: " + id);
+        }
+        return toUsuarioSaidaDTO(usuario);
+    }
+
     public Optional<Usuario> buscarPorEmail(String email) {
         return repo.findByEmail(email.toLowerCase());
     }
@@ -209,9 +218,6 @@ public class UsuarioService {
         return new UsuarioPerfilDTO(usuario);
     }
 
-    // =================================================================
-    // === MÉTODO PÚBLICO ADICIONADO PARA CORRIGIR O ERRO =============
-    // =================================================================
     public PlanoGoldDetalhesDTO buscarDetalhesPlanoGold(UserDetails userDetails) {
         Usuario usuario = repo.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado no sistema!"));
@@ -256,8 +262,6 @@ public class UsuarioService {
                 .duracaoAcademia(duracao)
                 .build();
     }
-
-    // ... (outros métodos como excluirPorId, excluirPorEmail, etc., continuam iguais)
 
     public void excluirPorId(String id) {
         if (!repo.existsById(id)) {

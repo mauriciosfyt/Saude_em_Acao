@@ -48,7 +48,6 @@ public class SegurancaFilterChain {
                         // =================================================================
                         .requestMatchers(HttpMethod.GET, "/api/aluno").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/aluno/{id}").hasRole("ADMIN")
-                        //.requestMatchers("/api/professor/**").hasRole("ADMIN") // ALTERAÇÃO: A permissão GET será tratada no controller
                         .requestMatchers(HttpMethod.POST, "/api/professor").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/professor/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/professor/{id}").hasRole("ADMIN")
@@ -65,12 +64,13 @@ public class SegurancaFilterChain {
                         // =================================================================
                         // === 3. ROTAS COM PERMISSÕES CUSTOMIZADAS (Tratadas com @PreAuthorize)
                         // =================================================================
-                        // ALTERAÇÃO 1: Acesso a GET /professor será validado no controller.
                         .requestMatchers(HttpMethod.GET, "/api/professor").authenticated()
-                        // ALTERAÇÃO 2: Acesso a PUT /aluno/{id} será validado no controller.
                         .requestMatchers(HttpMethod.PUT, "/api/aluno/{id}").authenticated()
-                        // ALTERAÇÃO 3: Adicionar a nova rota de admin
                         .requestMatchers(HttpMethod.POST, "/api/aluno/{id}/renovar-plano").hasRole("ADMIN")
+
+                        // ALTERAÇÃO: ADICIONANDO AS NOVAS ROTAS DE BUSCA POR ID
+                        .requestMatchers(HttpMethod.GET, "/api/aluno/{id}").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/professor/{id}").authenticated()
 
 
                         // =================================================================
@@ -84,7 +84,7 @@ public class SegurancaFilterChain {
                         // === 5. ROTAS DE ALUNO (EXIGEM PERFIL 'ALUNO') ====================
                         // =================================================================
                         .requestMatchers(HttpMethod.POST, "/api/reservas").hasRole("ALUNO")
-                        .requestMatchers(HttpMethod.GET, "/api/reservas/minhas").hasRole("ALUNO") // Corrigido para /api/reservas/minhas se for o caso
+                        .requestMatchers(HttpMethod.GET, "/api/reservas/minhas").hasRole("ALUNO")
                         .requestMatchers(HttpMethod.POST, "/api/treinos/{id}/realizar").hasRole("ALUNO")
                         .requestMatchers(HttpMethod.GET, "/api/treinos/desempenho-semanal").hasRole("ALUNO")
 
@@ -111,7 +111,7 @@ public class SegurancaFilterChain {
                 "http://localhost:5173",
                 "http://localhost:8080",
                 "http://127.0.0.1:5500",
-                "https://saude-em-acao-react.vercel.app" // Corrigido o domínio final
+                "https://saude-em-acao-react.vercel.app"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));

@@ -1,7 +1,6 @@
 package br.com.saudeemacao.api.controller;
 
 import br.com.saudeemacao.api.dto.*;
-
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.Usuario;
 import br.com.saudeemacao.api.service.UsuarioService;
@@ -14,7 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,7 +25,6 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // ... (Endpoints de /aluno, /professor, /admin) ...
     // ROTAS PARA ALUNOS
     @PostMapping("/aluno")
     public ResponseEntity<Usuario> criarAluno(@Valid @ModelAttribute AlunoCreateDTO dto) throws IOException {
@@ -44,6 +42,14 @@ public class UsuarioController {
             return ResponseEntity.ok(usuarioService.buscarPorPerfilENome(EPerfil.ALUNO, nome, pageRequest));
         }
         return ResponseEntity.ok(usuarioService.buscarPorPerfil(EPerfil.ALUNO, pageRequest));
+    }
+
+    // NOVO ENDPOINT PARA BUSCAR ALUNO POR ID
+    @GetMapping("/aluno/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UsuarioSaidaDTO> buscarAlunoPorId(@PathVariable String id) {
+        UsuarioSaidaDTO aluno = usuarioService.buscarUsuarioDTOPorIdEPerfil(id, EPerfil.ALUNO);
+        return ResponseEntity.ok(aluno);
     }
 
     @PutMapping("/aluno/{id}")
@@ -78,6 +84,14 @@ public class UsuarioController {
             return ResponseEntity.ok(usuarioService.buscarPorPerfilENome(EPerfil.PROFESSOR, nome, pageRequest));
         }
         return ResponseEntity.ok(usuarioService.buscarPorPerfil(EPerfil.PROFESSOR, pageRequest));
+    }
+
+    // NOVO ENDPOINT PARA BUSCAR PROFESSOR POR ID
+    @GetMapping("/professor/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR') or @usuarioService.isUsuarioGold(authentication.principal.username)")
+    public ResponseEntity<UsuarioSaidaDTO> buscarProfessorPorId(@PathVariable String id) {
+        UsuarioSaidaDTO professor = usuarioService.buscarUsuarioDTOPorIdEPerfil(id, EPerfil.PROFESSOR);
+        return ResponseEntity.ok(professor);
     }
 
     @PutMapping("/professor/{id}")
