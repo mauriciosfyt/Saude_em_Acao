@@ -2,7 +2,7 @@
 // Em produção, defina VITE_API_BASE_URL na Vercel (ex: https://saudeemacao.onrender.com)
 // Se a variável não estiver definida, usamos o caminho relativo '/api' (funciona com o rewrite do Vercel).
 // Força a base URL do backend (caso a variável de ambiente não exista)
-const API_URL = (import.meta.env.VITE_API_BASE_URL || 'http://34.205.11.57') + '/api';
+export const API_URL = (import.meta.env.VITE_API_BASE_URL || 'http://34.205.11.57') + '/api';
 
 
 // --- Funções Auxiliares ---
@@ -294,18 +294,16 @@ export const updateProfessor = async (id, dadosFormulario) => {
 export const deleteProfessor = async (id) => {
   try {
     const token = getAuthToken();
-    const response = await fetch(`${API_URL}/professor/${id}`, {
+    const response = await fetch(`${API_URL}/professor/${encodeURIComponent(id)}`, {
       method: 'DELETE',
       headers: { 
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     });
-    
     if (!response.ok) {
       throw new Error('Falha ao excluir professor.');
     }
-    
     return response.ok;
   } catch (error) {
     console.error(`❌ Erro ao excluir professor ${id}:`, error);
@@ -411,3 +409,45 @@ export const deleteMinhaConta = async () => {
     throw error;
   }
 };
+
+/**
+ * Busca um Professor pelo ID.
+ * Rota: GET /professor/{id}
+ * @param {string} id - ID do professor
+ */
+ export const getProfessorById = async (id) => {
+   try {
+     const token = getAuthToken();
+     if (!token) throw new Error('Token de autenticação não encontrado.');
+
+    const response = await fetch(`${API_URL}/professor/${encodeURIComponent(id)}`, {
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json'
+       }
+     });
+
+    const text = await response.text();
+
+    if (!response.ok) {
+      // tenta extrair mensagem da API
+      try {
+        const err = JSON.parse(text);
+        throw new Error(err.message || `Erro HTTP ${response.status}`);
+      } catch (e) {
+        throw new Error(text || `Erro HTTP ${response.status}`);
+      }
+    }
+
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      // se não for JSON, retorna texto bruto
+      return { message: text };
+    }
+  } catch (error) {
+    console.error(`Erro em getProfessorById(${id}):`, error);
+    throw error;
+  }
+ };
