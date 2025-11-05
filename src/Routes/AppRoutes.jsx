@@ -85,7 +85,7 @@ const AppRoutes = () => {
         <Route path="/AdicionarAluno" element={<AdicionarAluno />} /> {/* Adicione esta linha */}
         <Route path="/EditarAluno" element={<EditarAluno />} /> {/* Adicione esta linha */}
         <Route path="/EditarProduto" element={<EditarProduto />} />
-        <Route path="/EditarPersonal" element={<EditarPersonal />} /> {/* Nova rota */}
+        <Route path="/EditarPersonal/:id" element={<EditarPersonal />} /> {/* Nova rota */}
         <Route path="/GerenciarTreino" element={<GerenciarTreino />} /> {/* Nova rota */}
         <Route path="/PersonalizarTreino" element={<PersonalizarTreino />} />
 
