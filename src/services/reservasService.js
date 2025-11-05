@@ -8,7 +8,7 @@ const API_BASE_URL = 'http://34.205.11.57/api';
 
 const RESERVAS_STATS_URL = `${API_BASE_URL}/reservas/stats`;
 const RESERVAS_LIST_URL = `${API_BASE_URL}/reservas`;
-const MINHAS_RESERVAS_URL = `${API_BASE_URL}/minhas`;
+const MINHAS_RESERVAS_URL = `${API_BASE_URL}/reservas/minhas`;
 
 /**
  * Retorna estatísticas de reservas (por status, produto, categoria, etc, conforme backend).
