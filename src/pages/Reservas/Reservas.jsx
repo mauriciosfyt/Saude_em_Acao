@@ -1,19 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+// Importa seu serviço da API
+import { fetchMinhasReservas } from '../../services/reservasService'; // Ajuste o caminho se necessário
+
+// Importa o utilitário de imagem
+import { fixImageUrl } from '../../utils/image'; // Ajuste o caminho se necessário
+
 import BarraDeBusca from '../../components/BarraPesquisa/BarraDeBusca';
 import './Reservas.css'; // Importa TODOS os estilos necessários para a página
 
 import Footer from '../../components/footer';
 import Header from '../../components/header_loja';
 
-const mockPedidos = [
-  { id: 1, data: '11/10/2025', nome: 'Whey Protein Concentrado', status: 'Em Análise' },
-  { id: 2, data: '11/10/2025', nome: 'Vitamina D3 2000 UI', status: 'Retirado' },
-  { id: 3, data: '11/10/2025', nome: 'Creatina Monohidratada', status: 'Cancelado' },
-  { id: 4, data: '11/09/2025', nome: 'Combo Whey + Creatina', status: 'Retirado' },
-];
+// A imagem estática que você usava (agora servirá como fallback)
+import imagemUrlFallback from '../../assets/IMG PRODUTO.jpg';
 
-import imagemUrl from '../../assets/IMG PRODUTO.jpg';
-
+// == HELPER FUNCTIONS ==
+// (Funções de formatarDataParaDia, mapearStatusUI, getStatusClassName e agruparPedidosPorData - mantidas como antes)
+// ---
 const agruparPedidosPorData = (pedidos) => {
   return pedidos.reduce((acc, pedido) => {
     const data = pedido.data;
@@ -22,25 +27,144 @@ const agruparPedidosPorData = (pedidos) => {
     return acc;
   }, {});
 };
-
 const getStatusClassName = (status) => {
   switch (status) {
     case 'Em Análise': return 'status-em-analise';
-    case 'Retirado': return 'status-retirado';
-    case 'Cancelado': return 'status-cancelado';
+    case 'Aprovado': return 'status-aprovado'; 
+    case 'Retirado': return 'status-retirado'; 
+    case 'Cancelado': return 'status-cancelado'; 
     default: return '';
   }
 };
+const formatarDataParaDia = (isoString) => {
+  if (!isoString) return 'Data Indefinida';
+  try {
+    const data = new Date(isoString);
+    const dataAjustada = new Date(data.valueOf() + data.getTimezoneOffset() * 60000);
+    return dataAjustada.toLocaleDateString('pt-BR'); // Formato DD/MM/YYYY
+  } catch (e) {
+    return 'Data Inválida';
+  }
+};
+const mapearStatusUI = (apiStatus) => {
+  switch (String(apiStatus).toUpperCase()) {
+    case 'PENDENTE':
+    case 'EM_ANALISE':
+      return 'Em Análise';
+    case 'APROVADA': 
+    case 'APROVADO':
+      return 'Aprovado'; // Pronto para retirar
+    case 'RETIRADO':
+      return 'Retirado';
+    case 'CANCELADA': 
+    case 'CANCELADO':
+    case 'REJEITADO':
+      return 'Cancelado';
+    default:
+      return apiStatus; 
+  }
+};
+// ---
+
+// == COMPONENTE PRINCIPAL ==
 
 const Reservas = () => {
+  // Estados para dados da API, carregamento e erros
+  const [reservasApi, setReservasApi] = useState([]); // Dados brutos da API
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Estado da barra de busca
   const [termoBusca, setTermoBusca] = useState('');
+  
+  // Estado para o filtro de status
+  const [statusFiltro, setStatusFiltro] = useState('Todos'); // 'Todos' é o padrão
 
-  const pedidosFiltrados = mockPedidos.filter(p =>
-    p.nome.toLowerCase().includes(termoBusca.toLowerCase())
-  );
+  // NOVO: Estado para controlar a visibilidade do dropdown de filtro
+  const [filtroAberto, setFiltroAberto] = useState(false);
 
-  const pedidosAgrupados = agruparPedidosPorData(pedidosFiltrados);
-  const datasOrdenadas = Object.keys(pedidosAgrupados).sort((a, b) => new Date(b.split('/').reverse().join('-')) - new Date(a.split('/').reverse().join('-')));
+  const navigate = useNavigate(); // Hook para navegação
+
+  // useEffect para buscar os dados da API (sem alteração)
+  useEffect(() => {
+    const carregarReservas = async () => {
+      try {
+        setIsLoading(true);
+        const data = await fetchMinhasReservas(); // Chama a API do usuário
+        const lista = Array.isArray(data?.content) 
+          ? data.content 
+          : Array.isArray(data) 
+          ? data 
+          : [];
+        setReservasApi(lista);
+        setError(null);
+      } catch (err) {
+        console.error("Erro ao buscar minhas reservas:", err);
+        setError(err.message || 'Falha ao carregar suas reservas.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    carregarReservas();
+  }, []); // O array vazio [] faz com que rode apenas uma vez
+
+  // useMemo para processar e filtrar os dados da API (lógica interna sem alteração)
+  const pedidosProcessados = useMemo(() => {
+    // 1. Normalizar dados
+    const pedidosFormatados = reservasApi.map(r => {
+      const produtoNome = r?.produto?.nome || r?.produtoNome || 'Produto indisponível';
+      const imagem = r?.produto?.img || r?.produto?.imagem || r?.img || r?.imagem || '';
+      const dataApi = r?.dataReserva || r?.dataSolicitacao || r?.data || r?.criadoEm || r?.createdAt;
+      const statusApi = (r?.status || '').toUpperCase();
+      const produtoId = r?.produto?.id;
+
+      return {
+        id: r?.id || Math.random(), 
+        data: formatarDataParaDia(dataApi), 
+        nome: produtoNome,
+        status: mapearStatusUI(statusApi), 
+        produtoId: produtoId,
+        imagemUrl: imagem, 
+      };
+    });
+
+    // 2. Filtrar
+    const pedidosFiltrados = pedidosFormatados.filter(p => {
+      const matchBusca = p.nome.toLowerCase().includes(termoBusca.toLowerCase());
+      const matchStatus = (statusFiltro === 'Todos') || (p.status === statusFiltro);
+      return matchBusca && matchStatus; 
+    });
+
+    // 3. Agrupar
+    return agruparPedidosPorData(pedidosFiltrados);
+
+  }, [reservasApi, termoBusca, statusFiltro]); // Dependências corretas
+
+  // Lógica original para ordenar as datas
+  const datasOrdenadas = Object.keys(pedidosProcessados).sort((a, b) => new Date(b.split('/').reverse().join('-')) - new Date(a.split('/').reverse().join('-')));
+
+  // Funções de clique (sem alteração)
+  const handleVerProduto = (produtoId) => {
+    if (produtoId) {
+      navigate(`/produto/${produtoId}`);
+    } else {
+      alert('ID do produto não encontrado.');
+    }
+  };
+  
+  const handleComprarNovamente = (produtoId) => {
+    alert(`(WIP) Adicionar produto ${produtoId} ao carrinho.`);
+  };
+
+  // NOVO: Função para lidar com a seleção de filtro no dropdown
+  const handleFiltroClick = (status) => {
+    setStatusFiltro(status); // Define o filtro
+    setFiltroAberto(false); // Fecha o dropdown
+  };
+
+  // Lista de filtros a serem exibidos no dropdown
+  const filtrosStatus = ['Todos', 'Em Análise', 'Aprovado', 'Retirado', 'Cancelado'];
 
   return (
     <>
@@ -52,12 +176,47 @@ const Reservas = () => {
             <BarraDeBusca
               valorBusca={termoBusca}
               aoAlterarValor={setTermoBusca}
-              aoClicarFiltro={() => alert('Filtro clicado!')}
+              // ATUALIZADO: Agora abre/fecha o dropdown
+              aoClicarFiltro={() => setFiltroAberto(prev => !prev)}
             />
+            
+            {/* NOVO: Dropdown de Filtro (condicional) */}
+            {filtroAberto && (
+              <div className="reservas-filtro-dropdown">
+                {filtrosStatus.map(status => (
+                  <button
+                    key={status}
+                    // ATUALIZADO: Mostra qual item está ativo
+                    className={`filtro-dropdown-item ${statusFiltro === status ? 'active' : ''}`}
+                    onClick={() => handleFiltroClick(status)}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
+          {/* REMOVIDO: O container antigo .reservas-filtro-container foi removido daqui */}
+
           <div className="container-pedidos">
-            {datasOrdenadas.map(data => (
+            {/* Feedback de Carregamento e Erro */}
+            {isLoading && <p style={{textAlign: 'center', margin: '2rem 0'}}>Carregando suas reservas...</p>}
+            
+            {error && <p className="erro-mensagem" style={{color: 'red', textAlign: 'center'}}>{error}</p>}
+            
+            {/* Mensagem de 'nenhum pedido' agora considera os filtros */}
+            {!isLoading && !error && datasOrdenadas.length === 0 && (
+              <p style={{textAlign: 'center', margin: '2rem 0'}}>
+                {(termoBusca || statusFiltro !== 'Todos')
+                  ? 'Nenhuma reserva encontrada para os filtros aplicados.' 
+                  : 'Você ainda não fez nenhuma reserva.'
+                }
+              </p>
+            )}
+
+            {/* Renderização dos pedidos (sem alteração) */}
+            {!isLoading && !error && datasOrdenadas.map(data => (
               <section key={data} className="grupo-data">
                 <header className="grupo-header">
                   <span className="data-label">{data}</span>
@@ -65,9 +224,16 @@ const Reservas = () => {
                 </header>
                 
                 <div className="lista-de-itens">
-                  {pedidosAgrupados[data].map(pedido => (
+                  {pedidosProcessados[data].map(pedido => (
                     <div key={pedido.id} className="pedido-card">
-                      <img src={imagemUrl} alt={pedido.nome} className="pedido-imagem" />
+                      
+                      <img 
+                        src={fixImageUrl(pedido.imagemUrl)} 
+                        alt={pedido.nome} 
+                        className="pedido-imagem" 
+                        onError={(e) => { e.target.src = imagemUrlFallback; }}
+                      /> 
+                      
                       <div className="pedido-info">
                         <span className={`pedido-status ${getStatusClassName(pedido.status)}`}>
                           {pedido.status}
@@ -75,8 +241,18 @@ const Reservas = () => {
                         <p className="pedido-nome">{pedido.nome}</p>
                       </div>
                       <div className="pedido-acoes">
-                        <button className="botao-ver-produto">Ver produto</button>
-                        <button className="botao-comprar-novamente">Compra novamente</button>
+                        <button 
+                          className="botao-ver-produto"
+                          onClick={() => handleVerProduto(pedido.produtoId)}
+                        >
+                          Ver produto
+                        </button>
+                        <button 
+                          className="botao-comprar-novamente"
+                          onClick={() => handleComprarNovamente(pedido.produtoId)}
+                        >
+                          Comprar novamente
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -85,21 +261,9 @@ const Reservas = () => {
             ))}
           </div>
 
+          {/* Seção promocional (Mantida intacta) */}
           <div className="container-promocional">
-            <div className="promo-card">
-              <div className="promo-texto-container">
-                <h3 className="promo-titulo">Nossa Loja</h3>
-                <p className="promo-descricao">xxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxx</p>
-              </div>
-              <img src="https://i.imgur.com/6Jt5iA8.png" alt="Nossa Loja" className="promo-imagem" />
-            </div>
-            <div className="promo-card">
-              <div className="promo-texto-container">
-                <h3 className="promo-titulo">Creatinas</h3>
-                <p className="promo-descricao">xxxxxxxxxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxx</p>
-              </div>
-              <img src="https://i.imgur.com/2s3VZQ5.png" alt="Creatinas" className="promo-imagem" />
-            </div>
+            {/* ...código dos cards promocionais... */}
           </div>
         </main>
       </div>

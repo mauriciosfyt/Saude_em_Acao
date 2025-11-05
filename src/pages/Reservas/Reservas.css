@@ -198,3 +198,63 @@
     margin-top: 12px;
   }
 }
+
+.status-em-analise { color: #007bff; background-color: #e7f3ff; }
+
+/* ADICIONE ESTA NOVA CLASSE ABAIXO: */
+.status-aprovado { color: #28a745; background-color: #eaf7ed; }
+/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
+
+.status-retirado { color: #28a745; background-color: #eaf7ed; }
+.status-cancelado { color: #dc3545; background-color: #fbe9eb; }
+
+/* =================================================================== */
+/* --- 1. BARRA DE BUSCA (Fiel ao Figma) --- */
+/* =================================================================== */
+.container-barra-busca {
+  padding: 16px 0;
+  position: relative; /* NOVO: Essencial para ancorar o dropdown */
+}
+
+/* ... (seus estilos existentes da barra de busca) ... */
+
+
+/* =================================================================== */
+/* --- 1.5. DROPDOWN DE FILTRO (Novo) --- */
+/* =================================================================== */
+.reservas-filtro-dropdown {
+  position: absolute;
+  top: 100%; /* Aparece logo abaixo do container da barra de busca */
+  right: 0; /* Alinha à direita (pode ajustar para 'left: 0' se preferir) */
+  width: 250px; /* Largura do dropdown */
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #E0E2E7;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100; /* Garante que fique por cima de outros elementos */
+  margin-top: 4px; /* Pequeno espaço da barra */
+  overflow: hidden; /* Para os cantos arredondados nos itens */
+}
+
+.filtro-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+}
+
+.filtro-dropdown-item:hover {
+  background-color: #f4f4f5; /* Cor de hover */
+}
+
+/* Estilo do item ativo (o filtro selecionado) */
+.filtro-dropdown-item.active {
+  background-color: #f0f0f0; /* Um fundo leve para o item ativo */
+  font-weight: 600;
+  color: #000;
+}
