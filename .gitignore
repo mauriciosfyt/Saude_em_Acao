@@ -2,7 +2,15 @@
 # ARQUIVO DE CREDENCIAIS E SEGREDOS
 # A linha mais importante! Impede que seus segredos vazem.
 # =================================================================
+# Ignora o arquivo que contém as variáveis de ambiente locais.
 .env
+
+# CRÍTICO: Ignora o arquivo de propriedades do Spring Boot.
+# Este arquivo NUNCA deve ser versionado se contiver senhas,
+# chaves de API ou qualquer outra informação sensível.
+# Use um arquivo `application.properties.example` versionado como template
+# e configure os valores reais através de variáveis de ambiente no seu servidor.
+application.properties
 
 
 # =================================================================
@@ -12,6 +20,9 @@
 /target/
 /build/
 *.class
+*.jar
+*.war
+*.ear
 
 # Exceção: O Maven Wrapper é necessário para construir o projeto
 # de forma consistente em qualquer máquina, então NÃO o ignoramos.
@@ -19,11 +30,13 @@
 
 
 # =================================================================
-# LOGS
-# Ignora arquivos de log gerados durante a execução.
+# LOGS E ARQUIVOS DE RUNTIME
+# Ignora arquivos de log gerados durante a execução e dumps de erro.
 # =================================================================
 *.log
 logs/
+hs_err_pid*
+replay_pid*
 
 
 # =================================================================

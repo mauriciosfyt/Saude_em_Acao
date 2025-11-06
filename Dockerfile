@@ -19,7 +19,8 @@ RUN mvn package -DskipTests
 
 
 # Estágio 2: Run - Usa uma imagem Java leve apenas para rodar a aplicação
-FROM openjdk:17-jdk-slim
+# --- ALTERAÇÃO PRINCIPAL AQUI ---
+FROM eclipse-temurin:17-jdk-jammy
 
 # Define o diretório de trabalho
 WORKDIR /app
