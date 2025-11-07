@@ -103,19 +103,84 @@ export async function getAllAlunos() { // Remover o parâmetro token
  */
 export const updateAluno = async (id, dadosAluno) => {
   try {
+    // Suporta atualizar via JSON (objeto) ou FormData (multipart)
     const token = getAuthToken();
-    const response = await fetch(`${API_URL}/aluno/${id}`, {
+    if (!token) throw new Error('Token de autenticação não encontrado.');
+
+    const isFormData = typeof FormData !== 'undefined' && dadosAluno instanceof FormData;
+
+    const response = await fetch(`${API_URL}/aluno/${encodeURIComponent(id)}`, {
       method: 'PUT',
-      headers: {
+      headers: isFormData ? {
+        'Authorization': `Bearer ${token}`
+      } : {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(dadosAluno)
+      body: isFormData ? dadosAluno : JSON.stringify(dadosAluno)
     });
-    if (!response.ok) throw new Error('Falha ao atualizar aluno.');
-    return await response.json();
+
+    const responseText = await response.text();
+
+    if (!response.ok) {
+      try {
+        const erroJson = JSON.parse(responseText);
+        throw new Error(erroJson.message || 'Falha ao atualizar aluno.');
+      } catch (e) {
+        throw new Error(responseText || 'Falha ao atualizar aluno.');
+      }
+    }
+
+    if (responseText.length === 0) {
+      return { success: true, message: 'Atualizado com sucesso.' };
+    }
+
+    try {
+      return JSON.parse(responseText);
+    } catch (e) {
+      return { success: true, message: responseText };
+    }
   } catch (error) {
     console.error(`Erro ao atualizar aluno ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Busca um Aluno pelo ID.
+ * Rota: GET /aluno/{id}
+ */
+export const getAlunoById = async (id) => {
+  try {
+    const token = getAuthToken();
+    if (!token) throw new Error('Token de autenticação não encontrado.');
+
+    const response = await fetch(`${API_URL}/aluno/${encodeURIComponent(id)}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const text = await response.text();
+
+    if (!response.ok) {
+      try {
+        const err = JSON.parse(text);
+        throw new Error(err.message || `Erro HTTP ${response.status}`);
+      } catch (e) {
+        throw new Error(text || `Erro HTTP ${response.status}`);
+      }
+    }
+
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      return { message: text };
+    }
+  } catch (error) {
+    console.error(`Erro em getAlunoById(${id}):`, error);
     throw error;
   }
 };
