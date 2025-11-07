@@ -1,4 +1,3 @@
-// src/main/java/br/com/saudeemacao/api/dto/ReservaSolicitacaoDTO.java
 package br.com.saudeemacao.api.dto;
 
 import br.com.saudeemacao.api.model.EnumProduto.ECategoria;

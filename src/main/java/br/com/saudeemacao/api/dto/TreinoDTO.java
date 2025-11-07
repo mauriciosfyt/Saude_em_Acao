@@ -2,15 +2,8 @@ package br.com.saudeemacao.api.dto;
 
 import br.com.saudeemacao.api.model.EnumTreino.ENivel;
 import br.com.saudeemacao.api.model.EnumTreino.ESexo;
-import br.com.saudeemacao.api.model.Exercicio;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.List;
@@ -45,7 +38,7 @@ public class TreinoDTO {
 
     @Valid
     @NotEmpty(message = "O treino deve conter pelo menos um exercício.")
-    private List<Exercicio> exercicios;
+    private List<ExercicioDTO> exercicios;
 
     @AssertTrue(message = "A idade máxima não pode ser menor que a idade mínima.")
     private boolean isIdadeValida() {

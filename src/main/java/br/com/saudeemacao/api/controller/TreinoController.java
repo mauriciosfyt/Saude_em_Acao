@@ -26,7 +26,7 @@ public class TreinoController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('PROFESSOR')")
-    public ResponseEntity<Treino> criarTreino(@Valid @RequestBody TreinoDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Treino> criarTreino(@Valid @ModelAttribute TreinoDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
         Treino novoTreino = treinoService.criarTreino(dto, userDetails);
         return ResponseEntity.status(HttpStatus.CREATED).body(novoTreino);
     }
@@ -57,7 +57,7 @@ public class TreinoController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('PROFESSOR')")
-    public ResponseEntity<Treino> atualizarTreino(@PathVariable String id, @Valid @RequestBody TreinoDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Treino> atualizarTreino(@PathVariable String id, @Valid @ModelAttribute TreinoDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(treinoService.atualizarTreino(id, dto, userDetails));
     }
 

@@ -101,7 +101,7 @@ public class ProdutoService {
     }
 
     public Produto create(ProdutoDTO dto) throws IOException {
-        validarCamposObrigatorios(dto);
+        validarCamposObrigatoriosParaCriacao(dto);
 
         String imgUrl = uploadImagem(dto.getImg());
 
@@ -117,9 +117,6 @@ public class ProdutoService {
 
         switch (dto.getCategoria()) {
             case CAMISETAS:
-                if (dto.getEstoquePorTamanho() == null || dto.getEstoquePorTamanho().isEmpty()) {
-                    throw new IllegalArgumentException("Estoque por tamanho é obrigatório para camisetas.");
-                }
                 produto.setEstoquePorTamanho(dto.getEstoquePorTamanho().entrySet().stream()
                         .collect(Collectors.toMap(
                                 e -> ETamanho.valueOf(e.getKey().toUpperCase()),
@@ -128,9 +125,6 @@ public class ProdutoService {
                 break;
             case CREATINA:
             case WHEY_PROTEIN:
-                if (dto.getEstoquePorSabor() == null || dto.getEstoquePorSabor().isEmpty()) {
-                    throw new IllegalArgumentException("Estoque por sabor é obrigatório para suplementos.");
-                }
                 produto.setEstoquePorSabor(dto.getEstoquePorSabor().entrySet().stream()
                         .collect(Collectors.toMap(
                                 e -> ESabor.valueOf(e.getKey().toUpperCase()),
@@ -138,9 +132,6 @@ public class ProdutoService {
                         )));
                 break;
             case VITAMINAS:
-                if (dto.getEstoquePadrao() == null || dto.getEstoquePadrao() < 0) {
-                    throw new IllegalArgumentException("Estoque padrão é obrigatório para vitaminas.");
-                }
                 produto.setEstoquePadrao(dto.getEstoquePadrao());
                 break;
             default:
@@ -151,8 +142,13 @@ public class ProdutoService {
     }
 
     public Produto update(String id, ProdutoDTO dto) throws IOException {
+        // PASSO 1: Obter o produto existente
         Produto produto = getById(id);
 
+        // PASSO 2: Aplicar a mesma lógica de validação do POST, mas de forma flexível
+        validarCamposParaUpdate(dto);
+
+        // PASSO 3: Atualizar os campos
         if (dto.getNome() != null && !dto.getNome().trim().isEmpty()) {
             produto.setNome(dto.getNome());
         }
@@ -162,9 +158,6 @@ public class ProdutoService {
         }
 
         if (dto.getPreco() != null) {
-            if (dto.getPreco() <= 0) {
-                throw new IllegalArgumentException("Preço deve ser maior que zero");
-            }
             produto.setPreco(dto.getPreco());
         }
 
@@ -204,9 +197,6 @@ public class ProdutoService {
                 break;
             case VITAMINAS:
                 if (dto.getEstoquePadrao() != null) {
-                    if (dto.getEstoquePadrao() < 0) {
-                        throw new IllegalArgumentException("Estoque padrão não pode ser negativo.");
-                    }
                     produto.setEstoquePadrao(dto.getEstoquePadrao());
                 }
                 break;
@@ -302,7 +292,64 @@ public class ProdutoService {
         repository.save(produto);
     }
 
-    private void validarCamposObrigatorios(ProdutoDTO dto) {
+    private void validarCamposParaUpdate(ProdutoDTO dto) {
+        // Valida o preço apenas se ele foi fornecido
+        if (dto.getPreco() != null && dto.getPreco() <= 0) {
+            throw new IllegalArgumentException("Preço deve ser maior que zero");
+        }
+
+        // Valida o preço promocional e as datas associadas
+        if (dto.getPrecoPromocional() != null) {
+            if (dto.getPrecoPromocional() <= 0) {
+                throw new IllegalArgumentException("Preço promocional deve ser maior que zero");
+            }
+            // Se um preço promocional é enviado, as datas também devem ser válidas
+            if (dto.getDataInicioPromocao() == null || dto.getDataFimPromocao() == null) {
+                throw new IllegalArgumentException("Datas de início e fim da promoção são obrigatórias quando um preço promocional é fornecido.");
+            }
+        }
+
+        // Valida a consistência das datas da promoção, se ambas forem fornecidas
+        if (dto.getDataInicioPromocao() != null && dto.getDataFimPromocao() != null) {
+            try {
+                LocalDateTime inicio = parseDate(dto.getDataInicioPromocao(), "dataInicioPromocao");
+                LocalDateTime fim = parseDate(dto.getDataFimPromocao(), "dataFimPromocao");
+                if (fim != null && inicio != null && fim.isBefore(inicio)) {
+                    throw new IllegalArgumentException("Data de fim da promoção não pode ser anterior à data de início.");
+                }
+            } catch (IllegalArgumentException e) {
+                throw e; // Relança a exceção de formato de data
+            }
+        }
+
+        // Valida os estoques se eles forem fornecidos
+        if (dto.getCategoria() != null) {
+            switch (dto.getCategoria()) {
+                case CAMISETAS:
+                    if (dto.getEstoquePorTamanho() != null) {
+                        dto.getEstoquePorTamanho().forEach((tamanhoStr, qtd) -> {
+                            if (qtd < 0) throw new IllegalArgumentException("Estoque não pode ser negativo.");
+                        });
+                    }
+                    break;
+                case CREATINA:
+                case WHEY_PROTEIN:
+                    if (dto.getEstoquePorSabor() != null) {
+                        dto.getEstoquePorSabor().forEach((saborStr, qtd) -> {
+                            if (qtd < 0) throw new IllegalArgumentException("Estoque não pode ser negativo.");
+                        });
+                    }
+                    break;
+                case VITAMINAS:
+                    if (dto.getEstoquePadrao() != null && dto.getEstoquePadrao() < 0) {
+                        throw new IllegalArgumentException("Estoque padrão não pode ser negativo.");
+                    }
+                    break;
+            }
+        }
+    }
+
+    private void validarCamposObrigatoriosParaCriacao(ProdutoDTO dto) {
         if (dto.getNome() == null || dto.getNome().trim().isEmpty()) {
             throw new IllegalArgumentException("Nome é obrigatório");
         }

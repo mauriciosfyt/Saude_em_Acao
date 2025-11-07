@@ -1,9 +1,13 @@
 package br.com.saudeemacao.api.service;
 
+import br.com.saudeemacao.api.dto.ExercicioDTO;
 import br.com.saudeemacao.api.dto.TreinoDTO;
 import br.com.saudeemacao.api.dto.TreinoMetricasDTO;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
-import br.com.saudeemacao.api.model.*;
+import br.com.saudeemacao.api.model.Exercicio;
+import br.com.saudeemacao.api.model.HistoricoTreino;
+import br.com.saudeemacao.api.model.Treino;
+import br.com.saudeemacao.api.model.Usuario;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
 import br.com.saudeemacao.api.repository.HistoricoTreinoRepository;
@@ -14,6 +18,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +33,7 @@ public class TreinoService {
     private final TreinoRepository treinoRepository;
     private final UsuarioRepository usuarioRepository;
     private final HistoricoTreinoRepository historicoTreinoRepository;
+    private final CloudinaryService cloudinaryService;
 
     private Usuario getUsuarioAutenticado(UserDetails userDetails) {
         return usuarioRepository.findByEmail(userDetails.getUsername())
@@ -36,6 +42,10 @@ public class TreinoService {
 
     public Treino criarTreino(TreinoDTO dto, UserDetails userDetails) {
         Usuario responsavel = getUsuarioAutenticado(userDetails);
+
+        List<Exercicio> exercicios = dto.getExercicios().stream()
+                .map(this::mapExercicioDtoToModel)
+                .collect(Collectors.toList());
 
         Treino treino = Treino.builder()
                 .nome(dto.getNome())
@@ -46,7 +56,7 @@ public class TreinoService {
                 .frequenciaSemanal(dto.getFrequenciaSemanal())
                 .idadeMinima(dto.getIdadeMinima())
                 .idadeMaxima(dto.getIdadeMaxima())
-                .exercicios(dto.getExercicios())
+                .exercicios(exercicios)
                 .build();
 
         return treinoRepository.save(treino);
@@ -82,6 +92,10 @@ public class TreinoService {
             throw new SecurityException("Você não tem permissão para atualizar este treino.");
         }
 
+        List<Exercicio> exerciciosAtualizados = dto.getExercicios().stream()
+                .map(this::mapExercicioDtoToModel)
+                .collect(Collectors.toList());
+
         treinoExistente.setNome(dto.getNome());
         treinoExistente.setTipoDeTreino(dto.getTipoDeTreino());
         treinoExistente.setNivel(dto.getNivel());
@@ -89,7 +103,7 @@ public class TreinoService {
         treinoExistente.setFrequenciaSemanal(dto.getFrequenciaSemanal());
         treinoExistente.setIdadeMinima(dto.getIdadeMinima());
         treinoExistente.setIdadeMaxima(dto.getIdadeMaxima());
-        treinoExistente.setExercicios(dto.getExercicios());
+        treinoExistente.setExercicios(exerciciosAtualizados);
 
         return treinoRepository.save(treinoExistente);
     }
@@ -193,5 +207,26 @@ public class TreinoService {
         }
 
         return diasConsecutivos;
+    }
+
+    private Exercicio mapExercicioDtoToModel(ExercicioDTO dto) {
+        String imgUrl = null;
+        if (dto.getImg() != null && !dto.getImg().isEmpty()) {
+            try {
+                imgUrl = cloudinaryService.uploadFile(dto.getImg());
+            } catch (IOException e) {
+                throw new RuntimeException("Falha ao fazer upload da imagem para o exercício: " + dto.getNome(), e);
+            }
+        }
+
+        Exercicio exercicio = new Exercicio();
+        exercicio.setNome(dto.getNome());
+        exercicio.setSeries(dto.getSeries());
+        exercicio.setRepeticoes(dto.getRepeticoes());
+        exercicio.setCarga(dto.getCarga());
+        exercicio.setIntervalo(dto.getIntervalo());
+        exercicio.setObservacao(dto.getObservacao());
+        exercicio.setImg(imgUrl);
+        return exercicio;
     }
 }

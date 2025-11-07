@@ -1,4 +1,3 @@
-// src/main/java/br/com/saudeemacao/api/dto/ReservaStatsDTO.java
 package br.com.saudeemacao.api.dto;
 
 import lombok.AllArgsConstructor;

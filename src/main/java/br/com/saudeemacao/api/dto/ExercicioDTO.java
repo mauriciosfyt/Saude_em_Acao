@@ -1,19 +1,16 @@
-package br.com.saudeemacao.api.model;
+// src/main/java/br/com/saudeemacao/api/dto/ExercicioDTO.java
+package br.com.saudeemacao.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.URL;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalTime;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class Exercicio {
+public class ExercicioDTO {
 
     @NotBlank(message = "O nome do exercício é obrigatório.")
     private String nome;
@@ -35,5 +32,5 @@ public class Exercicio {
 
     private String observacao;
 
-    private String img;
+    private MultipartFile img;
 }
