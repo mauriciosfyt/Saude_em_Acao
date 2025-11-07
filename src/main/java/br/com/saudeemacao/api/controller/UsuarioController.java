@@ -39,7 +39,6 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // ROTAS PARA ALUNOS
     @PostMapping("/aluno")
     public ResponseEntity<Usuario> criarAluno(@Valid @ModelAttribute AlunoCreateDTO dto) throws IOException {
         Usuario usuario = usuarioService.criarAluno(dto);
@@ -59,7 +58,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/aluno/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR')")
     public ResponseEntity<UsuarioSaidaDTO> buscarAlunoPorId(@PathVariable String id) {
         UsuarioSaidaDTO aluno = usuarioService.buscarUsuarioDTOPorIdEPerfil(id, EPerfil.ALUNO);
         return ResponseEntity.ok(aluno);
@@ -79,7 +78,6 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-    // ROTAS PARA PROFESSORES
     @PostMapping("/professor")
     public ResponseEntity<Usuario> criarProfessor(@Valid @ModelAttribute ProfessorCreateDTO dto) throws IOException {
         Usuario usuario = usuarioService.criarProfessor(dto);
@@ -119,7 +117,6 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-    // ROTAS PARA ADMINS
     @PostMapping("/admin")
     public ResponseEntity<Usuario> criarAdmin(@Valid @RequestBody UsuarioCreateDTO dto) {
         Usuario usuario = usuarioService.criarAdmin(dto);
@@ -146,8 +143,6 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-
-    // ROTAS DE AUTOATENDIMENTO
     @GetMapping("/meu-perfil")
     public ResponseEntity<?> getMeuPerfil(@AuthenticationPrincipal UserDetails userDetails) {
         try {

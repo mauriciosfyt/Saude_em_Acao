@@ -22,11 +22,6 @@ public class ReservaAgendadaService {
     private final ProdutoService produtoService;
     private final EmailService emailService;
 
-    /**
-     * LÓGICA ATUALIZADA:
-     * Roda todo dia às 03:00 da manhã para verificar e expirar reservas que foram aprovadas
-     * mas não foram retiradas até a data limite (`dataRetirada`).
-     */
     @Scheduled(cron = "0 0 10 * * *")
     public void cancelarReservasNaoRetiradas() {
         log.info("Iniciando tarefa agendada: Expirar Reservas Não Retiradas...");
@@ -48,7 +43,6 @@ public class ReservaAgendadaService {
                 Produto produto = reserva.getProduto();
                 String identificadorVariacao = null;
 
-                // Determina a variação correta para devolver o item ao estoque
                 switch (produto.getCategoria()) {
                     case CAMISETAS:
                         if (reserva.getTamanho() != null) {
@@ -62,23 +56,19 @@ public class ReservaAgendadaService {
                         }
                         break;
                     case VITAMINAS:
-                        // Não precisa de identificador de variação
                         break;
                 }
 
-                // 1. Devolve o item ao estoque com os parâmetros corretos
                 produtoService.incrementarEstoque(
                         produto.getId(),
                         identificadorVariacao,
                         produto.getCategoria()
                 );
 
-                // 2. Atualiza o status da reserva para EXPIRADA
                 reserva.setStatus(EStatusReserva.EXPIRADA);
                 reserva.setMotivoAnalise("Expirada automaticamente por não retirada no prazo.");
                 reservaRepository.save(reserva);
 
-                // 3. Notifica o aluno sobre a expiração
                 String motivo = "<p>Sua reserva expirou pois o prazo de retirada não foi cumprido. O produto retornou ao nosso estoque.</p>";
                 emailService.notificarAlunoStatusReserva(
                         reserva.getUsuario().getEmail(),
@@ -90,7 +80,6 @@ public class ReservaAgendadaService {
                 log.info("Reserva {} expirada com sucesso. Estoque do produto {} incrementado.", reserva.getId(), produto.getId());
 
             } catch (Exception e) {
-                // Loga o erro, mas continua o loop para não impedir que outras reservas sejam processadas
                 log.error("Erro ao expirar a reserva {}: {}", reserva.getId(), e.getMessage(), e);
             }
         }

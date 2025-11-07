@@ -17,8 +17,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @Service
-public class LoginService implements UserDetailsService { // <-- A correção está aqui
-
+public class LoginService implements UserDetailsService {
     @Value("${spring.security.jwt.secret}")
     private String chaveSecreta;
 

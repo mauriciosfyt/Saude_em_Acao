@@ -12,5 +12,5 @@ public class ReservaStatsDTO {
     private long totalPendentes;
     private long totalAprovadas;
     private long aprovadasHoje;
-    private long totalCanceladas; // Este campo inclui reservas canceladas e expiradas
+    private long totalCanceladas;
 }

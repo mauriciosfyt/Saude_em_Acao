@@ -16,8 +16,8 @@ public class PlanoGoldDetalhesDTO {
 
     private EStatus statusPlano;
     private EPlano tipoPlano;
-    private LocalDateTime dataRenovacao; // Data em que o plano será renovado
-    private LocalDateTime dataVencimento; // Data de expiração do plano atual
-    private LocalDateTime dataInicioAcademia; // Data de cadastro do usuário
-    private String duracaoAcademia; // Tempo total na academia (ex: "1 ano, 2 meses e 5 dias")
+    private LocalDateTime dataRenovacao;
+    private LocalDateTime dataVencimento;
+    private LocalDateTime dataInicioAcademia;
+    private String duracaoAcademia;
 }

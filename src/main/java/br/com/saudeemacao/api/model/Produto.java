@@ -33,7 +33,6 @@ public class Produto {
     @Positive(message = "Preço deve ser maior que zero")
     private Double preco;
 
-    // Novos atributos para a promoção
     private Double precoPromocional;
     private LocalDateTime dataInicioPromocao;
     private LocalDateTime dataFimPromocao;
@@ -44,12 +43,11 @@ public class Produto {
     @NotNull(message = "Categoria é obrigatória")
     private ECategoria categoria;
 
-    // Campos de estoque dependentes da categoria
     @PositiveOrZero(message = "Estoque não pode ser negativo")
-    private Integer estoquePadrao; // Para VITAMINAS
+    private Integer estoquePadrao;
 
-    private Map<ETamanho, Integer> estoquePorTamanho; // Para CAMISETAS
-    private Map<ESabor, Integer> estoquePorSabor; // Para CREATINA, WHEY_PROTEIN
+    private Map<ETamanho, Integer> estoquePorTamanho;
+    private Map<ESabor, Integer> estoquePorSabor;
 
     // Método auxiliar para obter o estoque total, se necessário
     public Integer getEstoqueTotal() {

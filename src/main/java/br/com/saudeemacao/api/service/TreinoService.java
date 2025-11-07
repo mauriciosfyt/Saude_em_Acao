@@ -118,7 +118,6 @@ public class TreinoService {
 
         historicoTreinoRepository.save(historico);
 
-        // ATUALIZA A DATA DO ÚLTIMO TREINO NO USUÁRIO
         aluno.setDataUltimoTreino(historico.getDataRealizacao());
         usuarioRepository.save(aluno);
 
@@ -135,29 +134,21 @@ public class TreinoService {
         return historicoTreinoRepository.findByAlunoIdAndDataRealizacaoBetween(aluno.getId(), inicioDaSemana, fimDaSemana);
     }
 
-    /**
-     * Orquestra a busca e o cálculo de todas as métricas de treino para o aluno logado.
-     */
     public TreinoMetricasDTO getMetricasDeTreino(UserDetails userDetails) {
         Usuario aluno = getUsuarioAutenticado(userDetails);
 
-        // Validação de segurança crucial
         if (aluno.getPlano() != EPlano.GOLD) {
             throw new AccessDeniedException("Acesso negado. Este recurso é exclusivo para alunos do plano Gold.");
         }
 
-        // 1. Quantidade de treinos no mês atual
         LocalDateTime inicioDoMes = LocalDate.now().withDayOfMonth(1).atStartOfDay();
         LocalDateTime fimDoMes = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()).atTime(23, 59, 59);
         long treinosNoMes = historicoTreinoRepository.countByAlunoIdAndDataRealizacaoBetween(aluno.getId(), inicioDoMes, fimDoMes);
 
-        // 2. Data do último treino (já está no objeto aluno)
         LocalDateTime ultimoTreino = aluno.getDataUltimoTreino();
 
-        // 3. Total de treinos completos
         long totalTreinos = historicoTreinoRepository.countByAlunoId(aluno.getId());
 
-        // 4. Dias ativos consecutivos
         int diasConsecutivos = calcularDiasAtivosConsecutivos(aluno.getId());
 
         return TreinoMetricasDTO.builder()
@@ -168,16 +159,13 @@ public class TreinoService {
                 .build();
     }
 
-    /**
-     * Calcula os dias consecutivos de treino.
-     */
+
     private int calcularDiasAtivosConsecutivos(String alunoId) {
         List<HistoricoTreino> historico = historicoTreinoRepository.findByAlunoIdOrderByDataRealizacaoDesc(alunoId);
         if (historico.isEmpty()) {
             return 0;
         }
 
-        // Mapeia para LocalDate e remove duplicatas (caso o aluno treine mais de uma vez no mesmo dia)
         List<LocalDate> datasDeTreinoUnicas = historico.stream()
                 .map(h -> h.getDataRealizacao().toLocalDate())
                 .distinct()
@@ -186,25 +174,20 @@ public class TreinoService {
         LocalDate hoje = LocalDate.now();
         LocalDate ultimoDiaDeTreino = datasDeTreinoUnicas.get(0);
 
-        // Se o último treino não foi hoje nem ontem, a sequência atual é 0.
         if (!ultimoDiaDeTreino.equals(hoje) && !ultimoDiaDeTreino.equals(hoje.minusDays(1))) {
             return 0;
         }
 
-        // A sequência atual é de, no mínimo, 1 dia.
         int diasConsecutivos = 1;
         LocalDate diaReferencia = ultimoDiaDeTreino;
 
-        // Começa do segundo treino mais recente e compara com o dia de referência
         for (int i = 1; i < datasDeTreinoUnicas.size(); i++) {
             LocalDate diaAtual = datasDeTreinoUnicas.get(i);
 
-            // Verifica se o dia atual é exatamente um dia antes do dia de referência
             if (diaReferencia.minusDays(1).equals(diaAtual)) {
                 diasConsecutivos++;
-                diaReferencia = diaAtual; // Atualiza o dia de referência para o próximo loop
+                diaReferencia = diaAtual;
             } else {
-                // A sequência foi quebrada, então paramos de contar.
                 break;
             }
         }

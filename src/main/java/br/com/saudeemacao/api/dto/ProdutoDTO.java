@@ -22,7 +22,6 @@ public class ProdutoDTO {
     @Positive(message = "Preço deve ser maior que zero")
     private Double preco;
 
-    // Novos campos para a promoção
     @Positive(message = "Preço promocional deve ser maior que zero")
     private Double precoPromocional;
     private String dataInicioPromocao;
@@ -31,12 +30,11 @@ public class ProdutoDTO {
     @NotNull(message = "Categoria é obrigatória")
     private ECategoria categoria;
 
-    // Campos de estoque dependentes da categoria
     @PositiveOrZero(message = "Estoque não pode ser negativo")
-    private Integer estoquePadrao; // Para VITAMINAS
+    private Integer estoquePadrao;
 
-    private Map<String, Integer> estoquePorTamanho; // Para CAMISETAS
-    private Map<String, Integer> estoquePorSabor; // Para CREATINA, WHEY_PROTEIN
+    private Map<String, Integer> estoquePorTamanho;
+    private Map<String, Integer> estoquePorSabor;
 
     @NotNull(message = "Imagem é obrigatória")
     private MultipartFile img;

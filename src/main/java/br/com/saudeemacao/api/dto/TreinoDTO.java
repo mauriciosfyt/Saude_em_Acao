@@ -50,7 +50,7 @@ public class TreinoDTO {
     @AssertTrue(message = "A idade máxima não pode ser menor que a idade mínima.")
     private boolean isIdadeValida() {
         if (this.idadeMinima == null || this.idadeMaxima == null) {
-            return true; // A validação @NotNull cuidará disso.
+            return true;
         }
         return this.idadeMaxima >= this.idadeMinima;
     }

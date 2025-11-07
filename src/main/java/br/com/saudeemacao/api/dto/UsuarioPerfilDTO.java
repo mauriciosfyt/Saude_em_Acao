@@ -27,7 +27,7 @@ public class UsuarioPerfilDTO {
 
     private Integer idade;
     private Integer peso;
-    private Double altura; // <-- ALTERAÇÃO AQUI: De Integer para Double
+    private Double altura;
     private String objetivo;
     private ENivelAtividade nivelAtividade;
 
@@ -45,7 +45,7 @@ public class UsuarioPerfilDTO {
         if (usuario.getPlano() == EPlano.GOLD) {
             this.idade = usuario.getIdade();
             this.peso = usuario.getPeso();
-            this.altura = usuario.getAltura(); // Agora esta linha funciona corretamente
+            this.altura = usuario.getAltura();
             this.objetivo = usuario.getObjetivo();
             this.nivelAtividade = usuario.getNivelAtividade();
         }

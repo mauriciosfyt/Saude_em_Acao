@@ -26,28 +26,22 @@ public class DashboardService {
     private final ReservaRepository reservaRepository;
 
     public DashboardStatsDTO getDashboardStats(Integer ano) {
-        // Define o ano corrente se nenhum for fornecido
         int anoParaFiltro = (ano != null && ano > 2000) ? ano : Year.now().getValue();
 
-        // Define o intervalo de datas para o ano especificado
         LocalDateTime inicioDoAno = LocalDateTime.of(anoParaFiltro, 1, 1, 0, 0, 0);
         LocalDateTime fimDoAno = LocalDateTime.of(anoParaFiltro, 12, 31, 23, 59, 59);
 
-        // 1. Métricas gerais (não dependem do ano)
         long totalAlunos = usuarioRepository.countByPerfil(EPerfil.ALUNO);
         Map<String, Long> contagemPorPlano = getContagemPorPlano();
         Map<String, Long> estoquePorCategoria = getEstoquePorCategoria();
 
-        // 2. Busca as vendas (reservas CONCLUÍDAS) no ano especificado, filtrando pela DATA DE CONCLUSÃO
         List<Reserva> vendasDoAno = reservaRepository.findByStatusAndDataConclusaoBetween(
                 EStatusReserva.CONCLUIDA, inicioDoAno, fimDoAno
         );
 
-        // 3. Calcula as métricas de vendas com base nos dados corrigidos
         double totalVendasGerais = calcularTotalVendas(vendasDoAno);
         Map<String, Long> vendasPorProduto = getVendasPorProduto(vendasDoAno);
 
-        // Monta o DTO de resposta
         return DashboardStatsDTO.builder()
                 .totalAlunos(totalAlunos)
                 .contagemPorPlano(contagemPorPlano)
@@ -74,7 +68,6 @@ public class DashboardService {
     }
 
     private Map<String, Long> getContagemPorPlano() {
-        // Agrupa todos os usuários pelo nome do plano e conta as ocorrências.
         return usuarioRepository.findAll().stream()
                 .filter(u -> u.getPlano() != null)
                 .collect(Collectors.groupingBy(u -> u.getPlano().name(), Collectors.counting()));

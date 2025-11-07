@@ -95,27 +95,19 @@ public class AuthController {
         }
     }
 
-    /**
-     * ETAPA 1: O usuário solicita um código para redefinir a senha.
-     */
     @PostMapping("/esqueci-senha/solicitar")
     public ResponseEntity<String> solicitarRedefinicaoSenha(@Valid @RequestBody RedefinirSenhaSolicitacaoDTO dto) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(dto.getEmail());
 
-        // **** ALTERAÇÃO PRINCIPAL AQUI ****
-        // Se o usuário com o e-mail fornecido não for encontrado,
-        // retorna um erro claro e o status HTTP 404.
         if (usuarioOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Usuário não encontrado com o e-mail fornecido.");
         }
 
-        // Se o usuário foi encontrado, o fluxo continua normalmente.
         try {
             TokenAcesso tokenAcesso = tokenAcessoService.gerarToken(dto.getEmail());
             emailService.enviarTokenRedefinicaoSenha(dto.getEmail(), tokenAcesso.getToken());
 
-            // A mensagem de sucesso agora pode ser mais direta.
             return ResponseEntity.ok("Token de redefinição de senha enviado para o seu e-mail.");
 
         } catch (Exception e) {
@@ -124,10 +116,6 @@ public class AuthController {
         }
     }
 
-    /**
-     * ETAPA 2: O usuário envia o código recebido para validação.
-     * O corpo JSON é recebido como um Map, evitando a necessidade de um DTO.
-     */
     @PostMapping("/esqueci-senha/validar-codigo")
     public ResponseEntity<?> validarCodigo(@RequestBody Map<String, String> payload) {
         String codigo = payload.get("codigo");
@@ -138,17 +126,12 @@ public class AuthController {
         boolean isTokenValid = tokenAcessoService.validarToken(codigo).isPresent();
 
         if (isTokenValid) {
-            // Retorna o próprio código como confirmação para o frontend usar na próxima etapa
             return ResponseEntity.ok(Map.of("codigo", codigo));
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("erro", "Código inválido ou expirado."));
         }
     }
 
-    /**
-     * ETAPA 3: O usuário envia a nova senha para o endpoint que contém o código validado.
-     * O corpo da requisição contém apenas a nova senha.
-     */
     @PostMapping("/esqueci-senha/redefinir/{codigo}")
     public ResponseEntity<String> redefinirSenha(
             @PathVariable String codigo,
@@ -161,9 +144,7 @@ public class AuthController {
 
         TokenAcesso tokenAcesso = tokenOpt.get();
         try {
-            // Atualiza a senha do usuário associado ao e-mail do token
             usuarioService.atualizarSenha(tokenAcesso.getEmail(), dto.getNovaSenha());
-            // Marca o token como usado para que não possa ser reutilizado
             tokenAcessoService.marcarComoUsado(tokenAcesso);
             return ResponseEntity.ok("Senha redefinida com sucesso!");
         } catch (Exception e) {

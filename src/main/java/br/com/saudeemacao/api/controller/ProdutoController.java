@@ -25,17 +25,14 @@ public class ProdutoController {
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) ECategoria categoria) {
 
-        // Se o parâmetro 'categoria' for fornecido, busca por categoria.
         if (categoria != null) {
             return ResponseEntity.ok(service.getProdutosPorCategoria(categoria));
         }
 
-        // Se o parâmetro 'nome' for fornecido, busca por nome.
         if (nome != null && !nome.isEmpty()) {
             return ResponseEntity.ok(service.getProdutosPorNome(nome));
         }
 
-        // Senão, lista todos.
         return ResponseEntity.ok(service.getAll());
     }
 

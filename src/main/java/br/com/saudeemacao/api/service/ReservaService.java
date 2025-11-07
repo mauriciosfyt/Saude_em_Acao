@@ -145,14 +145,6 @@ public class ReservaService {
         return reserva;
     }
 
-    /**
-     * NOVO MÉTODO:
-     * Marca uma reserva como CONCLUÍDA.
-     * Isso deve ser feito quando o aluno retira o produto fisicamente.
-     *
-     * @param id O ID da reserva a ser concluída.
-     * @return A reserva com o status atualizado.
-     */
     public Reserva concluirReserva(String id) {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Reserva não encontrada."));
@@ -162,7 +154,6 @@ public class ReservaService {
         }
 
         reserva.setStatus(EStatusReserva.CONCLUIDA);
-        // **** ALTERAÇÃO AQUI: Preenchendo a data de conclusão ****
         reserva.setDataConclusao(LocalDateTime.now());
 
         return reservaRepository.save(reserva);

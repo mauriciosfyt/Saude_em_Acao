@@ -12,12 +12,10 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DashboardStatsDTO {
-    // Métricas existentes
     private long totalAlunos;
     private Map<String, Long> contagemPorPlano;
     private Map<String, Long> estoquePorCategoria;
 
-    // NOVAS MÉTRICAS DE VENDAS
-    private double totalVendasGerais; // Total em R$
-    private Map<String, Long> totalVendasPorProduto; // Total em unidades por produto
+    private double totalVendasGerais;
+    private Map<String, Long> totalVendasPorProduto;
 }

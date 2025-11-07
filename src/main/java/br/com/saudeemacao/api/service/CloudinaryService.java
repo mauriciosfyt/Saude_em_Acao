@@ -12,8 +12,7 @@ import java.util.Map;
 @Service
 public class CloudinaryService {
 
-    // ALTERAÇÃO 2: Ajuste do tamanho máximo e mensagem de erro
-    private static final long MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+    private static final long MAX_FILE_SIZE = 30 * 1024 * 1024;
     private static final String[] ALLOWED_CONTENT_TYPES = {
             "image/jpeg", "image/png", "image/gif", "image/webp"
     };
@@ -22,27 +21,22 @@ public class CloudinaryService {
     private Cloudinary cloudinary;
 
     public String uploadFile(MultipartFile file) throws IOException {
-        // Validações iniciais
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("O arquivo não pode ser nulo ou vazio");
         }
 
-        // Validação do tamanho do arquivo
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new IllegalArgumentException("A imagem de perfil deve ter no máximo 30 MB.");
         }
-        // Validação do tamanho do arquivo
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new IllegalArgumentException("O arquivo excede o tamanho máximo permitido de 30MB");
         }
 
-        // Validação do tipo de conteúdo
         if (!isContentTypeAllowed(file.getContentType())) {
             throw new IllegalArgumentException("Tipo de arquivo não suportado. Use JPEG, PNG, GIF ou WEBP");
         }
 
         try {
-            // Realiza o upload
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
             return uploadResult.get("url").toString();
         } catch (IOException e) {

@@ -31,7 +31,7 @@ public class SegurancaFilter extends OncePerRequestFilter {
         }
 
         if (token != null && !token.isEmpty()) {
-            String username = loginService.validaToken(token); // Aqui deve retornar o username/email do usuário
+            String username = loginService.validaToken(token);
 
             UserDetails userDetails = loginService.loadUserByUsername(username);
 

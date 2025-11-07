@@ -44,7 +44,7 @@ public class WebSocketJwtInterceptor implements ChannelInterceptor {
 
                     accessor.setUser(authentication);
                 } catch (Exception e) {
-                    return null; // Recusa a conexão se o token for inválido
+                    return null;
                 }
             }
         }

@@ -17,13 +17,12 @@ public class LimpezaTokenService {
     @Autowired
     private TokenAcessoRepository tokenAcessoRepository;
 
-    @Scheduled(cron = "0 0 0 * * *") // Executa todos os dias à meia-noite
+    @Scheduled(cron = "0 0 0 * * *")
     public void limparTokensAntigos() {
         log.info("Iniciando limpeza de tokens antigos...");
         LocalDateTime agora = LocalDateTime.now();
 
         try {
-            // Remove tokens expirados ou já usados
             tokenAcessoRepository.deleteByExpiraEmBeforeOrUsadoTrue(agora);
             log.info("Limpeza de tokens concluída com sucesso.");
         } catch (Exception e) {

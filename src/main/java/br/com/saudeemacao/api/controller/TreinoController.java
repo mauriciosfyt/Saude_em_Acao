@@ -85,12 +85,6 @@ public class TreinoController {
         return ResponseEntity.ok(desempenho);
     }
 
-    /**
-     * NOVO ENDPOINT:
-     * Retorna as métricas de treino consolidadas.
-     * Acesso restrito a usuários com perfil ALUNO. A validação do plano
-     * GOLD é feita na camada de serviço.
-     */
     @GetMapping("/minhas-metricas")
     @PreAuthorize("hasRole('ALUNO')")
     public ResponseEntity<TreinoMetricasDTO> getMinhasMetricas(

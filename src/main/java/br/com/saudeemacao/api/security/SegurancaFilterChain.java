@@ -34,19 +34,15 @@ public class SegurancaFilterChain {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // =================================================================
-                        // === 1. ROTAS PÚBLICAS (NÃO EXIGEM AUTENTICAÇÃO) ================
-                        // =================================================================
+
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/aluno").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/treinos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/treinos/{id}").permitAll()
 
-                        // =================================================================
-                        // === 2. ROTAS DE ADMIN (EXIGEM PERFIL 'ADMIN') ===================
-                        // =================================================================
-                        .requestMatchers(HttpMethod.GET, "/api/aluno").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/aluno").hasAnyRole("ADMIN", "PROFESSOR")
                         .requestMatchers(HttpMethod.DELETE, "/api/aluno/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/professor").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/professor/{id}").hasRole("ADMIN")
@@ -61,9 +57,6 @@ public class SegurancaFilterChain {
                         .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/rejeitar").hasRole("ADMIN")
                         .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
 
-                        // =================================================================
-                        // === 3. ROTAS COM PERMISSÕES CUSTOMIZADAS (Tratadas com @PreAuthorize)
-                        // =================================================================
                         .requestMatchers(HttpMethod.GET, "/api/professor").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/aluno/{id}").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/aluno/{id}/renovar-plano").hasRole("ADMIN")
@@ -71,24 +64,16 @@ public class SegurancaFilterChain {
                         .requestMatchers(HttpMethod.GET, "/api/professor/{id}").authenticated()
 
 
-                        // =================================================================
-                        // === 4. ROTAS DE PROFESSOR OU ADMIN ==============================
-                        // =================================================================
                         .requestMatchers(HttpMethod.POST, "/api/treinos").hasAnyRole("PROFESSOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/treinos/{id}").hasAnyRole("PROFESSOR", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/treinos/{id}").hasAnyRole("PROFESSOR", "ADMIN")
 
-                        // =================================================================
-                        // === 5. ROTAS DE ALUNO (EXIGEM PERFIL 'ALUNO') ====================
-                        // =================================================================
+
                         .requestMatchers(HttpMethod.POST, "/api/reservas").hasRole("ALUNO")
                         .requestMatchers(HttpMethod.GET, "/api/reservas/minhas").hasRole("ALUNO")
                         .requestMatchers(HttpMethod.POST, "/api/treinos/{id}/realizar").hasRole("ALUNO")
                         .requestMatchers(HttpMethod.GET, "/api/treinos/desempenho-semanal").hasRole("ALUNO")
 
-                        // =================================================================
-                        // === 6. QUALQUER OUTRA ROTA EXIGE AUTENTICAÇÃO ===================
-                        // =================================================================
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(segurancaFilter, UsernamePasswordAuthenticationFilter.class)

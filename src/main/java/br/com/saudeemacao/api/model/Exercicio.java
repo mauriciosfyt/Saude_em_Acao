@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalTime;
 
@@ -33,4 +34,7 @@ public class Exercicio {
     private LocalTime intervalo;
 
     private String observacao;
+
+    @URL(message = "O campo 'img' deve ser uma URL válida.")
+    private String img;
 }

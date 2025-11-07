@@ -31,7 +31,6 @@ public class ProdutoService {
     private final ReservaRepository reservaRepository;
     private final Cloudinary cloudinary;
 
-    // ... (métodos parseDate e aplicarPromocaoSeAtiva) ...
 
     private LocalDateTime parseDate(String dateString, String fieldName) {
         if (dateString == null || dateString.isBlank()) {
@@ -101,7 +100,6 @@ public class ProdutoService {
         return aplicarPromocaoSeAtiva(produto);
     }
 
-    // ... (demais métodos: create, update, delete, etc.) ...
     public Produto create(ProdutoDTO dto) throws IOException {
         validarCamposObrigatorios(dto);
 

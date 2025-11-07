@@ -15,7 +15,6 @@ public class ReservaSolicitacaoDTO {
     @NotNull(message = "A categoria do produto é obrigatória.")
     private ECategoria categoriaProduto;
 
-    // Opcional, mas necessário para produtos com variação de tamanho
-    private String tamanho; // Usar String para receber a entrada do frontend
-    private String sabor;   // Usar String para receber a entrada do frontend
+    private String tamanho;
+    private String sabor;
 }

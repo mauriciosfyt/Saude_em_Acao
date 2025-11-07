@@ -8,9 +8,7 @@ import java.util.List;
 
 public interface ProdutoRepository extends MongoRepository<Produto, String> {
 
-    // NOVO MÉTODO: Busca produtos cujo nome contém a string fornecida, ignorando maiúsculas/minúsculas.
     List<Produto> findByNomeContainingIgnoreCase(String nome);
 
-    // NOVO MÉTODO: Busca produtos por categoria.
     List<Produto> findByCategoria(ECategoria categoria);
 }

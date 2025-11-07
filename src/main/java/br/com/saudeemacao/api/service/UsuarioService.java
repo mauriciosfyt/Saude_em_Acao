@@ -399,6 +399,7 @@ public class UsuarioService {
 
     private UsuarioSaidaDTO toUsuarioSaidaDTO(Usuario usuario) {
         return new UsuarioSaidaDTO(
+                usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
                 usuario.getCpf(),

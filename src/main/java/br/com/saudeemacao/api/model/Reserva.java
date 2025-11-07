@@ -1,5 +1,3 @@
-// src/main/java/br.com.saudeemacao.api/model/Reserva.java
-
 package br.com.saudeemacao.api.model;
 
 import br.com.saudeemacao.api.model.EnumProduto.ESabor;
@@ -31,27 +29,16 @@ public class Reserva {
     @DBRef
     private Produto produto;
 
-    // Campos para identificar a variação do produto reservado
-    private ETamanho tamanho; // Para produtos de categoria CAMISETAS
-    private ESabor sabor;     // Para produtos de categoria CREATINA, WHEY_PROTEIN
+    private ETamanho tamanho;
+    private ESabor sabor;
 
     private EStatusReserva status;
 
     private LocalDateTime dataSolicitacao;
     private LocalDateTime dataAnalise;
 
-    /**
-     * NOVO CAMPO:
-     * Armazena a data e hora limite para a retirada do produto.
-     * Se o usuário não retirar até esta data, a reserva é cancelada.
-     */
     private LocalDateTime dataRetirada;
 
-    /**
-     * NOVO CAMPO:
-     * Armazena a data e hora exatas em que a reserva foi concluída (retirada).
-     * Este campo será usado para os filtros de vendas no dashboard.
-     */
     private LocalDateTime dataConclusao;
 
     private String motivoAnalise;
