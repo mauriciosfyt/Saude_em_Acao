@@ -80,6 +80,7 @@
   color: #f59e0b;
   text-decoration: none;
   font-weight: 500;
+  border: 1px solid #f59e0b;
 }
 
 .personal-action-link-edit {
