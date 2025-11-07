@@ -1,234 +1,400 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { FaSave, FaArrowLeft } from 'react-icons/fa';
 import './EditarAluno.css';
+import MenuAdm from '../../../components/MenuAdm/MenuAdm';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { getAlunoById, updateAluno, deleteAluno, API_URL } from '../../../services/usuarioService';
 
-import AdminHeader from '../../../components/header_admin';
-import Footer from "../../../components/footer";
+// Reuse PlusIcon and EyeIcon from EditarPersonal pattern
+const PlusIcon = () => (
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 5V19" stroke="#007bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5 12H19" stroke="#007bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const EyeIcon = ({ visible }) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ cursor: 'pointer' }}
+  >
+    {visible ? (
+      <path
+        d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+        fill="currentColor"
+      />
+    ) : (
+      <path
+        d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"
+        fill="currentColor"
+      />
+    )}
+  </svg>
+);
 
 const EditarAluno = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const location = useLocation();
-  
-  // Pegar os dados do aluno da navegação
-  const alunoData = location.state?.aluno;
+
+  // Support receiving aluno via location.state (existing behavior) or via param id
+  const alunoState = location.state?.aluno;
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
     cpf: '',
+    telefone: '',
+    plano: '',
     senha: '',
     confirmarSenha: '',
-    numero: ''
+    idade: '',
+    peso: '',
+    altura: '',
+    objetivo: '',
+    nivelAtividade: ''
   });
 
-  // Carregar dados do aluno quando o componente montar
+  const [imagemPreview, setImagemPreview] = useState(null);
+  const [imagemFile, setImagemFile] = useState(null);
+
+  // Busca dados do aluno quando houver id; caso contrário usa estado ou localStorage
   useEffect(() => {
-    // Tentar pegar dados do localStorage se não houver no state
-    let dadosAluno = alunoData;
-    if (!dadosAluno) {
-      const alunoLocalStorage = localStorage.getItem('alunoParaEditar');
-      if (alunoLocalStorage) {
-        dadosAluno = JSON.parse(alunoLocalStorage);
+    let mounted = true;
+
+    const preencherCampos = (dados) => {
+      setFormData(prev => ({
+        ...prev,
+        nome: dados.nome || prev.nome || '',
+        email: dados.email || prev.email || '',
+        cpf: dados.cpf || prev.cpf || '',
+        telefone: dados.telefone || dados.numero || prev.telefone || '',
+        plano: dados.plano || prev.plano || '',
+        idade: dados.idade || prev.idade || '',
+        peso: dados.peso || prev.peso || '',
+        altura: dados.altura || prev.altura || '',
+        objetivo: dados.objetivo || prev.objetivo || '',
+        nivelAtividade: dados.nivelAtividade || prev.nivelAtividade || ''
+      }));
+
+      const foto = dados.fotoPerfil || dados.foto || dados.imagem || dados.avatar || dados.urlFoto;
+      if (foto) {
+        const baseServer = API_URL.replace(/\/api$/, '');
+        const isAbsolute = /^https?:\/\//i.test(foto);
+        const fotoUrl = isAbsolute ? foto : (foto.startsWith('/') ? `${baseServer}${foto}` : `${baseServer}/${foto}`);
+        setImagemPreview(fotoUrl);
+      }
+    };
+
+    if (id) {
+      (async () => {
+        try {
+          const aluno = await getAlunoById(id);
+          if (!mounted) return;
+          if (!aluno) {
+            // fallback to local state
+            if (alunoState) preencherCampos(alunoState);
+            return;
+          }
+          preencherCampos(aluno);
+        } catch (err) {
+          console.error('Falha ao obter dados do aluno:', err);
+          if (alunoState) preencherCampos(alunoState);
+        }
+      })();
+    } else if (alunoState) {
+      preencherCampos(alunoState);
+    } else {
+      // fallback to localStorage (compatibilidade com versão anterior)
+      const alunoLocal = localStorage.getItem('alunoParaEditar');
+      if (alunoLocal) {
+        try {
+          const dados = JSON.parse(alunoLocal);
+          preencherCampos(dados);
+        } catch (e) {
+          console.warn('Aluno no localStorage inválido');
+        }
+      } else if (!id) {
+        // nada encontrado, redireciona
+        alert('Dados do aluno não encontrados.');
+        navigate('/GerenciarAlunos');
       }
     }
-    
-    if (dadosAluno) {
-      setFormData({
-        nome: dadosAluno.nome || '',
-        email: dadosAluno.email || '',
-        cpf: dadosAluno.cpf || '',
-        senha: '', // Não carregamos a senha por segurança
-        confirmarSenha: '',
-        numero: dadosAluno.numero || ''
-      });
-    } else {
-      // Se não houver dados do aluno, redirecionar para GerenciarAlunos
-      alert('Dados do aluno não encontrados.');
-      navigate('/GerenciarAlunos');
-    }
-  }, [alunoData, navigate]);
 
-  const handleInputChange = (e) => {
+    return () => { mounted = false; };
+  }, [id, alunoState, navigate]);
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  // senha validation helpers
+  const senha = formData.senha || '';
+  const validations = {
+    length: senha.length >= 6,
+    upper: /[A-Z]/.test(senha),
+    lower: /[a-z]/.test(senha),
+    number: /[0-9]/.test(senha),
+    special: /[^A-Za-z0-9]/.test(senha)
+  };
+  const confirmMatches = formData.confirmarSenha ? formData.confirmarSenha === senha : false;
+
+  const handleImagemChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagemPreview(URL.createObjectURL(file));
+      setImagemFile(file);
+    }
+  };
+
+  const handleCancelar = () => {
+    navigate('/GerenciarAlunos');
+  };
+
+  const handleExcluir = async () => {
+    try {
+      setIsDeleting(true);
+      const alvoId = id || (JSON.parse(localStorage.getItem('alunoParaEditar') || '{}').id);
+      if (!alvoId) throw new Error('ID do aluno não encontrado para exclusão.');
+      await deleteAluno(alvoId);
+      alert('Aluno excluído com sucesso!');
+      navigate('/GerenciarAlunos');
+    } catch (err) {
+      console.error('Erro ao excluir aluno:', err);
+      alert(err?.message || 'Falha ao excluir aluno.');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validações básicas
-    if (!formData.nome || !formData.email || !formData.cpf || !formData.numero) {
+
+    // Validações simples
+    if (!formData.nome || !formData.email || !formData.cpf || !formData.telefone) {
       alert('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
-    // Se a senha foi alterada, validar
-    if (formData.senha || formData.confirmarSenha) {
-      if (formData.senha !== formData.confirmarSenha) {
-        alert('As senhas não coincidem.');
-        return;
-      }
-
-      if (formData.senha.length < 6) {
-        alert('A senha deve ter pelo menos 6 caracteres.');
-        return;
-      }
-    }
-
-    // Validação básica de CPF (formato)
-    const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
-    if (!cpfRegex.test(formData.cpf)) {
-      alert('Por favor, insira um CPF válido no formato 000.000.000-00');
+    if (formData.senha && formData.senha !== formData.confirmarSenha) {
+      alert('As senhas não coincidem.');
       return;
     }
 
-    // Pegar o ID do aluno do localStorage
-    const alunoParaEditar = JSON.parse(localStorage.getItem('alunoParaEditar') || '{}');
-    
-    // Atualizar a lista de alunos no localStorage
-    const alunosAtuais = JSON.parse(localStorage.getItem('alunos') || '[]');
-    const alunosAtualizados = alunosAtuais.map(aluno => {
-      if (aluno.id === alunoParaEditar.id) {
-        return {
-          ...aluno,
-          nome: formData.nome,
-          email: formData.email,
-          cpf: formData.cpf,
-          numero: formData.numero,
-          // Só atualiza a senha se foi fornecida
-          ...(formData.senha && { senha: formData.senha })
-        };
-      }
-      return aluno;
-    });
-    
-    localStorage.setItem('alunos', JSON.stringify(alunosAtualizados));
-    
-    // Limpar o localStorage temporário
-    localStorage.removeItem('alunoParaEditar');
-    
-    // Seta a flag para mostrar notificação de edição
-    localStorage.setItem('showAlunoEditado', 'true');
-    
-    // Navegar de volta para Gerenciar Alunos
-    navigate('/GerenciarAlunos');
-  };
+    try {
+      setIsSubmitting(true);
+      const dados = new FormData();
+      dados.append('nome', formData.nome || '');
+      dados.append('email', formData.email || '');
+      dados.append('cpf', formData.cpf || '');
+      dados.append('telefone', formData.telefone || '');
+      dados.append('plano', formData.plano || '');
+      if (formData.senha) dados.append('senha', formData.senha);
+      if (formData.idade) dados.append('idade', formData.idade);
+      if (formData.peso) dados.append('peso', formData.peso);
+      if (formData.altura) dados.append('altura', formData.altura);
+      if (formData.objetivo) dados.append('objetivo', formData.objetivo);
+      if (formData.nivelAtividade) dados.append('nivelAtividade', formData.nivelAtividade);
+      if (imagemFile) dados.append('foto', imagemFile);
 
-  const handleCancelar = () => {
-    // Limpar o localStorage temporário
-    localStorage.removeItem('alunoParaEditar');
-    navigate('/GerenciarAlunos');
-  };
+      const alvoId = id || (JSON.parse(localStorage.getItem('alunoParaEditar') || '{}').id);
+      if (!alvoId) throw new Error('ID do aluno não encontrado para atualização.');
 
-  // Se não há dados do aluno, não renderizar nada
-  if (!alunoData) {
-    const alunoLocalStorage = localStorage.getItem('alunoParaEditar');
-    if (!alunoLocalStorage) {
-      return null;
+      await updateAluno(alvoId, dados);
+
+      alert('Aluno atualizado com sucesso.');
+      navigate('/GerenciarAlunos');
+    } catch (err) {
+      console.error('Erro ao salvar aluno:', err);
+      alert(err?.message || 'Falha ao salvar alterações.');
+    } finally {
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
-    <>
-      <AdminHeader />
-      <div className="editar-aluno-container">
-        <main className="editar-aluno-content">
-          <h1>Editar Aluno</h1>
-          
-          <form onSubmit={handleSubmit} className="form-aluno">
-            <div className="form-group">
-              <label htmlFor="nome">Nome Completo *</label>
-              <input
-                type="text"
-                id="nome"
-                name="nome"
-                value={formData.nome}
-                onChange={handleInputChange}
-                placeholder="Digite o nome completo"
-                required
-              />
-            </div>
+    <div style={{ display: 'flex' }}>
+      <MenuAdm />
 
-            <div className="form-group">
-              <label htmlFor="email">E-mail *</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="Digite o e-mail"
-                required
-              />
-            </div>
+      <main className="editar-aluno-container">
+        <h1 className="editar-aluno-title">Editar Aluno</h1>
 
-            <div className="form-group">
-              <label htmlFor="cpf">CPF *</label>
-              <input
-                type="text"
-                id="cpf"
-                name="cpf"
-                value={formData.cpf}
-                onChange={handleInputChange}
-                placeholder="000.000.000-00"
-                required
-              />
-            </div>
+        <div className="editar-aluno-form-layout">
+          <div className="editar-aluno-image-section">
+            <label htmlFor="profile-pic" className="editar-aluno-image-placeholder">
+              {imagemPreview ? (
+                <img src={imagemPreview} alt="Preview" className="editar-aluno-image-preview" />
+              ) : (
+                <PlusIcon />
+              )}
+            </label>
+            <input 
+              type="file" 
+              id="profile-pic" 
+              style={{ display: 'none' }} 
+              onChange={handleImagemChange}
+              accept="image/png, image/jpeg, image/webp"
+            />
+          </div>
 
-            <div className="form-group">
-              <label htmlFor="numero">Telefone *</label>
-              <input
-                type="tel"
-                id="numero"
-                name="numero"
-                value={formData.numero}
-                onChange={handleInputChange}
-                placeholder="(11) 98765-4321"
-                required
-              />
-            </div>
+          <div className="editar-aluno-fields-section">
+            <form onSubmit={handleSubmit}>
+              <div className="editar-aluno-form-group">
+                <label htmlFor="nome">Nome</label>
+                <input type="text" id="nome" name="nome" value={formData.nome} onChange={handleChange} required />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="senha">Nova Senha (deixe em branco para manter a atual)</label>
-              <input
-                type="password"
-                id="senha"
-                name="senha"
-                value={formData.senha}
-                onChange={handleInputChange}
-                placeholder="Digite a nova senha"
-              />
-            </div>
+              <div className="editar-aluno-form-group">
+                <label htmlFor="email">Email</label>
+                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="confirmarSenha">Confirmar Nova Senha</label>
-              <input
-                type="password"
-                id="confirmarSenha"
-                name="confirmarSenha"
-                value={formData.confirmarSenha}
-                onChange={handleInputChange}
-                placeholder="Confirme a nova senha"
-              />
-            </div>
+              <div className="editar-aluno-form-group">
+                <label htmlFor="cpf">CPF</label>
+                <input type="text" id="cpf" name="cpf" value={formData.cpf} onChange={handleChange} required />
+              </div>
 
-            <div className="form-actions">
-              <button type="button" className="btn-cancelar" onClick={handleCancelar}>
-                <FaArrowLeft size={14} /> CANCELAR
-              </button>
-              <button type="submit" className="btn-salvar">
-                <FaSave size={14} /> SALVAR ALTERAÇÕES
-              </button>
-            </div>
-          </form>
-        </main>
-      </div>
-      <Footer />
-    </>
+              <div className="editar-aluno-form-group">
+                <label htmlFor="telefone">Telefone</label>
+                <input type="tel" id="telefone" name="telefone" value={formData.telefone} onChange={handleChange} required />
+              </div>
+
+              <div className="editar-aluno-form-group">
+                <label htmlFor="senha">Nova Senha</label>
+                <div className="password-input-wrapper">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    id="senha" 
+                    name="senha" 
+                    value={formData.senha} 
+                    onChange={handleChange}
+                  />
+                  <span 
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    <EyeIcon visible={showPassword} />
+                  </span>
+                </div>
+              </div>
+
+              <div className="password-requirements">
+                <p className="password-hint">A senha deve conter:</p>
+                <ul>
+                  <li className={`requirement ${validations.length ? 'met' : 'unmet'}`}>
+                    Pelo menos 6 caracteres
+                  </li>
+                  <li className={`requirement ${validations.upper ? 'met' : 'unmet'}`}>
+                    Pelo menos uma letra maiúscula
+                  </li>
+                  <li className={`requirement ${validations.lower ? 'met' : 'unmet'}`}>
+                    Pelo menos uma letra minúscula
+                  </li>
+                  <li className={`requirement ${validations.number ? 'met' : 'unmet'}`}>
+                    Pelo menos um número
+                  </li>
+                  <li className={`requirement ${validations.special ? 'met' : 'unmet'}`}>
+                    Pelo menos um caractere especial
+                  </li>
+                </ul>
+              </div>
+
+              <div className="editar-aluno-form-group">
+                <label htmlFor="confirmarSenha">Confirmar Nova Senha</label>
+                <div className="password-input-wrapper">
+                  <input 
+                    type={showConfirmPassword ? "text" : "password"} 
+                    id="confirmarSenha" 
+                    name="confirmarSenha" 
+                    value={formData.confirmarSenha} 
+                    onChange={handleChange}
+                  />
+                  <span 
+                    className="password-toggle"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    title={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    <EyeIcon visible={showConfirmPassword} />
+                  </span>
+                </div>
+              </div>
+
+              <div className="password-requirements">
+                <ul>
+                  <li className={`requirement ${confirmMatches ? 'met' : 'unmet'}`}>
+                    Confirmação corresponde à nova senha
+                  </li>
+                </ul>
+              </div>
+
+              <div className="editar-aluno-actions">
+                <button 
+                  type="button" 
+                  className="editar-aluno-cancel" 
+                  onClick={handleCancelar}
+                  disabled={isSubmitting || isDeleting}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="editar-aluno-save"
+                  disabled={isSubmitting || isDeleting}
+                >
+                  {isSubmitting ? 'Salvando...' : 'Salvar'}
+                </button>
+                <button
+                  type="button"
+                  className="editar-aluno-delete"
+                  onClick={() => setShowDeleteModal(true)}
+                  disabled={isSubmitting || isDeleting}
+                >
+                  Excluir
+                </button>
+              </div>
+
+              {showDeleteModal && (
+                <div className="delete-modal-overlay">
+                  <div className="delete-modal">
+                    <h2>Confirmar Exclusão</h2>
+                    <p>Tem certeza que deseja excluir este aluno?</p>
+                    <p className="delete-modal-warning">Esta ação não pode ser desfeita.</p>
+                    <div className="delete-modal-actions">
+                      <button 
+                        className="delete-modal-cancel" 
+                        onClick={() => setShowDeleteModal(false)}
+                        disabled={isDeleting}
+                      >
+                        Cancelar
+                      </button>
+                      <button 
+                        className="delete-modal-confirm" 
+                        onClick={handleExcluir}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? 'Excluindo...' : 'Sim, Excluir'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 };
 

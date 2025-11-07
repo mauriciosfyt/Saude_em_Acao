@@ -123,6 +123,46 @@
   margin-left: 260px;
 }
 
+/* Estilo dos botões */
+.aluno-action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.aluno-cancel-button,
+.aluno-save-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.aluno-cancel-button {
+  background-color: transparent;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+}
+
+.aluno-cancel-button:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+.aluno-save-button {
+  background-color: #28a745;
+  color: white;
+  border: 1px solid #28a745;
+}
+
+.aluno-save-button:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
 .editar-personal-title {
   font-size: 2.2em;
   font-weight: bold;
@@ -159,6 +199,56 @@
   background-color: #dee2e6;
 }
 
+/* Make sure any image placed inside the placeholder fills the circle and is clipped */
+.editar-personal-image-placeholder {
+  overflow: hidden; /* clip overflowing parts to the circular shape */
+  position: relative;
+}
+
+.editar-personal-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* scale and crop to fill without distortion */
+  border-radius: 50%; /* keep the image itself rounded */
+  display: block;
+}
+
+/* Password requirement styles */
+.password-requirements {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: #333;
+}
+.password-requirements .password-hint {
+  margin: 0 0 6px 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+.password-requirements ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.password-requirements .requirement {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #dc3545; /* red by default */
+  margin-bottom: 4px;
+}
+.password-requirements .requirement.met {
+  color: #28a745; /* green when met */
+}
+.password-requirements .requirement::before {
+  content: '✖';
+  display: inline-block;
+  width: 18px;
+  text-align: center;
+}
+.password-requirements .requirement.met::before {
+  content: '✔';
+}
+
 .editar-personal-fields-section {
   width: 100%;
   max-width: 450px;
@@ -193,6 +283,36 @@
   border-bottom-color: #007bff;
 }
 
+/* Estilos para o wrapper do input de senha */
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  flex: 1;
+  padding-right: 40px; /* Espaço para o ícone */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.password-toggle:hover {
+  color: #007bff;
+}
+
 .editar-personal-actions {
   display: flex;
   justify-content: flex-end;
@@ -202,8 +322,8 @@
 }
 
 .editar-personal-cancel,
-.editar-personal-save {
-  background-color: #fff;
+.editar-personal-save,
+.editar-personal-delete {
   color: #fff;
   border: none;
   padding: 8px 24px;
@@ -211,19 +331,111 @@
   cursor: pointer;
   font-size: 18px;
   font-weight: 500;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
   box-shadow: none;
 }
 
 .editar-personal-cancel:hover,
-.editar-personal-save:hover {
+.editar-personal-save:hover,
+.editar-personal-delete:hover {
   opacity: 0.85;
 }
 
 .editar-personal-cancel {
-  background-color: #dc3545;
+  background-color: #dc3545; /* Vermelho para excluir */
+}
+
+.editar-personal-delete {
+  background-color: #dc3545; /* Vermelho para excluir */
+  margin-right: auto; /* Empurra para a esquerda */
 }
 
 .editar-personal-save {
-  background-color: #28a745;
+  background-color: #28a745; /* Verde para salvar */
+}
+
+/* Estilo quando desabilitado */
+.editar-personal-cancel:disabled,
+.editar-personal-save:disabled,
+.editar-personal-delete:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Modal de confirmação de exclusão */
+.delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.delete-modal {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.delete-modal h2 {
+  margin: 0 0 16px;
+  color: #dc3545;
+  font-size: 1.5rem;
+}
+
+.delete-modal p {
+  margin: 8px 0;
+  color: #333;
+}
+
+.delete-modal-warning {
+  color: #dc3545 !important;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.delete-modal-cancel,
+.delete-modal-confirm {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.delete-modal-cancel {
+  background: #6c757d;
+  color: white;
+}
+
+.delete-modal-confirm {
+  background: #dc3545;
+  color: white;
+}
+
+.delete-modal-cancel:hover,
+.delete-modal-confirm:hover {
+  opacity: 0.85;
+}
+
+.delete-modal-cancel:disabled,
+.delete-modal-confirm:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }

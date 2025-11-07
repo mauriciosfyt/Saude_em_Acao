@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './EditarPersonal.css';
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getProfessorById, API_URL } from '../../../services/usuarioService'; // <-- adicionado API_URL
+import { getProfessorById, API_URL, updateProfessor, deleteProfessor } from '../../../services/usuarioService';
 
 const PlusIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -11,10 +11,40 @@ const PlusIcon = () => (
   </svg>
 );
 
+// Ícone de olho para mostrar/ocultar senha
+const EyeIcon = ({ visible }) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ cursor: 'pointer' }}
+  >
+    {visible ? (
+      // Ícone olho aberto
+      <path
+        d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+        fill="currentColor"
+      />
+    ) : (
+      // Ícone olho fechado (riscado)
+      <path
+        d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"
+        fill="currentColor"
+      />
+    )}
+  </svg>
+);
+
 const EditarPersonal = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -26,6 +56,9 @@ const EditarPersonal = () => {
   });
 
   const [imagemPreview, setImagemPreview] = useState(null);
+  const [imagemFile, setImagemFile] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // validation state is derived from formData.senha, we compute on render
 
   // --- NOVO: buscar dados do personal ao montar e popular campos ---
   useEffect(() => {
@@ -73,10 +106,22 @@ const EditarPersonal = () => {
     setFormData(prevState => ({ ...prevState, [name]: value }));
   };
 
+  // senha validation helpers
+  const senha = formData.senha || '';
+  const validations = {
+    length: senha.length >= 6,
+    upper: /[A-Z]/.test(senha),
+    lower: /[a-z]/.test(senha),
+    number: /[0-9]/.test(senha),
+    special: /[^A-Za-z0-9]/.test(senha)
+  };
+  const confirmMatches = formData.confirmarSenha ? formData.confirmarSenha === senha : false;
+
   const handleImagemChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImagemPreview(URL.createObjectURL(file));
+      setImagemFile(file);
     }
   };
 
@@ -84,11 +129,61 @@ const EditarPersonal = () => {
     navigate('/GerenciarPersonal');
   };
 
-  const handleSubmit = (e) => {
+  const handleExcluir = async () => {
+    try {
+      setIsDeleting(true);
+      await deleteProfessor(id);
+      alert('Professor excluído com sucesso!');
+      navigate('/GerenciarPersonal');
+    } catch (err) {
+      console.error('Erro ao excluir professor:', err);
+      const msg = err?.message || 'Falha ao excluir professor.';
+      alert(msg);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Dados do formulário:', formData);
-    console.log('ID do personal:', id);
-    navigate('/GerenciarPersonal');
+    // Validação simples de senha (se preenchida)
+    if (formData.senha && formData.senha !== formData.confirmarSenha) {
+      alert('As senhas não coincidem.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const dados = new FormData();
+      dados.append('nome', formData.nome || '');
+      dados.append('email', formData.email || '');
+      // CPF normalmente é a chave do recurso (já está no URL), mas incluímos também caso a API espere
+      dados.append('cpf', formData.cpf || '');
+      dados.append('telefone', formData.telefone || '');
+      if (formData.senha) {
+        dados.append('senha', formData.senha);
+      }
+      // Anexa imagem se houver
+      if (imagemFile) {
+        // campo 'foto' é o mais provável; se sua API esperar outro nome, troque aqui (ex: 'imagem' ou 'fotoPerfil')
+        dados.append('foto', imagemFile);
+      }
+
+      // Chama a função do serviço que envia o PUT multipart/form-data
+      await updateProfessor(id, dados);
+
+      // Sucesso
+      alert('Personal atualizado com sucesso.');
+      navigate('/GerenciarPersonal');
+    } catch (err) {
+      console.error('Erro ao salvar personal:', err);
+      const msg = err?.message || 'Falha ao salvar alterações.';
+      alert(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -136,21 +231,114 @@ const EditarPersonal = () => {
               </div>
               <div className="editar-personal-form-group">
                 <label htmlFor="senha">Nova Senha</label>
-                <input type="password" id="senha" name="senha" value={formData.senha} onChange={handleChange} />
+                <div className="password-input-wrapper">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    id="senha" 
+                    name="senha" 
+                    value={formData.senha} 
+                    onChange={handleChange}
+                  />
+                  <span 
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    <EyeIcon visible={showPassword} />
+                  </span>
+                </div>
+              </div>
+              <div className="password-requirements">
+                <p className="password-hint">A senha deve conter:</p>
+                <ul>
+                  <li className={`requirement ${validations.length ? 'met' : 'unmet'}`}>
+                    Pelo menos 6 caracteres
+                  </li>
+                  <li className={`requirement ${validations.upper ? 'met' : 'unmet'}`}>
+                    Pelo menos uma letra maiúscula
+                  </li>
+                  <li className={`requirement ${validations.lower ? 'met' : 'unmet'}`}>
+                    Pelo menos uma letra minúscula
+                  </li>
+                  <li className={`requirement ${validations.number ? 'met' : 'unmet'}`}>
+                    Pelo menos um número
+                  </li>
+                  <li className={`requirement ${validations.special ? 'met' : 'unmet'}`}>
+                    Pelo menos um caractere especial
+                  </li>
+                </ul>
               </div>
               <div className="editar-personal-form-group">
                 <label htmlFor="confirmarSenha">Confirmar Nova Senha</label>
-                <input type="password" id="confirmarSenha" name="confirmarSenha" value={formData.confirmarSenha} onChange={handleChange} />
+                <div className="password-input-wrapper">
+                  <input 
+                    type={showConfirmPassword ? "text" : "password"} 
+                    id="confirmarSenha" 
+                    name="confirmarSenha" 
+                    value={formData.confirmarSenha} 
+                    onChange={handleChange}
+                  />
+                  <span 
+                    className="password-toggle"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    title={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    <EyeIcon visible={showConfirmPassword} />
+                  </span>
+                </div>
+              </div>
+              <div className="password-requirements">
+                <ul>
+                  <li className={`requirement ${confirmMatches ? 'met' : 'unmet'}`}>
+                    Confirmação corresponde à nova senha
+                  </li>
+                </ul>
               </div>
               
               <div className="editar-personal-actions">
-                <button type="button" className="editar-personal-cancel" onClick={handleCancelar}>
+                <button 
+                  type="button" 
+                  className="editar-personal-cancel" 
+                  onClick={handleCancelar}
+                  disabled={isSubmitting || isDeleting}
+                >
                   Cancelar
                 </button>
-                <button type="submit" className="editar-personal-save">
-                  Salvar
+                <button 
+                  type="submit" 
+                  className="editar-personal-save"
+                  disabled={isSubmitting || isDeleting}
+                >
+                  {isSubmitting ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
+
+              {/* Modal de confirmação de exclusão */}
+              {showDeleteModal && (
+                <div className="delete-modal-overlay">
+                  <div className="delete-modal">
+                    <h2>Confirmar Exclusão</h2>
+                    <p>Tem certeza que deseja excluir este professor?</p>
+                    <p className="delete-modal-warning">Esta ação não pode ser desfeita.</p>
+                    <div className="delete-modal-actions">
+                      <button 
+                        className="delete-modal-cancel" 
+                        onClick={() => setShowDeleteModal(false)}
+                        disabled={isDeleting}
+                      >
+                        Cancelar
+                      </button>
+                      <button 
+                        className="delete-modal-confirm" 
+                        onClick={handleExcluir}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? 'Excluindo...' : 'Sim, Excluir'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </form>
           </div>
         </div>

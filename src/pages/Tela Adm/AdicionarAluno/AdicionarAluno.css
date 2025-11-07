@@ -77,6 +77,78 @@
   border-bottom-color: #007bff;
 }
 
+/* Estilos para o wrapper do input de senha */
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  flex: 1;
+  padding-right: 40px; /* Espaço para o ícone */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.password-toggle:hover {
+  color: #007bff;
+}
+
+/* Estilos para os requisitos de senha */
+.password-requirements {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.password-requirements .password-hint {
+  margin: 0 0 6px 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.password-requirements ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.password-requirements .requirement {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #dc3545; /* vermelho por padrão */
+  margin-bottom: 4px;
+}
+
+.password-requirements .requirement.met {
+  color: #28a745; /* verde quando atendido */
+}
+
+.password-requirements .requirement::before {
+  content: '✖';
+  display: inline-block;
+  width: 18px;
+  text-align: center;
+}
+
+.password-requirements .requirement.met::before {
+  content: '✔';
+}
+
 .aluno-action-buttons {
   display: flex;
   justify-content: flex-end;
@@ -84,33 +156,36 @@
   margin-top: 40px;
 }
 
-.aluno-cancel-button,
-.aluno-save-button {
-  padding: 12px 25px;
-  font-size: 1em;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.button-cancelar-aluno,
+.button-salvar-aluno {
+    color: #fff;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 12px 0px 12px 0;
+    /* Apenas duas pontas arredondadas */
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: background 0.2s;
+    box-shadow: none;
 }
 
-.aluno-cancel-button {
-  background-color: #f1f3f5;
-  color: #555;
+.button-cancelar-aluno {
+  background-color: #dc3545;
+  color: #fff;
 }
 
-.aluno-cancel-button:hover {
-  background-color: #e9ecef;
+.button-cancelar-aluno:hover {
+  opacity: 0.85;
 }
 
-.aluno-save-button {
-  background-color: #007bff;
+.button-salvar-aluno {
+  background-color: #28a745;
   color: #ffffff;
 }
 
-.aluno-save-button:hover {
-  background-color: #0056b3;
+.button-salvar-aluno:hover {
+  opacity: 0.85;
 }
 
 
