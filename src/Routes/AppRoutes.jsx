@@ -83,7 +83,7 @@ const AppRoutes = () => {
         <Route path="/Dashboard" element={<Dashboard />} /> {/* Adicione esta linha */}
         <Route path="/GerenciarAlunos" element={<GerenciarAlunos />} /> {/* Adicione esta linha */}
         <Route path="/AdicionarAluno" element={<AdicionarAluno />} /> {/* Adicione esta linha */}
-        <Route path="/EditarAluno" element={<EditarAluno />} /> {/* Adicione esta linha */}
+        <Route path="/EditarAluno/:id" element={<EditarAluno />} /> {/* Rota para edição de aluno */}
         <Route path="/EditarProduto" element={<EditarProduto />} />
         <Route path="/EditarPersonal/:id" element={<EditarPersonal />} /> {/* Nova rota */}
         <Route path="/GerenciarTreino" element={<GerenciarTreino />} /> {/* Nova rota */}
