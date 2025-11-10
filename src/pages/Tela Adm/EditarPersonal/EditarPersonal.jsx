@@ -312,33 +312,6 @@ const EditarPersonal = () => {
                   {isSubmitting ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
-
-              {/* Modal de confirmação de exclusão */}
-              {showDeleteModal && (
-                <div className="delete-modal-overlay">
-                  <div className="delete-modal">
-                    <h2>Confirmar Exclusão</h2>
-                    <p>Tem certeza que deseja excluir este professor?</p>
-                    <p className="delete-modal-warning">Esta ação não pode ser desfeita.</p>
-                    <div className="delete-modal-actions">
-                      <button 
-                        className="delete-modal-cancel" 
-                        onClick={() => setShowDeleteModal(false)}
-                        disabled={isDeleting}
-                      >
-                        Cancelar
-                      </button>
-                      <button 
-                        className="delete-modal-confirm" 
-                        onClick={handleExcluir}
-                        disabled={isDeleting}
-                      >
-                        {isDeleting ? 'Excluindo...' : 'Sim, Excluir'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </form>
           </div>
         </div>

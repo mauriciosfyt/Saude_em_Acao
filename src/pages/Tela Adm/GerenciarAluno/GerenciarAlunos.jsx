@@ -142,23 +142,27 @@ const GerenciarAlunos = () => {
                     <td>{aluno.email || 'N/A'}</td>
                     <td>{aluno.funcao || 'Aluno'}</td>
                     <td>
-                      <button
-                        className="alunos-treino-link"
-                        onClick={() => handleOpenModal(aluno)}
-                        aria-label={`Gerenciar treino de ${aluno.nome}`}
-                      >
-                        Gerenciar
-                      </button>
-                      {selectedTreinos[aluno.id] && (
-                        <div className="treino-chosen" title={`Treino escolhido: ${selectedTreinos[aluno.id].title}`}>
-                          <span className="treino-dot" aria-hidden="true" />
-                          <span className="treino-title">{selectedTreinos[aluno.id].title}</span>
-                        </div>
-                      )}
+                      {aluno.plano?.toLowerCase?.() === 'gold' ? (
+                        <>
+                          <button
+                            className="alunos-treino-link"
+                            onClick={() => handleOpenModal(aluno)}
+                            aria-label={`Gerenciar treino de ${aluno.nome}`}
+                          >
+                            Gerenciar
+                          </button>
+                          {selectedTreinos[aluno.id] && (
+                            <div className="treino-chosen" title={`Treino escolhido: ${selectedTreinos[aluno.id].title}`}>
+                              <span className="treino-dot" aria-hidden="true" />
+                              <span className="treino-title">{selectedTreinos[aluno.id].title}</span>
+                            </div>
+                          )}
+                        </>
+                      ) : null}
                     </td>
                     <td>
                       <Link 
-                        to={`/editar-aluno/${aluno.id}`} 
+                        to={`/EditarAluno/${aluno.id}`} 
                         className="alunos-action-link-edit"
                       >
                         Editar

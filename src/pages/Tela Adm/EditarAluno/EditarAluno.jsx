@@ -342,7 +342,7 @@ const EditarAluno = () => {
               <div className="editar-aluno-actions">
                 <button 
                   type="button" 
-                  className="editar-aluno-cancel" 
+                  className="editar-personal-cancel" 
                   onClick={handleCancelar}
                   disabled={isSubmitting || isDeleting}
                 >
@@ -350,46 +350,12 @@ const EditarAluno = () => {
                 </button>
                 <button 
                   type="submit" 
-                  className="editar-aluno-save"
+                  className="editar-personal-save"
                   disabled={isSubmitting || isDeleting}
                 >
                   {isSubmitting ? 'Salvando...' : 'Salvar'}
                 </button>
-                <button
-                  type="button"
-                  className="editar-aluno-delete"
-                  onClick={() => setShowDeleteModal(true)}
-                  disabled={isSubmitting || isDeleting}
-                >
-                  Excluir
-                </button>
               </div>
-
-              {showDeleteModal && (
-                <div className="delete-modal-overlay">
-                  <div className="delete-modal">
-                    <h2>Confirmar Exclusão</h2>
-                    <p>Tem certeza que deseja excluir este aluno?</p>
-                    <p className="delete-modal-warning">Esta ação não pode ser desfeita.</p>
-                    <div className="delete-modal-actions">
-                      <button 
-                        className="delete-modal-cancel" 
-                        onClick={() => setShowDeleteModal(false)}
-                        disabled={isDeleting}
-                      >
-                        Cancelar
-                      </button>
-                      <button 
-                        className="delete-modal-confirm" 
-                        onClick={handleExcluir}
-                        disabled={isDeleting}
-                      >
-                        {isDeleting ? 'Excluindo...' : 'Sim, Excluir'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </form>
           </div>
         </div>
