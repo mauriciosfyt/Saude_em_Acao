@@ -12,6 +12,10 @@ const Header = () => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 799);
   
+  // --- ADIÇÃO 1: Estado para controlar o valor da barra de pesquisa ---
+  const [termoBusca, setTermoBusca] = useState('');
+  // -------------------------------------------------------------------
+
   // Obtém o token de forma robusta
   const getRawTokenFromLocalStorage = () => {
     try {
@@ -129,6 +133,19 @@ const Header = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // --- ADIÇÃO 2: Função para lidar com a pesquisa ---
+  const handleSearch = (e) => {
+    e.preventDefault(); // Impede o recarregamento da página
+    const query = termoBusca.trim();
+    if (query) {
+      // Navega para a PÁGINA DE BUSCA com o termo
+      navigate(`/busca?nome=${encodeURIComponent(query)}`);
+      // Opcional: setTermoBusca('');
+    }
+  };
+  // ---------------------------------------------------
+
   return (
     <>
       {/* Cabeçalho principal */}
@@ -163,16 +180,18 @@ const Header = () => {
               </Link>
             </div>
 
-            <div className="search-bar">
+            {/* --- MUDANÇA (Mobile): "div" virou "form" --- */}
+            <form className="search-bar" onSubmit={handleSearch}>
               <input
                 type="text"
                 placeholder="Buscar pelo nome do produto"
+                value={termoBusca}
+                onChange={(e) => setTermoBusca(e.target.value)}
               />
-              <button className="search-button">
+              <button type="submit" className="search-button">
                 <FaSearch className="icon_navegacao" />
               </button>
-            </div>
-
+            </form>
           </div>
         ) : (
           // JSX para telas maiores
@@ -181,15 +200,19 @@ const Header = () => {
               <img src={logo} alt="Logo da Empresa" className="logo-img" />
             </div>
 
-            <div className="search-bar">
+            {/* --- MUDANÇA (Desktop): "div" virou "form" --- */}
+            <form className="search-bar" onSubmit={handleSearch}>
               <input
                 type="text"
                 placeholder="Buscar pelo nome do produto"
+                value={termoBusca}
+                onChange={(e) => setTermoBusca(e.target.value)}
               />
-              <button className="search-button">
+              <button type="submit" className="search-button">
                 <FaSearch className="icon_navegacao" />
               </button>
-            </div>
+            </form>
+            {/* --- FIM DA MUDANÇA --- */}
 
             <div className="header-actions">
               <button

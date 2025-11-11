@@ -4,7 +4,8 @@ import { FaShoppingCart, FaUser, FaSearch } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
 import logo from "../../assets/logo_dia.png";
 import { useAuth } from "../../contexts/AuthContext";
-import { Link } from "react-router-dom";
+// --- ADIÇÃO 1: Importar Link e useNavigate ---
+import { Link, useNavigate } from "react-router-dom";
 
 // Importando os modais refatorados (nomes corrigidos sem espaços)
 import ModalLogin from "../../components/modal_login/ModalLogin";
@@ -15,6 +16,8 @@ import ModalAlterarSenha from "../../components/modal_login/ModalAlterarSenha";
 
 const Header_nLogin = () => {
   const { isAuthenticated, logout } = useAuth();
+  // --- ADIÇÃO 2: Instanciar o useNavigate ---
+  const navigate = useNavigate(); 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 799);
   const [showModal, setShowModal] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
@@ -26,8 +29,9 @@ const Header_nLogin = () => {
   const [recoverEmail, setRecoverEmail] = useState("");
   const [recoverToken, setRecoverToken] = useState("");
 
-  // Removi o useEffect que usava historiaRef e setShowHistoria
-  // Se quiser esse efeito depois, me avisa!
+  // --- ADIÇÃO 3: Estado para a barra de pesquisa ---
+  const [termoBusca, setTermoBusca] = useState('');
+  // -------------------------------------------------
 
   const handleCodeChange = (value, idx) => {
     // Aceita letras e números (alphanumeric). Mantém em maiúsculas para
@@ -81,6 +85,17 @@ const Header_nLogin = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // --- ADIÇÃO 4: Função para lidar com a pesquisa ---
+  const handleSearch = (e) => {
+    e.preventDefault(); // Impede o recarregamento da página
+    const query = termoBusca.trim();
+    if (query) {
+      // Navega para a página de busca com o termo
+      navigate(`/busca?nome=${encodeURIComponent(query)}`);
+    }
+  };
+  // -------------------------------------------------
+
   return (
     <>
       {/* Cabeçalho principal */}
@@ -98,15 +113,21 @@ const Header_nLogin = () => {
             >
               {isAuthenticated ? 'Sair' : 'Fazer login'}
             </button>
-            <div className="search-bar">
+            
+            {/* --- MUDANÇA (Mobile): "div" virou "form" --- */}
+            <form className="search-bar" onSubmit={handleSearch}>
               <input
                 type="text"
                 placeholder="Buscar pelo nome do produto"
+                value={termoBusca}
+                onChange={(e) => setTermoBusca(e.target.value)}
               />
-              <button className="search-button">
+              <button type="submit" className="search-button">
                 <FaSearch className="icon_navegacao" />
               </button>
-            </div>
+            </form>
+            {/* --- FIM DA MUDANÇA --- */}
+            
           </div>
         ) : (
           // JSX para telas maiores
@@ -115,15 +136,19 @@ const Header_nLogin = () => {
               <img src={logo} alt="Logo da Empresa" className="logo-img" />
             </div>
 
-            <div className="search-bar">
+            {/* --- MUDANÇA (Desktop): "div" virou "form" --- */}
+            <form className="search-bar" onSubmit={handleSearch}>
               <input
                 type="text"
                 placeholder="Buscar pelo nome do produto"
+                value={termoBusca}
+                onChange={(e) => setTermoBusca(e.target.value)}
               />
-              <button className="search-button">
+              <button type="submit" className="search-button">
                 <FaSearch className="icon_navegacao" />
               </button>
-            </div>
+            </form>
+            {/* --- FIM DA MUDANÇA --- */}
 
             <button
               className="login-button_loja"
@@ -135,7 +160,7 @@ const Header_nLogin = () => {
         )}
       </header>
 
-      {/* Modais separados */}
+      {/* Modais separados (Sem alterações) */}
       {showModal && (
         <ModalLogin
           onClose={closeAllModals}
@@ -185,7 +210,7 @@ const Header_nLogin = () => {
         />
       )}
 
-    {/* Navegação secundária */}
+      {/* Navegação secundária (Sem alterações) */}
       <nav className="nav-links">
         <div className="nav-center">
           <Link to="/">Home</Link>
