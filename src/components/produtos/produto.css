@@ -30,6 +30,7 @@
   justify-content: center;
   gap: 24px;
   flex-wrap: wrap;
+  align-items: flex-start;
 }
 
 .product-card {
@@ -46,7 +47,7 @@
   align-items: center;
   position: relative;
   border-radius: 12px 0px 12px 0;
-
+  min-height: 520px;
 }
 
 .product-card img {
@@ -59,10 +60,13 @@
 
 .product-card h3 {
   font-size: 1.35rem;
-  margin: 16px 0 8px 12px;
+  margin: 16px auto 8px;
   font-weight: 600;
   color: #111;
-  text-align: left;
+  text-align: center;
+  min-height: 60px;
+  width: 90%;
+  display: block;
 }
 
 .product-card p {
@@ -78,7 +82,7 @@
   gap: 10px;
   align-items: center;
   width: 100%;
-  margin-top: 18px;
+  margin-top: auto;
 }
 
 .buy-button,
