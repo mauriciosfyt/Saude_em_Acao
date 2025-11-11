@@ -9,13 +9,25 @@ const getAuthToken = () => {
 };
 
 /**
- * Busca todos os produtos da loja.
+ * Busca todos os produtos da loja, ou filtra por nome.
  * Rota: GET /api/produtos (Pública)
+ * Rota (Filtro): GET /api/produtos?nome=... (Pública)
  */
-export const getAllProdutos = async () => {
+export const getAllProdutos = async (nome = null) => {
   try {
-    console.log('🔍 Buscando produtos...');
-    const response = await fetch(API_URL);
+    // Começa com a URL base
+    let url = API_URL;
+
+    // Se um 'nome' (filtro) foi fornecido, anexa ele à URL
+    if (nome && nome.trim() !== '') {
+      url += `?nome=${encodeURIComponent(nome)}`;
+      console.log(`🔍 Buscando produtos com filtro: ${nome}`);
+    } else {
+      console.log('🔍 Buscando todos os produtos...');
+    }
+
+    // Faz a chamada fetch com a URL (seja ela a base ou a com filtro)
+    const response = await fetch(url);
     
     if (!response.ok) {
       throw new Error(`Erro HTTP ${response.status}: Falha ao buscar produtos`);
@@ -24,6 +36,7 @@ export const getAllProdutos = async () => {
     const data = await response.json();
     console.log('✅ Produtos recebidos:', data);
     return data;
+
   } catch (error) {
     console.error("❌ Erro em getAllProdutos:", error);
     throw error;
@@ -147,7 +160,6 @@ export const updateProduto = async (id, produtoData) => {
     };
 
     if (produtoData instanceof FormData) {
-      // Para FormData (com imagem), o navegador define o Content-Type automaticamente
       body = produtoData;
       console.log('📤 Enviando como FormData');
     } else {
@@ -179,7 +191,6 @@ export const updateProduto = async (id, produtoData) => {
       throw new Error(errorMessage);
     }
 
-    // Tenta parsear a resposta como JSON
     let data;
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
@@ -198,6 +209,7 @@ export const updateProduto = async (id, produtoData) => {
     throw new Error(`Falha ao atualizar produto: ${error.message}`);
   }
 };
+
 /**
  * Exclui um produto.
  * Rota: DELETE /api/produtos/{id} (Admin)
