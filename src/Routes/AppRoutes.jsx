@@ -14,6 +14,8 @@ import Planos from '../pages/Planos/index.jsx';
 import Erro404 from '../pages/Erro404/erro_404.jsx';
 import PerfilPersonal from '../pages/PerfilPersonal/PerfilPersonal.jsx';
 
+import ResultadosBusca from '../pages/Busca/index.jsx';
+
 import GerenciarProduto from '../pages/Tela Adm/GerenciarProduto/index.jsx';
 
 import CategoriaCreatina from '../pages/CategoriaCreatina/index.jsx';
@@ -67,6 +69,8 @@ const AppRoutes = () => {
         <Route path="/ThayFit" element={<ThayFit/>} /> {/* Adicione esta linha */}
         <Route path="/Pilates" element={<Pilates/>} /> {/* Adicione esta linha */}
         <Route path="/Funcional" element={<Funcional/>} /> {/* Adicione esta linha */}
+        <Route path="/Busca" element={<ResultadosBusca/>} /> {/* Adicione esta linha */}
+
 
         <Route path="/CategoriaCreatina" element={<CategoriaCreatina />} />
         <Route path="/CategoriaCamisa" element={<CategoriaCamisa />} />
