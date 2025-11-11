@@ -5,7 +5,6 @@ import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import './Perfil.css'; // Importa o CSS corrigido
 import performLogout from "../../components/LogoutButton/LogoutButton";
-import { getMeuPerfil } from "../../services/usuarioService";
 import { FaTimesCircle } from 'react-icons/fa';
 
 // SVG para o ícone de check circle
@@ -83,68 +82,59 @@ const Perfil = () => {
       return;
     }
 
-    // Tenta buscar os dados completos do usuário via API primeiro
-    const fetchProfile = async () => {
-      try {
-        const perfil = await getMeuPerfil();
-        console.log('Meu perfil (API):', perfil);
+    // Carrega os dados salvos no sessionStorage durante o login
+    const cachedName = sessionStorage.getItem('alunoName') || sessionStorage.getItem('userName');
+    const cachedEmail = sessionStorage.getItem('alunoEmail') || sessionStorage.getItem('userEmail');
+    const cachedTelefone = sessionStorage.getItem('alunoNumero') || sessionStorage.getItem('userNumero');
+    const cachedPlano = sessionStorage.getItem('alunoPlano');
 
-        const nomeApi = perfil.nome || perfil.name || perfil.usuario?.nome || perfil.user?.nome || perfil.fullName || perfil.nome_completo || perfil.nomeCompleto;
-        const emailApi = perfil.email || perfil.usuario?.email || perfil.user?.email || perfil.login;
-        const telefoneApi = perfil.numero || perfil.telefone || perfil.celular || perfil.phone || perfil.user?.phone || perfil.usuario?.telefone;
-  const planoApi = perfil.plano || perfil.plan || perfil.plano_tipo || perfil.plano?.nome || perfil.subscription || perfil.planName || perfil.planoTipo || perfil.plano_assinatura || perfil.planoNome;
+    if (cachedName || cachedEmail) {
+      setUserData((prev) => ({
+        ...prev,
+        nome: cachedName || prev.nome,
+        email: cachedEmail || prev.email,
+        telefone: cachedTelefone || prev.telefone,
+        plano: cachedPlano || prev.plano,
+      }));
+    } else {
+      // Se não houver cache, tenta extrair do token
+      const nome =
+        payload.nome ||
+        payload.name ||
+        payload.user?.nome ||
+        payload.user?.name ||
+        payload.usuario?.nome ||
+        payload.sub?.split("@")[0] ||
+        "Aluno";
 
-        setUserData((prev) => ({
-          ...prev,
-          nome: nomeApi || prev.nome,
-          email: emailApi || prev.email,
-          telefone: telefoneApi || prev.telefone,
-          plano: (planoApi || prev.plano || '').toString(),
-        }));
-      } catch (err) {
-        // Se a chamada à API falhar, faz fallback usando o token (já decodificado)
-        console.warn('Falha ao buscar perfil via API, usando token como fallback:', err);
-        console.log("Decoded token payload (Perfil fallback):", payload);
+      const email =
+        payload.email ||
+        payload.user?.email ||
+        payload.usuario?.email ||
+        payload.sub ||
+        "sem-email@dominio.com";
 
-        const nome =
-          payload.nome ||
-          payload.name ||
-          payload.user?.nome ||
-          payload.user?.name ||
-          payload.usuario?.nome ||
-          payload.sub?.split("@")[0] ||
-          "Aluno";
+      const telefone =
+        payload.numero ||
+        payload.phone ||
+        payload.telefone ||
+        payload.celular ||
+        payload.mobile ||
+        payload.user?.phone ||
+        payload.user?.telefone ||
+        payload.usuario?.telefone ||
+        "(00) 00000-0000";
+      
+      const plano = payload.plano || payload.plan || payload.plano_tipo || payload.planoTipo || payload.subscription || payload.perfil || "";
 
-        const email =
-          payload.email ||
-          payload.user?.email ||
-          payload.usuario?.email ||
-          payload.sub ||
-          "sem-email@dominio.com";
-
-        const telefone =
-          payload.numero ||
-          payload.phone ||
-          payload.telefone ||
-          payload.celular ||
-          payload.mobile ||
-          payload.user?.phone ||
-          payload.user?.telefone ||
-          payload.usuario?.telefone ||
-          "(00) 00000-0000";
-        const planoFallback = payload.plano || payload.plan || payload.plano_tipo || payload.planoTipo || payload.subscription || payload.perfil || "";
-
-        setUserData((prevState) => ({
-          ...prevState,
-          nome,
-          email,
-          telefone,
-          plano: (planoFallback || prevState.plano || '').toString(),
-        }));
-      }
-    };
-
-    fetchProfile();
+      setUserData((prevState) => ({
+        ...prevState,
+        nome,
+        email,
+        telefone,
+        plano: (plano || prevState.plano || '').toString(),
+      }));
+    }
   }, [navigate]);
 
   // Logout agora é tratado pelo componente reutilizável LogoutButton

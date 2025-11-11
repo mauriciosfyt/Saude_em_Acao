@@ -35,15 +35,15 @@ const Planos = () => {
 
       <section className="planos-container">
         <div className="planos-header">
-          <h2>Compare os planos Saúde em Ação disponíveis</h2>
-          <p>Planos acessíveis para você treinar em nossas academias de alto padrão</p>
+          <h2>Compare os planos gold disponíveis:</h2>
+          <p>Planos acessíveis para você treinar em nossas academias de alto padrão.</p>
         </div>
 
         <div className="planos-content">
           <div className="planos-grid">
             {/* Plano básico */}
             <article className="plano-card">
-              <h3 className="plano-title-gold">Plano gold básico</h3>
+              <h3 className="plano-title-gold">Plano Gold Básico</h3>
                 <div className="descricao-text">Ideal para quem está começando ou busca manter a forma com treinos eficazes e supervisionados.</div>
 
               <div className="plano-cta">
@@ -63,7 +63,7 @@ const Planos = () => {
 
             {/* Plano intermediario */}
             <article className="plano-card">
-              <h3 className="plano-title-gold">Plano gold intermediario</h3>
+              <h3 className="plano-title-gold">Plano Gold Intermediario</h3>
                 <div className="descricao-text">Perfeito para quem já tem uma rotina ativa e quer acelerar resultados, com foco em força, resistência e estética corporal.</div>
 
               <div className="plano-cta">
@@ -83,7 +83,7 @@ const Planos = () => {
 
             {/* Plano avançado */}
             <article className="plano-card">
-              <h3 className="plano-title-gold">Plano gold avançado</h3>
+              <h3 className="plano-title-gold">Plano Gold Avançado</h3>
                 <div className="descricao-text">Ideal para quem busca resultados rápidos e treinos intensivos, com foco em performance e superação de limites.</div>
 
               <div className="plano-cta">

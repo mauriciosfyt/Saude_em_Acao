@@ -188,9 +188,9 @@ const GerenciarProduto = () => {
               </tr>
             </thead>
             <tbody className="produto-tbody">
-              {produtosFiltrados.length > 0 ? (
+                {produtosFiltrados.length > 0 ? (
                 produtosFiltrados.map((produto) => (
-                  <tr key={produto.id}>
+                  <tr key={produto.id} className={produto.estoque === 0 ? 'produto-sem-estoque' : ''}>
                     <td>
                       <div className="produto-info">
                         <img src={produto.imagem} alt={produto.nome} className="produto-imagem" />
@@ -201,7 +201,7 @@ const GerenciarProduto = () => {
                       <span className="produto-categoria-text">{produto.categoria}</span>
                     </td>
                     <td>{`R$ ${produto.preco.toFixed(2).replace('.', ',')}`}</td>
-                    <td>{produto.estoque}</td>
+                    <td>{produto.estoque === 0 ? (<span className="produto-sem-estoque-label">Sem estoque</span>) : produto.estoque}</td>
                     <td>
                       <a href="#" onClick={(e) => { e.preventDefault(); handleEditClick(produto.id); }} className="produto-action-link-edit">Edit</a>
                       <a href="#" onClick={(e) => { e.preventDefault(); handleDeleteClick(produto.id); }} className="produto-action-link-delete">Delete</a>

@@ -70,7 +70,7 @@ function Home() {
             >
               <h2>CONHEÇA NOSSA HISTÓRIA</h2>
               <p>
-                A Saúde em Ação nasceu com um propósito de transformar vidas
+                A Saúde em Ação nasceu o propósito de transformar vidas
                 através do movimento.
                 <br />
                 Aqui, cada treino é um passo rumo à sua melhor versão.
@@ -94,7 +94,7 @@ function Home() {
               </span>
             </h2>
             <p className="subtitulo-final">
-              ambiente motivador e planos que cabem no seu bolso
+              Ambiente motivador e planos que cabem no seu bolso.
             </p>
           </div>
         </div>

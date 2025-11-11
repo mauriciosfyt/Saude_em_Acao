@@ -47,12 +47,12 @@ const ThayFit = () => {
       <section className="intro-section">
         <div className="intro-content">
           <p>
-           Nossa academia saúde em ação oferece atividades Thai Fit é um tipo de aula de fitness baseada no Muay Thai, que combina movimentos de arte marcial com exercícios físicos intensos sem o confronto de luta entre os praticantes. O objetivo é melhorar o condicionamento físico, força, agilidade e queimar calorias, sendo uma atividade completa para o corpo e a mente.
+           Nossa academia Saúde em Ação oferece atividades Thai Fit é um tipo de aula de fitness baseada no Muay Thai, que combina movimentos de artes marciais com exercícios físicos intensos sem o confronto de luta entre os praticantes. O objetivo é melhorar o condicionamento físico, força, agilidade e queimar calorias, sendo uma atividade completa para o corpo e a mente.
           </p>
         </div>
       </section>
 
-      <h3 className="contrate-plano">Contrate um plano e venha fazer parte da familia  saúde em ação!</h3>
+      <h3 className="contrate-plano">Contrate um plano e venha fazer parte da familia Saúde em Ação!</h3>
     </main>
 
   <PlanosComponent cardBg="d9d9" />

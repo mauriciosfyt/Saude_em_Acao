@@ -4,7 +4,6 @@ import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import "./PerfilAdm.css";
-import { getMeuPerfil } from "../../services/usuarioService";
 import performLogout from "../../components/LogoutButton/LogoutButton";
 
 const PerfilAdm = () => {
@@ -61,48 +60,38 @@ const PerfilAdm = () => {
       return;
     }
 
-    // Tenta buscar os dados completos do usuário via API primeiro
-    const fetchProfile = async () => {
-      try {
-        const perfil = await getMeuPerfil();
-        console.log('Meu perfil de admin (API):', perfil);
+    // Carrega os dados salvos no sessionStorage durante o login
+    const cachedName = sessionStorage.getItem('adminName');
+    const cachedEmail = sessionStorage.getItem('adminEmail');
+    const cachedPerfil = sessionStorage.getItem('adminPerfil');
 
-        const nomeApi = perfil.nome || perfil.name || perfil.usuario?.nome || perfil.user?.nome || perfil.fullName || perfil.nome_completo || perfil.nomeCompleto;
-        const emailApi = perfil.email || perfil.usuario?.email || perfil.user?.email || perfil.login;
-        const perfilApi = perfil.perfil || perfil.role || perfil.userRole || "ADMIN";
+    if (cachedName || cachedEmail) {
+      setAdminData({
+        nome: cachedName || "",
+        email: cachedEmail || "",
+        perfil: cachedPerfil || "ADMIN",
+      });
+    } else {
+      // Se não houver cache, tenta extrair do token
+      const nome = 
+        payload.nome ||
+        payload.name ||
+        payload.user?.nome ||
+        payload.user?.name ||
+        payload.usuario?.nome ||
+        payload.fullName ||
+        payload.nome_completo ||
+        payload.nomeCompleto ||
+        "Administrador";
+      const email = payload.email || payload.usuario?.email || payload.user?.email || payload.sub || "sem-email@dominio.com";
+      const perfil = payload.perfil || payload.role || payload.userRole || "ADMIN";
 
-        setAdminData({
-          nome: nomeApi || "",
-          email: emailApi || "",
-          perfil: perfilApi,
-        });
-      } catch (err) {
-        // Se a chamada à API falhar, faz fallback usando o token (já decodificado)
-        console.warn('Falha ao buscar perfil via API, usando token como fallback:', err);
-        console.log("Decoded token payload (Admin fallback):", payload);
-
-        const nome = 
-          payload.nome ||
-          payload.name ||
-          payload.user?.nome ||
-          payload.user?.name ||
-          payload.usuario?.nome ||
-          payload.fullName ||
-          payload.nome_completo ||
-          payload.nomeCompleto ||
-          "Administrador";
-        const email = payload.email || payload.usuario?.email || payload.user?.email || payload.sub || "sem-email@dominio.com";
-        const perfil = payload.perfil || payload.role || payload.userRole || "ADMIN";
-
-        setAdminData({
-          nome,
-          email,
-          perfil,
-        });
-      }
-    };
-
-    fetchProfile();
+      setAdminData({
+        nome,
+        email,
+        perfil,
+      });
+    }
   }, [navigate]);
 
 

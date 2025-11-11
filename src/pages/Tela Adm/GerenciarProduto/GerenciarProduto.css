@@ -96,7 +96,9 @@
 /* --- Tabela de Produtos --- */
 .produto-table {
   width: 100%;
-  border-collapse: collapse;
+  /* Usamos separate para permitir bordas arredondadas por linha */
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
 }
 
@@ -174,4 +176,40 @@
     border-radius: 5px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     z-index: 1000;
+}
+
+/* Destaque para produtos sem estoque */
+
+/* Borda contínua ao redor da linha sem mostrar linhas vermelhas entre células */
+.produto-sem-estoque td {
+  /* Apenas borda superior e inferior em todas as células */
+  border-top: 1.5px solid #dc3545;
+  border-bottom: 1.5px solid #dc3545;
+  background-clip: padding-box; /* garante que o radius funcione */
+}
+
+/* Bordas laterais somente na primeira e última célula para evitar linhas internas */
+.produto-sem-estoque td:first-child {
+  border-left: 1.5px solid #dc3545;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+.produto-sem-estoque td:last-child {
+  border-right: 1.5px solid #dc3545;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.produto-sem-estoque .produto-info {
+  opacity: 0.95;
+}
+
+.produto-sem-estoque .produto-imagem {
+  filter: grayscale(40%);
+  opacity: 0.9;
+}
+
+.produto-sem-estoque-label {
+  color: #dc3545;
+  font-weight: 700;
 }
