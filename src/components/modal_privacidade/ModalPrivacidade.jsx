@@ -46,15 +46,15 @@ const ModalPrivacidade = ({ onConcordo, onClose }) => {
         {/* Conteúdo da política */}
         <div className="modal-termos-content">
           <p>
-            A sua privacidade é importante para nós. Esta política explica como coletamos, usamos, armazenamos e protegemos seus dados ao utilizar a plataforma da equipe saúde em ação.<br /><br />
+            A sua privacidade é importante para nós. Esta política explica como coletamos, usamos, armazenamos e protegemos seus dados ao utilizar a plataforma da equipe Saúde em Ação.<br /><br />
             <strong>1. Coleta de dados</strong><br />
-            Coletamos informações que você fornece ao criar uma conta, como nome, e-mail, telefone, CPF e dados de pagamento (se aplicável).<br />
+            Coletamos informações que você fornece ao criar uma conta, como nome, e-mail, telefone, CPF e dados de reserva.<br />
             Também podemos coletar dados de navegação, como IP, tipo de dispositivo e interações com a plataforma.<br /><br />
             <strong>2. Uso das informações</strong><br />
             Seus dados são utilizados para:<br />
             Fornecer e melhorar nossos serviços;<br />
             Personalizar sua experiência na plataforma;<br />
-            Processar pagamentos e reservas;<br />
+            Processar de reservas;<br />
             Enviar notificações e comunicados;<br />
             Cumprir obrigações legais.<br /><br />
             <strong>3. Compartilhamento de dados</strong><br />

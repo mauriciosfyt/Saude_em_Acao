@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import logo from "../../assets/logo1.png";
 import { loginComToken, setAuthToken } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
+import { getMeuPerfil } from "../../services/usuarioService";
 import ErrorMessage from "./ErrorMessage";
 
 export default function CodeModal({
@@ -77,8 +78,50 @@ export default function CodeModal({
 
       localStorage.setItem("token", jwtToken);
       localStorage.setItem("userEmail", email);
+      sessionStorage.setItem("token", jwtToken);
+      sessionStorage.setItem("userEmail", email);
       setAuthToken(jwtToken);
       login(jwtToken, email);
+
+      // 🔹 Busca os dados do usuário para salvar no sessionStorage
+      try {
+        const perfil = await getMeuPerfil();
+        console.log('Dados do perfil após login:', perfil);
+
+        // Extrai os dados
+        const nome = perfil.nome || perfil.name || perfil.usuario?.nome || perfil.user?.nome || perfil.fullName || perfil.nome_completo || perfil.nomeCompleto || "Usuário";
+        const emailPerfil = perfil.email || perfil.usuario?.email || perfil.user?.email || perfil.login || email;
+        const numero = perfil.numero || perfil.telefone || perfil.phone || perfil.celular || perfil.phoneNumber || "";
+        const perfilTipo = perfil.perfil || perfil.role || perfil.userRole || "USUARIO";
+
+        // Salva no sessionStorage (genérico)
+        sessionStorage.setItem('userName', nome);
+        sessionStorage.setItem('userEmail', emailPerfil);
+        sessionStorage.setItem('userNumero', numero);
+        sessionStorage.setItem('userPerfil', perfilTipo);
+
+        // Salva também com nome específico de cada tipo de usuário
+        if (perfilTipo.toUpperCase().includes('ADMIN')) {
+          sessionStorage.setItem('adminName', nome);
+          sessionStorage.setItem('adminEmail', emailPerfil);
+          sessionStorage.setItem('adminPerfil', perfilTipo);
+        } else if (perfilTipo.toUpperCase().includes('PERSONAL')) {
+          sessionStorage.setItem('personalName', nome);
+          sessionStorage.setItem('personalEmail', emailPerfil);
+          sessionStorage.setItem('personalNumero', numero);
+          sessionStorage.setItem('personalPerfil', perfilTipo);
+        } else {
+          // Usuário comum (aluno)
+          sessionStorage.setItem('alunoName', nome);
+          sessionStorage.setItem('alunoEmail', emailPerfil);
+          sessionStorage.setItem('alunoNumero', numero);
+          sessionStorage.setItem('alunoPerfil', perfilTipo);
+        }
+      } catch (perfilErr) {
+        console.warn('Não foi possível buscar o perfil completo:', perfilErr);
+        // Salva pelo menos o email no sessionStorage se falhar
+        sessionStorage.setItem('userEmail', email);
+      }
 
       if (onValidate) onValidate(data);
       onClose();

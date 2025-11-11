@@ -46,9 +46,9 @@ const ModalTermos = ({ onConcordo, onClose }) => {
         {/* Conteúdo dos termos */}
         <div className="modal-termos-content">
           <p>
-            Ao usar a aplicação web Equipe Saúde em Ação, você concorda com os seguintes termos:<br /><br />
+            Ao usar a aplicação web da nossa academia Saúde em Ação, você concorda com os seguintes termos:<br /><br />
             <strong>Aceitação:</strong> Ao acessar a plataforma, você concorda com estes Termos de Uso. Caso não concorde, não utilize a aplicação.<br />
-            <strong>Uso da aplicação:</strong> A plataforma oferece serviços relacionados a treinos, agendamento de aulas e acompanhamento de desempenho. Use-a apenas para fins pessoais e dentro da lei.<br />
+            <strong>Uso da aplicação:</strong> A plataforma oferece serviços relacionados a reservas de produtos, nossos personais e acompanhamento de desempenho. Use-a apenas para fins pessoais e dentro da lei.<br />
             <strong>Cadastro e conta:</strong> Para algumas funcionalidades, será necessário criar uma conta. Você é responsável pela segurança da sua conta.<br />
             <strong>Privacidade:</strong> Seus dados são protegidos conforme nossa política de privacidade.<br />
             <strong>Responsabilidades do usuário:</strong> Não use a aplicação para fins ilegais, ofensivos ou prejudiciais.<br />

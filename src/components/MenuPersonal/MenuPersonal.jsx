@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 // --- ALTERAÇÃO --- Trocamos 'Link' por 'NavLink'
 import { NavLink } from 'react-router-dom';
 import './MenuPersonal.css';
@@ -11,8 +11,18 @@ const UserIcon = () => (
 );
 
 const MenuPersonal = () => {
-  // --- REMOVIDO --- O useState não é mais necessário, o NavLink gerencia o estado ativo.
-  // const [activeItem, setActiveItem] = useState('Personal');
+  // Inicializa com o valor do sessionStorage se existir, senão com "Carregando..."
+  const [personalName, setPersonalName] = useState(() => {
+    return sessionStorage.getItem('personalName') || 'Carregando...';
+  });
+
+  useEffect(() => {
+    // Verifica se o nome já está armazenado no sessionStorage
+    const cachedName = sessionStorage.getItem('personalName');
+    if (cachedName) {
+      setPersonalName(cachedName);
+    }
+  }, []);
 
   const menuItems = [
     { nome: 'Home', path: '/' },
@@ -27,7 +37,7 @@ const MenuPersonal = () => {
         <div className="avatar-circle-personal">
           <UserIcon />
         </div>
-        <h2 className="user-name-personal">Olá Sena</h2>
+        <h2 className="user-name-personal">Olá {personalName}</h2>
       </div>
 
       <nav className="navigation-personal">

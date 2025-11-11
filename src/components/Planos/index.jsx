@@ -27,7 +27,7 @@ function PlanosComponent({ cardBg }) {
 
         <div className="plano-card">
           <h3>Plano Essencial</h3>
-          <p className="descricao">O plano ideal para quem busca mais opções e flexibilidade nos treinos, aproveitando todas as modalidades com ótimo custo-benefício e estrutura completa!</p>
+          <p className="descricao">O plano ideal para quem busca mais opções e flexibilidade nos treinos, aproveitando quase todas as modalidades com ótimo custo-benefício e estrutura completa!</p>
           <p className="preco destaque-preco">R$ 159,90</p>
           <a href="https://api.whatsapp.com/message/7SFQMRX2M76KG1?autoload=1&app_absent=0" target="_blank" rel="noopener noreferrer">
             <button className="plano-btn full">Contratar</button>
