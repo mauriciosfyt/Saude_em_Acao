@@ -1,0 +1,13 @@
+/* Este arquivo importa os estilos que a página CategoriaCamisa já usa.
+  Assim, a página de Busca terá exatamente o mesmo visual.
+*/
+
+/* Importa o CSS genérico de Categorias 
+  (Define o .produto-card, .pagination, etc.) 
+*/
+@import "../../pages/CategoriaVitaminas/Categorias.css";
+
+/* Importa o CSS específico da CategoriaCamisa
+  (Define o .banner-gradient-categoria-camisa, .categoria-container, .produtos-grid, etc.) 
+*/
+@import "../../pages/CategoriaCamisa/CategoriaCamisa.css";
