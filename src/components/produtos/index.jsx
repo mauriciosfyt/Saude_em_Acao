@@ -75,16 +75,37 @@ const ProdutosSection = () => {
   };
   // --- FIM DA NOVA FUNÇÃO ---
 
+
+  {/* =================================================================== */}
+  {/* ================ ALTERAÇÃO DO LOADING COMEÇA AQUI ================= */}
+  {/* =================================================================== */}
   if (loading) {
     return (
       <section className="products-section">
         <h2 className="section-title">Destaques da Loja</h2>
-        <div className="cards-container">
-          <p style={{ textAlign: 'center' }}>Carregando produtos...</p>
+        
+        {/* Usando o mesmo padrão de loading do GerenciarPersonal */}
+        {/* Adicionei um minHeight para dar espaço ao spinner nesta seção */}
+        <div 
+          className="personal-loading" 
+          style={{ 
+            minHeight: '200px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center' 
+          }}
+        >
+          <div className="loading-spinner"></div>
+          Carregando produtos...
         </div>
+        
       </section>
     );
   }
+  {/* =================================================================== */}
+  {/* ================== ALTERAÇÃO DO LOADING TERMINA AQUI ================ */}
+  {/* =================================================================== */}
+
 
   if (error) {
     return <section className="products-section"><h2 className="section-title" style={{color: 'red'}}>Erro: {error}</h2></section>;
