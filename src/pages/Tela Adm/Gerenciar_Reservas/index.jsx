@@ -12,12 +12,11 @@ const formatarData = (dataString) => {
     try {
         const data = new Date(dataString);
         if (isNaN(data.getTime())) return dataString;
+        // Retorna apenas a data (sem hora)
         return new Intl.DateTimeFormat('pt-BR', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
         }).format(data);
     } catch {
         return dataString;
