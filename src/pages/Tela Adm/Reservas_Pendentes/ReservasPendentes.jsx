@@ -208,8 +208,22 @@ const ReservasPendentes = () => {
                 </div>
 
                 <div className="reservas-pendente-list">
-                    {loading && <p className="reservas-pendente-nenhuma-reserva">Carregando reservas...</p>}
-                    {!!erro && !loading && <p className="reservas-pendente-nenhuma-reserva">{erro}</p>}
+                    
+                    {/* ======================= MODIFICAÇÃO AQUI ======================= */}
+                    {loading && (
+                      <div className="personal-loading"> {/* Classe do GerenciarPersonal */}
+                        <div className="loading-spinner"></div> {/* Spinner */}
+                        Carregando reservas...
+                      </div>
+                    )}
+                    
+                    {!!erro && !loading && (
+                        <div className="personal-error" style={{ padding: '20px', textAlign: 'center' }}> {/* Estilo de erro similar */}
+                            <strong>Erro:</strong> {erro}
+                        </div>
+                    )}
+                    {/* ================================================================ */}
+                    
                     
                     {!loading && !erro && reservasFiltradas.length > 0 ? (
                         reservasFiltradas.map(reserva => (

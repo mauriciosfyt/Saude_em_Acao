@@ -113,8 +113,13 @@ const GerenciarAlunos = () => {
           </Link>
         </div>
 
-        {/* Estados de loading e erro */}
-        {loading && <div className="alunos-loading">Carregando alunos...</div>}
+        {/* Estados de loading e erro - MODIFICADO */}
+        {loading && (
+          <div className="personal-loading"> {/* Classe usada para corresponder ao estilo do GerenciarPersonal */}
+            <div className="loading-spinner"></div> {/* Classe usada para o spinner */}
+            Carregando alunos...
+          </div>
+        )}
         {error && <div className="alunos-error">{error}</div>}
 
         {!loading && !error && (

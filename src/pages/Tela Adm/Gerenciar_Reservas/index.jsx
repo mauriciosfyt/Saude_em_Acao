@@ -162,52 +162,65 @@ const GerenciarReservas = () => {
                     )}
                 </div>
 
-                <div className="reservas-list">
-                    {loading && <p className="nenhuma-reserva">Carregando reservas...</p>}
-                    {!!erro && !loading && <p className="nenhuma-reserva">{erro}</p>}
+                {/* ======================= MODIFICAÇÃO AQUI ======================= */}
+                {loading && (
+                  <div className="personal-loading"> {/* Classe do GerenciarPersonal */}
+                    <div className="loading-spinner"></div> {/* Spinner */}
+                    Carregando histórico...
+                  </div>
+                )}
+                
+                {!!erro && !loading && (
+                    <div className="personal-error" style={{ padding: '20px', textAlign: 'center' }}> {/* Estilo de erro similar */}
+                        <strong>Erro:</strong> {erro}
+                    </div>
+                )}
+                
+                {!loading && !erro && (
+                    <div className="reservas-list">
+                        {filteredReservas.length > 0 ? (
+                            filteredReservas.map((reserva) => (
+                                <div key={reserva.id} className="reserva-card">
+                                    <img
+                                        src={fixImageUrl(reserva.imagem)}
+                                        alt={reserva.produto}
+                                        className="reserva-card-image"
+                                        onError={(e) => {
+                                            e.target.src = 'https://placehold.co/100x100/f0f0f0/ccc?text=Sem+Img';
+                                        }}
+                                    />
 
-                    {!loading && !erro && filteredReservas.length > 0 ? (
-                        filteredReservas.map((reserva) => (
-                            <div key={reserva.id} className="reserva-card">
-                                <img
-                                    src={fixImageUrl(reserva.imagem)}
-                                    alt={reserva.produto}
-                                    className="reserva-card-image"
-                                    onError={(e) => {
-                                        e.target.src = 'https://placehold.co/100x100/f0f0f0/ccc?text=Sem+Img';
-                                    }}
-                                />
+                                    <div className="reserva-card-info">
+                                        <p><strong>Nome:</strong> {reserva.nome}</p>
+                                        <p><strong>Produto:</strong> {reserva.produto}</p>
+                                        <p><strong>Email:</strong> {reserva.email}</p>
+                                        <p><strong>Telefone:</strong> {reserva.telefone}</p>
+                                    </div>
 
-                                <div className="reserva-card-info">
-                                    <p><strong>Nome:</strong> {reserva.nome}</p>
-                                    <p><strong>Produto:</strong> {reserva.produto}</p>
-                                    <p><strong>Email:</strong> {reserva.email}</p>
-                                    <p><strong>Telefone:</strong> {reserva.telefone}</p>
+                                    <div className="reserva-card-details">
+                                        <p>
+                                            <strong>Status:</strong>{' '}
+                                            <span className={`status-${reserva.status.toLowerCase()}`}>{reserva.status}</span>
+                                        </p>
+                                        <p><strong>Quantidade:</strong> {reserva.quantidade}</p>
+                                        <p><strong>Tamanho:</strong> {reserva.tamanho}</p>
+                                    </div>
+
+                                    <div className="reserva-card-actions">
+                                        <p className="reserva-price">{reserva.preco}</p>
+                                        <p className="reserva-date">Data: {formatarData(reserva.data)}</p>
+                                    </div>
                                 </div>
-
-                                <div className="reserva-card-details">
-                                    <p>
-                                        <strong>Status:</strong>{' '}
-                                        <span className={`status-${reserva.status.toLowerCase()}`}>{reserva.status}</span>
-                                    </p>
-                                    <p><strong>Quantidade:</strong> {reserva.quantidade}</p>
-                                    <p><strong>Tamanho:</strong> {reserva.tamanho}</p>
-                                </div>
-
-                                <div className="reserva-card-actions">
-                                    <p className="reserva-price">{reserva.preco}</p>
-                                    <p className="reserva-date">Data: {formatarData(reserva.data)}</p>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        !loading && !erro && (
+                            ))
+                        ) : (
                             <p className="nenhuma-reserva">
                                 Nenhuma reserva encontrada para os filtros aplicados.
                             </p>
-                        )
-                    )}
-                </div>
+                        )}
+                    </div>
+                )}
+                {/* ================================================================ */}
+
             </main>
         </div>
     );

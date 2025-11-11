@@ -24,29 +24,30 @@ const GerenciarProduto = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const fetchProdutos = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getAllProdutos();
+      const mapped = data.map((p) => ({
+        id: p.id,
+        nome: p.nome,
+        categoria: p.categoria || 'Sem Categoria',
+        preco: p.preco ?? p.precoPromocional ?? 0,
+        estoque: p.estoqueTotal ?? (p.estoquePorTamanho ? Object.values(p.estoquePorTamanho).reduce((a, b) => a + b, 0) : 0),
+        imagem: p.img || p.imagem || 'https://via.placeholder.com/150',
+      }));
+      setProdutos(mapped);
+      setProdutosFiltrados(mapped);
+    } catch (err) {
+      console.error('Erro ao carregar produtos da API:', err);
+      setError('Não foi possível carregar produtos.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchProdutos = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await getAllProdutos();
-        const mapped = data.map((p) => ({
-          id: p.id,
-          nome: p.nome,
-          categoria: p.categoria || 'Sem Categoria',
-          preco: p.preco ?? p.precoPromocional ?? 0,
-          estoque: p.estoqueTotal ?? (p.estoquePorTamanho ? Object.values(p.estoquePorTamanho).reduce((a, b) => a + b, 0) : 0),
-          imagem: p.img || p.imagem || 'https://via.placeholder.com/150',
-        }));
-        setProdutos(mapped);
-        setProdutosFiltrados(mapped);
-      } catch (err) {
-        console.error('Erro ao carregar produtos da API:', err);
-        setError('Não foi possível carregar produtos.');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchProdutos();
   }, []);
 
@@ -149,47 +150,75 @@ const GerenciarProduto = () => {
           </Link>
         </div>
 
-        {/* O restante do seu componente (tabela) continua igual */}
-        <table className="produto-table">
-          <thead className="produto-thead">
-            <tr>
-              <th>Produto</th>
-              <th>Categoria</th>
-              <th>Preço</th>
-              <th>Estoque</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody className="produto-tbody">
-            {loading ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center' }}>Carregando produtos...</td></tr>
-            ) : error ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'red' }}>{error}</td></tr>
-            ) : produtosFiltrados.length > 0 ? (
-              produtosFiltrados.map((produto) => (
-                <tr key={produto.id}>
-                  <td>
-                    <div className="produto-info">
-                      <img src={produto.imagem} alt={produto.nome} className="produto-imagem" />
-                      <span>{produto.nome}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="produto-categoria-text">{produto.categoria}</span>
-                  </td>
-                  <td>{`R$ ${produto.preco.toFixed(2).replace('.', ',')}`}</td>
-                  <td>{produto.estoque}</td>
-                  <td>
-                    <a href="#" onClick={(e) => { e.preventDefault(); handleEditClick(produto.id); }} className="produto-action-link-edit">Edit</a>
-                    <a href="#" onClick={(e) => { e.preventDefault(); handleDeleteClick(produto.id); }} className="produto-action-link-delete">Delete</a>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr><td colSpan="5" style={{ textAlign: 'center' }}>Nenhum produto encontrado.</td></tr>
-            )}
-          </tbody>
-        </table>
+        {/* =================================================================== */}
+        {/* ================ ALTERAÇÃO DO LOADING COMEÇA AQUI ================= */}
+        {/* =================================================================== */}
+
+        {/* Estados de loading e erro (Estilo do GerenciarPersonal) */}
+        {loading && (
+          <div className="personal-loading"> {/* Classe do GerenciarPersonal */}
+            <div className="loading-spinner"></div> {/* Spinner */}
+            Carregando produtos...
+          </div>
+        )}
+        
+        {error && (
+          <div className="personal-error" style={{ padding: '20px', textAlign: 'center' }}> {/* Estilo de erro similar */}
+            <strong>Erro:</strong> {error}
+            <button 
+              onClick={fetchProdutos}
+              className="retry-button" // (Você precisaria estilizar esta classe)
+              style={{ display: 'block', margin: '10px auto' }}
+            >
+              Tentar Novamente
+            </button>
+          </div>
+        )}
+
+        {/* Tabela só aparece se não estiver carregando e não houver erro */}
+        {!loading && !error && (
+          <table className="produto-table">
+            <thead className="produto-thead">
+              <tr>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Estoque</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody className="produto-tbody">
+              {produtosFiltrados.length > 0 ? (
+                produtosFiltrados.map((produto) => (
+                  <tr key={produto.id}>
+                    <td>
+                      <div className="produto-info">
+                        <img src={produto.imagem} alt={produto.nome} className="produto-imagem" />
+                        <span>{produto.nome}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="produto-categoria-text">{produto.categoria}</span>
+                    </td>
+                    <td>{`R$ ${produto.preco.toFixed(2).replace('.', ',')}`}</td>
+                    <td>{produto.estoque}</td>
+                    <td>
+                      <a href="#" onClick={(e) => { e.preventDefault(); handleEditClick(produto.id); }} className="produto-action-link-edit">Edit</a>
+                      <a href="#" onClick={(e) => { e.preventDefault(); handleDeleteClick(produto.id); }} className="produto-action-link-delete">Delete</a>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan="5" style={{ textAlign: 'center' }}>Nenhum produto encontrado.</td></tr>
+              )}
+            </tbody>
+          </table>
+        )}
+
+        {/* =================================================================== */}
+        {/* ================== ALTERAÇÃO DO LOADING TERMINA AQUI ================ */}
+        {/* =================================================================== */}
+
       </main>
     </div>
   );
