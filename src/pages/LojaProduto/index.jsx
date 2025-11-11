@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+// --- ADIÇÃO 1: Importar o useNavigate ---
+import { useParams, useNavigate } from "react-router-dom"; 
+// ------------------------------------------
 import Header_nLogin from "../../components/header_loja_nLogin";
 import Header_Login from "../../components/header_loja";
 import Footer from "../../components/footer";
@@ -7,10 +9,14 @@ import ProdutosSection from "../../components/produtos";
 import { getProdutoById } from "../../services/produtoService";
 import { useAuth } from "../../contexts/AuthContext";
 import "./LojaProduto.css";
+import { fixImageUrl } from "../../utils/image"; // Importando a função de correção
 
 const LojaProduto = () => {
   const { id } = useParams();
   const { isAuthenticated, loading: authLoading } = useAuth();
+  // --- ADIÇÃO 2: Instanciar o useNavigate ---
+  const navigate = useNavigate(); 
+  // --------------------------------------------
 
   // Cria estados para guardar os dados do produto, o status de carregamento e erros
   const [produto, setProduto] = useState(null);
@@ -48,6 +54,17 @@ const LojaProduto = () => {
     fetchProduto();
   }, [id]); // O [id] faz com que a busca seja refeita se o ID na URL mudar
 
+  // --- ADIÇÃO 3: Função para lidar com o clique do botão ---
+  const handleReservarClick = () => {
+    if (!produto) return;
+
+    // Apenas navega para o Carrinho passando o ID do produto.
+    // O Carrinho.jsx (que você me mandou primeiro) vai
+    // ver o "?add=" e abrir o modal sozinho.
+    navigate(`/Carrinho?add=${produto.id}`);
+  };
+  // --------------------------------------------------------
+
   // Mostra loading enquanto verifica autenticação
   if (authLoading) {
     return (
@@ -58,7 +75,12 @@ const LojaProduto = () => {
         height: '100vh',
         fontSize: '18px'
       }}>
-        Carregando...
+        {/* ======================= (LÓGICA DE LOADING MANTIDA) ======================= */}
+        <div className="personal-loading" style={{ /* Estilos inline removidos para usar a classe */ }}>
+            <div className="loading-spinner"></div>
+            Carregando...
+        </div>
+        {/* ============================================================================== */}
       </div>
     );
   }
@@ -68,7 +90,20 @@ const LojaProduto = () => {
     return (
       <>
         {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
-        <div style={{ textAlign: 'center', padding: '150px' }}>Carregando produto...</div>
+        
+        {/* ======================= (LÓGICA DE LOADING MANTIDA) ======================= */}
+        <div 
+          className="personal-loading" // Classe do GerenciarPersonal para o spinner
+          style={{ 
+            padding: '150px', // Mantém o padding original para centralizar na página
+            /* A classe 'personal-loading' já deve ter display:flex e align-items:center */
+          }}
+        >
+          <div className="loading-spinner"></div>
+          Carregando produto...
+        </div>
+        {/* ================================================================================ */}
+
         <Footer />
       </>
     );
@@ -79,7 +114,16 @@ const LojaProduto = () => {
     return (
       <>
         {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
-        <div style={{ textAlign: 'center', padding: '150px', color: 'red' }}>Erro: {error}</div>
+        {/* Estilo de erro (pode ser padronizado também se quiser) */}
+        <div 
+          className="personal-error" // Usando a classe de erro do personal
+          style={{ 
+            padding: '150px', // Mantém o padding
+            textAlign: 'center' 
+          }}
+        >
+          <strong>Erro:</strong> {error}
+        </div>
         <Footer />
       </>
     );
@@ -98,7 +142,8 @@ const LojaProduto = () => {
       <section className="product-hero">
         <div className="left-section">
           {/* Usa a imagem vinda da API */}
-          <img src={produto.img} alt={produto.nome} className="main-product" />
+          {/* Usei a função 'fixImageUrl' do seu Carrinho.jsx por segurança */}
+          <img src={fixImageUrl(produto.img)} alt={produto.nome} className="main-product" />
           <div className="thumbs">
             {/* Espaço para futuras imagens em miniatura */}
           </div>
@@ -130,17 +175,20 @@ const LojaProduto = () => {
                   <option key={t} value={t}>{`Tamanho ${t} `}</option>
                 ))}
               </select>
-         
+            
             </div>
           )}
 
+          {/* --- ADIÇÃO 4: Conectar o onClick --- */}
           <button
             className="reserve-button"
+            onClick={handleReservarClick} // <-- ADIÇÃO
             disabled={produto.categoria === 'CAMISETAS' && availableSizes.length > 0 && !selectedSize}
             title={produto.categoria === 'CAMISETAS' && availableSizes.length > 0 && !selectedSize ? 'Escolha um tamanho' : ''}
           >
             RESERVAR <span className="cart-icon">🛒</span>
           </button>
+          {/* -------------------------------------- */}
         </div>
       </section>
 

@@ -640,3 +640,77 @@ body {
     width: 100%; /* Faz os botões ocuparem a largura total */
   }
 }
+
+/* ================================== */
+/* Estilos de Loading (Inline)    */
+/* ================================== */
+
+/* Container para o loading inline (dentro do resumo) */
+.carrinho-loading-inline {
+  display: flex;
+  flex-direction: row; /* Lado a lado */
+  align-items: center;
+  justify-content: center; /* Centraliza no card */
+  gap: 10px; /* Espaço entre spinner e texto */
+  font-size: 1rem; /* Texto do tamanho padrão */
+  font-weight: 600;
+  color: #333;
+  padding: 10px 0;
+  border-radius: 8px;
+  background-color: #f4f4f4;
+  margin-bottom: 10px;
+}
+
+/* Spinner pequeno */
+.loading-spinner-inline {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #004DFF; /* Azul do tema */
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite; /* Um pouco mais rápido */
+}
+
+/* Animação (reutilizada se já existir) */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ================================== */
+/* Estilo Carrinho Vazio          */
+/* ================================== */
+.carrinho-vazio-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: #ffffff; /* Fundo branco para destacar */
+  border-radius: 8px;
+  margin-top: 20px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Sombra suave */
+}
+
+.carrinho-vazio-box h3 {
+  font-size: 1.5rem; /* 24px */
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.carrinho-vazio-box p {
+  font-size: 1rem; /* 16px */
+  color: #666;
+  margin-bottom: 24px;
+}
+
+/* Ajuste para o botão .btn-continuar 
+  quando ele está dentro do .carrinho-vazio-box
+*/
+.carrinho-vazio-box .btn-continuar {
+  width: auto; /* Largura automática baseada no texto */
+  padding: 12px 24px; /* Mais preenchimento para um bom clique */
+  font-weight: 600;
+  margin-top: 0; /* Remove qualquer margem superior que ele possa ter */
+}

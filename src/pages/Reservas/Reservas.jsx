@@ -201,8 +201,13 @@ const Reservas = () => {
 
           <div className="container-pedidos">
             {/* Feedback de Carregamento e Erro */}
-            {isLoading && <p style={{textAlign: 'center', margin: '2rem 0'}}>Carregando suas reservas...</p>}
-            
+
+{isLoading && ( 
+  <div className="reservas-loading" style={{ padding: '80px 0' }}>
+    <div className="loading-spinner"></div>
+    <span>Carregando suas reservas...</span>
+  </div>
+)}
             {error && <p className="erro-mensagem" style={{color: 'red', textAlign: 'center'}}>{error}</p>}
             
             {/* Mensagem de 'nenhum pedido' agora considera os filtros */}

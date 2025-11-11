@@ -343,13 +343,30 @@ const Carrinho = () => {
               <span>Todos os produtos</span>
             </div>
           ) : (
-            !loading && !produtoParaSelecionar && <h3 className="carrinho-aviso">Seu carrinho está vazio.</h3>
+            // ==================================================
+            // 👇 AQUI ESTÁ A MUDANÇA 👇
+            // ==================================================
+            !loading && !produtoParaSelecionar && (
+              <div className="carrinho-vazio-box">
+                <h3>Seu carrinho está vazio</h3>
+                <p>Adicione produtos da loja para vê-los aqui.</p>
+                <button 
+                  className="btn-continuar" // Reutiliza a classe do botão "Continuar Comprando"
+                  onClick={irParaLoja}
+                >
+                  Ver produtos
+                </button>
+              </div>
+            )
+            // ==================================================
+            // 👆 FIM DA MUDANÇA 👆
+            // ==================================================
           )}
 
           {produtos.map((produto) => (
             
             <div key={`${produto.id}-${produto.variacaoValor}`} className="carrinho-produto-card">
-            
+              
               <input
                 type="checkbox"
                 checked={produto.selecionado}
@@ -364,7 +381,7 @@ const Carrinho = () => {
                     {produto.variacaoTipo === 'tamanho' ? 'Tamanho:' : 'Sabor:'} {produto.variacaoValor}
                   </span>
                 )}
-          
+              
               </div>
               <div className="quantidade">
                 <button onClick={() => alterarQuantidade(produto.id, produto.variacaoValor, -1)}>-</button>
@@ -383,7 +400,15 @@ const Carrinho = () => {
             <span>R$ {total}</span>
           </div>
 
-          {reservaStatus.loading && <p className="carrinho-aviso">Reservando produtos...</p>}
+          {/* --- SPINNER DE CARREGAMENTO (JÁ INCLUÍDO) --- */}
+          {reservaStatus.loading && (
+            <div className="carrinho-loading-inline">
+              <div className="loading-spinner-inline"></div>
+              <span>Reservando produtos...</span>
+            </div>
+          )}
+          {/* --- FIM DO SPINNER --- */}
+          
           {reservaStatus.error && <p className="carrinho-aviso-erro">{reservaStatus.error}</p>}
           
           <button className="btn-continuar" onClick={irParaLoja}>

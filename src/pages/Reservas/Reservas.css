@@ -258,3 +258,35 @@
   font-weight: 600;
   color: #000;
 }
+
+/* ================================== */
+/* Estilos de Loading         */
+/* ================================== */
+
+/* Container principal do loading (usado em Reservas.jsx) */
+.reservas-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px; /* Espaço entre o spinner e o texto */
+  width: 100%;
+  font-size: 1.1rem; 
+  color: #333; 
+}
+
+/* O spinner giratório */
+.loading-spinner {
+  width: 45px;
+  height: 45px;
+  border: 5px solid #f3f3f3; /* Cinza claro (base) */
+  border-top: 5px solid #004DFF; /* Azul do seu tema */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Animação de rotação */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
