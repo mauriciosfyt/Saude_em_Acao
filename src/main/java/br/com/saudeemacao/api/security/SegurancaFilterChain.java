@@ -1,15 +1,22 @@
 package br.com.saudeemacao.api.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -21,33 +28,62 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // Essencial para @PreAuthorize funcionar nos controllers
+@EnableMethodSecurity
 public class SegurancaFilterChain {
 
     @Autowired
     private SegurancaFilter segurancaFilter;
 
+    @Value("${swagger.admin.username}")
+    private String swaggerAdminUsername;
+
+    @Value("${swagger.admin.password}")
+    private String swaggerAdminPassword;
+
+    @Value("${swagger.admin.role}")
+    private String swaggerAdminRole;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public UserDetailsService swaggerUserDetailsService(PasswordEncoder passwordEncoder) {
+        UserDetails swaggerAdmin = User.withUsername(swaggerAdminUsername)
+                .password(passwordEncoder.encode(swaggerAdminPassword))
+                .roles(swaggerAdminRole)
+                .build();
+        return new InMemoryUserDetailsManager(swaggerAdmin);
+    }
+
+
+    @Bean
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
+                .securityMatcher("/api/**", "/ws-chat/**")
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-
+                        // REGRA 1: ROTAS PÚBLICAS (Nenhuma autenticação necessária)
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/aluno").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/treinos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/treinos/{id}").permitAll()
 
+                        // REGRA 2: ROTAS DE ALUNO (Requerem perfil ALUNO)
+                        .requestMatchers(HttpMethod.POST, "/api/reservas").hasRole("ALUNO")
+                        .requestMatchers(HttpMethod.GET, "/api/reservas/minhas").hasRole("ALUNO")
+                        .requestMatchers(HttpMethod.POST, "/api/treinos/{id}/realizar").hasRole("ALUNO")
+                        .requestMatchers(HttpMethod.GET, "/api/treinos/desempenho-semanal").hasRole("ALUNO")
+                        .requestMatchers(HttpMethod.GET, "/api/treinos/minhas-metricas").hasRole("ALUNO")
 
+                        // REGRA 3: ROTAS DE PROFESSOR E ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/treinos").hasAnyRole("ADMIN", "PROFESSOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/treinos/{id}").hasAnyRole("ADMIN", "PROFESSOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/treinos/{id}").hasAnyRole("ADMIN", "PROFESSOR")
                         .requestMatchers(HttpMethod.GET, "/api/aluno").hasAnyRole("ADMIN", "PROFESSOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/aluno/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/professor").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/professor/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/professor/{id}").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/aluno/{id}").hasAnyRole("ADMIN", "PROFESSOR")
+
+                        // REGRA 4: ROTAS EXCLUSIVAS DE ADMIN (Requerem perfil ADMIN)
+                        .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/produtos").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/produtos/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/produtos/{id}").hasRole("ADMIN")
@@ -55,24 +91,13 @@ public class SegurancaFilterChain {
                         .requestMatchers(HttpMethod.GET, "/api/reservas/stats").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/aprovar").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/rejeitar").hasRole("ADMIN")
-                        .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/api/professor").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/aluno/{id}").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/reservas/{id}/concluir").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/aluno/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/professor").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/professor/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/professor/{id}").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/aluno/{id}/renovar-plano").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/aluno/{id}").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/professor/{id}").authenticated()
-
-
-                        .requestMatchers(HttpMethod.POST, "/api/treinos").hasAnyRole("PROFESSOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/treinos/{id}").hasAnyRole("PROFESSOR", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/treinos/{id}").hasAnyRole("PROFESSOR", "ADMIN")
-
-
-                        .requestMatchers(HttpMethod.POST, "/api/reservas").hasRole("ALUNO")
-                        .requestMatchers(HttpMethod.GET, "/api/reservas/minhas").hasRole("ALUNO")
-                        .requestMatchers(HttpMethod.POST, "/api/treinos/{id}/realizar").hasRole("ALUNO")
-                        .requestMatchers(HttpMethod.GET, "/api/treinos/desempenho-semanal").hasRole("ALUNO")
 
                         .anyRequest().authenticated()
                 )

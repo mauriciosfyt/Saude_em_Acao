@@ -24,19 +24,18 @@ public class SegurancaFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String token = request.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
 
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.replace("Bearer ", "");
-        }
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
 
-        if (token != null && !token.isEmpty()) {
             String username = loginService.validaToken(token);
 
             UserDetails userDetails = loginService.loadUserByUsername(username);
 
             UsernamePasswordAuthenticationToken autenticacao = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
+
             SecurityContextHolder.getContext().setAuthentication(autenticacao);
         }
 
