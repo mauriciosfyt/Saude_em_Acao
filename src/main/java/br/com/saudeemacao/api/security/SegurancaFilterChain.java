@@ -1,22 +1,15 @@
 package br.com.saudeemacao.api.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,42 +21,22 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SegurancaFilterChain {
 
     @Autowired
     private SegurancaFilter segurancaFilter;
 
-    @Value("${swagger.admin.username}")
-    private String swaggerAdminUsername;
-
-    @Value("${swagger.admin.password}")
-    private String swaggerAdminPassword;
-
-    @Value("${swagger.admin.role}")
-    private String swaggerAdminRole;
-
     @Bean
-    public UserDetailsService swaggerUserDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails swaggerAdmin = User.withUsername(swaggerAdminUsername)
-                .password(passwordEncoder.encode(swaggerAdminPassword))
-                .roles(swaggerAdminRole)
-                .build();
-        return new InMemoryUserDetailsManager(swaggerAdmin);
-    }
-
-
-    @Bean
-    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .securityMatcher("/api/**", "/ws-chat/**")
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
                         // REGRA 1: ROTAS PÚBLICAS (Nenhuma autenticação necessária)
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/aluno").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/aluno").permitAll() // Permitir auto-cadastro de alunos
                         .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/treinos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/treinos/{id}").permitAll()
