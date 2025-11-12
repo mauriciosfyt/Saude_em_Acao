@@ -110,6 +110,13 @@ const GerenciarReservas = () => {
                 r.produto.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
+        // Marca uma reserva como RETIRADO no estado local (atualiza a UI imediatamente)
+        const handleMarcarRetirado = (id) => {
+            setReservas((prev) =>
+                prev.map((r) => (r.id === id ? { ...r, status: 'RETIRADO' } : r))
+            );
+        };
+
     return (
         <div style={{ display: 'flex' }}>
             <MenuAdm />
@@ -146,6 +153,12 @@ const GerenciarReservas = () => {
                             onClick={() => setStatusFilter('CANCELADA')}
                         >
                             Canceladas
+                        </button>
+                        <button
+                            className={`filter-btn ${statusFilter === 'RETIRADO' ? 'active' : ''}`}
+                            onClick={() => setStatusFilter('RETIRADO')}
+                        >
+                            Retirado
                         </button>
                     </div>
 
@@ -208,6 +221,18 @@ const GerenciarReservas = () => {
                                     <div className="reserva-card-actions">
                                         <p className="reserva-price">{reserva.preco}</p>
                                         <p className="reserva-date">Data: {formatarData(reserva.data)}</p>
+
+                                        {/* Botão de marcar como RETIRADO (aparece abaixo da data) */}
+                                        {reserva.status !== 'RETIRADO' ? (
+                                            <button
+                                                className="retirado-btn"
+                                                onClick={() => handleMarcarRetirado(reserva.id)}
+                                            >
+                                                Retirado
+                                            </button>
+                                        ) : (
+                                            <span className="status-retirado">Retirado</span>
+                                        )}
                                     </div>
                                 </div>
                             ))

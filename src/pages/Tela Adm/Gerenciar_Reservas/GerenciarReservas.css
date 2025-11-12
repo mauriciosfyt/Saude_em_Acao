@@ -184,6 +184,29 @@
 .status-aprovada { color: #2ecc71; font-weight: bold; }
 .status-cancelada { color: #e74c3c; font-weight: bold; }
 
+/* Status para retirado */
+.status-retirado { color: #0ea5a4; font-weight: bold; }
+
+/* Botão 'Retirado' abaixo da data */
+.retirado-btn {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: #0ea5a4; /* teal */
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.15s ease-in-out, transform 0.08s ease;
+}
+.retirado-btn:hover {
+  background-color: #089989;
+  transform: translateY(-1px);
+}
+.retirado-btn:active {
+  transform: translateY(0);
+}
+
 .nenhuma-reserva {
     text-align: center;
     padding: 40px;
