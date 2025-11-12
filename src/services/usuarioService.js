@@ -109,6 +109,21 @@ export const updateAluno = async (id, dadosAluno) => {
 
     const isFormData = typeof FormData !== 'undefined' && dadosAluno instanceof FormData;
 
+    console.log('🔄 Atualizando aluno:', id);
+    console.log('📦 Tipo de dados:', isFormData ? 'FormData' : 'JSON');
+    
+    if (isFormData) {
+      // Log cada campo do FormData
+      console.log('📋 Campos do FormData:');
+      for (const [key, value] of dadosAluno.entries()) {
+        if (value instanceof File) {
+          console.log(`  - ${key}: File(${value.name}, ${value.type}, ${value.size} bytes)`);
+        } else {
+          console.log(`  - ${key}: ${value}`);
+        }
+      }
+    }
+
     const response = await fetch(`${API_URL}/aluno/${encodeURIComponent(id)}`, {
       method: 'PUT',
       headers: isFormData ? {
@@ -123,6 +138,7 @@ export const updateAluno = async (id, dadosAluno) => {
     const responseText = await response.text();
 
     if (!response.ok) {
+      console.error('❌ Erro na resposta:', response.status, responseText);
       try {
         const erroJson = JSON.parse(responseText);
         throw new Error(erroJson.message || 'Falha ao atualizar aluno.');
@@ -130,6 +146,8 @@ export const updateAluno = async (id, dadosAluno) => {
         throw new Error(responseText || 'Falha ao atualizar aluno.');
       }
     }
+
+    console.log('✅ Aluno atualizado com sucesso!');
 
     if (responseText.length === 0) {
       return { success: true, message: 'Atualizado com sucesso.' };
