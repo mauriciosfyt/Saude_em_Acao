@@ -213,6 +213,24 @@
   display: block;
 }
 
+/* Botão de desfazer alteração de imagem */
+.editar-personal-image-section button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+.editar-personal-image-section button:hover {
+  background-color: #c82333;
+}
+
 /* Password requirement styles */
 .password-requirements {
   margin-top: 6px;

@@ -261,13 +261,7 @@ const EditarProduto = () => {
           break;
       }
 
-      console.log('🧮 Total em estoque:', totalEstoque);
 
-      // Log para debug
-      console.log('📤 Dados sendo enviados:');
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
 
       await updateProduto(produtoId, formData);
 
@@ -334,11 +328,6 @@ const EditarProduto = () => {
             Definir Estoque
           </button>
         </div>
-        
-        {/* Debug do estoque atual */}
-        <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-          Itens com estoque: {itens.length}
-        </div>
       </div>
     );
   };
@@ -349,19 +338,7 @@ const EditarProduto = () => {
       <main className="editar-produto-container">
         <h1 className="editar-produto-main-title">Editar Produto</h1>
 
-        {/* Debug info */}
-        <div style={{ 
-          padding: '10px', 
-          background: '#e9ecef', 
-          borderRadius: '4px',
-          marginBottom: '20px',
-          fontSize: '12px'
-        }}>
-          <strong>Debug:</strong> ID: {produtoId} | 
-          Categoria: {dadosFormulario.categoria} | 
-          Estoque: {JSON.stringify(estoquePorVariacao)} |
-          Modal: {modalAberto ? 'Aberto' : 'Fechado'}
-        </div>
+        
 
         {error && (
           <div style={{ 

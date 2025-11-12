@@ -57,6 +57,7 @@ const EditarPersonal = () => {
 
   const [imagemPreview, setImagemPreview] = useState(null);
   const [imagemFile, setImagemFile] = useState(null);
+  const [imagemOriginal, setImagemOriginal] = useState(null); // URL original do servidor
   const [isSubmitting, setIsSubmitting] = useState(false);
   // validation state is derived from formData.senha, we compute on render
 
@@ -88,7 +89,9 @@ const EditarPersonal = () => {
           const baseServer = API_URL.replace(/\/api$/, ''); // ex: http://34.205.11.57
           const isAbsolute = /^https?:\/\//i.test(foto);
           const fotoUrl = isAbsolute ? foto : (foto.startsWith('/') ? `${baseServer}${foto}` : `${baseServer}/${foto}`);
-          setImagemPreview(fotoUrl);
+          setImagemOriginal(fotoUrl); // Salva URL original
+          setImagemPreview(fotoUrl); // Mostra preview inicial
+          setImagemFile(null); // Limpa o arquivo selecionado
         }
       } catch (err) {
         console.error('Falha ao obter dados do personal:', err);
@@ -120,8 +123,41 @@ const EditarPersonal = () => {
   const handleImagemChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImagemPreview(URL.createObjectURL(file));
+      // Validação de tamanho (máx 5MB)
+      const maxSizeMB = 5;
+      const maxSizeBytes = maxSizeMB * 1024 * 1024;
+      
+      if (file.size > maxSizeBytes) {
+        alert(`A imagem deve ter no máximo ${maxSizeMB}MB. Tamanho atual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        return;
+      }
+
+      // Validação de tipo
+      const tiposAceitos = ['image/png', 'image/jpeg', 'image/webp'];
+      if (!tiposAceitos.includes(file.type)) {
+        alert('Por favor, selecione uma imagem válida (PNG, JPEG ou WebP)');
+        return;
+      }
+
+      console.log('📸 Imagem selecionada:', file.name, 'Tipo:', file.type, 'Tamanho:', (file.size / 1024).toFixed(2) + 'KB');
+      
+      // Criar nova URL local para preview
+      const novaPreview = URL.createObjectURL(file);
+      console.log('🖼️ Preview URL criada:', novaPreview);
+      
+      // Limpar URL anterior se for local
+      if (imagemPreview && imagemPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(imagemPreview);
+        console.log('🗑️ URL anterior limpa');
+      }
+      
+      // Atualizar estado
       setImagemFile(file);
+      setImagemPreview(novaPreview);
+      
+      console.log('✅ Nova imagem pronta para envio');
+    } else {
+      console.warn('⚠️ Nenhum arquivo selecionado');
     }
   };
 
@@ -165,12 +201,16 @@ const EditarPersonal = () => {
       if (formData.senha) {
         dados.append('senha', formData.senha);
       }
+      
       // Anexa imagem se houver
       if (imagemFile) {
-        // campo 'foto' é o mais provável; se sua API esperar outro nome, troque aqui (ex: 'imagem' ou 'fotoPerfil')
-        dados.append('foto', imagemFile);
+        console.log('✅ Imagem será enviada:', imagemFile.name, imagemFile.type);
+        dados.append('fotoPerfil', imagemFile); // Usar 'fotoPerfil' consistente com criar
+      } else {
+        console.warn('⚠️ Nenhuma imagem para enviar');
       }
 
+      console.log('📤 Enviando dados do personal para API...');
       // Chama a função do serviço que envia o PUT multipart/form-data
       await updateProfessor(id, dados);
 
@@ -209,6 +249,18 @@ const EditarPersonal = () => {
               onChange={handleImagemChange}
               accept="image/png, image/jpeg, image/webp"
             />
+            {imagemFile && (
+              <button
+                type="button"
+                onClick={() => {
+                  setImagemFile(null);
+                  setImagemPreview(imagemOriginal);
+                  console.log('🔄 Imagem resetada para original');
+                }}
+              >
+                Desfazer alteração
+              </button>
+            )}
           </div>
 
           <div className="editar-personal-fields-section">
