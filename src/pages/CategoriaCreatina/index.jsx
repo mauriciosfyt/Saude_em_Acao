@@ -1,76 +1,84 @@
-import React, { useState, useEffect } from "react"; // 1. Importar hooks
+import React, { useState, useEffect, useCallback } from "react"; // 1. Importar useCallback
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/footer";
 import banner from "../../assets/banners/banner_creatina.svg";
-// 2. Imports de produtos estáticos removidos
-import "../../pages/CategoriaVitaminas/Categorias.css"; // Estilo compartilhado
+import "../../pages/CategoriaVitaminas/Categorias.css"; // Estilo compartilhado (onde o CSS do spinner deve ir)
 import Header_nLogin from "../../components/header_loja_nLogin";
 import Header_Login from "../../components/header_loja";
 import { useAuth } from "../../contexts/AuthContext";
-
-// 3. Importar o serviço da API
 import { getProdutosByCategoria } from "../../services/produtoService";
+
+// --- Função Helper de Estoque (Sem alterações) ---
+const calcularEstoqueTotal = (produto) => {
+  if (typeof produto.estoquePadrao === 'number') {
+    return produto.estoquePadrao;
+  }
+  if (produto.estoquePorSabor && typeof produto.estoquePorSabor === 'object') {
+    return Object.values(produto.estoquePorSabor).reduce((total, qtd) => total + (Number(qtd) || 0), 0);
+  }
+  if (produto.estoquePorTamanho && typeof produto.estoquePorTamanho === 'object') {
+    return Object.values(produto.estoquePorTamanho).reduce((total, qtd) => total + (Number(qtd) || 0), 0);
+  }
+  return 0;
+};
+// --- Fim da Função Helper ---
+
 
 const CategoriaCreatina = () => {
   const navigate = useNavigate();
-  // 4. Renomear 'loading' de auth para evitar conflitos
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // 5. Estados para produtos da API, loading e erro
   const [produtos, setProdutos] = useState([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 6. Array de produtos estáticos removido
+  // --- 2. fetchProdutos MOVIDO PARA FORA DO useEffect ---
+  // Envolvido com useCallback para ser chamado pelo useEffect e pelo botão "Tentar Novamente"
+  const fetchProdutos = useCallback(async () => {
+    setIsDataLoading(true); // Mostra o spinner
+    setError(null);
+    try {
+      const data = await getProdutosByCategoria("CREATINA");
 
-  // 7. useEffect para buscar e FILTRAR dados da API
+      const produtosFiltrados = data.filter((p) => {
+        const categoriaCorreta = p.categoria === "CREATINA";
+        const temEstoque = calcularEstoqueTotal(p) > 0;
+        return categoriaCorreta && temEstoque;
+      });
+
+      console.log(`API retornou ${data.length} produtos.`);
+      console.log(
+        `Filtrados no frontend para ${produtosFiltrados.length} (categoria CREATINA e com estoque > 0).`
+      );
+
+      const produtosFormatados = produtosFiltrados.map((prod) => ({
+        ...prod,
+        imagem: prod.img,
+        precoFormatado: new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(prod.preco),
+      }));
+
+      setProdutos(produtosFormatados);
+    } catch (err) {
+      console.error("Erro ao buscar produtos da categoria 'CREATINA':", err);
+      setError(
+        "Não foi possível carregar os produtos. Tente novamente mais tarde."
+      );
+    } finally {
+      setIsDataLoading(false); // Esconde o spinner
+    }
+  }, []); // O array vazio [] significa que esta função nunca mudará
+
+  // useEffect agora apenas chama a função
   useEffect(() => {
-    const fetchProdutos = async () => {
-      setIsDataLoading(true);
-      setError(null);
-      try {
-        // 1. Chama a API
-        const data = await getProdutosByCategoria("CREATINA");
-
-        // 2. FILTRO NO FRONTEND
-        const produtosFiltrados = data.filter(
-          (p) => p.categoria === "CREATINA"
-        );
-
-        // Log de debug
-        console.log(`API retornou ${data.length} produtos.`);
-        console.log(
-          `Filtrados no frontend para ${produtosFiltrados.length} (categoria CREATINA).`
-        );
-
-        // 3. Mapeia e formata APENAS os produtos filtrados
-        const produtosFormatados = produtosFiltrados.map((prod) => ({
-          ...prod,
-          imagem: prod.img, // Usa 'prod.img'
-          precoFormatado: new Intl.NumberFormat("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          }).format(prod.preco),
-        }));
-
-        // 4. Seta o estado com os produtos corretos
-        setProdutos(produtosFormatados);
-      } catch (err) {
-        console.error("Erro ao buscar produtos da categoria 'CREATINA':", err);
-        setError(
-          "Não foi possível carregar os produtos. Tente novamente mais tarde."
-        );
-      } finally {
-        setIsDataLoading(false);
-      }
-    };
-
     fetchProdutos();
-  }, []); // O array vazio [] garante que isso rode apenas uma vez
+  }, [fetchProdutos]); // Depende da função fetchProdutos definida acima
 
-  // 8. Paginação agora usa o estado 'produtos'
+  // --- Funções de Paginação e Navegação (Sem alterações) ---
   const totalPages = Math.max(1, Math.ceil(produtos.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const visibleProducts = produtos.slice(startIndex, startIndex + itemsPerPage);
@@ -81,26 +89,16 @@ const CategoriaCreatina = () => {
     const el = document.querySelector(".categoria-container");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-
-  const handlePrev = () => gotoPage(currentPage - 1);
-  const handleNext = () => gotoPage(currentPage + 1);
-
-  // 9. irParaDetalhes agora aceita o ID
+  
   const irParaDetalhes = (produtoId) => {
     navigate(`/LojaProduto/${produtoId}`);
   };
 
-  // --- 1. FUNÇÃO ADICIONADA (IGUAL A DE CAMISAS) ---
-  /**
-   * Navega para a página de carrinho, passando o ID do produto
-   * como um query param 'add'.
-   */
   const handleAdicionarAoCarrinho = (produtoId) => {
     navigate(`/carrinho?add=${produtoId}`);
   };
-  // --- FIM DA FUNÇÃO ADICIONADA ---
+  // --- Fim das Funções de Paginação ---
 
-  // Helper de estilo para centralizar mensagens
   const centerStyle = {
     display: "flex",
     justifyContent: "center",
@@ -110,7 +108,7 @@ const CategoriaCreatina = () => {
     color: "#333",
   };
 
-  // 10. Lidar com o loading de autenticação
+  // Loading de autenticação (sem alterações)
   if (authLoading) {
     return (
       <div className="categoria-camisa">
@@ -119,7 +117,7 @@ const CategoriaCreatina = () => {
     );
   }
 
-  // 11. Renderização principal
+  // --- 3. RENDERIZAÇÃO PRINCIPAL ATUALIZADA ---
   return (
     <div className="categoria-camisa">
       {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
@@ -129,81 +127,103 @@ const CategoriaCreatina = () => {
         </section>
 
         <div className="categoria-container">
-          {/* 12. Lidar com loading de DADOS e ERROS */}
-          {isDataLoading ? (
-            <div style={centerStyle}>Carregando produtos...</div>
-          ) : error ? (
-            <div style={centerStyle}>{error}</div>
-          ) : (
+          
+          {/* === INÍCIO DA LÓGICA DE LOADING/ERROR (ESTILO GerenciarPersonal) === */}
+          
+          {isDataLoading && (
+            // Usando as mesmas classes do GerenciarPersonal
+            <div className="personal-loading"> 
+              <div className="loading-spinner"></div>
+              Carregando produtos...
+            </div>
+          )}
+
+          {error && (
+            // Usando as mesmas classes do GerenciarPersonal
+            <div className="personal-error">
+              <strong>Erro:</strong> {error}
+              <button 
+                onClick={fetchProdutos} // Chama a função refatorada
+                className="retry-button"
+              >
+                Tentar Novamente
+              </button>
+            </div>
+          )}
+
+          {!isDataLoading && !error && (
             <>
-              {/* Grid de produtos */}
-              <div className="produtos-grid">
-                {visibleProducts.map((produto) => (
-                  <div
-                    className="produto-card"
-                    key={produto.id}
-                    // --- 2. ONCLICK DO CARD SIMPLIFICADO ---
-                    onClick={() => irParaDetalhes(produto.id)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <img
-                      // 14. Usar a propriedade de imagem vinda da API
-                      src={produto.imagem} // (Mapeado de 'produto.img')
-                      alt={produto.nome}
-                      className="produto-img"
-                    />
-                    <div className="produto-card-content">
-                      <h3 className="produto-nome">{produto.nome}</h3>
-                    </div>
-                    <div className="produto-card-footer">
-                      {/* 15. Usar o preço formatado */}
-                      <p className="produto-preco">
-                        {produto.precoFormatado}
-                      </p>
+              {/* === FIM DA LÓGICA DE LOADING/ERROR === */}
 
-                      {/* --- 3. BOTÃO MODIFICADO (IGUAL A DE CAMISAS) --- */}
-                      <button
-                        className="btn-adicionar" // Classe atualizada
-                        onClick={(e) => {
-                          e.stopPropagation(); // Impede o clique de ir para o card
-                          handleAdicionarAoCarrinho(produto.id); // Chama a função do carrinho
-                        }}
+              {/* Mensagem de "Nenhum produto" (agora dentro do wrapper !loading && !error) */}
+              {produtos.length === 0 ? (
+                 <div style={centerStyle}>Nenhum produto disponível nesta categoria no momento.</div>
+              ) : (
+                <>
+                  {/* Grid de produtos (sem alterações) */}
+                  <div className="produtos-grid">
+                    {visibleProducts.map((produto) => (
+                      <div
+                        className="produto-card"
+                        key={produto.id}
+                        onClick={() => irParaDetalhes(produto.id)}
+                        style={{ cursor: "pointer" }}
                       >
-                        Adicionar ao carrinho {/* Texto atualizado */}
-                      </button>
-                      {/* --- FIM DA MODIFICAÇÃO --- */}
-                    </div>
+                        <img
+                          src={produto.imagem}
+                          alt={produto.nome}
+                          className="produto-img"
+                        />
+                        <div className="produto-card-content">
+                          <h3 className="produto-nome">{produto.nome}</h3>
+                        </div>
+                        <div className="produto-card-footer">
+                          <p className="produto-preco">
+                            {produto.precoFormatado}
+                          </p>
+                          <button
+                            className="btn-adicionar"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAdicionarAoCarrinho(produto.id);
+                            }}
+                          >
+                            Adicionar ao carrinho
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
 
-              {/* Controles de paginação (só mostra se houver mais de 1 página) */}
-              {totalPages > 1 && (
-                <div className="pagination">
-                  <div className="pagination-pages">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (p) => (
-                        <button
-                          key={p}
-                          className={`pagination-number ${
-                            p === currentPage ? "active" : ""
-                          }`}
-                          onClick={(e) => {
-                            // --- 4. STOPPROPAGATION ADICIONADO (BOA PRÁTICA) ---
-                            e.stopPropagation(); // Previne o clique do card
-                            gotoPage(p);
-                          }}
-                          aria-current={p === currentPage ? "page" : undefined}
-                        >
-                          {p}
-                        </button>
-                      )
-                    )}
-                  </div>
-                </div>
+                  {/* Paginação (sem alterações) */}
+                  {totalPages > 1 && (
+                    <div className="pagination">
+                      <div className="pagination-pages">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                          (p) => (
+                            <button
+                              key={p}
+                              className={`pagination-number ${
+                                p === currentPage ? "active" : ""
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                gotoPage(p);
+                              }}
+                              aria-current={p === currentPage ? "page" : undefined}
+                            >
+                              {p}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </>
-          )}
+          )} 
+          {/* Fim do wrapper !isDataLoading && !error */}
         </div>
       </div>
       <Footer />

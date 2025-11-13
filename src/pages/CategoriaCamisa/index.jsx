@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react"; // 1. Importar useCallback
 import { useNavigate } from "react-router-dom";
 import Header_Login from "../../components/header_loja";
 import Header_nLogin from "../../components/header_loja_nLogin";
@@ -8,8 +8,31 @@ import { useAuth } from "../../contexts/AuthContext";
 
 import { getProdutosByCategoria } from "../../services/produtoService";
 
-import "../../pages/CategoriaVitaminas/Categorias.css";
+import "../../pages/CategoriaVitaminas/Categorias.css"; // Estilo compartilhado (deve conter o CSS do spinner)
 import "./CategoriaCamisa.css";
+
+// --- 2. NOVA FUNÇÃO HELPER PARA CALCULAR ESTOQUE TOTAL ---
+/**
+ * Calcula o estoque total de um produto, independentemente do seu tipo.
+ */
+const calcularEstoqueTotal = (produto) => {
+  // 1. Estoque Padrão (ex: Vitaminas)
+  if (typeof produto.estoquePadrao === 'number') {
+    return produto.estoquePadrao;
+  }
+  // 2. Estoque por Sabor (ex: Whey, Creatina)
+  if (produto.estoquePorSabor && typeof produto.estoquePorSabor === 'object') {
+    return Object.values(produto.estoquePorSabor).reduce((total, qtd) => total + (Number(qtd) || 0), 0);
+  }
+  // 3. Estoque por Tamanho (ex: Camisetas)
+  if (produto.estoquePorTamanho && typeof produto.estoquePorTamanho === 'object') {
+    return Object.values(produto.estoquePorTamanho).reduce((total, qtd) => total + (Number(qtd) || 0), 0);
+  }
+  // 4. Fallback
+  return 0;
+};
+// --- FIM DA FUNÇÃO HELPER ---
+
 
 const CategoriaCamisa = () => {
   const navigate = useNavigate();
@@ -21,65 +44,63 @@ const CategoriaCamisa = () => {
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // --- 3. fetchProdutos MOVIDO PARA FORA DO useEffect (com useCallback) ---
+  const fetchProdutos = useCallback(async () => {
+    setIsDataLoading(true);
+    setError(null);
+    try {
+      const data = await getProdutosByCategoria("CAMISETAS");
+
+      // --- 4. FILTRO DE ESTOQUE ADICIONADO ---
+      const produtosFiltrados = data.filter((p) => {
+          const categoriaCorreta = p.categoria === "CAMISETAS";
+          const temEstoque = calcularEstoqueTotal(p) > 0; // Usando a helper
+          return categoriaCorreta && temEstoque;
+        });
+
+      console.log(`API retornou ${data.length} produtos.`);
+      console.log(
+        `Filtrados no frontend para ${produtosFiltrados.length} (categoria CAMISETAS e com estoque > 0).` // Log atualizado
+      );
+
+      const produtosFormatados = produtosFiltrados.map((prod) => ({
+        ...prod,
+        imagem: prod.img,
+        precoFormatado: new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(prod.preco),
+      }));
+
+      setProdutos(produtosFormatados);
+      
+    } catch (err) {
+      console.error(
+        "Erro ao buscar produtos da categoria 'CAMISETAS':",
+        err
+      );
+      setError(
+        "Não foi possível carregar os produtos. Tente novamente mais tarde."
+      );
+    } finally {
+      setIsDataLoading(false);
+    }
+  }, []); // Array de dependência vazio
+
+  // useEffect agora apenas chama a função
   useEffect(() => {
-    const fetchProdutos = async () => {
-      setIsDataLoading(true);
-      setError(null);
-      try {
-        const data = await getProdutosByCategoria("CAMISETAS");
-
-        // (O filtro no frontend estava correto, vamos mantê-lo)
-        const produtosFiltrados = data.filter(
-          (p) => p.categoria === "CAMISETAS"
-        );
-
-        console.log(`API retornou ${data.length} produtos.`);
-        console.log(
-          `Filtrados no frontend para ${produtosFiltrados.length} (categoria CAMISETAS).`
-        );
-
-        const produtosFormatados = produtosFiltrados.map((prod) => ({
-          ...prod,
-          imagem: prod.img, // Correção da API
-          precoFormatado: new Intl.NumberFormat("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          }).format(prod.preco),
-        }));
-
-        setProdutos(produtosFormatados);
-        
-      } catch (err) {
-        console.error(
-          "Erro ao buscar produtos da categoria 'CAMISETAS':",
-          err
-        );
-        setError(
-          "Não foi possível carregar os produtos. Tente novamente mais tarde."
-        );
-      } finally {
-        setIsDataLoading(false);
-      }
-    };
-
     fetchProdutos();
-  }, []);
+  }, [fetchProdutos]);
 
+  // --- Funções de Navegação e Paginação (Sem alterações) ---
   const irParaDetalhes = (produtoId) => {
     navigate(`/LojaProduto/${produtoId}`);
   };
 
-  // --- NOVA FUNÇÃO ADICIONADA ---
-  /**
-   * Navega para a página de carrinho, passando o ID do produto
-   * como um query param 'add'.
-   */
   const handleAdicionarAoCarrinho = (produtoId) => {
     navigate(`/carrinho?add=${produtoId}`);
   };
-  // --- FIM DA NOVA FUNÇÃO ---
 
-  // Lógica de Paginação (sem alteração)
   const totalPages = Math.max(1, Math.ceil(produtos.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const visibleProducts = produtos.slice(startIndex, startIndex + itemsPerPage);
@@ -90,17 +111,27 @@ const CategoriaCamisa = () => {
     const el = document.querySelector(".categoria-container");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+  // --- Fim das Funções (Sem alterações) ---
 
-  // ... (handlePrev, handleNext, centerStyle - sem alteração)
+  // Helper de estilo para centralizar (usado no auth loading e no "nenhum produto")
+  const centerStyle = {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "50vh",
+    fontSize: "18px",
+    color: "#333",
+  };
 
   if (authLoading) {
     return (
       <div className="categoria-camisa">
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>Carregando...</div>
+        <div style={{ ...centerStyle, height: "100vh" }}>Carregando...</div>
       </div>
     );
   }
 
+  // --- 5. RENDERIZAÇÃO PRINCIPAL ATUALIZADA (com loading/error) ---
   return (
     <div className="categoria-camisa">
       {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
@@ -110,76 +141,99 @@ const CategoriaCamisa = () => {
         </section>
 
         <div className="categoria-container">
-          {isDataLoading ? (
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>Carregando produtos...</div>
-          ) : error ? (
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>{error}</div>
-          ) : (
+          
+          {/* === INÍCIO DA LÓGICA DE LOADING/ERROR (ESTILO GerenciarPersonal) === */}
+          
+          {isDataLoading && (
+            <div className="personal-loading"> 
+              <div className="loading-spinner"></div>
+              Carregando produtos...
+            </div>
+          )}
+
+          {error && (
+            <div className="personal-error">
+              <strong>Erro:</strong> {error}
+              <button 
+                onClick={fetchProdutos} // Chama a função refatorada
+                className="retry-button"
+              >
+                Tentar Novamente
+              </button>
+            </div>
+          )}
+
+          {!isDataLoading && !error && (
             <>
-              <div className="produtos-grid">
-                {visibleProducts.map((produto) => (
-                  <div
-                    className="produto-card"
-                    key={produto.id}
-                    // --- ONCLICK DO CARD SIMPLIFICADO ---
-                    // Agora ele só se preocupa em ir para os detalhes
-                    onClick={() => irParaDetalhes(produto.id)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <img
-                      src={produto.imagem}
-                      alt={produto.nome}
-                      className="produto-img"
-                    />
-                    <div className="produto-card-content">
-                      <h3 className="produto-nome">{produto.nome}</h3>
-                    </div>
-                    <div className="produto-card-footer">
-                      <p className="produto-preco">{produto.precoFormatado}</p>
-                      
-                      {/* --- BOTÃO MODIFICADO --- */}
-                      <button 
-                        className="btn-adicionar" // Classe atualizada
-                        onClick={(e) => {
-                          e.stopPropagation(); // Impede o clique de ir para o card
-                          handleAdicionarAoCarrinho(produto.id); // Chama a função do carrinho
-                        }}
+              {/* === FIM DA LÓGICA DE LOADING/ERROR === */}
+
+              {/* 6. Mensagem de "Nenhum produto" adicionada */}
+              {produtos.length === 0 ? (
+                 <div style={centerStyle}>Nenhum produto disponível nesta categoria no momento.</div>
+              ) : (
+                <>
+                  {/* Grid de produtos (sem alterações) */}
+                  <div className="produtos-grid">
+                    {visibleProducts.map((produto) => (
+                      <div
+                        className="produto-card"
+                        key={produto.id}
+                        onClick={() => irParaDetalhes(produto.id)}
+                        style={{ cursor: "pointer" }}
                       >
-                        Adicionar ao carrinho {/* Texto atualizado */}
-                      </button>
-                      {/* --- FIM DA MODIFICAÇÃO --- */}
+                        <img
+                          src={produto.imagem}
+                          alt={produto.nome}
+                          className="produto-img"
+                        />
+                        <div className="produto-card-content">
+                          <h3 className="produto-nome">{produto.nome}</h3>
+                        </div>
+                        <div className="produto-card-footer">
+                          <p className="produto-preco">{produto.precoFormatado}</p>
+                          <button 
+                            className="btn-adicionar"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAdicionarAoCarrinho(produto.id);
+                            }}
+                          >
+                            Adicionar ao carrinho
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
 
+                  {/* Paginação (sem alterações) */}
+                  {totalPages > 1 && (
+                    <div className="pagination">
+                      <div className="pagination-pages">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                          (p) => (
+                            <button
+                              key={p}
+                              className={`pagination-number ${
+                                p === currentPage ? "active" : ""
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                gotoPage(p);
+                              }}
+                              aria-current={p === currentPage ? "page" : undefined}
+                            >
+                              {p}
+                            </button>
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Paginação (sem alteração) */}
-              {totalPages > 1 && (
-                <div className="pagination">
-                  <div className="pagination-pages">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (p) => (
-                        <button
-                          key={p}
-                          className={`pagination-number ${
-                            p === currentPage ? "active" : ""
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation(); // Previne o clique do card aqui também
-                            gotoPage(p);
-                          }}
-                          aria-current={p === currentPage ? "page" : undefined}
-                        >
-                          {p}
-                        </button>
-                      )
-                    )}
-                  </div>
-                </div>
+                  )}
+                </>
               )}
             </>
-          )}
+          )} 
+          {/* Fim do wrapper !isDataLoading && !error */}
         </div>
       </div>
       <Footer />
