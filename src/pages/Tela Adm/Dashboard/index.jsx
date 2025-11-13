@@ -31,19 +31,30 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (authLoading) return; // aguarda autenticação
+    console.log('[Dashboard] useEffect disparado. authLoading:', authLoading);
+    if (authLoading) {
+      console.log('[Dashboard] ⏳ Aguardando carregamento de autenticação...');
+      return; // aguarda autenticação
+    }
+    console.log('[Dashboard] ✅ Autenticação carregada, iniciando requisições...');
     // Fail-safe: configura Authorization a partir do sessionStorage em caso de reload
     try {
       const tokenStorage = sessionStorage.getItem('token');
-      console.log('[Dashboard] Token no sessionStorage:', tokenStorage ? 'presente' : 'ausente');
+      console.log('[Dashboard] Token no sessionStorage:', tokenStorage ? `${tokenStorage.slice(0, 20)}...` : 'ausente');
+      console.log('[Dashboard] User autenticado:', user?.email || 'não autenticado');
+      if (!tokenStorage) {
+        console.warn('[Dashboard] ⚠️ AVISO: Nenhum token encontrado! Dashboard requer Admin logado.');
+        return;
+      }
       if (tokenStorage) setAuthToken(tokenStorage);
     } catch (_) {}
     let isMounted = true;
     (async () => {
       try {
+        console.log('[Dashboard] 🚀 Chamando fetchDashboardStats()...');
         const dados = await fetchDashboardStats();
         if (isMounted) {
-          console.log('[Dashboard] /api/dashboard/stats resposta:', dados);
+          console.log('[Dashboard] ✅ /api/dashboard/stats resposta:', dados);
           statsRef.current = dados;
           // Tenta mapear as possíveis chaves de total de reservas
           const total =
@@ -55,13 +66,20 @@ const Dashboard = () => {
           setReservasTotal(total);
         }
       } catch (e) {
-        console.error('[Dashboard] Erro ao buscar /api/dashboard/stats:', e);
+        console.error('[Dashboard] ❌ Erro ao buscar /api/dashboard/stats:', e?.response?.status, e?.message);
+        if (e?.response?.status === 403) {
+          console.error('[Dashboard] 🔴 Erro 403: Você não tem permissão. Verifique se é ADMIN e se o token é válido.');
+        }
       }
       try {
         // Busca estatísticas detalhadas de reservas (por produto/categoria)
         const statsReservas = await fetchReservaStats();
         if (isMounted && statsReservas) {
-          console.log('[Dashboard] /api/reservas/stats resposta:', statsReservas);
+          console.log('[Dashboard] ✅ /api/reservas/stats resposta COMPLETA:', statsReservas);
+          console.log('[Dashboard] Tipo da resposta:', typeof statsReservas);
+          console.log('[Dashboard] É Array?', Array.isArray(statsReservas));
+          console.log('[Dashboard] Chaves disponíveis:', Object.keys(statsReservas));
+          
           // Mapeamento tolerante: tenta diversas estruturas comuns
           // 1) Array de objetos: [{ nome: 'Produto A', total: 10, ... }]
           let porProduto = null;
@@ -69,10 +87,13 @@ const Dashboard = () => {
           if (!porProduto && Array.isArray(statsReservas?.porProduto)) porProduto = statsReservas.porProduto;
           if (!porProduto && Array.isArray(statsReservas?.produtos)) porProduto = statsReservas.produtos;
 
+          console.log('[Dashboard] porProduto encontrado?', porProduto ? 'SIM' : 'NÃO', porProduto);
+
           let A = 0, B = 0, C = 0, D = 0;
           if (porProduto) {
             porProduto.forEach((item) => {
               const nome = (item?.nome || item?.produto || item?.produtoNome || '').toString().toLowerCase();
+              console.log('[Dashboard] Processando item:', { nome, item });
               const cat = (item?.categoria || '').toString().toLowerCase();
               const total = Number(item?.total || item?.quantidade || item?.reservas || 0) || 0;
               // A: Camisetas
@@ -112,11 +133,12 @@ const Dashboard = () => {
           console.log('[Dashboard] Totais mapeados -> A:', A, 'B:', B, 'C:', C, 'D:', D);
 
           const breakdown = [
-            { label: 'Produto A', value: A, color: '#2c3e50' },
-            { label: 'Produto B', value: B, color: '#f39c12' },
-            { label: 'Produto C', value: C, color: '#27ae60' },
-            { label: 'Produto D', value: D, color: '#16a085' },
+            { label: 'Camiseta', value: A, color: '#2c3e50' },
+            { label: 'Creatina', value: B, color: '#f39c12' },
+            { label: 'Whey', value: C, color: '#27ae60' },
+            { label: 'Vitamina', value: D, color: '#16a085' },
           ];
+          console.log('[Dashboard] Breakdown ABCD preparado:', breakdown);
           setBreakdownABCD(breakdown);
           if (reservasTotal == null) {
             const soma = A + B + C + D;
@@ -124,16 +146,20 @@ const Dashboard = () => {
           }
           // Se tudo ficou zerado, tenta fallback agregando pela lista de reservas
           const somaStats = (A + B + C + D) || 0;
+          console.log('[Dashboard] Soma stats calculada:', somaStats, 'Tentará fallback?', somaStats === 0);
           if (somaStats === 0) {
             try {
-              const reservas = await fetchReservas({ status: 'APROVADA' });
-              console.log('[Dashboard] Fallback /api/reservas lista (APROVADA):', reservas);
+              console.log('[Dashboard] Iniciando fallback - tentando /api/reservas sem filtro');
+              const reservas = await fetchReservas({});
+              console.log('[Dashboard] Fallback /api/reservas lista (sem filtro):', reservas);
               let A2 = 0, B2 = 0, C2 = 0, D2 = 0;
               const lista = Array.isArray(reservas?.content) ? reservas.content : (Array.isArray(reservas) ? reservas : []);
+              console.log('[Dashboard] Lista de reservas encontrada:', lista.length, 'itens');
               lista.forEach((r) => {
                 const nome = (r?.produto?.nome || r?.produtoNome || r?.nome || '').toString().toLowerCase();
                 const cat = (r?.produto?.categoria || r?.categoria || '').toString().toLowerCase();
                 const qtd = Number(r?.quantidade || 1) || 1;
+                console.log('[Dashboard] Analisando reserva:', { nome, cat, qtd });
                 const isA = nome.includes('camiseta') || nome.includes('camisa') || cat.includes('camiseta') || cat.includes('camisa');
                 const isB = nome.includes('creatina') || cat.includes('creatina');
                 const isC = nome.includes('whey protein') || nome.includes('whey') || cat.includes('whey protein') || cat.includes('whey');
@@ -142,10 +168,10 @@ const Dashboard = () => {
               });
               console.log('[Dashboard] Fallback totais -> A:', A2, 'B:', B2, 'C:', C2, 'D:', D2);
               const fallbackBreakdown = [
-                { label: 'Produto A', value: A2, color: '#2c3e50' },
-                { label: 'Produto B', value: B2, color: '#f39c12' },
-                { label: 'Produto C', value: C2, color: '#27ae60' },
-                { label: 'Produto D', value: D2, color: '#16a085' },
+                { label: 'Camiseta', value: A2, color: '#2c3e50' },
+                { label: 'Creatina', value: B2, color: '#f39c12' },
+                { label: 'Whey', value: C2, color: '#27ae60' },
+                { label: 'Vitamina', value: D2, color: '#16a085' },
               ];
               setBreakdownABCD(fallbackBreakdown);
               const soma2 = A2 + B2 + C2 + D2;
@@ -156,7 +182,10 @@ const Dashboard = () => {
           }
         }
       } catch (e) {
-        console.error('[Dashboard] Erro ao buscar /api/reservas/stats:', e);
+        console.error('[Dashboard] ❌ Erro ao buscar /api/reservas/stats:', e?.response?.status, e?.message);
+        if (e?.response?.status === 403) {
+          console.error('[Dashboard] 🔴 Erro 403: Você não tem permissão de ADMIN para acessar estatísticas.');
+        }
       }
     })();
     return () => { isMounted = false; };
