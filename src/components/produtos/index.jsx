@@ -1,8 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // 1. Importar useCallback
 import { useNavigate } from 'react-router-dom';
 import { getAllProdutos } from '../../services/produtoService';
 import './produto.css';
 import { fixImageUrl } from '../../utils/image';
+
+// --- 2. FUNÇÃO HELPER DE ESTOQUE ADICIONADA ---
+/**
+ * Calcula o estoque total de um produto, independentemente do seu tipo.
+ */
+const calcularEstoqueTotal = (produto) => {
+  // 1. Estoque Padrão (ex: Vitaminas)
+  if (typeof produto.estoquePadrao === 'number') {
+    return produto.estoquePadrao;
+  }
+  // 2. Estoque por Sabor (ex: Whey, Creatina)
+  if (produto.estoquePorSabor && typeof produto.estoquePorSabor === 'object') {
+    return Object.values(produto.estoquePorSabor).reduce((total, qtd) => total + (Number(qtd) || 0), 0);
+  }
+  // 3. Estoque por Tamanho (ex: Camisetas)
+  if (produto.estoquePorTamanho && typeof produto.estoquePorTamanho === 'object') {
+    return Object.values(produto.estoquePorTamanho).reduce((total, qtd) => total + (Number(qtd) || 0), 0);
+  }
+  // 4. Fallback
+  return 0;
+};
+// --- FIM DA FUNÇÃO HELPER ---
+
 
 const ProdutosSection = () => {
   const navigate = useNavigate();
@@ -11,81 +34,74 @@ const ProdutosSection = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchProdutos = async () => {
-      try {
-        const data = await getAllProdutos();
+  // --- 3. fetchProdutos refatorado com useCallback ---
+  const fetchProdutos = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getAllProdutos();
+      
+      const grouped = new Map();
+      
+      data.forEach(produto => {
+        const categoria = produto.categoria;
+        if (!grouped.has(categoria)) {
+          grouped.set(categoria, []);
+        }
+        grouped.get(categoria).push(produto);
+      });
 
-        // --- LÓGICA CORRIGIDA: Pegar APENAS 1 de cada categoria ---
+      const limitedProducts = [];
+      for (const categoryArray of grouped.values()) {
         
-        const grouped = new Map();
-        
-        // 1. Agrupa todos os produtos pela 'categoria'
-        data.forEach(produto => {
-          const categoria = produto.categoria;
-          if (!grouped.has(categoria)) {
-            grouped.set(categoria, []);
-          }
-          grouped.get(categoria).push(produto);
-        });
+        // --- 4. ALTERAÇÃO PRINCIPAL: FILTRO DE ESTOQUE APLICADO ---
+        // 1. Filtra o array da categoria para conter apenas produtos com estoque
+        const produtosComEstoque = categoryArray.filter(p => calcularEstoqueTotal(p) > 0);
 
-        // 2. Cria a lista final, pegando o PRIMEIRO (1) de cada grupo
-        const limitedProducts = [];
-        for (const categoryArray of grouped.values()) {
-          
-          // --- ESTA É A MUDANÇA ---
-          // Pega apenas o primeiro item (0, 1) do array daquela categoria
-          const firstOne = categoryArray.slice(0, 1); 
-          // ------------------------
-
-          // Adiciona esse item único à lista final
+        // 2. Se houver produtos com estoque nessa categoria...
+        if (produtosComEstoque.length > 0) {
+          // 3. Pega o primeiro item *da lista já filtrada* (A LÓGICA DE 1 POR CATEGORIA)
+          const firstOne = produtosComEstoque.slice(0, 1); 
           limitedProducts.push(...firstOne);
         }
-        // --- FIM DA LÓGICA ---
-
-        // 3. Armazena a lista JÁ FILTRADA (1 por categoria) no estado
-        // Se você quiser EXATAMENTE 4 produtos, descomente a linha abaixo:
-        // setProdutos(limitedProducts.slice(0, 4));
-        
-        // Se você quiser 1 de CADA (o que parece ser o ideal):
-        setProdutos(limitedProducts); 
-
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        // Se 'produtosComEstoque' estiver vazio, nada desta categoria será adicionado.
+        // --- FIM DA ALTERAÇÃO ---
       }
-    };
 
+      setProdutos(limitedProducts); 
+
+    } catch (err) {
+      console.error("Erro ao buscar produtos em destaque:", err);
+      setError(err.message || "Não foi possível carregar os produtos.");
+    } finally {
+      setLoading(false);
+    }
+  }, []); // Array de dependência vazio
+
+  // useEffect agora apenas chama a função
+  useEffect(() => {
     fetchProdutos();
-  }, []); 
+  }, [fetchProdutos]); 
 
+  // --- Funções de Navegação (sem alterações) ---
   const irParaDetalhes = (produtoId) => {
     navigate(`/LojaProduto/${produtoId}`);
   };
 
-  // --- NOVA FUNÇÃO ADICIONADA ---
-  /**
-   * Navega para a página de carrinho, passando o ID do produto
-   * como um query param 'add'.
-   */
   const adicionarAoCarrinho = (produtoId) => {
-    // A página /carrinho será responsável por ler este parâmetro
     navigate(`/carrinho?add=${produtoId}`);
   };
-  // --- FIM DA NOVA FUNÇÃO ---
+  // --- Fim das Funções de Navegação ---
 
 
-  {/* =================================================================== */}
-  {/* ================ ALTERAÇÃO DO LOADING COMEÇA AQUI ================= */}
-  {/* =================================================================== */}
-  if (loading) {
-    return (
-      <section className="products-section">
-        <h2 className="section-title">Destaques da Loja</h2>
-        
-        {/* Usando o mesmo padrão de loading do GerenciarPersonal */}
-        {/* Adicionei um minHeight para dar espaço ao spinner nesta seção */}
+  // --- 5. RENDERIZAÇÃO ATUALIZADA (Spinner e Erro) ---
+  return (
+    <section className="products-section">
+      <h2 className="section-title">Destaques da Loja</h2>
+
+      {/* === INÍCIO DA LÓGICA DE LOADING/ERROR (Padrão GerenciarPersonal) === */}
+      
+      {loading && (
         <div 
           className="personal-loading" 
           style={{ 
@@ -98,49 +114,65 @@ const ProdutosSection = () => {
           <div className="loading-spinner"></div>
           Carregando produtos...
         </div>
-        
-      </section>
-    );
-  }
-  {/* =================================================================== */}
-  {/* ================== ALTERAÇÃO DO LOADING TERMINA AQUI ================ */}
-  {/* =================================================================== */}
+      )}
 
-
-  if (error) {
-    return <section className="products-section"><h2 className="section-title" style={{color: 'red'}}>Erro: {error}</h2></section>;
-  }
-
-  return (
-    <section className="products-section">
-      <h2 className="section-title">Destaques da Loja</h2>
-      <div className="cards-container">
-        {/* Mapeia o array de produtos (agora 1 por categoria) */}
-        {produtos.map((produto) => (
-          <div className="product-card" key={produto.id}>
-            <img src={fixImageUrl(produto.img)} alt={produto.nome} />
-            <h3>{produto.nome}</h3>
-            <hr className="linha-produto" />
-            <div className="preco-produto">POR {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(produto.preco)}</div>
-            <div className="pagamento-produto">{produto.formaDePagamento || 'Consulte as opções de pagamento'}</div>
-            <div className="botoes-produto">
-              
-              {/* --- BOTÃO MODIFICADO --- */}
-              <button 
-                className="buy-button" 
-                onClick={() => adicionarAoCarrinho(produto.id)}
-              >
-                Adicionar ao carrinho
-              </button>
-              {/* --- FIM DA MODIFICAÇÃO --- */}
-
-              <button className="detalhes-button" onClick={() => irParaDetalhes(produto.id)}>
-                Detalhes
-              </button>
-            </div>
+      {error && (
+        <div style={{ minHeight: '200px' }}>
+          <div className="personal-error" style={{ padding: '20px', margin: '0 20px' }}>
+            <strong>Erro:</strong> {error}
+            <button 
+              onClick={fetchProdutos}
+              className="retry-button"
+            >
+              Tentar Novamente
+            </button>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <>
+          {/* 6. Adicionando mensagem de "nenhum produto" */}
+          {produtos.length === 0 ? (
+            <div style={{ 
+              minHeight: '200px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              color: '#555',
+              padding: '20px'
+            }}>
+              Nenhum produto em destaque disponível no momento.
+            </div>
+          ) : (
+            <div className="cards-container">
+              {/* Mapeia o array (1 por categoria, COM estoque) */}
+              {produtos.map((produto) => (
+                <div className="product-card" key={produto.id}>
+                  <img src={fixImageUrl(produto.img)} alt={produto.nome} />
+                  <h3>{produto.nome}</h3>
+                  <hr className="linha-produto" />
+                  <div className="preco-produto">POR {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(produto.preco)}</div>
+                  <div className="pagamento-produto">{produto.formaDePagamento || 'Consulte as opções de pagamento'}</div>
+                  <div className="botoes-produto">
+                    <button 
+                      className="buy-button" 
+                      onClick={() => adicionarAoCarrinho(produto.id)}
+                    >
+                      Adicionar ao carrinho
+                    </button>
+                    <button className="detalhes-button" onClick={() => irParaDetalhes(produto.id)}>
+                      Detalhes
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+      {/* === FIM DA LÓGICA DE LOADING/ERROR === */}
+
     </section>
   );
 };
