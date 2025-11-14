@@ -7,9 +7,43 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  const offset = shadowOffset ?? { width: 0, height: 2 };
+  const radius = shadowRadius ?? 4;
+  const opacity = shadowOpacity ?? 0.15;
+
+  if (Platform.OS === 'web') {
+    const blur = Math.max(radius * 2, 1);
+    return {
+      boxShadow: boxShadow ?? `${offset.width}px ${offset.height}px ${blur}px rgba(0,0,0,${opacity})`,
+    };
+  }
+
+  const nativeShadow = {
+    shadowColor,
+    shadowOffset: offset,
+    shadowOpacity: opacity,
+    shadowRadius: radius,
+  };
+
+  if (typeof elevation === 'number') {
+    nativeShadow.elevation = elevation;
+  }
+
+  return nativeShadow;
+};
 
 const HeaderLoja = ({ navigation: navigationProp, searchText, setSearchText }) => {
   const navigation = navigationProp || useNavigation();
@@ -44,12 +78,6 @@ const HeaderLoja = ({ navigation: navigationProp, searchText, setSearchText }) =
             <Ionicons name="search" size={20} color="#000" style={styles.searchIcon} />
           </View>
           <View style={styles.headerActions}>
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('LojaCarrinho')} 
-              style={styles.cartButton}
-            >
-              <Ionicons name="cart-outline" size={24} color="#000" />
-            </TouchableOpacity>
             <TouchableOpacity onPress={handleAbrirMenu} style={styles.menuButton}>
               <Ionicons name="menu" size={28} color="#000" />
             </TouchableOpacity>
@@ -121,16 +149,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  cartButton: {
-    marginRight: 15,
-    padding: 5,
-  },
   menuButton: {
     marginLeft: 5,
   },
   menuOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // overlay removido (transparente) para evitar sombra pesada ao abrir o menu
+    backgroundColor: 'transparent',
     alignItems: 'flex-end',
   },
   menuContent: {
@@ -139,11 +164,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     paddingTop: 80,
     paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '-6px 0px 18px rgba(0,0,0,0.25)',
+      shadowOffset: { width: -2, height: 0 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
   },
   menuTitle: {
     fontSize: 24,
@@ -171,14 +198,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginLeft: 15,
     height: 45,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 6px 14px rgba(0,0,0,0.2)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
   },
   searchInput: {
     flex: 1,

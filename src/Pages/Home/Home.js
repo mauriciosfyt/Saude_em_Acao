@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,11 @@ import {
   TouchableOpacity,
   ScrollView,
   StatusBar,
+  Platform,
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Image } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Svg, Path, Circle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
@@ -119,7 +121,7 @@ const Home = ({ navigation }) => {
   ];
 
   // Criar estilos dinâmicos baseados no tema
-  const dynamicStyles = StyleSheet.create({
+  const dynamicStyles = useMemo(() => ({
     safeArea: {
       flex: 1,
       backgroundColor: colors.background,
@@ -144,9 +146,13 @@ const Home = ({ navigation }) => {
       fontSize: SIZES.large,
       fontWeight: '700',
       color: colors.textPrimary,
-      textShadowColor: isDark ? 'rgba(64, 92, 186, 0.3)' : 'transparent',
-      textShadowOffset: { width: 0, height: 0 },
-      textShadowRadius: 10,
+      // text shadow: use CSS shorthand on web, native props on mobile
+      ...Platform.select({
+        web: { textShadow: '0px 0px 10px rgba(64,92,186,0.3)' },
+        default: {
+          // Mobile: textShadow* não suportados nativamente
+        },
+      }),
     },
     welcomeSection: {
       marginTop: SIZES.small,
@@ -168,11 +174,11 @@ const Home = ({ navigation }) => {
       paddingVertical: SIZES.medium,
       paddingHorizontal: SIZES.medium,
       marginBottom: SIZES.large,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.15 : 0.08,
-      shadowRadius: 6,
-      elevation: 3,
+      ...(Platform.OS === 'web'
+        ? { boxShadow: '0px 2px 6px rgba(0,0,0,0.12)' }
+        : {
+            elevation: 3,
+          }),
     },
     analyticsMonth: {
       position: 'absolute',
@@ -180,6 +186,28 @@ const Home = ({ navigation }) => {
       right: 12,
       color: colors.textPrimary,
       fontSize: 12,
+    },
+    analyticsInner: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+    },
+    areaWrapper: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    areaBox: {
+      width: '85%',
+      height: 90,
+      backgroundColor: '#5B84E2',
+      borderRadius: 6,
+      position: 'relative',
+    },
+    areaDot: {
+      position: 'absolute',
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: '#FFFFFF',
     },
     monthLabel: {
       marginTop: 8,
@@ -194,9 +222,27 @@ const Home = ({ navigation }) => {
       marginHorizontal: SIZES.base,
       opacity: 0.3,
     },
-    weekdayText: {
-      fontSize: 10,
-      color: colors.textPrimary,
+    barWrapper: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    barsRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      width: '85%',
+      height: 90,
+    },
+    bar: {
+      width: 18,
+      borderRadius: 4,
+      backgroundColor: '#405CBA', // Azul vibrante
+    },
+    weekdaysRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: '85%',
+      marginTop: 6,
     },
     featureButtonContainer: {
       backgroundColor: colors.cardBackground,
@@ -207,11 +253,11 @@ const Home = ({ navigation }) => {
       justifyContent: 'center',
       marginBottom: SIZES.medium,
       aspectRatio: 1,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.15 : 0.1,
-      shadowRadius: 3.84,
-      elevation: 5,
+      ...(Platform.OS === 'web'
+        ? { boxShadow: '0px 2px 6px rgba(0,0,0,0.12)' }
+        : {
+            elevation: 5,
+          }),
     },
     featureButtonLabel: {
       fontSize: SIZES.medium,
@@ -219,7 +265,7 @@ const Home = ({ navigation }) => {
       color: colors.textPrimary,
       marginTop: SIZES.base,
     },
-  });
+  }), [colors, isDark]);
 
   return (
     <SafeAreaView style={dynamicStyles.safeArea}>
@@ -229,16 +275,20 @@ const Home = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: SIZES.large }}
       >
-        {/* Cabeçalho com logo OP e ícone de perfil */}
-        <View style={dynamicStyles.headerInline}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
-          </TouchableOpacity>
-          <View style={dynamicStyles.logoContainer}>
-            <Text style={dynamicStyles.logoText}>OP</Text>
-          </View>
-          <TouchableOpacity onPress={() => navigation.navigate('Perfil')}>
-            <Ionicons name="person-circle-outline" size={32} color={colors.primary} />
+        {/* Logo Dia para tema claro, Prata para tema escuro */}
+        <View style={{ alignItems: 'center', marginTop: 16, marginBottom: 8 }}>
+          <Image
+            source={isDark
+              ? require('../../../assets/icons/Logo_Prata.png')
+              : require('../../../assets/icons/logo_dia.png')}
+            style={{ width: 64, height: 64 }}
+            resizeMode="contain"
+          />
+        </View>
+        {/* Ícone de perfil alinhado à esquerda e centralizado verticalmente com a logo */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, marginTop: -45 }}>
+          <TouchableOpacity onPress={() => navigation.navigate('Perfil')} style={{ alignSelf: 'flex-start', marginLeft: 290 }}>
+            <Ionicons name="person-circle-outline" size={35} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -303,9 +353,12 @@ const styles = StyleSheet.create({
     fontSize: SIZES.large,
     fontWeight: '700',
     color: COLORS.white,
-    textShadowColor: 'rgba(64, 92, 186, 0.3)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    ...Platform.select({
+      web: { textShadow: '0px 0px 10px rgba(64,92,186,0.3)' },
+      default: {
+        // Mobile: textShadow* não suportados nativamente
+      },
+    }),
   },
   welcomeSection: {
     marginTop: SIZES.small,
@@ -327,11 +380,12 @@ const styles = StyleSheet.create({
     paddingVertical: SIZES.medium,
     paddingHorizontal: SIZES.medium,
     marginBottom: SIZES.large,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 3,
+    ...Platform.select({
+      web: { boxShadow: '0px 2px 6px rgba(0,0,0,0.12)' },
+      default: {
+        elevation: 3,
+      },
+    }),
   },
   analyticsMonth: {
     position: 'absolute',
@@ -416,11 +470,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: SIZES.medium,
     aspectRatio: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...Platform.select({
+      web: { boxShadow: '0px 2px 6px rgba(0,0,0,0.12)' },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 3.84,
+        elevation: 5,
+      },
+    }),
   },
   featureButtonLabel: {
     fontSize: SIZES.medium,

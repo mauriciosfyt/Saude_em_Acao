@@ -1,4 +1,24 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -51,14 +71,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginVertical: 8,
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 6px 16px rgba(0,0,0,0.12)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
     borderWidth: 1,
     borderColor: '#e9ecef',
   },
@@ -158,14 +177,13 @@ const styles = StyleSheet.create({
     padding: 20,
     marginVertical: 20,
     marginBottom: 40, // Espaço extra no final
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 6px 16px rgba(0,0,0,0.12)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
     borderWidth: 1,
     borderColor: '#e9ecef',
   },

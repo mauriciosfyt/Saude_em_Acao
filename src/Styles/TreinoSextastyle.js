@@ -1,12 +1,32 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
 
 const styles = StyleSheet.create({
+  // Container principal
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A', // fundo escuro como no site
+    // backgroundColor removido — agora controlado pelo tema no componente
   },
 
-  // Header sem cor de fundo, apenas seta e menu
   header: {
     backgroundColor: 'transparent',
     paddingTop: 16,
@@ -30,7 +50,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#405CBA', // Azul para manter padrão visual
+    color: '#405CBA',
   },
 
   menuButton: {
@@ -40,13 +60,13 @@ const styles = StyleSheet.create({
   // Conteúdo Principal
   content: {
     flex: 1,
-    backgroundColor: '#3A3A3A', // mesmo tom dos cards de exercício
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
     paddingHorizontal: 20,
     paddingTop: 20,
+    // backgroundColor removido — controlado pelo tema no componente
   },
 
   // Seções de Exercícios
@@ -71,30 +91,29 @@ const styles = StyleSheet.create({
 
   // Cards de Exercícios
   exercicioCard: {
-    backgroundColor: '#3A3A3A', // sobretom cinza escuro
     borderRadius: 15,
     padding: 15,
     marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000000ff',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 4px 12px rgba(0,0,0,0.12)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
+    // Cores aplicadas dinamicamente no componente (theme.cardBg)
   },
 
   checkbox: {
     width: 24,
-  height: 24,
-  borderRadius: 12,
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: 'transparent', // sem fundo
-  marginRight: 15,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    marginRight: 15,
   },
 
   exercicioImage: {
@@ -108,25 +127,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  exercicioNomeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    marginBottom: 5,
-    minHeight: 24,
-  },
   exercicioNome: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFFFFF', // branco para contraste
-    flexShrink: 1,
-    flexWrap: 'wrap',
+    marginBottom: 5,
+    // Cor controlada via tema no componente
   },
 
   exercicioDetalhes: {
     fontSize: 14,
-    color: '#D9D9D9', // cinza claro para contraste
     marginBottom: 2,
+    // Cor controlada via tema no componente
   },
 
   infoButton: {
@@ -135,22 +146,23 @@ const styles = StyleSheet.create({
 
   // Modal Sobre o Exercício
   modalExercicioContainer: {
-    backgroundColor: '#fff',
     borderRadius: 20,
     padding: 24,
     width: '85%',
     alignItems: 'flex-start',
   },
+
   modalExercicioTitulo: {
-    color: '#888',
     fontSize: 12,
     marginBottom: 8,
   },
+
   modalExercicioNomeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
   },
+
   modalExercicioPonto: {
     width: 10,
     height: 10,
@@ -158,19 +170,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#405CBA',
     marginRight: 8,
   },
+
   modalExercicioNome: {
     fontWeight: 'bold',
     fontSize: 16,
   },
+
   modalExercicioDescricao: {
     fontSize: 15,
-    color: '#222',
     marginBottom: 16,
   },
+
   modalExercicioFechar: {
     alignSelf: 'flex-end',
     marginTop: 8,
   },
+
   modalExercicioFecharTexto: {
     color: '#405CBA',
     fontWeight: 'bold',
@@ -185,7 +200,6 @@ const styles = StyleSheet.create({
 
   progressText: {
     fontSize: 16,
-    color: '#FFFFFF', // branco para contraste
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -208,9 +222,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 20,
     paddingVertical: 20,
-    backgroundColor: '#1A1A1A', // <--- Altere para a mesma cor do `styles.container`
     borderTopWidth: 0,
     borderTopColor: 'transparent',
+    // Cor aplicada dinamicamente no componente conforme tema
   },
 
   comecarButton: {
@@ -246,33 +260,35 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
 
-  // Estilos do Menu Modal
+  // Menu lateral
   menuOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // overlay transparente para evitar dimming pesado
+    backgroundColor: 'transparent',
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
   },
 
   menuContent: {
-    backgroundColor: '#1A1F2E', // fundo escuro
     borderTopRightRadius: 20,
     borderBottomRightRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 30,
     width: 250,
     height: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '2px 0px 12px rgba(0,0,0,0.15)',
+      shadowOffset: { width: 2, height: 0 },
+      shadowOpacity: 0.12,
+      shadowRadius: 6,
+      elevation: 3,
+    }),
+    // backgroundColor definido via tema
   },
 
   menuTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF', // branco para contraste
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -288,7 +304,6 @@ const styles = StyleSheet.create({
 
   menuItemText: {
     fontSize: 16,
-    color: '#FFFFFF', // branco para contraste
     marginLeft: 15,
     fontWeight: '500',
   },

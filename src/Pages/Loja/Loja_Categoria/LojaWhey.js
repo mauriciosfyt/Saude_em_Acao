@@ -116,7 +116,7 @@ const LojaCategoria = ({ navigation }) => {
 
         {/* Banner horizontal (destaque) */}
         <View style={styles.bannerHorizontalContainer}>
-          <Image source={require('../../../../assets/banner_whey.jpg')} style={styles.bannerHorizontalImage} resizeMode="cover" />
+          <Image source={require('../../../../assets/banner_whey_piqueno.jpg')} style={styles.bannerHorizontalImage} resizeMode="cover" />
         </View>
 
         {/* Segunda linha de produtos (restante) */}

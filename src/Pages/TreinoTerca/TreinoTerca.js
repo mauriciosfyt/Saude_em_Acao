@@ -15,9 +15,11 @@ import HeaderSeta from '../../Components/header_seta/header_seta';
 import styles from '../../Styles/TreinoTercaStyle';
 import { playSuccessSound } from '../../Components/Sounds';
 import { useTheme } from '../../context/ThemeContext';
+import { useTreinos } from '../../context/TreinosContext';
 
 const TreinoTerca = ({ navigation, route }) => {
   const { isDark, colors } = useTheme();
+  const { marcarTreinoComoConcluido, marcarTreinoComoIncompleto } = useTreinos();
   const theme = {
     contentBg: isDark ? '#2c2c2c' : '#F5F5F5',
     cardBg: isDark ? '#3A3a3a' : '#FFFFFF',
@@ -90,7 +92,7 @@ const TreinoTerca = ({ navigation, route }) => {
         series: 4,
         repeticoes: 15,
         carga: 0,
-        imagem: require('../../../assets/banner_whey.jpg'),
+        imagem: require('../../../assets/banner_whey_piqueno.jpg'),
         descricao: 'Sentado, segure o halter acima da cabeça e flexione os cotovelos, descendo o peso atrás da cabeça.',
       },
     ],
@@ -156,9 +158,9 @@ const TreinoTerca = ({ navigation, route }) => {
     playSuccessSound();
 
     if (exerciciosConcluidos === totalExercicios) {
-      route?.params?.onTreinoConcluido?.('Terça-Feira');
+      marcarTreinoComoConcluido && marcarTreinoComoConcluido('Terça-Feira');
     } else {
-      route?.params?.onTreinoIncompleto?.('Terça-Feira');
+      marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Terça-Feira');
     }
 
     navigation.navigate('MeuTreino');
@@ -185,9 +187,6 @@ const TreinoTerca = ({ navigation, route }) => {
       <ScrollView style={[styles.content, { backgroundColor: theme.contentBg }]} showsVerticalScrollIndicator={false}>
 
         <View style={styles.secaoContainer}>
-          <View style={styles.secaoHeader}>
-            <Text style={styles.secaoTitle}>Costas</Text>
-          </View>
           {exercicios.costas.map((exercicio) => (
             <View
               key={exercicio.id}
@@ -204,7 +203,7 @@ const TreinoTerca = ({ navigation, route }) => {
                 <Ionicons
                   name={exerciciosSelecionados[exercicio.id] ? 'checkmark-circle' : 'ellipse-outline'}
                   size={24}
-                  color={exerciciosSelecionados[exercicio.id] ? '#405CBA' : '#ccc'}
+                  color={exerciciosSelecionados[exercicio.id] ? colors.primary : colors.divider}
                 />
               </TouchableOpacity>
               <Image source={exercicio.imagem} style={styles.exercicioImage} />
@@ -215,16 +214,13 @@ const TreinoTerca = ({ navigation, route }) => {
                 <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Carga: {exercicio.carga}(kg)</Text>
               </View>
               <TouchableOpacity style={styles.infoButton} onPress={() => handleAbrirModalExercicio(exercicio)}>
-                <Ionicons name="information-circle" size={24} color="#405CBA" />
+                <Ionicons name="information-circle" size={24} color={colors.primary} />
               </TouchableOpacity>
             </View>
           ))}
         </View>
 
         <View style={styles.secaoContainer}>
-          <View style={styles.secaoHeader}>
-            <Text style={styles.secaoTitle}>Bíceps</Text>
-          </View>
           {exercicios.biceps.map((exercicio) => (
             <View
               key={exercicio.id}
@@ -306,7 +302,8 @@ const TreinoTerca = ({ navigation, route }) => {
         <View
           style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            // overlay transparente para evitar sombra pesada em alguns aparelhos
+            backgroundColor: 'transparent',
             justifyContent: 'center',
             alignItems: 'center',
           }}
@@ -349,7 +346,7 @@ const TreinoTerca = ({ navigation, route }) => {
       {/* Modal Finalizar */}
       <Modal visible={modalFinalizar} animationType="fade" transparent>
         <View
-          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}
+          style={{ flex: 1, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}
         >
           <View
             style={{
@@ -411,7 +408,7 @@ const TreinoTerca = ({ navigation, route }) => {
         <View
           style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.4)',
+            backgroundColor: 'transparent',
             justifyContent: 'center',
             alignItems: 'center',
           }}

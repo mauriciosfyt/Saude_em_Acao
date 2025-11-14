@@ -31,7 +31,11 @@ export default function PlanoEssencial({ navigation, onContratar }) {
         >
           <View style={[cardStyles.card, isDark && { backgroundColor: '#3A3A3A', borderColor: '#405CBA' }]}>
             <View style={[cardStyles.banner, { backgroundColor: '#405CBA' }]}>
-              <Image source={require('../../assets/icons/vantajoso.png')} style={{ width: 20, height: 23, marginRight: 6, resizeMode: 'contain' }} />
+               <Image 
+                 source={require('../../assets/icons/vantajoso.png')} 
+                 style={{ width: 20, height: 23, marginRight: 6 }}
+                 resizeMode="contain"
+               />
               <Text style={cardStyles.bannerText}>O mais vantajoso</Text>
             </View>
 
@@ -40,7 +44,7 @@ export default function PlanoEssencial({ navigation, onContratar }) {
               O plano ideal com acesso a modalidades e acompanhamento profissional para seus treinos personalizados.
             </Text>
 
-            <Text style={[cardStyles.priceLabel, isDark && { color: '#C7C7C7' }]}>Por apenas</Text>
+            <Text style={[cardStyles.priceLabel, isDark && { color: '#C7C7C7' }]}>A partir de</Text>
             <View style={cardStyles.priceRow}>
               <Text style={[cardStyles.priceValue, isDark && { color: '#FFFFFF' }]}>R$159,90</Text>
               <Text style={cardStyles.pricePerMonth}>/mês</Text>

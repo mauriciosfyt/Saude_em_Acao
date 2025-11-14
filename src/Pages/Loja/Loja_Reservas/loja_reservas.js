@@ -9,11 +9,45 @@ import {
     SafeAreaView,
     StatusBar,
     SectionList,
+    Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { LinearGradient } from 'expo-linear-gradient';
 import HeaderLoja from '../../../Components/HeaderLoja';
 import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
+
+const platformShadow = ({
+    shadowColor = '#000',
+    shadowOffset = { width: 0, height: 2 },
+    shadowOpacity = 0.15,
+    shadowRadius = 4,
+    elevation,
+    boxShadow,
+} = {}) => {
+    const offset = shadowOffset ?? { width: 0, height: 2 };
+    const radius = shadowRadius ?? 4;
+    const opacity = shadowOpacity ?? 0.15;
+
+    if (Platform.OS === 'web') {
+        const blur = Math.max(radius * 2, 1);
+        return {
+            boxShadow: boxShadow ?? `${offset.width}px ${offset.height}px ${blur}px rgba(0,0,0,${opacity})`,
+        };
+    }
+
+    const nativeShadow = {
+        shadowColor,
+        shadowOffset: offset,
+        shadowOpacity: opacity,
+        shadowRadius: radius,
+    };
+
+    if (typeof elevation === 'number') {
+        nativeShadow.elevation = elevation;
+    }
+
+    return nativeShadow;
+};
 
 // Reutilizando e expandindo o tema
 const theme = {
@@ -213,12 +247,13 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: theme.spacing.medium,
         marginBottom: theme.spacing.medium,
-        // Sombra
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        ...platformShadow({
+            boxShadow: '0px 8px 18px rgba(0,0,0,0.12)',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+        }),
     },
     cardImage: {
         width: 60,
@@ -274,11 +309,13 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 16,
         marginVertical: theme.spacing.medium,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 2,
+        ...platformShadow({
+            boxShadow: '0px 4px 12px rgba(0,0,0,0.12)',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.08,
+            shadowRadius: 2,
+            elevation: 2,
+        }),
     },
     sectionHeaderText: {
         fontSize: theme.fontSize.regular,

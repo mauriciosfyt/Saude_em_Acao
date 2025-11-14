@@ -1,5 +1,5 @@
 
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -13,7 +13,6 @@ const styles = StyleSheet.create({
         width: '92%',
         height: 90,
         borderRadius: 16,
-        resizeMode: 'cover',
     },
     container: {
         flex: 1,
@@ -34,7 +33,6 @@ const styles = StyleSheet.create({
     bannerImage: {
         width: '100%',
         height: '100%',
-        resizeMode: 'cover',
     },
     bannerText: {
         position: 'absolute',
@@ -43,9 +41,12 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 20,
-        textShadowColor: '#000',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 4,
+        ...Platform.select({
+            web: { textShadow: '1px 1px 4px rgba(0,0,0,0.6)' },
+            default: {
+                // Mobile não suporta textShadow nativo
+            },
+        }),
     },
     produtosContainer: {
         flexDirection: 'row',
@@ -62,11 +63,15 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
         paddingVertical: 14,
         paddingHorizontal: 10,
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.10,
-        shadowRadius: 10,
+        ...Platform.select({
+            web: { boxShadow: '0px 2px 10px rgba(0,0,0,0.10)' },
+            ios: {
+                elevation: 4,
+            },
+            android: {
+                elevation: 4,
+            },
+        }),
         position: 'relative',
         alignItems: 'center',
     },

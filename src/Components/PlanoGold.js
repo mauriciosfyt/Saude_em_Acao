@@ -45,7 +45,7 @@ export default function PlanoGold({ navigation, onContratar }) {
              O plano de academia ideal, que oferecer resultados completo por  um preço acessível. Nele inclui acesso a todas as modalidades e acompanhamento profissional de um professor para montar seus treino presonalizados.
             </Text>
 
-            <Text style={[cardStyles.priceLabel, isDark && { color: '#C7C7C7' }]}>Por apenas</Text>
+            <Text style={[cardStyles.priceLabel, isDark && { color: '#C7C7C7' }]}>A partir de</Text>
             <View style={cardStyles.priceRow}>
               <Text style={[cardStyles.priceValue, isDark && { color: '#FFFFFF' }]}>R$300,00</Text>
               <Text style={cardStyles.pricePerMonth}>/mês</Text>

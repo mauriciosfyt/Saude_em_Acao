@@ -15,26 +15,34 @@ import HeaderSeta from '../../Components/header_seta/header_seta';
 import styles from '../../Styles/TreinoQuintaStyle';
 import { playSuccessSound } from '../../Components/Sounds';
 import { useTheme } from '../../context/ThemeContext';
+import { useTreinos } from '../../context/TreinosContext';
 
 const TreinoQuinta = ({ navigation, route }) => {
   const { isDark, colors } = useTheme();
+  const { marcarTreinoComoConcluido, marcarTreinoComoIncompleto } = useTreinos();
+
   const theme = {
-    contentBg: isDark ? '#2B2F36' : '#F5F5F5',
-    cardBg: isDark ? '#3A3F47' : '#FFFFFF',
-    cardBorder: isDark ? '#525862' : 'rgba(0,0,0,0.08)',
+    contentBg: isDark ? '#2C2C2C' : '#F5F5F5',
+    cardBg: isDark ? '#3A3A3A' : '#FFFFFF',
+    cardBorder: isDark ? '#555' : 'rgba(0,0,0,0.08)',
     textPrimary: isDark ? '#FFFFFF' : '#000000',
-    textSecondary: isDark ? '#C9CEDA' : '#666666',
-    modalBg: isDark ? '#1A1F2E' : '#FFFFFF',
+    textSecondary: isDark ? '#C9CEDA' : '#555555',
+    modalBg: isDark ? '#1E1E1E' : '#FFFFFF',
     modalTitle: isDark ? '#FFFFFF' : '#000000',
     modalText: isDark ? '#C9CEDA' : '#222222',
+    footerBg: isDark ? '#2C2C2C' : '#FFFFFF',
+    menuBg: isDark ? '#2C2C2C' : '#FFFFFF',
+    menuText: isDark ? '#fafafa' : '#000000',
+  iconColor: colors.primary,
+    progressTrack: isDark ? '#444' : '#E0E0E0',
   };
 
-  // Exercícios conforme imagem enviada
+  // Exercícios
   const exercicios = {
     cardio: [
       {
         id: 1,
-        nome: 'Esteira(Perna)',
+        nome: 'Esteira (Perna)',
         series: 4,
         repeticoes: '20 min',
         carga: 0,
@@ -54,25 +62,25 @@ const TreinoQuinta = ({ navigation, route }) => {
     ombro: [
       {
         id: 3,
-        nome: 'Desenvolvimento - Máquina Articulada(Ombro)',
+        nome: 'Desenvolvimento - Máquina Articulada (Ombro)',
         series: 4,
         repeticoes: 15,
         carga: 0,
-        imagem: require('../../../assets/banner_whey.jpg'),
+        imagem: require('../../../assets/banner_whey_piqueno.jpg'),
         descricao: 'Sente-se na máquina, segure as alças e empurre para cima até estender os braços.',
       },
       {
         id: 4,
-        nome: 'Elevação Lateral(Ombro)',
+        nome: 'Elevação Lateral (Ombro)',
         series: 4,
         repeticoes: 15,
         carga: 0,
-        imagem: require('../../../assets/banner_whey.jpg'),
+        imagem: require('../../../assets/banner_whey_piqueno.jpg'),
         descricao: 'Em pé, segure os halteres ao lado do corpo e eleve-os lateralmente até a altura dos ombros.',
       },
       {
         id: 5,
-        nome: 'Elevação Fronta(ombro)',
+        nome: 'Elevação Frontal (Ombro)',
         series: 4,
         repeticoes: 15,
         carga: 0,
@@ -81,7 +89,7 @@ const TreinoQuinta = ({ navigation, route }) => {
       },
       {
         id: 6,
-        nome: 'Crucifixo Inverso(Costas)',
+        nome: 'Crucifixo Inverso (Costas)',
         series: 4,
         repeticoes: 15,
         carga: 0,
@@ -90,7 +98,10 @@ const TreinoQuinta = ({ navigation, route }) => {
       },
     ],
   };
+
   const totalExercicios = exercicios.cardio.length + exercicios.ombro.length;
+
+  // estados
   const [menuVisivel, setMenuVisivel] = useState(false);
   const [exerciciosConcluidos, setExerciciosConcluidos] = useState(0);
   const [exerciciosSelecionados, setExerciciosSelecionados] = useState({});
@@ -98,7 +109,7 @@ const TreinoQuinta = ({ navigation, route }) => {
   const [modalFinalizar, setModalFinalizar] = useState(false);
   const [modalAviso, setModalAviso] = useState(false);
 
-  // Funções de controle do menu
+  // ---------- Funções do menu ----------
   const handleAbrirMenu = () => {
     setMenuVisivel(true);
   };
@@ -108,11 +119,11 @@ const TreinoQuinta = ({ navigation, route }) => {
   };
 
   const handleNavegar = (nomeDaTela) => {
-    handleFecharMenu();
+    setMenuVisivel(false);
     navigation.navigate(nomeDaTela);
   };
 
-  // Função para marcar/desmarcar exercício
+  // ---------- Funções de seleção de exercício ----------
   const toggleExercicio = (id) => {
     const novoEstado = { ...exerciciosSelecionados };
     if (novoEstado[id]) {
@@ -124,27 +135,22 @@ const TreinoQuinta = ({ navigation, route }) => {
     setExerciciosConcluidos(Object.keys(novoEstado).length);
   };
 
-  // Função para selecionar/desmarcar todos os exercícios
   const handleSelecionarExercicios = () => {
     if (exerciciosConcluidos === totalExercicios) {
-      // Se todos já estão selecionados, desmarcar todos
+      // desmarcar todos
       setExerciciosSelecionados({});
       setExerciciosConcluidos(0);
     } else {
-      // Selecionar todos os exercícios
-      const todosExercicios = {};
-      exercicios.cardio.forEach(exercicio => {
-        todosExercicios[exercicio.id] = true;
-      });
-      exercicios.ombro.forEach(exercicio => {
-        todosExercicios[exercicio.id] = true;
-      });
-      setExerciciosSelecionados(todosExercicios);
+      // marcar todos
+      const todos = {};
+      exercicios.cardio.forEach((e) => (todos[e.id] = true));
+      exercicios.ombro.forEach((e) => (todos[e.id] = true));
+      setExerciciosSelecionados(todos);
       setExerciciosConcluidos(totalExercicios);
     }
   };
 
-  // Função para finalizar treino - agora permite finalizar com pelo menos 1 exercício
+  // ---------- Finalizar treino ----------
   const handleFinalizarTreino = () => {
     if (exerciciosConcluidos > 0) {
       setModalFinalizar(true);
@@ -160,20 +166,14 @@ const TreinoQuinta = ({ navigation, route }) => {
   const handleConfirmarFinalizar = () => {
     setModalFinalizar(false);
     playSuccessSound();
-    
-    // Verifica se todos os exercícios foram concluídos
+
+    // Use TreinosContext instead of passing functions through navigation params
     if (exerciciosConcluidos === totalExercicios) {
-      // Marcar treino como concluído se a função estiver disponível
-      if (route?.params?.onTreinoConcluido) {
-        route.params.onTreinoConcluido('Quinta-Feira');
-      }
+      marcarTreinoComoConcluido && marcarTreinoComoConcluido('Quinta-Feira');
     } else {
-      // Marcar treino como incompleto se a função estiver disponível
-      if (route?.params?.onTreinoIncompleto) {
-        route.params.onTreinoIncompleto('Quinta-Feira');
-      }
+      marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Quinta-Feira');
     }
-    
+
     navigation.navigate('MeuTreino');
   };
 
@@ -181,7 +181,7 @@ const TreinoQuinta = ({ navigation, route }) => {
     setModalFinalizar(false);
   };
 
-  // Funções do modal de exercício
+  // ---------- Modais de exercício ----------
   const handleAbrirModalExercicio = (exercicio) => {
     setModalExercicio({ visivel: true, exercicio });
   };
@@ -190,178 +190,185 @@ const TreinoQuinta = ({ navigation, route }) => {
     setModalExercicio({ visivel: false, exercicio: null });
   };
 
+  // ---------- Render ----------
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor="#405CBA" />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.contentBg }]}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.contentBg}
+      />
 
-      {/* Header com seta de voltar e menu */}
-      <HeaderSeta navigation={navigation} mesAno={null} />
+      {/* Header - passei iconColor para HeaderSeta para controlar cor da seta/menu */}
+      <HeaderSeta navigation={navigation} mesAno={null} isDark={isDark} iconColor={theme.iconColor} onPressMenu={handleAbrirMenu} />
 
-
-      {/* Conteúdo Principal */}
-      <ScrollView style={[styles.content, { backgroundColor: theme.contentBg }]} showsVerticalScrollIndicator={false}>
-        {/* Seção Cardio */}
+      {/* Conteúdo principal */}
+      <ScrollView
+        style={[styles.content, { backgroundColor: theme.contentBg }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Cardio */}
         <View style={styles.secaoContainer}>
-          <View style={styles.secaoHeader}>
-            <Text style={styles.secaoTitle}>Cardio</Text>
-          </View>
           {exercicios.cardio.map((exercicio) => (
-            <View key={exercicio.id} style={[styles.exercicioCard, { backgroundColor: theme.cardBg, borderColor: theme.cardBorder, borderWidth: 1 }]}>
-              <TouchableOpacity 
-                style={styles.checkbox}
-                onPress={() => toggleExercicio(exercicio.id)}
-              >
-                <Ionicons 
-                  name={exerciciosSelecionados[exercicio.id] ? "checkmark-circle" : "ellipse-outline"} 
-                  size={24} 
-                  color={exerciciosSelecionados[exercicio.id] ? "#405CBA" : "#ccc"} 
+            <View
+              key={exercicio.id}
+              style={[
+                styles.exercicioCard,
+                { backgroundColor: theme.cardBg, borderColor: theme.cardBorder, borderWidth: 1 },
+              ]}
+            >
+              <TouchableOpacity style={styles.checkbox} onPress={() => toggleExercicio(exercicio.id)}>
+                <Ionicons
+                  name={exerciciosSelecionados[exercicio.id] ? 'checkmark-circle' : 'ellipse-outline'}
+                  size={24}
+                  color={exerciciosSelecionados[exercicio.id] ? colors.primary : colors.divider}
                 />
               </TouchableOpacity>
-              {exercicio.imagem && (
-                <Image source={exercicio.imagem} style={styles.exercicioImage} />
-              )}
+
+              {exercicio.imagem && <Image source={exercicio.imagem} style={styles.exercicioImage} />}
+
               <View style={styles.exercicioInfo}>
-                <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>{exercicio.id} {exercicio.nome}</Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Série: {exercicio.series}</Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Repetição: {exercicio.repeticoes}</Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Carga: {exercicio.carga}(kg)</Text>
+                <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>
+                  {exercicio.id} {exercicio.nome}
+                </Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                  Série: {exercicio.series}
+                </Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                  Repetição: {exercicio.repeticoes}
+                </Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                  Carga: {exercicio.carga}(kg)
+                </Text>
               </View>
+
               <TouchableOpacity style={styles.infoButton} onPress={() => handleAbrirModalExercicio(exercicio)}>
-                <Ionicons name="information-circle" size={24} color="#405CBA" />
+                <Ionicons name="information-circle" size={24} color={colors.primary} />
               </TouchableOpacity>
             </View>
           ))}
         </View>
-        {/* Seção Ombro */}
+
+        {/* Ombro */}
         <View style={styles.secaoContainer}>
-          <View style={styles.secaoHeader}>
-            <Text style={styles.secaoTitle}>Ombro</Text>
-          </View>
           {exercicios.ombro.map((exercicio) => (
-            <View key={exercicio.id} style={[styles.exercicioCard, { backgroundColor: theme.cardBg, borderColor: theme.cardBorder, borderWidth: 1 }]}>
-              <TouchableOpacity 
-                style={styles.checkbox}
-                onPress={() => toggleExercicio(exercicio.id)}
-              >
-                <Ionicons 
-                  name={exerciciosSelecionados[exercicio.id] ? "checkmark-circle" : "ellipse-outline"} 
-                  size={24} 
-                  color={exerciciosSelecionados[exercicio.id] ? "#405CBA" : "#ccc"} 
+            <View
+              key={exercicio.id}
+              style={[
+                styles.exercicioCard,
+                { backgroundColor: theme.cardBg, borderColor: theme.cardBorder, borderWidth: 1 },
+              ]}
+            >
+              <TouchableOpacity style={styles.checkbox} onPress={() => toggleExercicio(exercicio.id)}>
+                <Ionicons
+                  name={exerciciosSelecionados[exercicio.id] ? 'checkmark-circle' : 'ellipse-outline'}
+                  size={24}
+                  color={exerciciosSelecionados[exercicio.id] ? colors.primary : colors.divider}
                 />
               </TouchableOpacity>
-              {exercicio.imagem && (
-                <Image source={exercicio.imagem} style={styles.exercicioImage} />
-              )}
+
+              {exercicio.imagem && <Image source={exercicio.imagem} style={styles.exercicioImage} />}
+
               <View style={styles.exercicioInfo}>
-                <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>{exercicio.id} {exercicio.nome}</Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Série: {exercicio.series}</Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Repetição: {exercicio.repeticoes}</Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Carga: {exercicio.carga}(kg)</Text>
+                <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>
+                  {exercicio.id} {exercicio.nome}
+                </Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                  Série: {exercicio.series}
+                </Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                  Repetição: {exercicio.repeticoes}
+                </Text>
+                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                  Carga: {exercicio.carga}(kg)
+                </Text>
               </View>
+
               <TouchableOpacity style={styles.infoButton} onPress={() => handleAbrirModalExercicio(exercicio)}>
-                <Ionicons name="information-circle" size={24} color="#405CBA" />
+                <Ionicons name="information-circle" size={24} color={colors.primary} />
               </TouchableOpacity>
             </View>
           ))}
         </View>
       </ScrollView>
-              
 
-      {/* Barra de Progresso fora do header, antes do footer */}
+      {/* Barra de progresso */}
       <View style={styles.progressContainer}>
-        <Text style={styles.progressText}>{exerciciosConcluidos} de {totalExercicios} Treinos concluídos</Text>
-        <View style={styles.progressBar}>
-          <View 
-            style={[styles.progressFill, { width: `${(exerciciosConcluidos / totalExercicios) * 100}%` }]} 
+        <Text style={[styles.progressText, { color: theme.textPrimary }]}>
+          {exerciciosConcluidos} de {totalExercicios} Treinos concluídos
+        </Text>
+        <View style={[styles.progressBar, { backgroundColor: theme.progressTrack }]}>
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${(exerciciosConcluidos / totalExercicios) * 100}%` },
+            ]}
           />
         </View>
       </View>
 
-      {/* Footer com Botões */}
-      <View style={styles.footer}>
+      {/* Footer */}
+      <View style={[styles.footer, { backgroundColor: theme.footerBg }]}>
         <TouchableOpacity style={styles.comecarButton} onPress={handleSelecionarExercicios}>
           <Text style={styles.comecarButtonText}>Selecionar tudo</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[
             styles.finalizarButton,
-            exerciciosConcluidos === totalExercicios && { backgroundColor: '#4CAF50' } // Verde se todos selecionados
+            exerciciosConcluidos === totalExercicios && { backgroundColor: '#4CAF50' },
           ]}
           onPress={handleFinalizarTreino}
         >
-          <Text style={[
-            styles.finalizarButtonText,
-            exerciciosConcluidos === totalExercicios && { color: 'white' } // Texto branco no botão verde
-          ]}>
+          <Text
+            style={[
+              styles.finalizarButtonText,
+              exerciciosConcluidos === totalExercicios && { color: 'white' },
+            ]}
+          >
             Finalizar
           </Text>
-          <Ionicons name="checkmark-circle" size={20} color={exerciciosConcluidos === totalExercicios ? "white" : "#666"} />
+          <Ionicons
+            name="checkmark-circle"
+            size={20}
+            color={exerciciosConcluidos === totalExercicios ? 'white' : theme.iconColor}
+          />
         </TouchableOpacity>
       </View>
 
-      {/* Modal do Menu */}
+      {/* Menu lateral */}
       <Modal
-        animationType="fade"
+        animationType="slide"
         transparent={true}
         visible={menuVisivel}
         onRequestClose={handleFecharMenu}
       >
-        <TouchableOpacity
-          style={styles.menuOverlay}
-          onPress={handleFecharMenu}
-          activeOpacity={1}
-        >
-          <View style={styles.menuContent}>
-            <Text style={styles.menuTitle}>Menu</Text>
+        <TouchableOpacity style={styles.menuOverlay} activeOpacity={1} onPress={handleFecharMenu}>
+          <View style={[styles.menuContent, { backgroundColor: theme.menuBg }]}>
+            <Text style={[styles.menuTitle, { color: theme.menuText }]}>Menu</Text>
 
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("MainTabs")}
-            >
-              <Ionicons name="home-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Home</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Perfil")}
-            >
-              <Ionicons name="person-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meu Perfil</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Chat")}
-            >
-              <Ionicons name="chatbubble-ellipses-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Chat</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Desempenho")}
-            >
-              <Ionicons name="bar-chart-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Desempenho</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("MeuTreino")}
-            >
-              <Ionicons name="fitness-outline" size={24} color="#333" />
-              <Text style={styles.menuItemText}>Meus Treinos</Text>
-            </TouchableOpacity>
-
+            {[
+              { nome: 'MainTabs', label: 'Home', icon: 'home-outline' },
+              { nome: 'Perfil', label: 'Meu Perfil', icon: 'person-outline' },
+              { nome: 'Chat', label: 'Chat', icon: 'chatbubble-ellipses-outline' },
+              { nome: 'Desempenho', label: 'Desempenho', icon: 'bar-chart-outline' },
+              { nome: 'MeuTreino', label: 'Meus Treinos', icon: 'fitness-outline' },
+            ].map((item) => (
+              <TouchableOpacity
+                key={item.nome}
+                style={styles.menuItem}
+                onPress={() => handleNavegar(item.nome)}
+              >
+                <Ionicons name={item.icon} size={24} color={theme.iconColor} />
+                <Text style={[styles.menuItemText, { color: theme.menuText }]}>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </TouchableOpacity>
       </Modal>
 
-      {/* Modal Sobre o Exercício */}
+      {/* Modal do exercício */}
       <Modal
-       visible={modalExercicio.visivel}
+        visible={modalExercicio.visivel}
         transparent={true}
         animationType="fade"
         onRequestClose={handleFecharModalExercicio}
@@ -369,15 +376,18 @@ const TreinoQuinta = ({ navigation, route }) => {
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
           <View style={{ backgroundColor: theme.modalBg, borderRadius: 16, padding: 24, width: 300, alignItems: 'flex-start' }}>
             <Text style={{ color: theme.modalText, fontSize: 12, marginBottom: 8 }}>Sobre o Exercício</Text>
+
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
               <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#405CBA', marginRight: 8 }} />
               <Text style={{ fontWeight: 'bold', fontSize: 16, color: theme.modalTitle }}>
                 {modalExercicio.exercicio?.nome}
               </Text>
             </View>
+
             <Text style={{ fontSize: 15, color: theme.modalText, marginBottom: 16 }}>
               {modalExercicio.exercicio?.descricao || 'Descrição do exercício.'}
             </Text>
+
             <TouchableOpacity onPress={handleFecharModalExercicio} style={{ alignSelf: 'flex-end', marginTop: 8 }}>
               <Text style={{ color: '#405CBA', fontWeight: 'bold', fontSize: 16 }}>Fechar</Text>
             </TouchableOpacity>
@@ -385,7 +395,7 @@ const TreinoQuinta = ({ navigation, route }) => {
         </View>
       </Modal>
 
-      {/* Modal Finalizar Treino - Breve e Direto */}
+      {/* Modal Finalizar */}
       <Modal
         visible={modalFinalizar}
         animationType="fade"
@@ -398,6 +408,7 @@ const TreinoQuinta = ({ navigation, route }) => {
             <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginBottom: 16, color: theme.modalTitle }}>
               Finalizar treino?
             </Text>
+
             <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
               <TouchableOpacity
                 style={{ backgroundColor: isDark ? '#2B2F36' : '#F0F0F0', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20, flex: 0.45 }}
@@ -405,6 +416,7 @@ const TreinoQuinta = ({ navigation, route }) => {
               >
                 <Text style={{ color: '#405CBA', fontWeight: 'bold', fontSize: 14, textAlign: 'center' }}>Cancelar</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={{ backgroundColor: '#405CBA', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20, flex: 0.45 }}
                 onPress={handleConfirmarFinalizar}
@@ -416,7 +428,7 @@ const TreinoQuinta = ({ navigation, route }) => {
         </View>
       </Modal>
 
-      {/* Modal de Aviso de Exercícios não selecionados */}
+      {/* Modal Aviso */}
       <Modal
         visible={modalAviso}
         animationType="fade"
@@ -427,10 +439,10 @@ const TreinoQuinta = ({ navigation, route }) => {
           <View style={{ backgroundColor: theme.modalBg, borderRadius: 16, padding: 24, alignItems: 'center', width: 300 }}>
             <MaterialIcons name="error-outline" size={48} color="#F5A623" style={{ marginBottom: 12 }} />
             <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 8, color: theme.modalTitle }}>
-              Você ainda não completou todos os exercícios.
+              Você ainda não selecionou exercícios.
             </Text>
             <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 24, color: theme.modalText }}>
-              Complete todos os exercícios antes de finalizar o treino.
+              Selecione ao menos um exercício antes de finalizar o treino.
             </Text>
             <TouchableOpacity
               style={{ backgroundColor: '#405CBA', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 32, width: '100%' }}

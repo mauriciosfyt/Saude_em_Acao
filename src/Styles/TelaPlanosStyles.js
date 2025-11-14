@@ -1,4 +1,24 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
 
 const { width, height } = Dimensions.get('window');
 
@@ -87,11 +107,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 8,
     marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 8px 18px rgba(0,0,0,0.15)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
     position: 'relative',
   },
   diagonalBanner: {
@@ -125,7 +147,6 @@ const styles = StyleSheet.create({
     width: 20,
     height: 23,
     marginRight: 6,
-    resizeMode: 'contain',
   },
   bannerText: {
     color: '#ffffff',
@@ -163,11 +184,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 20,
     alignSelf: 'flex-end',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 6px 14px rgba(0,0,0,0.25)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
     top: -18,
   },
   saibaMaisText: {

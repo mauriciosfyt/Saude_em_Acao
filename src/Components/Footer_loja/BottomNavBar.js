@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
 const theme = {
@@ -52,7 +52,7 @@ const BottomNavBar = ({ navigation, activeScreen }) => {
 const styles = StyleSheet.create({
     bottomNav: {
         position: 'absolute',
-        bottom: 16,
+        bottom: 30, // subido um pouco para não sobrepor conteúdo
         left: 8,
         right: 8,
         flexDirection: 'row',
@@ -61,10 +61,20 @@ const styles = StyleSheet.create({
         height: 38,
         backgroundColor: theme.colors.background,
         borderRadius: 19,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.18,
-        shadowRadius: 8,
+        ...Platform.select({
+          ios: {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.18,
+            shadowRadius: 8,
+          },
+          android: {
+            elevation: 8,
+          },
+          web: {
+            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.18)',
+          },
+        }),
         elevation: 8,
     },
     iconButton: {

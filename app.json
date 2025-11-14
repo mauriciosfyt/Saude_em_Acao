@@ -20,10 +20,19 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.jaowzinho.saudeemacao"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b9569515-4507-42f0-b2d7-a6cc9a6fc09a"
+      }
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }

@@ -1,7 +1,40 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Modal, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  const offset = shadowOffset ?? { width: 0, height: 2 };
+  const radius = shadowRadius ?? 4;
+  const opacity = shadowOpacity ?? 0.15;
+
+  if (Platform.OS === 'web') {
+    const blur = Math.max(radius * 2, 1);
+    return {
+      boxShadow: boxShadow ?? `${offset.width}px ${offset.height}px ${blur}px rgba(0,0,0,${opacity})`,
+    };
+  }
+
+  const nativeShadow = {
+    shadowColor,
+    shadowOffset: offset,
+    shadowOpacity: opacity,
+    shadowRadius: radius,
+  };
+
+  if (typeof elevation === 'number') {
+    nativeShadow.elevation = elevation;
+  }
+
+  return nativeShadow;
+};
 
 const HeaderProfessores = ({ title, onBackPress, navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
@@ -104,21 +137,29 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
       <View>
         <View style={styles.header}>
           <TouchableOpacity onPress={onBackPress} style={styles.iconButton}>
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            <Ionicons 
+              name="arrow-back" 
+              size={24} 
+              color={isDark ? '#FFFFFF' : '#000000'} 
+            />
           </TouchableOpacity>
           
           <Image
-            source={require('../../../assets/icons/logo_dia.png')} // Ajuste o caminho
-            style={styles.logo}
+            source={require('../../../assets/icons/logo_dia.png')}
+            style={[styles.logo, { tintColor: isDark ? '#FFFFFF' : undefined }]}
             resizeMode="contain"
           />
           
           <TouchableOpacity onPress={handleAbrirMenu} style={styles.iconButton}>
-            <Ionicons name="menu" size={28} color="#FFFFFF" />
+            <Ionicons 
+              name="menu" 
+              size={28} 
+              color={isDark ? '#FFFFFF' : '#000000'} 
+            />
           </TouchableOpacity>
         </View>
         
-        <Text style={[styles.pageTitle, { color: '#FFFFFF' }]}>{title}</Text>
+        <Text style={[styles.pageTitle, { color: isDark ? '#FFFFFF' : '#000000' }]}>{title}</Text>
       </View>
     </>
   );
@@ -158,7 +199,8 @@ const styles = StyleSheet.create({
   // Estilos do Modal
   menuOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    // removido overlay pesado para evitar sombra grande
+    backgroundColor: 'transparent',
     alignItems: "flex-end",
   },
   menuContent: {
@@ -166,11 +208,13 @@ const styles = StyleSheet.create({
     width: "75%",
     paddingTop: 80,
     paddingHorizontal: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '-6px 0px 18px rgba(0,0,0,0.25)',
+      shadowOffset: { width: -2, height: 0 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
   },
   menuTitle: {
     fontSize: 24,

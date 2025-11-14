@@ -1,4 +1,24 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
 
 const styles = StyleSheet.create({
   // Container principal
@@ -77,11 +97,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 4px 12px rgba(0,0,0,0.12)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
     // Cores aplicadas dinamicamente no componente (theme.cardBg)
   },
 
@@ -242,7 +264,8 @@ const styles = StyleSheet.create({
   // Menu lateral
   menuOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // overlay transparente para evitar dimming pesado
+    backgroundColor: 'transparent',
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
   },
@@ -254,11 +277,13 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
     width: 250,
     height: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '2px 0px 12px rgba(0,0,0,0.15)',
+      shadowOffset: { width: 2, height: 0 },
+      shadowOpacity: 0.12,
+      shadowRadius: 6,
+      elevation: 3,
+    }),
   },
 
   menuTitle: {

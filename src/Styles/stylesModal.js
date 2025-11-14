@@ -1,10 +1,31 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
 
 const stylesModal = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // overlay removido para evitar sombra pesada quando modais abrirem
+    backgroundColor: 'transparent',
   },
   overlay: {
     position: 'absolute',
@@ -12,7 +33,7 @@ const stylesModal = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'transparent',
   },
   overlayTouchable: {
     flex: 1,
@@ -24,14 +45,13 @@ const stylesModal = StyleSheet.create({
     width: '100%',
     maxHeight: '50%',
     minHeight: '35%',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -10,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
+    ...platformShadow({
+      boxShadow: '0px -10px 20px rgba(0,0,0,0.12)',
+      shadowOffset: { width: 0, height: -10 },
+      shadowOpacity: 0.12,
+      shadowRadius: 10,
+      elevation: 4,
+    }),
   },
   modalContent: {
     flex: 1,
@@ -65,14 +85,13 @@ const stylesModal = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 15,
     margin: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 5px 12px rgba(0,0,0,0.05)',
+      shadowOffset: { width: 0, height: 5 },
+      shadowOpacity: 0.05,
+      shadowRadius: 6,
+      elevation: 2,
+    }),
   },
   selecaoContainer: {
     flex: 1,
@@ -106,14 +125,14 @@ const stylesModal = StyleSheet.create({
     marginBottom: 20,
     alignItems: 'center',
     backgroundColor: '#fff',
-    shadowColor: '#405CBA',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 3px 6px rgba(64,92,186,0.12)',
+      shadowColor: '#405CBA',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.12,
+      shadowRadius: 6,
+      elevation: 3,
+    }),
   },
   textoBotaoSelecao: {
     color: '#405CBA',
@@ -128,7 +147,7 @@ const stylesModal = StyleSheet.create({
   logoTopo: {
     width: 36,
     height: 36,
-    resizeMode: 'contain',
+    // não colocar resizeMode aqui — passe como prop no <Image resizeMode="contain" />
     alignSelf: 'center',
     marginBottom: 10,
   },
@@ -171,14 +190,14 @@ const stylesModal = StyleSheet.create({
     borderRadius: 15,
     paddingVertical: 18,
     alignItems: 'center',
-    shadowColor: '#405CBA',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
+    ...platformShadow({
+      boxShadow: '0px 3px 6px rgba(64,92,186,0.12)',
+      shadowColor: '#405CBA',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.12,
+      shadowRadius: 6,
+      elevation: 3,
+    }),
   },
   textoBotaoConcordar: {
     color: '#fff',

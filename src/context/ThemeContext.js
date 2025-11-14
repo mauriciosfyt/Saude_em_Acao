@@ -45,7 +45,8 @@ const ThemeContext = createContext({
 
 export const ThemeProvider = ({ children }) => {
   const systemIsDark = Appearance.getColorScheme() === 'dark';
-  const [isDark, setIsDark] = useState(undefined);
+  // Initialize with system theme to avoid a flash of the wrong theme
+  const [isDark, setIsDark] = useState(systemIsDark);
 
   // Carregar preferência salva ao inicializar
   useEffect(() => {

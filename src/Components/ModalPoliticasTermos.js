@@ -9,53 +9,63 @@ import {
   Animated,
   Dimensions,
   SafeAreaView,
-  Image
+  Image,
+  Platform,
 } from 'react-native';
 
 import { COLORS, SPACING, FONTS, BORDERS } from '../constants/constants';
 import stylesModal from '../Styles/stylesModal'
-import { useColorScheme } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
 
 const { height: alturaTela } = Dimensions.get('window');
 
 const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPoliticas, aoAbrirTermos }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { colors, isDark } = useTheme();
   const animacaoSubida = useRef(new Animated.Value(alturaTela)).current;
   const animacaoOpacidade = useRef(new Animated.Value(0)).current;
+  const [internalVisible, setInternalVisible] = useState(visivel);
 
+  // evita usar driver nativo na web
+  const useNative = Platform.OS !== 'web';
+
+  // refs para controlar/limpar animações em andamento
+  const animationsRef = useRef([]);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    if (visivel) {
-      // Animação de entrada - modal sobe da parte inferior
-      Animated.parallel([
-        Animated.timing(animacaoSubida, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animacaoOpacidade, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      // Animação de saída - modal desce para a parte inferior
-      Animated.parallel([
-        Animated.timing(animacaoSubida, {
-          toValue: alturaTela,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animacaoOpacidade, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
+    return () => {
+      // cleanup ao desmontar: parar animações pendentes e evitar setState
+      mountedRef.current = false;
+      animationsRef.current.forEach(anim => anim && typeof anim.stop === 'function' && anim.stop());
+      animationsRef.current = [];
+    };
+  }, []);
 
+  // Controla montagem do Modal: mantém montado enquanto animações de saída rodam
+  useEffect(() => {
+    // limpar animações anteriores
+    animationsRef.current.forEach(a => a && typeof a.stop === 'function' && a.stop());
+    animationsRef.current = [];
+
+    if (visivel) {
+      // montar antes de animar entrada
+      setInternalVisible(true);
+      const a1 = Animated.timing(animacaoSubida, { toValue: 0, duration: 300, useNativeDriver: useNative });
+      const a2 = Animated.timing(animacaoOpacidade, { toValue: 1, duration: 300, useNativeDriver: useNative });
+      animationsRef.current = [a1, a2];
+      Animated.parallel([a1, a2]).start(() => {
+        animationsRef.current = [];
+      });
+    } else if (internalVisible) {
+      // animação de saída: só desmonta quando terminar
+      const a1 = Animated.timing(animacaoSubida, { toValue: alturaTela, duration: 300, useNativeDriver: useNative });
+      const a2 = Animated.timing(animacaoOpacidade, { toValue: 0, duration: 300, useNativeDriver: useNative });
+      animationsRef.current = [a1, a2];
+      Animated.parallel([a1, a2]).start(() => {
+        animationsRef.current = [];
+        if (mountedRef.current) setInternalVisible(false);
+      });
     }
   }, [visivel]);
 
@@ -67,32 +77,53 @@ const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPol
       <View style={stylesModal.selecaoContainer}>
         
         <TouchableOpacity 
-          style={stylesModal.botaoSelecao}
+          style={[
+            stylesModal.botaoSelecao,
+            { backgroundColor: colors.surface, borderColor: colors.primary }
+          ]}
           onPress={() => {
             aoFechar();
             aoAbrirPoliticas();
           }}
         >
-          <Text style={[stylesModal.textoBotaoSelecao, { color: '#000' }]}>Política de privacidade</Text>
+          <Text style={[stylesModal.textoBotaoSelecao, { color: colors.primary }]}>Política de privacidade</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={[stylesModal.botaoSelecao, { backgroundColor: '#405CBA', borderColor: '#405CBA' }]}
+          style={[stylesModal.botaoSelecao, dynamic.botaoSelecaoPrimary]}
           onPress={() => {
             aoFechar();
             aoAbrirTermos && aoAbrirTermos();
           }}
         >
-          <Text style={[stylesModal.textoBotaoSelecao, { color: '#fff' }]}>Termos</Text>
+          <Text style={[stylesModal.textoBotaoSelecao, dynamic.botaoSelecaoTextPrimary]}>Termos</Text>
         </TouchableOpacity>
       </View>
     );
   };
 
+  const overlayColor = isDark ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0.6)';
+
+  // estilos dinâmicos baseados no tema (mesclados com stylesModal)
+  const dynamic = {
+    overlay: { backgroundColor: overlayColor },
+    modalContainer: { backgroundColor: colors.surface },
+    modalContent: { backgroundColor: colors.surface },
+    headerModal: { backgroundColor: colors.surface },
+    tituloHeader: { color: colors.textPrimary },
+    iconeFechar: { color: colors.textPrimary },
+    conteudoContainer: { backgroundColor: colors.surface },
+    botaoSelecaoPrimary: { backgroundColor: colors.primary, borderColor: colors.primary },
+    botaoSelecaoTextPrimary: { color: colors.onPrimary || '#fff' },
+    botaoSelecaoText: { color: colors.primary },
+    botaoConcordar: { backgroundColor: colors.primary },
+    textoBotaoConcordar: { color: colors.onPrimary || '#fff' },
+  };
+
   return (
     <Modal
       transparent={true}
-      visible={visivel}
+      visible={internalVisible}
       onRequestClose={aoFechar}
       animationType="none"
     >
@@ -101,6 +132,7 @@ const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPol
         <Animated.View 
           style={[
             stylesModal.overlay,
+            dynamic.overlay,
             { opacity: animacaoOpacidade }
           ]}
         >
@@ -115,25 +147,26 @@ const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPol
         <Animated.View
           style={[
             stylesModal.modalContainer,
+            dynamic.modalContainer,
             {
               transform: [{ translateY: animacaoSubida }]
             }
           ]}
         >
-          <SafeAreaView style={[stylesModal.modalContent, isDark && { backgroundColor: '#2B2B2B' }]}>
+          <SafeAreaView style={[stylesModal.modalContent, dynamic.modalContent]}>
             {/* Header do Modal */}
-            <View style={[stylesModal.headerModal, isDark && { backgroundColor: '#2B2B2B' }]}>
-              <Text style={[stylesModal.tituloHeader, isDark && { color: '#FFFFFF' }]}>Políticas e termos</Text>
+            <View style={[stylesModal.headerModal, dynamic.headerModal]}>
+              <Text style={[stylesModal.tituloHeader, dynamic.tituloHeader]}>Políticas e termos</Text>
               <TouchableOpacity 
                 style={stylesModal.botaoFechar}
                 onPress={aoFechar}
               >
-                <Text style={[stylesModal.iconeFechar, isDark && { color: '#FFFFFF' }]}>×</Text>
+                <Text style={[stylesModal.iconeFechar, dynamic.iconeFechar]}>×</Text>
               </TouchableOpacity>
             </View>
 
             {/* Conteúdo do Modal */}
-            <View style={[stylesModal.conteudoContainer, isDark && { backgroundColor: '#2B2B2B' }]}>
+            <View style={[stylesModal.conteudoContainer, dynamic.conteudoContainer]}>
               {renderizarConteudo()}
             </View>
           </SafeAreaView>

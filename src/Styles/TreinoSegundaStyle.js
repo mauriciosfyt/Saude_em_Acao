@@ -1,5 +1,24 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
 const styles = StyleSheet.create({
   // Container principal
   container: {
@@ -77,11 +96,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 4px 12px rgba(0,0,0,0.12)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
     // Cores aplicadas dinamicamente no componente (theme.cardBg)
   },
 
@@ -197,52 +218,65 @@ const styles = StyleSheet.create({
   },
 
   // Footer com Botões
-  footer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderTopWidth: 0,
-    borderTopColor: 'transparent',
-    // Cor aplicada dinamicamente no componente conforme tema
-  },
+      // Cor aplicada dinamicamente no componente conforme tema
+  // footer: {
+  //   flexDirection: 'row',
+  //   paddingHorizontal: 20,
+  //   paddingVertical: 20,
+  //   borderTopWidth: 0,
+  //   borderTopColor: 'transparent',
+    
+  // },
 
   comecarButton: {
     flex: 1,
     backgroundColor: '#405CBA',
-    paddingVertical: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderRadius: 10,
-    marginRight: 10,
+    marginRight: 6,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
+    marginTop: 0,
+    minHeight: 44,
   },
 
   comecarButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
   },
 
   finalizarButton: {
     flex: 1,
-    backgroundColor: '#E0E0E0',
-    paddingVertical: 15,
+    backgroundColor: '#F0F0F0',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderRadius: 10,
-    marginLeft: 10,
+    marginLeft: 6,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 15,
+    marginTop: 0,
+    minHeight: 44,
+    borderWidth: 1,
+    borderColor: '#D0D0D0',
   },
 
   finalizarButtonText: {
     color: '#666',
-    fontSize: 16,
-    fontWeight: '600',
-    marginRight: 5,
+    fontSize: 15,
+    fontWeight: '500',
+    marginRight: 6,
   },
 
   // Menu lateral
   menuOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // overlay transparente para evitar dimming pesado
+    backgroundColor: 'transparent',
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
   },
@@ -254,11 +288,13 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
     width: 250,
     height: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '2px 0px 12px rgba(0,0,0,0.15)',
+      shadowOffset: { width: 2, height: 0 },
+      shadowOpacity: 0.12,
+      shadowRadius: 6,
+      elevation: 3,
+    }),
   },
 
   menuTitle: {

@@ -5,11 +5,22 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // O componente recebe 'navigation' para poder navegar
 const Inicial = ({ navigation }) => {
+  // sombra por plataforma: boxShadow para web, shadow* + elevation para mobile
+  const startButtonShadow = Platform.OS === 'web'
+    ? { boxShadow: '0px 2px 4px rgba(0,0,0,0.25)' }
+    : {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      };
   // Verifique se estes caminhos estão corretos para o seu projeto
   const appLogoSource = require('../../../assets/icons/Logo_Prata.png');
 
@@ -37,7 +48,7 @@ const Inicial = ({ navigation }) => {
 
         <Text style={styles.welcomeText}>Seja bem vindo!</Text>
 
-        <TouchableOpacity style={styles.startButton} onPress={handleStartPress}>
+        <TouchableOpacity style={[styles.startButton, startButtonShadow]} onPress={handleStartPress}>
           <Text style={styles.startButtonText}>Entrar</Text>
         </TouchableOpacity>
       </LinearGradient>
@@ -80,11 +91,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#405CBA',
     paddingVertical: 16,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
   startButtonText: {
     color: '#ffffff',

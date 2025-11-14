@@ -1,6 +1,25 @@
-import { StyleSheet } from 'react-native';
+import { Platform } from 'react-native';
 
-const createStyles = (isDark) => StyleSheet.create({
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
+const createStyles = (isDark) => ({
   container: {
     flex: 1,
     backgroundColor: isDark ? '#4A69BD' : '#405CBA',
@@ -87,7 +106,6 @@ const createStyles = (isDark) => StyleSheet.create({
   progressTitleIcon: {
     width: 16,
     height: 16,
-    resizeMode: 'contain',
   },
   
   cardsContainer: {
@@ -108,21 +126,18 @@ const createStyles = (isDark) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 2px 6px rgba(0,0,0,0.15)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
   },
 
   iconImage: {
     width: 26,
     height: 26,
-    tintColor: '#ffffff',
-    resizeMode: 'contain',
   },
   
   infoCard: {
@@ -130,14 +145,13 @@ const createStyles = (isDark) => StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...platformShadow({
+      boxShadow: '0px 2px 8px rgba(0,0,0,0.12)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3.84,
+      elevation: 5,
+    }),
   },
   
   infoLabel: {
@@ -336,7 +350,8 @@ const createStyles = (isDark) => StyleSheet.create({
   // Estilos para o Modal de Configurações
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    // overlay transparente para evitar sombra pesada ao abrir as configurações
+    backgroundColor: 'transparent',
     justifyContent: 'flex-end',
   },
 

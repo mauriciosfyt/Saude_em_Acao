@@ -1,4 +1,24 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
 
 const stylesLogin = StyleSheet.create({
   container: {
@@ -70,13 +90,13 @@ const stylesLogin = StyleSheet.create({
     paddingVertical: 16,
     marginTop: 20,
     alignItems: 'center',
-    shadowColor: '#405CBA',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    ...platformShadow({
+      boxShadow: '0px 4px 8px rgba(64,92,186,0.18)',
+      shadowColor: '#405CBA',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+    }),
     elevation: 8,
   },
   textoBotaoEntrar: {
@@ -124,10 +144,13 @@ const stylesLogin = StyleSheet.create({
     backgroundColor: '#2C2C2C', // Fundo cinza escuro
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
+    ...platformShadow({
+      boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.15,
+      shadowRadius: 20,
+      elevation: 6,
+    }),
     elevation: 10,
   },
   cardHeader: {
@@ -141,7 +164,6 @@ const stylesLogin = StyleSheet.create({
   logoHeader: {
     width: 36,
     height: 36,
-    resizeMode: 'contain',
   },
   botaoVoltarCard: {
     position: 'absolute',

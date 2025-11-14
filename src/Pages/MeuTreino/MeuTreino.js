@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import createStyles from "../../Styles/MeuTreinoStyle";
 import { useTheme } from "../../context/ThemeContext";
 import { useTreinos } from "../../context/TreinosContext";
+import { obterTreinos } from '../../Services/api';
 
 const MeuTreino = ({ navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
@@ -21,7 +22,7 @@ const MeuTreino = ({ navigation }) => {
     dia: "",
   });
   const { colors, isDark } = useTheme();
-  const styles = createStyles(isDark);
+  const styles = useMemo(() => createStyles(isDark), [isDark]);
   const {
     treinosConcluidos,
     treinosIncompletos,
@@ -29,38 +30,63 @@ const MeuTreino = ({ navigation }) => {
     marcarTreinoComoIncompleto,
   } = useTreinos();
 
-  const treinos = [
-    {
-      id: 1,
-      dia: "Segunda-Feira",
-      grupos: "• Peito • Tríceps",
-      imagem: require("../../../assets/banner_whey.png"),
-    },
-    {
-      id: 2,
-      dia: "Terça-Feira",
-      grupos: "• Costas • Bíceps",
-      imagem: require("../../../assets/banner_creatina.png"),
-    },
-    {
-      id: 3,
-      dia: "Quarta-Feira",
-      grupos: "• Perna completo",
-      imagem: require("../../../assets/banner_vitaminas.png"),
-    },
-    {
-      id: 4,
-      dia: "Quinta-Feira",
-      grupos: "• Cardio • Ombro",
-      imagem: require("../../../assets/banner_roupas.jpg"),
-    },
-    {
-      id: 5,
-      dia: "Sexta-Feira",
-      grupos: "• Abdômen • Costas",
-      imagem: require("../../../assets/banner_camisas.png"),
-    },
-  ];
+  const [treinos, setTreinos] = useState([]);
+  const [carregandoTreinos, setCarregandoTreinos] = useState(true);
+
+  // Carregar treinos da API se disponível; caso contrário, usar fallback
+  React.useEffect(() => {
+    let mounted = true;
+
+    const carregar = async () => {
+      try {
+        setCarregandoTreinos(true);
+        const dados = await obterTreinos();
+        if (!mounted) return;
+
+        if (Array.isArray(dados) && dados.length > 0) {
+          // Mapear resposta da API para o formato esperado pela UI
+          const mapped = dados.map((t, idx) => ({
+            id: t.id || idx + 1,
+            dia: t.dia || t.nome || `Treino ${idx + 1}`,
+            grupos: t.grupos || t.musculos || '',
+            imagem: t.imagem ? { uri: t.imagem } : [
+              require("../../../assets/banner_whey.png"),
+              require("../../../assets/banner_creatina.png"),
+              require("../../../assets/banner_vitaminas.png"),
+              require("../../../assets/banner_roupas.jpg"),
+              require("../../../assets/banner_camisas.png"),
+            ][idx % 5],
+          }));
+
+          setTreinos(mapped);
+        } else {
+          // fallback local (sem dados da API)
+          setTreinos([
+            { id: 1, dia: 'Segunda-Feira', grupos: '• Peito • Tríceps', imagem: require('../../../assets/banner_whey.png') },
+            { id: 2, dia: 'Terça-Feira', grupos: '• Costas • Bíceps', imagem: require('../../../assets/banner_creatina.png') },
+            { id: 3, dia: 'Quarta-Feira', grupos: '• Perna completo', imagem: require('../../../assets/banner_vitaminas.png') },
+            { id: 4, dia: 'Quinta-Feira', grupos: '• Cardio • Ombro', imagem: require('../../../assets/banner_roupas.jpg') },
+            { id: 5, dia: 'Sexta-Feira', grupos: '• Abdômen • Costas', imagem: require('../../../assets/banner_camisas.png') },
+          ]);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar treinos:', error);
+        // usar fallback
+        setTreinos([
+          { id: 1, dia: 'Segunda-Feira', grupos: '• Peito • Tríceps', imagem: require('../../../assets/banner_whey.png') },
+          { id: 2, dia: 'Terça-Feira', grupos: '• Costas • Bíceps', imagem: require('../../../assets/banner_creatina.png') },
+          { id: 3, dia: 'Quarta-Feira', grupos: '• Perna completo', imagem: require('../../../assets/banner_vitaminas.png') },
+          { id: 4, dia: 'Quinta-Feira', grupos: '• Cardio • Ombro', imagem: require('../../../assets/banner_roupas.jpg') },
+          { id: 5, dia: 'Sexta-Feira', grupos: '• Abdômen • Costas', imagem: require('../../../assets/banner_camisas.png') },
+        ]);
+      } finally {
+        setCarregandoTreinos(false);
+      }
+    };
+
+    carregar();
+    return () => { mounted = false; };
+  }, []);
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -100,31 +126,17 @@ const MeuTreino = ({ navigation }) => {
       return;
     }
     // Permite acesso a treinos incompletos ou novos
+    
     if (treino.dia === "Segunda-Feira") {
-      navigation.navigate("TreinoSegunda", {
-        onTreinoConcluido: marcarTreinoComoConcluido,
-        onTreinoIncompleto: marcarTreinoComoIncompleto,
-      });
+      navigation.navigate("TreinoSegunda");
     } else if (treino.dia === "Terça-Feira") {
-      navigation.navigate("TreinoTerca", {
-        onTreinoConcluido: marcarTreinoComoConcluido,
-        onTreinoIncompleto: marcarTreinoComoIncompleto,
-      });
+      navigation.navigate("TreinoTerca");
     } else if (treino.dia === "Quarta-Feira") {
-      navigation.navigate("TreinoQuarta", {
-        onTreinoConcluido: marcarTreinoComoConcluido,
-        onTreinoIncompleto: marcarTreinoComoIncompleto,
-      });
+      navigation.navigate("TreinoQuarta");
     } else if (treino.dia === "Quinta-Feira") {
-      navigation.navigate("TreinoQuinta", {
-        onTreinoConcluido: marcarTreinoComoConcluido,
-        onTreinoIncompleto: marcarTreinoComoIncompleto,
-      });
+      navigation.navigate("TreinoQuinta");
     } else if (treino.dia === "Sexta-Feira") {
-      navigation.navigate("TreinoSexta", {
-        onTreinoConcluido: marcarTreinoComoConcluido,
-        onTreinoIncompleto: marcarTreinoComoIncompleto,
-      });
+      navigation.navigate("TreinoSexta");
     }
   };
 
@@ -149,20 +161,20 @@ const MeuTreino = ({ navigation }) => {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={colors.headerText} />
+            <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.headerText }]}>
+          <Text style={[styles.headerTitle, { color: '#fff' }]}> 
             Meus Treinos
           </Text>
           <TouchableOpacity onPress={handleAbrirMenu}>
-            <Ionicons name="menu" size={24} color={colors.headerText} />
+            <Ionicons name="menu" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
         <View style={styles.greetingSection}>
-          <Text style={[styles.greeting, { color: colors.headerText }]}>
+          <Text style={[styles.greeting, { color: '#fff' }]}> 
             Olá Aluno!
           </Text>
-          <Text style={[styles.date, { color: colors.headerText }]}>
+          <Text style={[styles.date, { color: '#fff' }]}> 
             {getCurrentDate()}
           </Text>
         </View>
@@ -176,11 +188,6 @@ const MeuTreino = ({ navigation }) => {
             <View style={styles.treinoInfo}>
               <Text style={[styles.treinoDia, { color: colors.textPrimary }]}>
                 {treino.dia}
-              </Text>
-              <Text
-                style={[styles.treinoGrupos, { color: colors.textSecondary }]}
-              >
-                {treino.grupos}
               </Text>
             </View>
             <TouchableOpacity

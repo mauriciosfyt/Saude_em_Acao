@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../context/ThemeContext";
 
 const DesempenhoHeader = ({ navigation, mesAno, isDark }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
-  const { colors } = useTheme();
+    const { colors, isDark: themeIsDark } = useTheme();
 
   const handleVoltar = () => {
     if (navigation) navigation.goBack();
@@ -19,10 +19,15 @@ const DesempenhoHeader = ({ navigation, mesAno, isDark }) => {
     navigation.navigate(nomeDaTela);
   };
 
-  const iconColor = isDark ? "#FFFFFF" : "#000000";
-  const menuTextColor = isDark ? "#FFFFFF" : "#333333";
-  const menuBg = isDark ? "#2C2C2C" : "#FFFFFF";
-  const overlayColor = isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
+  // Use cores do ThemeContext para o menu acompanhar o tema
+  const theme = {
+    iconColor: colors.textPrimary,
+    menuText: colors.textPrimary,
+    menuBg: colors.surface,
+    menuIconColor: colors.textSecondary,
+  };
+  // Tornar o overlay transparente para evitar sombra pesada quando o menu abre
+  const overlayColor = 'transparent';
 
   return (
     <>
@@ -37,9 +42,8 @@ const DesempenhoHeader = ({ navigation, mesAno, isDark }) => {
           onPress={handleFecharMenu}
           activeOpacity={1}
         >
-          <View style={[styles.menuContent, { backgroundColor: menuBg }]}>
-            <Text style={[styles.menuTitle, { color: menuTextColor }]}>Menu</Text>
-
+          <View style={[styles.menuContent, { backgroundColor: theme.menuBg }]}> 
+            <Text style={[styles.menuTitle, { color: theme.menuText }]}>Menu</Text>
             {[
               { name: "home-outline", text: "Home", screen: "Home" },
               { name: "person-outline", text: "Meu Perfil", screen: "Perfil" },
@@ -54,13 +58,12 @@ const DesempenhoHeader = ({ navigation, mesAno, isDark }) => {
                 style={styles.menuItem}
                 onPress={() => handleNavegar(item.screen)}
               >
-                <Ionicons name={item.name} size={24} color={menuTextColor} />
-                <Text style={[styles.menuItemText, { color: menuTextColor }]}>
+                <Ionicons name={item.name} size={24} color={theme.menuIconColor} />
+                <Text style={[styles.menuItemText, { color: theme.menuText }]}> 
                   {item.text}
                 </Text>
               </TouchableOpacity>
             ))}
-
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => handleNavegar("Inicial")}
@@ -73,16 +76,19 @@ const DesempenhoHeader = ({ navigation, mesAno, isDark }) => {
       </Modal>
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerButton} onPress={handleVoltar}>
-          <Ionicons name="arrow-back" size={24} color={iconColor} />
-        </TouchableOpacity>
+        {/* Só renderiza a seta se não estiver na Home */}
+        {navigation?.getState?.()?.routeNames?.[navigation?.getState?.()?.index] !== 'Home' && (
+          <TouchableOpacity style={styles.headerButton} onPress={handleVoltar}>
+            <Ionicons name="arrow-back" size={24} color={theme.iconColor} />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={styles.headerButton} onPress={handleAbrirMenu}>
-          <Ionicons name="menu" size={28} color={iconColor} />
+          <Ionicons name="menu" size={28} color={theme.iconColor} />
         </TouchableOpacity>
       </View>
 
       {mesAno && (
-        <Text style={[styles.monthYearText, { color: iconColor }]}>{mesAno}</Text>
+        <Text style={[styles.monthYearText, { color: theme.iconColor }]}>{mesAno}</Text>
       )}
     </>
   );
@@ -98,11 +104,16 @@ const styles = StyleSheet.create({
     width: "75%",
     paddingTop: 80,
     paddingHorizontal: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...Platform.select({
+      web: { boxShadow: '-2px 0px 10px rgba(0,0,0,0.25)' },
+      default: {
+        shadowColor: "#000",
+        shadowOffset: { width: -2, height: 0 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+      },
+    }),
   },
   menuTitle: {
     fontSize: 24,
@@ -124,7 +135,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingBottom: 20,
-    marginTop: 45,
+    marginTop: 15, // Sobe os ícones
     paddingHorizontal: 20,
   },
   headerButton: {

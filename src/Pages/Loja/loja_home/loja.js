@@ -9,6 +9,7 @@ import {
   TextInput,
   Dimensions,
   FlatList,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONTS, BORDERS } from '../../../constants/constants';
@@ -116,7 +117,7 @@ const categories = [
 
   const renderBanner = ({ item }) => (
     <View style={styles.bannerContainer}>
-      <Image source={item.image} style={styles.bannerImage} />
+      <Image source={item.image} style={styles.bannerImage} resizeMode="cover" />
       <View style={styles.bannerOverlay}>
         <Text style={styles.bannerTitle}>{item.title}</Text>
         <Text style={styles.bannerSubtitle}>{item.subtitle}</Text>
@@ -135,7 +136,7 @@ const categories = [
         />
       </TouchableOpacity>
       <View style={styles.productContent}>
-        <Image source={item.image} style={styles.horizontalProductImage} />
+        <Image source={item.image} style={styles.horizontalProductImage} resizeMode="contain" />
         <View style={styles.textContainer}>
           <Text style={styles.horizontalProductName} numberOfLines={2}>
             {item.name}
@@ -153,7 +154,7 @@ const categories = [
 
   const renderVerticalProduct = ({ item }) => (
     <TouchableOpacity style={styles.verticalProductCard} onPress={() => navigation.navigate('LojaProdutos', { produto: item })}>
-      <Image source={item.image} style={styles.verticalProductImage} />
+      <Image source={item.image} style={styles.verticalProductImage} resizeMode="contain" />
       <View style={styles.verticalProductInfo}>
         <Text style={styles.verticalProductDescription} numberOfLines={2}>
           {item.description}
@@ -225,7 +226,7 @@ const categories = [
                   {category.type === 'ionicon' ? (
                     <Ionicons name={category.icon} size={24} color="#000" />
                   ) : (
-                    <Image source={category.icon} style={styles.categoryImage} />
+                    <Image source={category.icon} style={styles.categoryImage} resizeMode="contain" />
                   )}
                 </View>
                 <Text style={styles.categoryText}>{category.name}</Text>
@@ -261,6 +262,7 @@ const categories = [
       </ScrollView>
       {/* Adiciona a nova barra de navegação fixa */}
   <BottomNavBar navigation={navigation} activeScreen={'Loja'} />
+    
     </View>
   );
 };
@@ -291,7 +293,6 @@ const styles = StyleSheet.create({
   bannerImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   bannerOverlay: {
     position: 'absolute',
@@ -303,16 +304,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ff6b35',
     marginBottom: 5,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    ...Platform.select({
+      web: { textShadow: '1px 1px 2px rgba(0,0,0,0.3)' },
+      default: {
+        // Mobile: textShadow* não suportados nativamente
+      },
+    }),
   },
   bannerSubtitle: {
     fontSize: 14,
     color: 'white',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    ...Platform.select({
+      web: { textShadow: '1px 1px 2px rgba(0,0,0,0.5)' },
+      default: {
+        // Mobile: textShadow* não suportados nativamente
+      },
+    }),
   },
   bannerIndicators: {
     flexDirection: 'row',
@@ -357,14 +364,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...Platform.select({
+      web: { boxShadow: '0px 2px 8px rgba(0,0,0,0.10)' },
+      default: {
+        elevation: 5,
+      },
+    }),
   },
   categoryText: {
     fontSize: 12,
@@ -375,7 +380,6 @@ const styles = StyleSheet.create({
   categoryImage: {
     width: 24,
     height: 24,
-    resizeMode: 'contain',
   },
   horizontalProductsSection: {
     marginBottom: 20,
@@ -390,14 +394,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     marginRight: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
+    ...Platform.select({
+      web: { boxShadow: '0px 4px 12px rgba(0,0,0,0.10)' },
+      default: {
+        elevation: 5,
+      },
+    }),
     marginBottom: 10,
     justifyContent: 'space-between',
   },
@@ -422,7 +424,6 @@ const styles = StyleSheet.create({
   horizontalProductImage: {
     width: '100%',
     height: 90,
-    resizeMode: 'contain',
     marginBottom: 8,
   },
   horizontalProductName: {
@@ -450,14 +451,12 @@ const styles = StyleSheet.create({
   verticalProductsContainer: {
     backgroundColor: 'white',
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...Platform.select({
+      web: { boxShadow: '0px 6px 18px rgba(0,0,0,0.10)' },
+      default: {
+        elevation: 5,
+      },
+    }),
     overflow: 'hidden',
     marginBottom:10,
 
@@ -470,7 +469,6 @@ const styles = StyleSheet.create({
   verticalProductImage: {
     width: 80,
     height: 80,
-    resizeMode: 'contain',
     marginRight: 15,
   },
   verticalProductInfo: {

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { MaterialIcons } from '@expo/vector-icons';
 import {
   View,
   Text,
@@ -10,28 +9,39 @@ import {
   StatusBar,
   Modal,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import HeaderSeta from '../../Components/header_seta/header_seta';
 import styles from '../../Styles/TreinoSextastyle';
 import { playSuccessSound } from '../../Components/Sounds';
 import { useTheme } from '../../context/ThemeContext';
-
-// ...restante do código permanece igual...
+import { useTreinos } from '../../context/TreinosContext';
 
 const TreinoSexta = ({ navigation, route }) => {
-  console.log('Renderizando TreinoSexta');
   const { isDark, colors } = useTheme();
+  const { marcarTreinoComoConcluido, marcarTreinoComoIncompleto } = useTreinos();
+
+  // 🎨 Definição das cores do tema
   const theme = {
-    contentBg: isDark ? '#2B2F36' : '#F5F5F5',
-    cardBg: isDark ? '#3A3F47' : '#FFFFFF',
-    cardBorder: isDark ? '#525862' : 'rgba(0,0,0,0.08)',
+    contentBg: isDark ? '#2C2C2C' : '#F5F5F5',
+    cardBg: isDark ? '#3A3A3A' : '#FFFFFF',
+    cardBorder: isDark ? '#FFFFFF' : 'rgba(0,0,0,0.1)',
     textPrimary: isDark ? '#FFFFFF' : '#000000',
-    textSecondary: isDark ? '#C9CEDA' : '#666666',
-    modalBg: isDark ? '#1A1F2E' : '#FFFFFF',
+    textSecondary: isDark ? '#CCCCCC' : '#666666',
+    footerBg: isDark ? '#2C2C2C' : '#FFFFFF',
+    modalBg: isDark ? '#2c2c2c' : '#ffffff',
     modalTitle: isDark ? '#FFFFFF' : '#000000',
     modalText: isDark ? '#C9CEDA' : '#222222',
+    progressTrack: isDark ? '#444' : '#E0E0E0',
+    iconColor: isDark ? '#FFFFFF' : '#000000',
+    menuBg: isDark ? '#2C2C2C' : '#FFFFFF',
+    menuText: isDark ? '#fafafa' : '#000000',
   };
-  // Exercícios de sexta-feira: Costas e Abdomen
+  // Overlay do menu lateral (segue o tema)
+  const menuOverlayColor = isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.15)';
+
+  // 🏋️‍♂️ Exercícios de sexta-feira
+  // 🏋️‍♂️ Exercícios de sexta-feira
   const exercicios = {
     costas: [
       {
@@ -41,7 +51,8 @@ const TreinoSexta = ({ navigation, route }) => {
         repeticoes: 15,
         carga: 0,
         imagem: require('../../../assets/banner_roupas.jpg'),
-        descricao: 'Sente-se no aparelho, segure a barra e puxe em direção ao abdômen, mantendo as costas retas.',
+        descricao:
+          'Sente-se no aparelho, segure a barra e puxe em direção ao abdômen, mantendo as costas retas.',
       },
       {
         id: 2,
@@ -50,18 +61,20 @@ const TreinoSexta = ({ navigation, route }) => {
         repeticoes: 15,
         carga: 0,
         imagem: require('../../../assets/banner_camisas.png'),
-        descricao: 'Em pé, segure a barra e puxe-a para cima até a altura do peito, mantendo os cotovelos elevados.',
+        descricao:
+          'Em pé, segure a barra e puxe-a para cima até a altura do peito, mantendo os cotovelos elevados.',
       },
     ],
     abdomen: [
       {
         id: 3,
-        nome: 'Abdominal cruzado',
+        nome: 'Abdominal Cruzado',
         series: 4,
         repeticoes: 15,
         carga: 0,
-        imagem: require('../../../assets/banner_whey.jpg'),
-        descricao: 'Deitado, cruze uma perna sobre a outra e leve o cotovelo ao joelho oposto, alternando os lados.',
+        imagem: require('../../../assets/banner_whey_piqueno.jpg'),
+        descricao:
+          'Deitado, cruze uma perna sobre a outra e leve o cotovelo ao joelho oposto, alternando os lados.',
       },
       {
         id: 4,
@@ -69,8 +82,9 @@ const TreinoSexta = ({ navigation, route }) => {
         series: 4,
         repeticoes: 15,
         carga: 0,
-        imagem: require('../../../assets/banner_whey.jpg'),
-        descricao: 'Deitado, flexione o tronco elevando os ombros em direção ao quadril.',
+        imagem: require('../../../assets/banner_whey_piqueno.jpg'),
+        descricao:
+          'Deitado, flexione o tronco elevando os ombros em direção ao quadril.',
       },
       {
         id: 5,
@@ -79,28 +93,78 @@ const TreinoSexta = ({ navigation, route }) => {
         repeticoes: 15,
         carga: 0,
         imagem: require('../../../assets/banner_creatina1.jpg'),
-        descricao: 'Apoie os antebraços e a ponta dos pés no chão, mantendo o corpo reto e contraído.',
+        descricao:
+          'Apoie os antebraços e a ponta dos pés no chão, mantendo o corpo reto e contraído.',
       },
       {
         id: 6,
-        nome: 'Giro Francês(Abdomen)',
+        nome: 'Giro Francês (Abdômen)',
         series: 4,
         repeticoes: 15,
         carga: 0,
         imagem: require('../../../assets/banner_vitaminas.png'),
-        descricao: 'Sentado, segure um peso e gire o tronco de um lado para o outro, trabalhando o abdômen oblíquo.',
+        descricao:
+          'Sentado, segure um peso e gire o tronco de um lado para o outro, trabalhando o abdômen oblíquo.',
       },
     ],
   };
   const totalExercicios = exercicios.costas.length + exercicios.abdomen.length;
-  const [menuVisivel, setMenuVisivel] = useState(false);
-  const [exerciciosConcluidos, setExerciciosConcluidos] = useState(0);
   const [exerciciosSelecionados, setExerciciosSelecionados] = useState({});
+  const [exerciciosConcluidos, setExerciciosConcluidos] = useState(0);
   const [modalExercicio, setModalExercicio] = useState({ visivel: false, exercicio: null });
   const [modalFinalizar, setModalFinalizar] = useState(false);
   const [modalAviso, setModalAviso] = useState(false);
 
-  // Funções de controle do menu
+  // ✅ Alterna o estado de conclusão do exercício
+  const toggleExercicio = (id) => {
+    const novoEstado = { ...exerciciosSelecionados };
+    if (novoEstado[id]) {
+      delete novoEstado[id];
+    } else {
+      novoEstado[id] = true;
+    }
+    setExerciciosSelecionados(novoEstado);
+    setExerciciosConcluidos(Object.keys(novoEstado).length);
+  };
+
+  // ✅ Selecionar ou desmarcar todos
+  const handleSelecionarExercicios = () => {
+    if (exerciciosConcluidos === totalExercicios) {
+      setExerciciosSelecionados({});
+      setExerciciosConcluidos(0);
+    } else {
+      const todos = {};
+      exercicios.costas.concat(exercicios.abdomen).forEach((e) => (todos[e.id] = true));
+      setExerciciosSelecionados(todos);
+      setExerciciosConcluidos(totalExercicios);
+    }
+  };
+
+  //  Verifica se há exercícios selecionados antes de finalizar
+  const handleFinalizarTreino = () => {
+    if (exerciciosConcluidos > 0) {
+      setModalFinalizar(true);
+    } else {
+      setModalAviso(true);
+    }
+  };
+
+  // ✅ Confirma o término do treino
+  const handleConfirmarFinalizar = () => {
+    setModalFinalizar(false);
+    playSuccessSound();
+
+    if (exerciciosConcluidos === totalExercicios) {
+      marcarTreinoComoConcluido && marcarTreinoComoConcluido('Sexta-Feira');
+    } else {
+      marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Sexta-Feira');
+    }
+
+    navigation.navigate('MeuTreino');
+  };
+
+  const [menuVisivel, setMenuVisivel] = useState(false);
+
   const handleAbrirMenu = () => {
     setMenuVisivel(true);
   };
@@ -114,279 +178,329 @@ const TreinoSexta = ({ navigation, route }) => {
     navigation.navigate(nomeDaTela);
   };
 
-  // Função para marcar/desmarcar exercício
-  const toggleExercicio = (id) => {
-    const novoEstado = { ...exerciciosSelecionados };
-    if (novoEstado[id]) {
-      delete novoEstado[id];
-    } else {
-      novoEstado[id] = true;
-    }
-    setExerciciosSelecionados(novoEstado);
-    setExerciciosConcluidos(Object.keys(novoEstado).length);
-  };
-
-  // Função para selecionar/desmarcar todos os exercícios
-  const handleSelecionarExercicios = () => {
-    if (exerciciosConcluidos === totalExercicios) {
-      // Desmarcar todos
-      setExerciciosSelecionados({});
-      setExerciciosConcluidos(0);
-    } else {
-      // Selecionar todos
-      const todosExercicios = {};
-      exercicios.costas.forEach(exercicio => {
-        todosExercicios[exercicio.id] = true;
-      });
-      exercicios.abdomen.forEach(exercicio => {
-        todosExercicios[exercicio.id] = true;
-      });
-      setExerciciosSelecionados(todosExercicios);
-      setExerciciosConcluidos(totalExercicios);
-    }
-  };
-
-  // Função para finalizar treino - agora permite finalizar com pelo menos 1 exercício
-  const handleFinalizarTreino = () => {
-    if (exerciciosConcluidos > 0) {
-      setModalFinalizar(true);
-    } else {
-      setModalAviso(true);
-    }
-  };
-
-  const handleFecharAviso = () => {
-    setModalAviso(false);
-  };
-
-  const handleConfirmarFinalizar = () => {
-    setModalFinalizar(false);
-    playSuccessSound();
-    
-    // Verifica se todos os exercícios foram concluídos
-    if (exerciciosConcluidos === totalExercicios) {
-      // Marcar treino como concluído se a função estiver disponível
-      if (route?.params?.onTreinoConcluido) {
-        route.params.onTreinoConcluido('Sexta-Feira');
-      }
-    } else {
-      // Marcar treino como incompleto se a função estiver disponível
-      if (route?.params?.onTreinoIncompleto) {
-        route.params.onTreinoIncompleto('Sexta-Feira');
-      }
-    }
-    
-    navigation.navigate('MeuTreino');
-  };
-
-  const handleCancelarFinalizar = () => {
-    setModalFinalizar(false);
-  };
-
-  // Funções do modal de exercício
-  const handleAbrirModalExercicio = (exercicio) => {
-    setModalExercicio({ visivel: true, exercicio });
-  };
-
-  const handleFecharModalExercicio = () => {
-    setModalExercicio({ visivel: false, exercicio: null });
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor="#405CBA" />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.contentBg }]}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={colors.primary}
+      />
 
-      {/* Header com seta de voltar e menu */}
-      <HeaderSeta navigation={navigation} mesAno={null} />
+      {/* Header com seta adaptável */}
+      <HeaderSeta
+        navigation={navigation}
+        mesAno={null}
+        isDark={isDark}
+        onPressMenu={handleAbrirMenu}
+      />
 
-
-      {/* Conteúdo Principal */}
-      <ScrollView style={[styles.content, { backgroundColor: theme.contentBg }]} showsVerticalScrollIndicator={false}>
-        {/* Seção Costas */}
-        <View style={styles.secaoContainer}>
-          <View style={styles.secaoHeader}>
-            <Text style={styles.secaoTitle}>Costas</Text>
-          </View>
-          {exercicios.costas.map((exercicio) => (
-            <View key={exercicio.id} style={[styles.exercicioCard, { backgroundColor: theme.cardBg, borderColor: theme.cardBorder, borderWidth: 1 }]}>
-              <TouchableOpacity 
-                style={styles.checkbox}
-                onPress={() => toggleExercicio(exercicio.id)}
+      <ScrollView
+        style={[styles.content, { backgroundColor: theme.contentBg }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Seções (Costas e Abdômen) */}
+        {Object.entries(exercicios).map(([grupo, lista]) => (
+          <View key={grupo} style={styles.secaoContainer}>
+            {lista.map((exercicio) => (
+              <View
+                key={exercicio.id}
+                style={[
+                  styles.exercicioCard,
+                  {
+                    backgroundColor: theme.cardBg,
+                    borderColor: theme.cardBorder,
+                  },
+                ]}
               >
-                <Ionicons 
-                  name={exerciciosSelecionados[exercicio.id] ? "checkmark-circle" : "ellipse-outline"} 
-                  size={24} 
-                  color={exerciciosSelecionados[exercicio.id] ? "#405CBA" : "#ccc"} 
-                />
-              </TouchableOpacity>
-              {exercicio.imagem && (
-                <Image source={exercicio.imagem} style={styles.exercicioImage} />
-              )}
-              <View style={styles.exercicioInfo}>
-                <View style={styles.exercicioNomeContainer}>
-                  <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>{exercicio.id} {exercicio.nome}</Text>
+                <TouchableOpacity
+                  style={styles.checkbox}
+                  onPress={() => toggleExercicio(exercicio.id)}
+                >
+                  <Ionicons
+                    name={
+                      exerciciosSelecionados[exercicio.id]
+                        ? 'checkmark-circle'
+                        : 'ellipse-outline'
+                    }
+                    size={24}
+                    color={exerciciosSelecionados[exercicio.id] ? colors.primary : colors.textTertiary}
+                  />
+                </TouchableOpacity>
+
+                {exercicio.imagem && (
+                  <Image source={exercicio.imagem} style={styles.exercicioImage} />
+                )}
+
+                <View style={styles.exercicioInfo}>
+                  <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>
+                    {exercicio.nome}
+                  </Text>
+                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                    Série: {exercicio.series}
+                  </Text>
+                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                    Repetição: {exercicio.repeticoes}
+                  </Text>
+                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                    Carga: {exercicio.carga} (kg)
+                  </Text>
                 </View>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Série: {exercicio.series}</Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Repetição: {exercicio.repeticoes}</Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Carga: {exercicio.carga}(kg)</Text>
+
+                <TouchableOpacity
+                  style={styles.infoButton}
+                  onPress={() => setModalExercicio({ visivel: true, exercicio })}
+                >
+                  <Ionicons name="information-circle" size={24} color={colors.primary} />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity style={styles.infoButton} onPress={() => handleAbrirModalExercicio(exercicio)}>
-                <Ionicons name="information-circle" size={24} color="#405CBA" />
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
-        {/* Seção Abdomen */}
-        <View style={styles.secaoContainer}>
-          <View style={styles.secaoHeader}>
-            <Text style={styles.secaoTitle}>Abdomen</Text>
+            ))}
           </View>
-          {exercicios.abdomen.map((exercicio) => (
-            <View key={exercicio.id} style={[styles.exercicioCard, { backgroundColor: theme.cardBg, borderColor: theme.cardBorder, borderWidth: 1 }]}>
-              <TouchableOpacity 
-                style={styles.checkbox}
-                onPress={() => toggleExercicio(exercicio.id)}
-              >
-                <Ionicons 
-                  name={exerciciosSelecionados[exercicio.id] ? "checkmark-circle" : "ellipse-outline"} 
-                  size={24} 
-                  color={exerciciosSelecionados[exercicio.id] ? "#405CBA" : "#ccc"} 
-                />
-              </TouchableOpacity>
-              {exercicio.imagem && (
-                <Image source={exercicio.imagem} style={styles.exercicioImage} />
-              )}
-              <View style={styles.exercicioInfo}>
-                <View style={styles.exercicioNomeContainer}>
-                  <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>{exercicio.id} {exercicio.nome}</Text>
-                </View>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Série: {exercicio.series}</Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Repetição: {exercicio.repeticoes}</Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Carga: {exercicio.carga}(kg)</Text>
-              </View>
-              <TouchableOpacity style={styles.infoButton} onPress={() => handleAbrirModalExercicio(exercicio)}>
-                <Ionicons name="information-circle" size={24} color="#405CBA" />
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
+        ))}
       </ScrollView>
-              
 
-      {/* Barra de Progresso fora do header, antes do footer */}
+      {/* Barra de Progresso */}
       <View style={styles.progressContainer}>
-        <Text style={styles.progressText}>{exerciciosConcluidos} de {totalExercicios} Treinos concluídos</Text>
-        <View style={styles.progressBar}>
-          <View 
-            style={[styles.progressFill, { width: `${(exerciciosConcluidos / totalExercicios) * 100}%` }]} 
+        <Text style={[styles.progressText, { color: theme.textPrimary }]}>
+          {exerciciosConcluidos} de {totalExercicios} Treinos concluídos
+        </Text>
+        <View style={[styles.progressBar, { backgroundColor: theme.progressTrack }]}>
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${(exerciciosConcluidos / totalExercicios) * 100}%` },
+            ]}
           />
         </View>
       </View>
 
-      {/* Footer com Botões */}
-      <View style={styles.footer}>
+      {/* Footer */}
+      <View style={[styles.footer, { backgroundColor: theme.footerBg }]}>
         <TouchableOpacity style={styles.comecarButton} onPress={handleSelecionarExercicios}>
-          <Text style={styles.comecarButtonText}>Selecionar tudo</Text>
+          <Text style={[styles.comecarButtonText, { color: theme.textPrimary }]}>
+            Selecionar tudo
+          </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[
             styles.finalizarButton,
-            exerciciosConcluidos === totalExercicios && { backgroundColor: '#4CAF50' } // Verde se todos selecionados
+            exerciciosConcluidos === totalExercicios && { backgroundColor: '#4CAF50' },
           ]}
           onPress={handleFinalizarTreino}
         >
-          <Text style={[
-            styles.finalizarButtonText,
-            exerciciosConcluidos === totalExercicios && { color: 'white' } // Texto branco no botão verde
-          ]}>
+          <Text
+            style={[
+              styles.finalizarButtonText,
+              {
+                color:
+                  exerciciosConcluidos === totalExercicios ? '#FFFFFF' : theme.textPrimary,
+              },
+            ]}
+          >
             Finalizar
           </Text>
-          <Ionicons name="checkmark-circle" size={20} color={exerciciosConcluidos === totalExercicios ? "white" : "#666"} />
+          <Ionicons
+            name="checkmark-circle"
+            size={20}
+            color={
+              exerciciosConcluidos === totalExercicios ? '#FFFFFF' : theme.textSecondary
+            }
+          />
         </TouchableOpacity>
       </View>
-
-      {/* Modal Sobre o Exercício */}
-      <Modal
-        visible={modalExercicio.visivel}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={handleFecharModalExercicio}
-      >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: theme.modalBg, borderRadius: 20, padding: 20, width: 320, alignItems: 'flex-start', elevation: 10 }}>
-            <Text style={{ color: theme.modalText, fontSize: 13, marginBottom: 8, fontWeight: 'bold' }}>Sobre o Exercício</Text>
+      {/* Menu lateral */}
+      {/* Modal Exercício */}
+      <Modal visible={modalExercicio.visivel} transparent animationType="fade">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: theme.modalBg,
+              borderRadius: 20,
+              padding: 24,
+              width: '85%',
+              alignItems: 'flex-start',
+            }}
+          >
+            <Text style={{ color: theme.modalText, fontSize: 12, marginBottom: 8 }}>Sobre o Exercício</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#405CBA', marginRight: 8 }} />
-              <Text style={{ fontWeight: 'bold', fontSize: 17, color: theme.modalTitle }}>
+              <View
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: 5,
+                  backgroundColor: colors.primary,
+                  marginRight: 8,
+                }}
+              />
+              <Text style={{ fontWeight: 'bold', fontSize: 16, color: theme.modalTitle }}>
                 {modalExercicio.exercicio?.nome}
               </Text>
             </View>
             <Text style={{ fontSize: 15, color: theme.modalText, marginBottom: 16 }}>
-              {modalExercicio.exercicio?.descricao || 'Descrição do exercício.'}
+              {modalExercicio.exercicio?.descricao}
             </Text>
-            <TouchableOpacity onPress={handleFecharModalExercicio} style={{ alignSelf: 'flex-end', marginTop: 8 }}>
-              <Text style={{ color: '#405CBA', fontWeight: 'bold', fontSize: 16 }}>Fechar</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setModalExercicio({ visivel: false, exercicio: null })}
+                style={{ alignSelf: 'flex-end', marginTop: 8 }}
+              >
+                <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 16 }}>Fechar</Text>
+              </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* Modal Finalizar Treino - Breve e Direto */}
-      <Modal
-        visible={modalFinalizar}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={handleCancelarFinalizar}
-      >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: theme.modalBg, borderRadius: 16, padding: 20, alignItems: 'center', width: 280 }}>
-            <MaterialIcons name="check-circle" size={40} color="#405CBA" style={{ marginBottom: 12 }} />
-            <Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginBottom: 16, color: theme.modalTitle }}>
+      {/* Modal Finalizar */}
+      <Modal visible={modalFinalizar} transparent animationType="fade">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.4)',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: theme.modalBg,
+              borderRadius: 16,
+              padding: 20,
+              alignItems: 'center',
+              width: 280,
+            }}
+          >
+            <MaterialIcons name="check-circle" size={40} color={colors.primary} style={{ marginBottom: 12 }} />
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                textAlign: 'center',
+                marginBottom: 16,
+                color: theme.modalTitle,
+              }}
+            >
               Finalizar treino?
             </Text>
             <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
               <TouchableOpacity
-                style={{ backgroundColor: isDark ? '#2B2F36' : '#F0F0F0', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20, flex: 0.45 }}
-                onPress={handleCancelarFinalizar}
+                style={{
+                  backgroundColor: isDark ? '#2C2C2C' : '#F0F0F0',
+                  borderRadius: 8,
+                  paddingVertical: 10,
+                  paddingHorizontal: 20,
+                  flex: 0.45,
+                }}
+                onPress={() => setModalFinalizar(false)}
               >
-                <Text style={{ color: '#405CBA', fontWeight: 'bold', fontSize: 14, textAlign: 'center' }}>Cancelar</Text>
+                <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 14, textAlign: 'center' }}>
+                  Cancelar
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={{ backgroundColor: '#405CBA', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20, flex: 0.45 }}
-                onPress={handleConfirmarFinalizar}
-              >
-                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14, textAlign: 'center' }}>Finalizar</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: colors.primary,
+                    borderRadius: 8,
+                    paddingVertical: 10,
+                    paddingHorizontal: 20,
+                    flex: 0.45,
+                  }}
+                  onPress={handleConfirmarFinalizar}
+                >
+                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14, textAlign: 'center' }}>
+                    Finalizar
+                  </Text>
+                </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* Modal de Aviso de Exercícios não selecionados */}
-      <Modal
-        visible={modalAviso}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={handleFecharAviso}
-      >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: theme.modalBg, borderRadius: 16, padding: 24, alignItems: 'center', width: 300 }}>
+      {/* Modal Aviso */}
+      <Modal visible={modalAviso} transparent animationType="fade">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.4)',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: theme.modalBg,
+              borderRadius: 16,
+              padding: 24,
+              alignItems: 'center',
+              width: 300,
+            }}
+          >
             <MaterialIcons name="error-outline" size={48} color="#F5A623" style={{ marginBottom: 12 }} />
-            <Text style={{ fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginBottom: 8, color: theme.modalTitle }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: 'bold',
+                textAlign: 'center',
+                marginBottom: 8,
+                color: theme.modalTitle,
+              }}
+            >
               Você ainda não completou todos os exercícios.
             </Text>
             <Text style={{ fontSize: 16, textAlign: 'center', marginBottom: 24, color: theme.modalText }}>
-              Complete todos os exercícios antes de finalizar o treino.
+              Complete pelo menos um exercício antes de finalizar.
             </Text>
             <TouchableOpacity
-              style={{ backgroundColor: '#405CBA', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 32, width: '100%' }}
-              onPress={handleFecharAviso}
+              style={{
+                backgroundColor: colors.primary,
+                borderRadius: 8,
+                paddingVertical: 10,
+                paddingHorizontal: 32,
+                width: '100%',
+              }}
+              onPress={() => setModalAviso(false)}
             >
               <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>OK</Text>
             </TouchableOpacity>
           </View>
         </View>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={menuVisivel}
+        onRequestClose={handleFecharMenu}
+      >
+        <TouchableOpacity
+          style={[styles.menuOverlay, { backgroundColor: menuOverlayColor }]}
+          activeOpacity={1}
+          onPress={handleFecharMenu}
+        >
+          <View style={[styles.menuContent, { backgroundColor: theme.menuBg }]}>
+            <Text style={[styles.menuTitle, { color: theme.menuText }]}>Menu</Text>
+
+            {[
+              { nome: 'MainTabs', label: 'Home', icon: 'home-outline' },
+              { nome: 'Perfil', label: 'Meu Perfil', icon: 'person-outline' },
+              { nome: 'Chat', label: 'Chat', icon: 'chatbubble-ellipses-outline' },
+              { nome: 'Desempenho', label: 'Desempenho', icon: 'bar-chart-outline' },
+              { nome: 'MeuTreino', label: 'Meus Treinos', icon: 'fitness-outline' },
+            ].map((item) => (
+              <TouchableOpacity
+                key={item.nome}
+                style={styles.menuItem}
+                onPress={() => handleNavegar(item.nome)}
+              >
+                <Ionicons name={item.icon} size={24} color={theme.menuText} />
+                <Text style={[styles.menuItemText, { color: theme.menuText }]}>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );

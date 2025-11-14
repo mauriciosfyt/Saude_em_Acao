@@ -10,10 +10,44 @@ import {
   StatusBar,
   Modal,
   useColorScheme,
+  Platform,
 } from "react-native";
 import { useTheme } from "../../context/ThemeContext";
 // Usaremos Ionicons para manter a consistência com a tela Desempenho
 import { Ionicons } from "@expo/vector-icons";
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  const offset = shadowOffset ?? { width: 0, height: 2 };
+  const radius = shadowRadius ?? 4;
+  const opacity = shadowOpacity ?? 0.15;
+
+  if (Platform.OS === 'web') {
+    const blur = Math.max(radius * 2, 1);
+    return {
+      boxShadow: boxShadow ?? `${offset.width}px ${offset.height}px ${blur}px rgba(0,0,0,${opacity})`,
+    };
+  }
+
+  const nativeShadow = {
+    shadowColor,
+    shadowOffset: offset,
+    shadowOpacity: opacity,
+    shadowRadius: radius,
+  };
+
+  if (typeof elevation === 'number') {
+    nativeShadow.elevation = elevation;
+  }
+
+  return nativeShadow;
+};
 
 const Mensalidades = ({ navigation }) => {
   const colorScheme = useColorScheme();
@@ -231,8 +265,9 @@ const styles = StyleSheet.create({
   // Estilos do Menu Modal
   menuOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    alignItems: "flex-end",
+    // overlay transparente para evitar sombra pesada em alguns aparelhos
+    backgroundColor: 'transparent',
+    alignItems: 'flex-end',
   },
   menuContent: {
     height: "100%",
@@ -291,11 +326,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: "#405CBA",
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    ...platformShadow({
+      boxShadow: "0px 12px 24px rgba(0,0,0,0.12)",
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 3,
+    }),
   },
   mainTitle: {
     fontSize: 26,
@@ -337,11 +374,14 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderRadius: 12,
     alignItems: "center",
-    elevation: 4,
-    shadowColor: "#6A82FB",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    ...platformShadow({
+      boxShadow: "0px 6px 16px rgba(106,130,251,0.28)",
+      shadowColor: '#6A82FB',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.12,
+      shadowRadius: 4,
+      elevation: 2,
+    }),
     marginTop: 16,
   },
   mainButtonText: { color: "#FFFFFF", fontSize: 18, fontWeight: "bold" },

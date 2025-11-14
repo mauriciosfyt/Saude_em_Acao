@@ -15,9 +15,11 @@ import HeaderSeta from '../../Components/header_seta/header_seta';
 import styles from '../../Styles/TreinoQuartaStyle';
 import { playSuccessSound } from '../../Components/Sounds';
 import { useTheme } from '../../context/ThemeContext';
+import { useTreinos } from '../../context/TreinosContext';
 
 const TreinoQuarta = ({ navigation, route }) => {
-  const { isDark } = useTheme();
+  const { isDark, colors } = useTheme();
+  const { marcarTreinoComoConcluido, marcarTreinoComoIncompleto } = useTreinos();
 
   const theme = {
     contentBg: isDark ? '#2C2C2C' : '#F5F5F5',
@@ -29,6 +31,9 @@ const TreinoQuarta = ({ navigation, route }) => {
     modalTitle: isDark ? '#FFFFFF' : '#000000',
     modalText: isDark ? '#C9CEDA' : '#222222',
     footerBg: isDark ? '#2C2C2C' : '#FFFFFF',
+    menuBg: isDark ? '#2C2C2C' : '#FFFFFF',
+    menuText: isDark ? '#fafafa' : '#000000',
+    iconColor: isDark ? '#FFFFFF' : '#333333',
   };
 
   const exercicios = {
@@ -39,7 +44,7 @@ const TreinoQuarta = ({ navigation, route }) => {
         series: 4,
         repeticoes: 15,
         carga: 0,
-        imagem: require('../../../assets/banner_whey.jpg'),
+        imagem: require('../../../assets/banner_whey_piqueno.jpg'),
         descricao:
           'Fique em pé com os pés afastados na largura dos ombros, segure a barra sobre os ombros e agache flexionando os joelhos até formar um ângulo de 90°. Retorne à posição inicial.',
       },
@@ -59,7 +64,7 @@ const TreinoQuarta = ({ navigation, route }) => {
         series: 4,
         repeticoes: 15,
         carga: 0,
-        imagem: require('../../../assets/banner_whey.jpg'),
+        imagem: require('../../../assets/banner_whey_piqueno.jpg'),
         descricao:
           'Sente-se no banco extensor, ajuste o apoio nos tornozelos e eleve as pernas até estender os joelhos, retornando devagar.',
       },
@@ -133,29 +138,41 @@ const TreinoQuarta = ({ navigation, route }) => {
     setModalFinalizar(false);
     playSuccessSound();
 
-    if (exerciciosConcluidos === totalExercicios && route?.params?.onTreinoConcluido) {
-      route.params.onTreinoConcluido('Quarta-Feira');
-    } else if (route?.params?.onTreinoIncompleto) {
-      route.params.onTreinoIncompleto('Quarta-Feira');
+    // Use TreinosContext instead of functions passed via route params
+    if (exerciciosConcluidos === totalExercicios) {
+      marcarTreinoComoConcluido && marcarTreinoComoConcluido('Quarta-Feira');
+    } else {
+      marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Quarta-Feira');
     }
 
     navigation.navigate('MeuTreino');
   };
 
+  const [menuVisivel, setMenuVisivel] = useState(false);
+
+  const handleAbrirMenu = () => {
+    setMenuVisivel(true);
+  };
+
+  const handleFecharMenu = () => {
+    setMenuVisivel(false);
+  };
+
+  const handleNavegar = (nomeDaTela) => {
+    handleFecharMenu();
+    navigation.navigate(nomeDaTela);
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.contentBg }]}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor="#405CBA" />
-      <HeaderSeta navigation={navigation} mesAno={null} />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.primary} />
+      <HeaderSeta navigation={navigation} mesAno={null} isDark={isDark} onPressMenu={handleAbrirMenu} />
 
       <ScrollView
         style={[styles.content, { backgroundColor: theme.contentBg }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.secaoContainer}>
-          <View style={styles.secaoHeader}>
-            <Text style={styles.secaoTitle}>Perna</Text>
-          </View>
-
           {exercicios.perna.map((exercicio) => (
             <View
               key={exercicio.id}
@@ -171,7 +188,7 @@ const TreinoQuarta = ({ navigation, route }) => {
                 <Ionicons
                   name={exerciciosSelecionados[exercicio.id] ? 'checkmark-circle' : 'ellipse-outline'}
                   size={24}
-                  color={exerciciosSelecionados[exercicio.id] ? '#405CBA' : '#ccc'}
+                  color={exerciciosSelecionados[exercicio.id] ? colors.primary : colors.divider}
                 />
               </TouchableOpacity>
 
@@ -196,7 +213,7 @@ const TreinoQuarta = ({ navigation, route }) => {
                 style={styles.infoButton}
                 onPress={() => setModalExercicio({ visivel: true, exercicio })}
               >
-                <Ionicons name="information-circle" size={24} color="#405CBA" />
+                <Ionicons name="information-circle" size={24} color={colors.primary} />
               </TouchableOpacity>
             </View>
           ))}
@@ -276,7 +293,7 @@ const TreinoQuarta = ({ navigation, route }) => {
                   width: 10,
                   height: 10,
                   borderRadius: 5,
-                  backgroundColor: '#405CBA',
+                  backgroundColor: colors.primary,
                   marginRight: 8,
                 }}
               />
@@ -291,7 +308,7 @@ const TreinoQuarta = ({ navigation, route }) => {
               onPress={() => setModalExercicio({ visivel: false, exercicio: null })}
               style={{ alignSelf: 'flex-end', marginTop: 8 }}
             >
-              <Text style={{ color: '#405CBA', fontWeight: 'bold', fontSize: 16 }}>Fechar</Text>
+              <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 16 }}>Fechar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -316,7 +333,7 @@ const TreinoQuarta = ({ navigation, route }) => {
               width: 280,
             }}
           >
-            <MaterialIcons name="check-circle" size={40} color="#405CBA" style={{ marginBottom: 12 }} />
+            <MaterialIcons name="check-circle" size={40} color={colors.primary} style={{ marginBottom: 12 }} />
             <Text
               style={{
                 fontSize: 16,
@@ -341,7 +358,7 @@ const TreinoQuarta = ({ navigation, route }) => {
               >
                 <Text
                   style={{
-                    color: '#405CBA',
+                    color: colors.primary,
                     fontWeight: 'bold',
                     fontSize: 14,
                     textAlign: 'center',
@@ -352,7 +369,7 @@ const TreinoQuarta = ({ navigation, route }) => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
-                  backgroundColor: '#405CBA',
+                  backgroundColor: colors.primary,
                   borderRadius: 8,
                   paddingVertical: 10,
                   paddingHorizontal: 20,
@@ -422,29 +439,60 @@ const TreinoQuarta = ({ navigation, route }) => {
             >
               Complete pelo menos um exercício antes de finalizar.
             </Text>
-            <TouchableOpacity
-              style={{
-                backgroundColor: '#405CBA',
-                borderRadius: 8,
-                paddingVertical: 10,
-                paddingHorizontal: 32,
-                width: '100%',
-              }}
-              onPress={() => setModalAviso(false)}
-            >
-              <Text
-                style={{
-                  color: 'white',
-                  fontWeight: 'bold',
-                  fontSize: 16,
-                  textAlign: 'center',
-                }}
-              >
-                OK
-              </Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: colors.primary,
+                    borderRadius: 8,
+                    paddingVertical: 10,
+                    paddingHorizontal: 32,
+                    width: '100%',
+                  }}
+                  onPress={() => setModalAviso(false)}
+                >
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: 16,
+                      textAlign: 'center',
+                    }}
+                  >
+                    OK
+                  </Text>
+                </TouchableOpacity>
           </View>
         </View>
+      </Modal>
+
+      {/* Menu lateral */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={menuVisivel}
+        onRequestClose={handleFecharMenu}
+      >
+        <TouchableOpacity style={styles.menuOverlay} activeOpacity={1} onPress={handleFecharMenu}>
+          <View style={[styles.menuContent, { backgroundColor: theme.menuBg }]}>
+            <Text style={[styles.menuTitle, { color: theme.menuText }]}>Menu</Text>
+
+            {[
+              { nome: 'MainTabs', label: 'Home', icon: 'home-outline' },
+              { nome: 'Perfil', label: 'Meu Perfil', icon: 'person-outline' },
+              { nome: 'Chat', label: 'Chat', icon: 'chatbubble-ellipses-outline' },
+              { nome: 'Desempenho', label: 'Desempenho', icon: 'bar-chart-outline' },
+              { nome: 'MeuTreino', label: 'Meus Treinos', icon: 'fitness-outline' },
+            ].map((item) => (
+              <TouchableOpacity
+                key={item.nome}
+                style={styles.menuItem}
+                onPress={() => handleNavegar(item.nome)}
+              >
+                <Ionicons name={item.icon} size={24} color={theme.iconColor} />
+                <Text style={[styles.menuItemText, { color: theme.menuText }]}>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );

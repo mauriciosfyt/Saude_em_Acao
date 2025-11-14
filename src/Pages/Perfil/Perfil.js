@@ -1,7 +1,9 @@
 import { scheduleNotification } from '../../Components/Notifications';
-import React, { useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { playSuccessSound, TestSoundButton, setSoundEnabled } from '../../Components/Sounds';
+import { useAuth } from '../../context/AuthContext';
+import { deleteAdminAccount, obterMeuPerfil } from '../../Services/api';
 
 import {
   View,
@@ -22,25 +24,57 @@ import createStyles from '../../Styles/PerfilStyles';
 const Perfil = ({ navigation }) => {
   const [configModalVisible, setConfigModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [notificacoes, setNotificacoes] = useState(true);
-  const [som, setSom] = useState(true);
+  const [notificacoes, setNotificacoes] = useState(false);
+  const [som, setSom] = useState(false);
   const [vibracao, setVibracao] = useState(false);
+  const [carregando, setCarregando] = useState(true);
   const { isDark, colors, toggleTheme } = useTheme();
-  const styles = createStyles(isDark);
+  const { user, logout } = useAuth();
+  const styles = useMemo(() => createStyles(isDark), [isDark]);
 
-  // Dados mockados do usuário
+  // Dados do usuário
   const [dadosUsuario, setDadosUsuario] = useState({
-    nome: 'Heleno Brito',
-    email: 'heleno.bt@gmail.com',
-    idade: 17,
-    peso: 90,
-    altura: 175,
-    objetivo: 'Perder peso',
-    nivelAtividade: 'Intermediário',
+    nome: '',
+    email: '',
+    idade: 0,
+    peso: 0,
+    altura: 0,
+    objetivo: '',
+    nivelAtividade: 'Iniciante',
   });
 
   // Dados temporários para edição
   const [dadosEditaveis, setDadosEditaveis] = useState({});
+
+  // Carregar dados do perfil quando o componente monta
+  useEffect(() => {
+    const carregarPerfil = async () => {
+      try {
+        setCarregando(true);
+        const dados = await obterMeuPerfil();
+        
+        // Mapeando os dados da API para o estado local
+        setDadosUsuario({
+          nome: dados.nome || 'Usuário',
+          email: dados.email || '',
+          idade: dados.idade || 0,
+          peso: dados.peso || 0,
+          altura: dados.altura || 0,
+          objetivo: dados.objetivo || '',
+          nivelAtividade: dados.nivelAtividade || 'Iniciante',
+        });
+        
+        console.log('✅ Dados do perfil carregados com sucesso:', dados);
+      } catch (error) {
+        console.error('❌ Erro ao carregar perfil:', error);
+        // Mantém os dados mockados em caso de erro
+      } finally {
+        setCarregando(false);
+      }
+    };
+
+    carregarPerfil();
+  }, []);
 
 const handleVoltar = () => {
   navigation.navigate('Home');
@@ -101,15 +135,85 @@ const handleVoltar = () => {
   };
 
   const handleSairConta = () => {
-    // Lógica para sair da conta
-    console.log('Sair da conta');
-    setConfigModalVisible(false);
+    Alert.alert(
+      'Sair da Conta',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Logout cancelado'),
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          onPress: async () => {
+            try {
+              setConfigModalVisible(false);
+              await logout();
+              navigation.navigate('Inicial');
+              console.log('✅ Logout realizado com sucesso');
+            } catch (error) {
+              console.error('❌ Erro ao fazer logout:', error);
+              Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
   };
 
   const handleExcluirConta = () => {
-    // Lógica para excluir conta
-    console.log('Excluir conta');
-    setConfigModalVisible(false);
+    Alert.alert(
+      'Excluir Conta',
+      'Tem certeza que deseja excluir sua conta? Esta ação é irreversível.',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Exclusão cancelada'),
+          style: 'cancel',
+        },
+        {
+          text: 'Excluir',
+          onPress: async () => {
+            try {
+              if (!user || !user.email) {
+                Alert.alert('Erro', 'Informações de usuário não encontradas');
+                return;
+              }
+
+              // Extrai o ID do email ou usa outro identificador disponível
+              // Se você tiver um user ID armazenado no context, use-o
+              const adminId = user.email; // ou user.id se tiver
+
+              await deleteAdminAccount(adminId);
+              
+              Alert.alert(
+                'Sucesso',
+                'Sua conta foi excluída com sucesso.',
+                [
+                  {
+                    text: 'OK',
+                    onPress: async () => {
+                      setConfigModalVisible(false);
+                      await logout();
+                      navigation.navigate('Inicial');
+                    },
+                  },
+                ]
+              );
+            } catch (error) {
+              console.error('Erro ao excluir conta:', error);
+              Alert.alert(
+                'Erro',
+                error.message || 'Erro ao excluir a conta. Tente novamente.'
+              );
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
   };
 
   const handlePrivacidade = () => {
@@ -183,8 +287,16 @@ const handleVoltar = () => {
       </View>
 
       <ScrollView style={styles.content}>
-        {/* Foto e Informações Básicas */}
-        <View style={styles.profileSection}>
+        {carregando ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 100 }}>
+            <Text style={{ color: isDark ? '#FFFFFF' : '#000000', fontSize: 16 }}>
+              Carregando perfil...
+            </Text>
+          </View>
+        ) : (
+          <>
+            {/* Foto e Informações Básicas */}
+            <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
               <Ionicons name="person" size={60} color={isDark ? "#FFFFFF" : "#405CBA"} />
@@ -253,16 +365,18 @@ const handleVoltar = () => {
 
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>157</Text>
+              <Text style={styles.statNumber}>-</Text>
               <Text style={styles.statLabel}>Treinos Completos</Text>
             </View>
 
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>19</Text>
+              <Text style={styles.statNumber}>-</Text>
               <Text style={styles.statLabel}>Dias Ativos</Text>
             </View>
           </View>
         </View>
+            </>
+        )}
       </ScrollView>
 
       {/* Modal de Edição de Perfil */}

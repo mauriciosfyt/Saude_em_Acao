@@ -1,4 +1,24 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 48) / 2;
@@ -30,14 +50,13 @@ const createStyles = (isDark) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 7,
+    ...platformShadow({
+      boxShadow: '0px 6px 14px rgba(0,0,0,0.25)',
+      shadowOffset: { width: 0, height: 5 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 7,
+    }),
   },
   whatsappIcon: {
     width: 28, 
@@ -96,14 +115,13 @@ const createStyles = (isDark) => StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 8,
+    ...platformShadow({
+      boxShadow: isDark ? '0px 10px 20px rgba(0,0,0,0.35)' : '0px 10px 20px rgba(0,0,0,0.15)',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 8,
+    }),
   },
   profileImage: {
     width: 100,

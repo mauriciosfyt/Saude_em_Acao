@@ -49,8 +49,8 @@ export default function PlanoBasico({ navigation, onContratar }) {
                   width: 20,
                   height: 23,
                   marginRight: 6,
-                  resizeMode: "contain",
                 }}
+                 resizeMode="contain"
               />
               <Text style={styles.bannerText}>O mais vantajoso</Text>
             </View>
@@ -63,7 +63,7 @@ export default function PlanoBasico({ navigation, onContratar }) {
               treino presonalizados.
             </Text>
 
-            <Text style={[styles.priceLabel, isDark && { color: '#C7C7C7' }]}>Por apenas</Text>
+            <Text style={[styles.priceLabel, isDark && { color: '#C7C7C7' }]}>A partir de</Text>
             <View style={styles.priceRow}>
               <Text style={[styles.priceValue, isDark && { color: '#FFFFFF' }]}>R$120,00</Text>
               <Text style={styles.pricePerMonth}>/mês</Text>

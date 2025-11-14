@@ -9,11 +9,45 @@ import {
     SafeAreaView,
     ScrollView,
     StatusBar,
+    Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { LinearGradient } from 'expo-linear-gradient';
 import HeaderLoja from '../../../Components/HeaderLoja';
 import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
+
+const platformShadow = ({
+    shadowColor = '#000',
+    shadowOffset = { width: 0, height: 2 },
+    shadowOpacity = 0.15,
+    shadowRadius = 4,
+    elevation,
+    boxShadow,
+} = {}) => {
+    const offset = shadowOffset ?? { width: 0, height: 2 };
+    const radius = shadowRadius ?? 4;
+    const opacity = shadowOpacity ?? 0.15;
+
+    if (Platform.OS === 'web') {
+        const blur = Math.max(radius * 2, 1);
+        return {
+            boxShadow: boxShadow ?? `${offset.width}px ${offset.height}px ${blur}px rgba(0,0,0,${opacity})`,
+        };
+    }
+
+    const nativeShadow = {
+        shadowColor,
+        shadowOffset: offset,
+        shadowOpacity: opacity,
+        shadowRadius: radius,
+    };
+
+    if (typeof elevation === 'number') {
+        nativeShadow.elevation = elevation;
+    }
+
+    return nativeShadow;
+};
 
 // Adicionando as cores do gradiente ao tema para manter a organização
 const theme = {
@@ -168,11 +202,13 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.white,
         padding: theme.spacing.small,
         borderRadius: 20,
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
+        ...platformShadow({
+            boxShadow: '0px 4px 10px rgba(0,0,0,0.2)',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.2,
+            shadowRadius: 2,
+            elevation: 3,
+        }),
     },
     priceSection: {
         alignItems: 'flex-start',
@@ -241,11 +277,13 @@ const styles = StyleSheet.create({
         height: 70,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        elevation: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        ...platformShadow({
+            boxShadow: '0px -6px 18px rgba(0,0,0,0.2)',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 10,
+        }),
     },
 });
 

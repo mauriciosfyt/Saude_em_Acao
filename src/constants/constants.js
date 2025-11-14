@@ -13,7 +13,8 @@ export const COLORS = {
   cinzaClaro: '#e9ecef',
   cinzaMedio: '#6c757d',
   cinzaEscuro: '#495057',
-  overlay: 'rgba(0, 0, 0, 0.5)',
+  // overlay global: reduzir/remover sombra pesada
+  overlay: 'transparent',
 };
 
 // Spacing

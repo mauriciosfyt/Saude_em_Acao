@@ -1,10 +1,30 @@
-import { StyleSheet, Dimensions } from "react-native";
+import { Dimensions, Platform } from "react-native";
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
 
 const { width, height } = Dimensions.get("window");
 
 const createStyles = (isDark) => {
   const colors = {
-    primary: '#405CBA',
+    primary: '#A7C3F8',
     background: isDark ? '#2B2F36' : '#F5F5F5',
     headerBg: '#405CBA',
     headerText: '#FFFFFF',
@@ -12,15 +32,18 @@ const createStyles = (isDark) => {
     cardBorder: isDark ? '#525862' : 'rgba(0,0,0,0.08)',
     textPrimary: isDark ? '#FFFFFF' : '#000000',
     textSecondary: isDark ? '#C9CEDA' : '#666666',
-    overlay: 'rgba(0, 0, 0, 0.5)',
-    menuBg: isDark ? '#1A1F2E' : '#FFFFFF',
-    menuTitle: isDark ? '#E6E8F3' : '#333333',
-    menuItemText: isDark ? '#D3D8EB' : '#333333',
+     // overlay mais suave — transparente no tema claro, leve sobreposição no escuro
+     overlay: isDark ? 'rgba(0, 0, 0, 0.12)' : 'transparent',
+  // Match training screens: darker neutral for menu background in dark mode
+  menuBg: isDark ? '#2C2C2C' : '#FFFFFF',
+  // Menu text/icons: white in dark mode, black in light mode (same as treino screens)
+  menuTitle: isDark ? '#FFFFFF' : '#000000',
+  menuItemText: isDark ? '#FFFFFF' : '#000000',
     menuItemActiveBg: isDark ? 'rgba(64,92,186,0.15)' : '#F0F4FF',
     success: '#4CAF50',
   };
 
-  return StyleSheet.create({
+  return {
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -77,11 +100,14 @@ const createStyles = (isDark) => {
       marginBottom: 22,
       borderWidth: 1.2,
       borderColor: colors.cardBorder,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: isDark ? 0.15 : 0.1,
-      shadowRadius: 10,
-      elevation: 8,
+      ...platformShadow({
+        boxShadow: isDark ? "0px 12px 24px rgba(0,0,0,0.35)" : "0px 12px 24px rgba(64,92,186,0.18)",
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: isDark ? 0.12 : 0.08,
+        shadowRadius: 6,
+        elevation: 3,
+      }),
       zIndex: 2,
       overflow: "visible",
     },
@@ -110,9 +136,6 @@ const createStyles = (isDark) => {
       fontSize: 34,
       marginBottom: 18,
       fontFamily: "monospace",
-      textShadowColor: isDark ? "rgba(64,92,186,0.20)" : "rgba(49,76,182,0.10)",
-      textShadowOffset: { width: 1, height: 2 },
-      textShadowRadius: 2,
       letterSpacing: 0.5,
     },
   beneficiosList: {
@@ -146,11 +169,14 @@ const createStyles = (isDark) => {
       paddingHorizontal: 16,
       width: width * 0.44,
       alignItems: "flex-start",
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: isDark ? 0.15 : 0.1,
-      shadowRadius: 6,
-      elevation: 4,
+      ...platformShadow({
+        boxShadow: isDark ? "0px 8px 20px rgba(0,0,0,0.3)" : "0px 6px 16px rgba(64,92,186,0.12)",
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: isDark ? 0.12 : 0.06,
+        shadowRadius: 6,
+        elevation: 3,
+      }),
       borderWidth: 1.2,
       borderColor: colors.cardBorder,
       marginBottom: 8,
@@ -165,8 +191,12 @@ const createStyles = (isDark) => {
     infoValue: {
       color: colors.textPrimary,
       fontSize: 22,
-      fontWeight: "bold",
-      marginLeft: 2,
+          ...Platform.select({
+            web: { textShadow: isDark ? '0 2px 10px rgba(64,92,186,0.20)' : '0 1px 6px rgba(49,76,182,0.10)' },
+            default: {
+              // Mobile não suporta textShadow nativo
+            },
+          }),
     },
     renovarButton: {
       marginTop: 30,
@@ -176,11 +206,13 @@ const createStyles = (isDark) => {
       width: width * 0.8,
       alignItems: "center",
       alignSelf: "center",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.2 : 0.1,
-      shadowRadius: 3,
-      elevation: 2,
+      ...platformShadow({
+        boxShadow: isDark ? "0px 6px 14px rgba(0,0,0,0.35)" : "0px 6px 14px rgba(0,0,0,0.2)",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: isDark ? 0.2 : 0.1,
+        shadowRadius: 3,
+        elevation: 2,
+      }),
     },
   renovarButtonText: {
     color: "#fff",
@@ -190,9 +222,10 @@ const createStyles = (isDark) => {
   },
     menuOverlay: {
       flex: 1,
+      // usa a cor overlay calculada (suave/transparente)
       backgroundColor: colors.overlay,
-      justifyContent: "flex-end",
-      alignItems: "flex-end",
+      justifyContent: 'flex-end',
+      alignItems: 'flex-end',
     },
 
     menuContent: {
@@ -203,11 +236,13 @@ const createStyles = (isDark) => {
       paddingVertical: 30,
       width: 250,
       height: "100%",
-      shadowColor: "#000",
-      shadowOffset: { width: 2, height: 0 },
-      shadowOpacity: isDark ? 0.2 : 0.1,
-      shadowRadius: 3.84,
-      elevation: 5,
+      ...platformShadow({
+        boxShadow: isDark ? "-6px 0px 18px rgba(0,0,0,0.35)" : "-6px 0px 18px rgba(0,0,0,0.15)",
+        shadowOffset: { width: 2, height: 0 },
+        shadowOpacity: isDark ? 0.12 : 0.08,
+        shadowRadius: 6,
+        elevation: 3,
+      }),
       borderLeftWidth: isDark ? 1 : 0,
       borderColor: isDark ? colors.cardBorder : 'transparent',
     },
@@ -244,7 +279,8 @@ const createStyles = (isDark) => {
       color: colors.primary,
       fontWeight: "600",
     },
-  });
+
+  };
 };
 
 export default createStyles;

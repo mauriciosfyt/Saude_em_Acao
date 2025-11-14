@@ -30,11 +30,12 @@ const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
         onRequestClose={handleFecharMenu}
       >
         <TouchableOpacity
-          style={[styles.menuOverlay, { backgroundColor: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)' }]}
+          // overlay transparente para evitar sombra pesada ao abrir o menu
+          style={[styles.menuOverlay, { backgroundColor: 'transparent' }]}
           onPress={handleFecharMenu}
           activeOpacity={1}
         >
-          <View style={[styles.menuContent, { backgroundColor: isDark ? '#1A1F2E' : 'white' }]}>
+          <View style={[styles.menuContent, { backgroundColor: isDark ? '#2c2c2c' : 'white' }]}>
             <Text style={[styles.menuTitle, { color: isDark ? '#FFFFFF' : '#333' }]}>Menu</Text>
             <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("Home")}>
               <Ionicons name="home-outline" size={24} color={isDark ? '#FFFFFF' : '#333'} />
@@ -126,7 +127,8 @@ const styles = StyleSheet.create({
   },
   menuOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    // overlay padronizado como transparente para evitar sombra pesada
+    backgroundColor: 'transparent',
     alignItems: "flex-end",
   },
   menuContent: {

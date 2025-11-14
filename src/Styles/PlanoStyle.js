@@ -1,4 +1,24 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
 
 const { width: WINDOW_WIDTH } = Dimensions.get('window');
 const DIAGONAL_HEIGHT = Math.round(WINDOW_WIDTH * 0.28);
@@ -102,11 +122,13 @@ planValue: {
     paddingHorizontal: 24,
     paddingVertical: 14, // aumentei um pouco para combinar com o texto maior
     borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 4,
+    ...platformShadow({
+      boxShadow: '0px 6px 12px rgba(0,0,0,0.2)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      elevation: 4,
+    }),
     marginBottom: 5, // espaço pequeno abaixo do botão para o texto que vem depois
   },
   changePlanButtonText: {

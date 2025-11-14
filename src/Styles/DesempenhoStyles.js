@@ -1,4 +1,24 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { Dimensions, Platform } from 'react-native';
+
+const platformShadow = ({
+  shadowColor = '#000',
+  shadowOffset = { width: 0, height: 2 },
+  shadowOpacity = 0.15,
+  shadowRadius = 4,
+  elevation,
+  boxShadow,
+} = {}) => {
+  if (Platform.OS === 'web') {
+    return {
+      boxShadow: boxShadow ?? `0px 0px 0px rgba(0,0,0,0)`,
+    };
+  }
+
+  // Mobile: usar apenas elevation (Android) - iOS não tem suporte nativo para shadow properties direto
+  return {
+    elevation: elevation ?? 5,
+  };
+};
 
 const { width } = Dimensions.get('window');
 
@@ -12,15 +32,17 @@ const createStyles = (isDark) => {
     cardBorder: isDark ? '#525862' : 'rgba(0,0,0,0.08)',
     textPrimary: isDark ? '#FFFFFF' : '#000000',
     textSecondary: isDark ? '#C9CEDA' : '#666666',
-    overlay: 'rgba(0, 0, 0, 0.5)',
-    menuBg: isDark ? '#1A1F2E' : '#FFFFFF',
-    menuTitle: isDark ? '#E6E8F3' : '#333333',
-    menuItemText: isDark ? '#D3D8EB' : '#333333',
+  // overlay suave: transparente no tema claro, leve escurecimento no escuro
+  overlay: isDark ? 'rgba(0, 0, 0, 0.12)' : 'transparent',
+  // Make menu colors match the treino screens
+  menuBg: isDark ? '#2C2C2C' : '#FFFFFF',
+  menuTitle: isDark ? '#ffffffff' : '#000000',
+  menuItemText: isDark ? '#FFFFFF' : '#000000',
     menuItemActiveBg: isDark ? 'rgba(64,92,186,0.15)' : '#F0F4FF',
     success: '#4CAF50',
   };
 
-  return StyleSheet.create({
+  return {
     container: {
       flex: 1,
       backgroundColor: colors.primary,
@@ -46,7 +68,7 @@ const createStyles = (isDark) => {
     },
     backButton: {
       position: 'absolute',
-      left: 12,
+      left: 10,
       top: 14,
       zIndex: 2,
       padding: 6,
@@ -60,13 +82,13 @@ const createStyles = (isDark) => {
     },
 
     monthYearText: {
-      fontSize: 26,
+      fontSize: 30,
       fontWeight: '700',
       color: colors.headerText,
       textAlign: 'left',
       alignSelf: 'flex-start',
       marginLeft: 8,
-      marginTop: 12,
+      marginTop: 20,
       marginBottom: 4,
     },
   
@@ -76,7 +98,7 @@ const createStyles = (isDark) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-start',
-      marginTop: 5,
+      marginTop: 80,
       paddingHorizontal: 12,
       paddingLeft: 8,
     },
@@ -132,7 +154,6 @@ const createStyles = (isDark) => {
     progressTitleIcon: {
       width: 18,
       height: 18,
-      resizeMode: 'contain',
     },
   
     cardsContainer: {
@@ -159,8 +180,6 @@ const createStyles = (isDark) => {
     iconImage: {
       width: 26,
       height: 26,
-      tintColor: '#ffffff',
-      resizeMode: 'contain',
     },
   
     infoCard: {
@@ -168,9 +187,11 @@ const createStyles = (isDark) => {
       backgroundColor: colors.cardBg,
       borderRadius: 12,
       padding: 12,
-      elevation: 3,
-      borderWidth: isDark ? 1 : 0,
-      borderColor: isDark ? colors.cardBorder : 'transparent',
+      // Remover sombra pesada (Android elevation) que cria um contorno escuro
+      elevation: 0,
+      // Usar borda sutil em tema claro para manter separação visual
+      borderWidth: isDark ? 1 : 1,
+      borderColor: isDark ? colors.cardBorder : 'rgba(0,0,0,0.06)',
     },
   
     infoLabel: {
@@ -188,62 +209,43 @@ const createStyles = (isDark) => {
     /* Modal / menu styles */
     menuOverlay: {
       flex: 1,
+      // overlay transparente para evitar dimming pesado em alguns dispositivos
       backgroundColor: 'transparent',
-      justifyContent: 'flex-start',
-      alignItems: 'flex-end', // menu abre pela direita
+      alignItems: 'flex-end',
     },
 
     menuContent: {
-      backgroundColor: '#1A1F2E', // fundo azul-escuro fixo como na imagem
-      paddingVertical: 30,
-      paddingHorizontal: 20,
-      width: 280,
       height: '100%',
-      borderTopRightRadius: 20,
-      borderBottomRightRadius: 20,
-      borderRightWidth: 0,
-      shadowColor: '#000',
-      shadowOffset: { width: 2, height: 0 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 10,
+      width: '75%',
+      paddingTop: 80,
+      paddingHorizontal: 20,
+      ...platformShadow({
+        boxShadow: isDark ? '-6px 0px 18px rgba(0,0,0,0.35)' : '-6px 0px 18px rgba(0,0,0,0.12)',
+        shadowOffset: { width: -2, height: 0 },
+        shadowOpacity: 0.12,
+        shadowRadius: 6,
+        elevation: 3,
+      }),
     },
 
     menuTitle: {
       fontSize: 24,
-      fontWeight: '700',
-      color: '#FFFFFF', // branco como na imagem
-      marginBottom: 20,
-      textAlign: 'left',
+      fontWeight: "bold",
+      marginBottom: 30,
     },
 
     menuItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       paddingVertical: 15,
-      paddingHorizontal: 15,
-      borderRadius: 12,
-      marginBottom: 8,
-    },
-
-    menuItemActive: {
-      backgroundColor: '#2A3441', // fundo azul-escuro para item ativo
-      borderTopRightRadius: 20,
-      borderBottomRightRadius: 20,
     },
 
     menuItemText: {
-      fontSize: 16,
-      color: '#FFFFFF', // branco para todos os itens
+      fontSize: 18,
       marginLeft: 15,
-      fontWeight: '500',
+      fontWeight: "500",
     },
-
-    menuItemTextActive: {
-      color: '#405CBA', // azul para item ativo
-      fontWeight: '600',
-    },
-  });
+  };
 };
 
 export default createStyles;

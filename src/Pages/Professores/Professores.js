@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -61,7 +61,7 @@ const professores = [
 const Professores = ({ navigation }) => {
   const colorScheme = useColorScheme();
   const { isDark, colors } = useTheme();
-  const styles = createStyles(isDark);
+  const styles = useMemo(() => createStyles(isDark), [isDark]);
   // Sua função para abrir o WhatsApp
   const openWhatsApp = (numero) => {
     const url = `whatsapp://send?phone=${numero}`;
@@ -108,6 +108,7 @@ const Professores = ({ navigation }) => {
                   <Image
                     source={require('../../../assets/icons/icone_whats.png')}
                     style={styles.whatsappIcon}
+                    tintColor="#FFFFFF"
                   />
                   <Text style={styles.buttonText}>Conversar</Text>
                 </TouchableOpacity>
