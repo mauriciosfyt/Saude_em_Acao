@@ -81,7 +81,6 @@ export default function CodeModal({
       sessionStorage.setItem("token", jwtToken);
       sessionStorage.setItem("userEmail", email);
       setAuthToken(jwtToken);
-      login(jwtToken, email);
 
       // 🔹 Busca os dados do usuário para salvar no sessionStorage
       try {
@@ -121,6 +120,15 @@ export default function CodeModal({
         console.warn('Não foi possível buscar o perfil completo:', perfilErr);
         // Salva pelo menos o email no sessionStorage se falhar
         sessionStorage.setItem('userEmail', email);
+      }
+
+      // Agora que gravamos o perfil no sessionStorage, chamamos login para que o AuthContext
+      // possa derivar corretamente o userType a partir dos dados salvos.
+      try {
+        login(jwtToken);
+      } catch (e) {
+        // não bloqueia o fluxo do modal — apenas loga o erro
+        console.warn('login() disparou erro:', e);
       }
 
       if (onValidate) onValidate(data);
