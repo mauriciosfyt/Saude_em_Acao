@@ -30,6 +30,9 @@ public interface ReservaRepository extends MongoRepository<Reserva, String> {
 
     List<Reserva> findByStatusAndDataConclusaoBetween(EStatusReserva status, LocalDateTime inicio, LocalDateTime fim);
 
+    long countByStatusAndDataConclusaoBetween(EStatusReserva status, LocalDateTime inicio, LocalDateTime fim);
+
+
     @Aggregation(pipeline = {
             "{ $group: { _id: '$produto', total: { $sum: 1 } } }",
             "{ $sort: { total: -1 } }",

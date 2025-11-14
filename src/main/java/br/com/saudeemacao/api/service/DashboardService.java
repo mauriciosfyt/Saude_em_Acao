@@ -42,12 +42,24 @@ public class DashboardService {
         double totalVendasGerais = calcularTotalVendas(vendasDoAno);
         Map<String, Long> vendasPorProduto = getVendasPorProduto(vendasDoAno);
 
+
+        long produtosReservados = reservaRepository.countByStatus(EStatusReserva.PENDENTE);
+        long produtosAtivos = produtoRepository.count();
+        long totalProdutosVendidos = reservaRepository.countByStatusAndDataConclusaoBetween(
+                EStatusReserva.CONCLUIDA, inicioDoAno, fimDoAno
+        );
+        long produtosAguardandoRetirada = reservaRepository.countByStatus(EStatusReserva.APROVADA);
+
         return DashboardStatsDTO.builder()
                 .totalAlunos(totalAlunos)
                 .contagemPorPlano(contagemPorPlano)
                 .estoquePorCategoria(estoquePorCategoria)
                 .totalVendasGerais(totalVendasGerais)
                 .totalVendasPorProduto(vendasPorProduto)
+                .produtosReservados(produtosReservados)
+                .produtosAtivos(produtosAtivos)
+                .totalProdutosVendidos(totalProdutosVendidos)
+                .produtosAguardandoRetirada(produtosAguardandoRetirada)
                 .build();
     }
 
