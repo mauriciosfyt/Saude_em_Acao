@@ -83,10 +83,10 @@ const Perfil = () => {
     }
 
     // Carrega os dados salvos no sessionStorage durante o login
-    const cachedName = sessionStorage.getItem('alunoName') || sessionStorage.getItem('userName');
-    const cachedEmail = sessionStorage.getItem('alunoEmail') || sessionStorage.getItem('userEmail');
-    const cachedTelefone = sessionStorage.getItem('alunoNumero') || sessionStorage.getItem('userNumero');
-    const cachedPlano = sessionStorage.getItem('alunoPlano');
+    const cachedName = sessionStorage.getItem('userName');
+    const cachedEmail = sessionStorage.getItem('userEmail');
+    const cachedTelefone = sessionStorage.getItem('userNumero');
+    const cachedPlano = sessionStorage.getItem('userPlano');
 
     if (cachedName || cachedEmail) {
       setUserData((prev) => ({
@@ -117,23 +117,29 @@ const Perfil = () => {
       const telefone =
         payload.numero ||
         payload.phone ||
-        payload.telefone ||
-        payload.celular ||
-        payload.mobile ||
-        payload.user?.phone ||
-        payload.user?.telefone ||
-        payload.usuario?.telefone ||
-        "(00) 00000-0000";
-      
-      const plano = payload.plano || payload.plan || payload.plano_tipo || payload.planoTipo || payload.subscription || payload.perfil || "";
+        payload.telefone || "(00) 00000-0000";
 
-      setUserData((prevState) => ({
-        ...prevState,
+      const plano = payload.plano || "Sem Plano";
+
+      setUserData((prev) => ({
+        ...prev,
         nome,
         email,
         telefone,
-        plano: (plano || prevState.plano || '').toString(),
+        plano,
       }));
+
+      // Salva os dados no sessionStorage
+      sessionStorage.setItem('userName', nome);
+      sessionStorage.setItem('userEmail', email);
+      sessionStorage.setItem('userNumero', telefone);
+      sessionStorage.setItem('userPlano', plano);
+
+      // Remove chaves antigas para evitar duplicidade
+      sessionStorage.removeItem('alunoName');
+      sessionStorage.removeItem('alunoEmail');
+      sessionStorage.removeItem('alunoNumero');
+      sessionStorage.removeItem('alunoPerfil');
     }
   }, [navigate]);
 

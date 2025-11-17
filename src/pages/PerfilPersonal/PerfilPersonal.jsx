@@ -5,7 +5,6 @@ import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import './PerfilPersonal.css';
 import performLogout from "../../components/LogoutButton/LogoutButton";
-import { useAuth } from '../../contexts/AuthContext';
 
 const PerfilPersonal = () => {
   const navigate = useNavigate();
@@ -15,8 +14,6 @@ const PerfilPersonal = () => {
     numero: "",
     perfil: "",
   });
-
-  const { perfil } = useAuth();
 
   // Função para buscar o token salvo e decodificá-lo
   const getDecodedToken = () => {
@@ -58,56 +55,55 @@ const PerfilPersonal = () => {
   };
 
   useEffect(() => {
-    // Se o perfil estiver disponível no AuthContext, usa ele (evita problemas no reload)
     const payload = getDecodedToken();
-    if (!payload && !perfil) {
-      navigate('/');
+    if (!payload) {
+      navigate("/"); // se não houver token, redireciona para login ou home
       return;
     }
 
-    if (perfil) {
-      const nome = perfil.nome || perfil.name || perfil.usuario?.nome || perfil.user?.nome || perfil.fullName || perfil.nome_completo || perfil.nomeCompleto || 'Personal';
-      const email = perfil.email || perfil.usuario?.email || perfil.user?.email || perfil.login || sessionStorage.getItem('personalEmail') || 'sem-email@dominio.com';
-      const perfilTipo = perfil.perfil || perfil.role || perfil.userRole || 'PERSONAL';
-      const numero = perfil.numero || perfil.telefone || perfil.phone || perfil.celular || sessionStorage.getItem('personalNumero') || '(00) 00000-0000';
-
-      setPersonalData({ nome, email, numero, perfil: perfilTipo });
-
-      // Garantir compatibilidade com outras partes que leem chaves específicas
-      try {
-        sessionStorage.setItem('personalName', nome);
-        sessionStorage.setItem('personalEmail', email);
-        sessionStorage.setItem('personalNumero', numero);
-        sessionStorage.setItem('personalPerfil', perfilTipo);
-      } catch (e) {
-        // ignore
-      }
-
-      return;
-    }
-
-    // Fallback: usar sessionStorage ou token quando perfil não estiver no contexto
-    const cachedName = sessionStorage.getItem('personalName');
-    const cachedEmail = sessionStorage.getItem('personalEmail');
-    const cachedNumero = sessionStorage.getItem('personalNumero');
-    const cachedPerfil = sessionStorage.getItem('personalPerfil');
+    // Carrega os dados salvos no sessionStorage durante o login
+    const cachedName = sessionStorage.getItem('userName');
+    const cachedEmail = sessionStorage.getItem('userEmail');
+    const cachedNumero = sessionStorage.getItem('userNumero');
+    const cachedPerfil = sessionStorage.getItem('userPerfil');
 
     if (cachedName || cachedEmail) {
       setPersonalData({
-        nome: cachedName || '',
-        email: cachedEmail || '',
-        perfil: cachedPerfil || 'PERSONAL',
-        numero: cachedNumero || '',
+        nome: cachedName || "",
+        email: cachedEmail || "",
+        perfil: cachedPerfil || "PERSONAL",
+        numero: cachedNumero || "",
       });
-    } else if (payload) {
-      const nome = payload.nome || payload.name || payload.user?.nome || payload.user?.name || payload.usuario?.nome || payload.fullName || payload.nome_completo || payload.nomeCompleto || 'Personal';
-      const email = payload.email || payload.usuario?.email || payload.user?.email || payload.sub || 'sem-email@dominio.com';
-      const perfilTipo = payload.perfil || payload.role || payload.userRole || 'PERSONAL';
-      const numero = payload.numero || payload.telefone || payload.phone || payload.celular || '(00) 00000-0000';
+    } else {
+      // Se não houver cache, tenta extrair do token
+      const nome = 
+        payload.nome ||
+        payload.name ||
+        payload.user?.nome ||
+        payload.user?.name ||
+        payload.usuario?.nome ||
+        payload.fullName ||
+        payload.nome_completo ||
+        payload.nomeCompleto ||
+        "Personal";
+      const email = payload.email || payload.usuario?.email || payload.user?.email || payload.sub || "sem-email@dominio.com";
+      const perfil = payload.perfil || payload.role || payload.userRole || "PERSONAL";
+      const numero = payload.numero || payload.telefone || payload.phone || payload.celular || "(00) 00000-0000";
 
-      setPersonalData({ nome, email, numero, perfil: perfilTipo });
+      setPersonalData({
+        nome,
+        email,
+        numero,
+        perfil,
+      });
+
+      // Salva os dados no sessionStorage
+      sessionStorage.setItem('userName', nome);
+      sessionStorage.setItem('userEmail', email);
+      sessionStorage.setItem('userNumero', numero);
+      sessionStorage.setItem('userPerfil', perfil);
     }
-  }, [navigate, perfil]);
+  }, [navigate]);
 
 
   return (

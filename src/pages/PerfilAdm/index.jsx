@@ -61,9 +61,9 @@ const PerfilAdm = () => {
     }
 
     // Carrega os dados salvos no sessionStorage durante o login
-    const cachedName = sessionStorage.getItem('adminName');
-    const cachedEmail = sessionStorage.getItem('adminEmail');
-    const cachedPerfil = sessionStorage.getItem('adminPerfil');
+    const cachedName = sessionStorage.getItem('userName');
+    const cachedEmail = sessionStorage.getItem('userEmail');
+    const cachedPerfil = sessionStorage.getItem('userPerfil');
 
     if (cachedName || cachedEmail) {
       setAdminData({
