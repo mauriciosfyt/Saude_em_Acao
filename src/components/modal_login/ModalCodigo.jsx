@@ -81,6 +81,7 @@ export default function CodeModal({
       sessionStorage.setItem("token", jwtToken);
       sessionStorage.setItem("userEmail", email);
       setAuthToken(jwtToken);
+      login(jwtToken, email);
 
       // 🔹 Busca os dados do usuário para salvar no sessionStorage
       try {
@@ -93,42 +94,32 @@ export default function CodeModal({
         const numero = perfil.numero || perfil.telefone || perfil.phone || perfil.celular || perfil.phoneNumber || "";
         const perfilTipo = perfil.perfil || perfil.role || perfil.userRole || "USUARIO";
 
-        // Salva no sessionStorage (genérico)
+        // Salva no sessionStorage (apenas genérico)
         sessionStorage.setItem('userName', nome);
         sessionStorage.setItem('userEmail', emailPerfil);
         sessionStorage.setItem('userNumero', numero);
         sessionStorage.setItem('userPerfil', perfilTipo);
 
-        // Salva também com nome específico de cada tipo de usuário
-        if (perfilTipo.toUpperCase().includes('ADMIN')) {
-          sessionStorage.setItem('adminName', nome);
-          sessionStorage.setItem('adminEmail', emailPerfil);
-          sessionStorage.setItem('adminPerfil', perfilTipo);
-        } else if (perfilTipo.toUpperCase().includes('PERSONAL')) {
-          sessionStorage.setItem('personalName', nome);
-          sessionStorage.setItem('personalEmail', emailPerfil);
-          sessionStorage.setItem('personalNumero', numero);
-          sessionStorage.setItem('personalPerfil', perfilTipo);
-        } else {
-          // Usuário comum (aluno)
-          sessionStorage.setItem('alunoName', nome);
-          sessionStorage.setItem('alunoEmail', emailPerfil);
-          sessionStorage.setItem('alunoNumero', numero);
-          sessionStorage.setItem('alunoPerfil', perfilTipo);
-        }
+        // Salva o plano do usuário no sessionStorage
+        const plano = perfil.plano || "Sem Plano";
+        sessionStorage.setItem('userPlano', plano);
+
+        // Remove chaves específicas para evitar duplicidade
+        sessionStorage.removeItem('adminName');
+        sessionStorage.removeItem('adminEmail');
+        sessionStorage.removeItem('adminPerfil');
+        sessionStorage.removeItem('personalName');
+        sessionStorage.removeItem('personalEmail');
+        sessionStorage.removeItem('personalNumero');
+        sessionStorage.removeItem('personalPerfil');
+        sessionStorage.removeItem('alunoName');
+        sessionStorage.removeItem('alunoEmail');
+        sessionStorage.removeItem('alunoNumero');
+        sessionStorage.removeItem('alunoPerfil');
       } catch (perfilErr) {
         console.warn('Não foi possível buscar o perfil completo:', perfilErr);
         // Salva pelo menos o email no sessionStorage se falhar
         sessionStorage.setItem('userEmail', email);
-      }
-
-      // Agora que gravamos o perfil no sessionStorage, chamamos login para que o AuthContext
-      // possa derivar corretamente o userType a partir dos dados salvos.
-      try {
-        login(jwtToken);
-      } catch (e) {
-        // não bloqueia o fluxo do modal — apenas loga o erro
-        console.warn('login() disparou erro:', e);
       }
 
       if (onValidate) onValidate(data);
