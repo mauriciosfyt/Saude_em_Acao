@@ -183,9 +183,7 @@
 /* --- Cores dos Status --- */
 .status-aprovada { color: #2ecc71; font-weight: bold; }
 .status-cancelada { color: #e74c3c; font-weight: bold; }
-
-/* Status para retirado */
-.status-retirado { color: #0ea5a4; font-weight: bold; }
+.status-concluida { color: #0ea5a4; font-weight: bold; }
 
 /* Botão 'Retirado' abaixo da data */
 .retirado-btn {

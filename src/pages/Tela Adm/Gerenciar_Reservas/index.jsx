@@ -4,7 +4,7 @@ import './GerenciarReservas.css';
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { FaSearch } from "react-icons/fa";
 import { setAuthToken } from '../../../services/api';
-import { fetchReservas, fetchReservaStats } from '../../../services/reservasService';
+import { fetchReservas, fetchReservaStats, aprovarRetirada } from '../../../services/reservasService';
 import { fixImageUrl } from '../../../utils/image';
 
 const formatarData = (dataString) => {
@@ -30,6 +30,7 @@ const GerenciarReservas = () => {
     const [erro, setErro] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('APROVADA'); // padrão: aprovadas
+    const [processingId, setProcessingId] = useState(null); // id da reserva em processamento
 
     useEffect(() => {
         const carregarReservas = async () => {
@@ -110,11 +111,21 @@ const GerenciarReservas = () => {
                 r.produto.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-        // Marca uma reserva como RETIRADO no estado local (atualiza a UI imediatamente)
-        const handleMarcarRetirado = (id) => {
-            setReservas((prev) =>
-                prev.map((r) => (r.id === id ? { ...r, status: 'RETIRADO' } : r))
-            );
+        // Marca uma reserva como RETIRADO via API e atualiza o estado com o retorno
+        const handleMarcarRetirado = async (id) => {
+            if (!window.confirm('Confirma marcar esta reserva como retirada?')) return;
+            setProcessingId(id);
+            try {
+                const resp = await aprovarRetirada(id);
+                // A API pode retornar o objeto atualizado ou texto; tentamos extrair o status
+                const novoStatus = (resp?.status || 'RETIRADO').toString().toUpperCase();
+                setReservas((prev) => prev.map((r) => (r.id === id ? { ...r, status: novoStatus } : r)));
+            } catch (error) {
+                console.error('Erro ao aprovar retirada:', error);
+                alert('Erro ao marcar como retirado: ' + (error?.message || error));
+            } finally {
+                setProcessingId(null);
+            }
         };
 
     return (
@@ -155,8 +166,8 @@ const GerenciarReservas = () => {
                             Canceladas
                         </button>
                         <button
-                            className={`filter-btn ${statusFilter === 'RETIRADO' ? 'active' : ''}`}
-                            onClick={() => setStatusFilter('RETIRADO')}
+                            className={`filter-btn ${statusFilter === 'CONCLUIDA' ? 'active' : ''}`}
+                            onClick={() => setStatusFilter('CONCLUIDA')}
                         >
                             Retirado
                         </button>
@@ -222,17 +233,18 @@ const GerenciarReservas = () => {
                                         <p className="reserva-price">{reserva.preco}</p>
                                         <p className="reserva-date">Data: {formatarData(reserva.data)}</p>
 
-                                        {/* Botão de marcar como RETIRADO (aparece abaixo da data) */}
-                                        {reserva.status !== 'RETIRADO' ? (
+                                        {/* Botão de marcar como RETIRADO: exibir apenas para reservas aprovadas */}
+                                        {reserva.status === 'APROVADA' ? (
                                             <button
                                                 className="retirado-btn"
                                                 onClick={() => handleMarcarRetirado(reserva.id)}
+                                                disabled={processingId === reserva.id}
                                             >
-                                                Retirado
+                                                {processingId === reserva.id ? 'Processando...' : 'Retirado'}
                                             </button>
-                                        ) : (
+                                        ) : reserva.status === 'RETIRADO' ? (
                                             <span className="status-retirado">Retirado</span>
-                                        )}
+                                        ) : null}
                                     </div>
                                 </div>
                             ))
