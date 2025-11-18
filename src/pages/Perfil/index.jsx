@@ -82,6 +82,16 @@ const Perfil = () => {
       return;
     }
 
+    // Validação de perfil ADMIN ou ALUNO
+    const cachedPerfil = sessionStorage.getItem('userPerfil');
+    let perfilFromToken = payload.perfil || payload.role || payload.userRole || "ALUNO";
+    const perfil = cachedPerfil || perfilFromToken;
+    if (perfil !== "ALUNO") {
+      navigate("/nao-autorizado");
+      return;
+    }
+    sessionStorage.setItem('userPerfil', perfil);
+
     // Carrega os dados salvos no sessionStorage durante o login
     const cachedName = sessionStorage.getItem('userName');
     const cachedEmail = sessionStorage.getItem('userEmail');

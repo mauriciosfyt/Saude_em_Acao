@@ -321,6 +321,14 @@ const Carrinho = () => {
     );
   };
 
+  useEffect(() => {
+    const perfil = sessionStorage.getItem('userPerfil');
+    if (perfil !== 'ALUNO') {
+      navigate('/nao-autorizado');
+      return;
+    }
+  }, [navigate]);
+
   return (
     <div className="carrinho-background">
       {/* 7. RENDERIZA O MODAL */}

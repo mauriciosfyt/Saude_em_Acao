@@ -69,6 +69,7 @@ const mapearStatusUI = (apiStatus) => {
 // == COMPONENTE PRINCIPAL ==
 
 const Reservas = () => {
+  const navigate = useNavigate();
   // Estados para dados da API, carregamento e erros
   const [reservasApi, setReservasApi] = useState([]); // Dados brutos da API
   const [isLoading, setIsLoading] = useState(true);
@@ -82,8 +83,6 @@ const Reservas = () => {
 
   // NOVO: Estado para controlar a visibilidade do dropdown de filtro
   const [filtroAberto, setFiltroAberto] = useState(false);
-
-  const navigate = useNavigate(); // Hook para navegação
 
   // useEffect para buscar os dados da API (sem alteração)
   useEffect(() => {
@@ -166,9 +165,17 @@ const Reservas = () => {
   // Lista de filtros a serem exibidos no dropdown
   const filtrosStatus = ['Todos', 'Em Análise', 'Aprovado', 'Retirado', 'Cancelado'];
 
+  useEffect(() => {
+    const perfil = sessionStorage.getItem('userPerfil');
+    if (perfil !== 'ALUNO') {
+      navigate('/nao-autorizado');
+      return;
+    }
+  }, [navigate]);
+
   return (
     <>
-      <Header/>
+      <Header />
 
       <div className="pagina-reservas">
         <main className="main-content">

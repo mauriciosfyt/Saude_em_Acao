@@ -71,6 +71,10 @@ const PerfilAdm = () => {
         email: cachedEmail || "",
         perfil: cachedPerfil || "ADMIN",
       });
+        if (cachedPerfil !== "ADMIN") {
+          navigate("/nao-autorizado");
+          return;
+        }
     } else {
       // Se não houver cache, tenta extrair do token
       const nome = 
@@ -91,6 +95,10 @@ const PerfilAdm = () => {
         email,
         perfil,
       });
+        if (perfil !== "ADMIN") {
+          navigate("/nao-autorizado");
+          return;
+        }
     }
   }, [navigate]);
 
