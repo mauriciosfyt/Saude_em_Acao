@@ -259,7 +259,7 @@ API RESTful desenvolvida em Spring Boot para gerenciamento administrativo da aca
 - Java 21 ou superior
 - Maven
 - **MongoDB**
-- IDE (IntelliJ IDEA ou Eclipse recomendado)
+- IDE (IntelliJ IDEA)
 
 ---
 
