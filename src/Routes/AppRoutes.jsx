@@ -47,7 +47,9 @@ import Funcional from '../pages/Funcional/Funcional.jsx';
 import AdministrarAluno from '../pages/Tela_Personal/AdministrarAluno/AdministrarAluno.jsx';
 import AdministrarTreino from '../pages/Tela_Personal/AdministrarTreino/AdministrarTreino.jsx';
 import ImplementarTreino from '../pages/Tela_Personal/implementarTreino/implementarTreino.jsx';
-import ProtectedRoute from './ProtectedRoute';
+import AdminRoute from '../components/AdminRoute.jsx';
+import PersonalRoute from '../components/PersonalRoute.jsx';
+import NaoAutorizado from '../pages/NaoAutorizado/index.jsx';
 
 const AppRoutes = () => {
   return (
@@ -56,18 +58,21 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/Loja" element={<Loja />} />
-        <Route path="/Perfil" element={<ProtectedRoute element={<Perfil />} requiredRole="ALUNO" />} />
-        <Route path="/PerfilAdm" element={<ProtectedRoute element={<PerfilAdm />} requiredRole="ADMIN" />} />
-        <Route path="/PerfilPersonal" element={<ProtectedRoute element={<PerfilPersonal />} requiredRole="PERSONAL" />} />
+        <Route path="/Perfil" element={<Perfil />} />
+        <Route path="/PerfilAdm" element={<PerfilAdm />} />
+        <Route path="/PerfilPersonal" element={
+          <PersonalRoute>
+            <PerfilPersonal />
+          </PersonalRoute>
+        } />
         <Route path="/SobreNos" element={<SobreNos />} />
         <Route path="/LojaProduto/:id" element={<LojaProduto />} />
         <Route path="/SobrenosLoja" element={<SobrenosLoja />} />
-        <Route path="/Carrinho" element={<ProtectedRoute element={<Carrinho />} requiredRole="ALUNO" />} />
+        <Route path="/Carrinho" element={<Carrinho />} />
         <Route path="/Planos" element={<Planos />} />
-        <Route path="/Professores" element={<ProtectedRoute element={<Professores />} requiredRoles={['PERSONAL', 'ADMIN']} requiredPlan="GOLD" />} />
-        <Route path="/Reservas" element={<ProtectedRoute element={<Reservas />} requiredRole="ALUNO" />} /> {/* Adicione esta linha */}
+        <Route path="/Professores" element={<Professores />} />
+        <Route path="/Reservas" element={<Reservas />} /> {/* Adicione esta linha */}
         <Route path="*" element={<Erro404 />} /> {/* Adicione esta linha */}
-        <Route path="/404" element={<Erro404 />} />
         <Route path="/ThayFit" element={<ThayFit/>} /> {/* Adicione esta linha */}
         <Route path="/Pilates" element={<Pilates/>} /> {/* Adicione esta linha */}
         <Route path="/Funcional" element={<Funcional/>} /> {/* Adicione esta linha */}
@@ -79,26 +84,71 @@ const AppRoutes = () => {
         <Route path="/CategoriaWhey" element={<CategoriaWhey />} />
         <Route path="/CategoriaVitaminas" element={<CategoriaVitaminas />} />
        
-        <Route path="/AdicionarTreino" element={<ProtectedRoute element={<AdicionarTreino />} requiredRole="ADMIN" />} />
-        <Route path="/ReservasPendentes" element={<ProtectedRoute element={<ReservasPendentes />} requiredRole="ADMIN" />} />
-        <Route path="/GerenciarReservas" element={<ProtectedRoute element={<GerenciarReservas />} requiredRole="ADMIN" />} />
-        <Route path="/AdicionarProduto" element={<ProtectedRoute element={<AdicionarProduto />} requiredRole="ADMIN" />} />
-        <Route path="/GerenciarProduto" element={<ProtectedRoute element={<GerenciarProduto />} requiredRole="ADMIN" />} />
-        <Route path="/GerenciarPersonal" element={<ProtectedRoute element={<GerenciarPersonal />} requiredRole="ADMIN" />} />
-        <Route path="/AdicionarPersonal" element={<ProtectedRoute element={<AdicionarPersonal />} requiredRole="ADMIN" />} />
-        <Route path="/Dashboard" element={<ProtectedRoute element={<Dashboard />} requiredRole="ADMIN" />} />
-        <Route path="/GerenciarAlunos" element={<ProtectedRoute element={<GerenciarAlunos />} requiredRole="ADMIN" />} />
-        <Route path="/AdicionarAluno" element={<ProtectedRoute element={<AdicionarAluno />} requiredRole="ADMIN" />} />
-        <Route path="/EditarAluno/:id" element={<ProtectedRoute element={<EditarAluno />} requiredRole="ADMIN" />} />
-        <Route path="/EditarProduto" element={<ProtectedRoute element={<EditarProduto />} requiredRole="ADMIN" />} />
-        <Route path="/EditarPersonal/:id" element={<ProtectedRoute element={<EditarPersonal />} requiredRole="ADMIN" />} />
-        <Route path="/GerenciarTreino" element={<ProtectedRoute element={<GerenciarTreino />} requiredRole="ADMIN" />} />
-        <Route path="/PersonalizarTreino" element={<ProtectedRoute element={<PersonalizarTreino />} requiredRole="ADMIN" />} />
+        <Route path="/AdicionarTreino" element={<AdicionarTreino />} /> {/* Adicione esta linha */}
+        <Route path="/ReservasPendentes" element={<ReservasPendentes />} /> {/* Adicione esta linha */}
+        <Route path="/GerenciarReservas" element={<GerenciarReservas />} /> {/* Adicione esta linha */}
+          <Route path="/AdicionarProduto" element={
+            <AdminRoute>
+              <AdicionarProduto />
+            </AdminRoute>
+          } />
+          <Route path="/GerenciarProduto" element={
+            <AdminRoute>
+              <GerenciarProduto />
+            </AdminRoute>
+          } />
+          <Route path="/GerenciarPersonal" element={
+            <AdminRoute>
+              <GerenciarPersonal />
+            </AdminRoute>
+          } />
+          <Route path="/AdicionarPersonal" element={
+            <AdminRoute>
+              <AdicionarPersonal />
+            </AdminRoute>
+          } />
+          <Route path="/Dashboard" element={
+            <AdminRoute>
+              <Dashboard />
+            </AdminRoute>
+          } />
+          <Route path="/GerenciarAlunos" element={
+            <AdminRoute>
+              <GerenciarAlunos />
+            </AdminRoute>
+          } />
+          <Route path="/AdicionarAluno" element={
+            <AdminRoute>
+              <AdicionarAluno />
+            </AdminRoute>
+          } />
+          <Route path="/EditarAluno/:id" element={
+            <AdminRoute>
+              <EditarAluno />
+            </AdminRoute>
+          } />
+        <Route path="/EditarProduto" element={<EditarProduto />} />
+        <Route path="/EditarPersonal/:id" element={<EditarPersonal />} /> {/* Nova rota */}
+        <Route path="/GerenciarTreino" element={<GerenciarTreino />} /> {/* Nova rota */}
+        <Route path="/PersonalizarTreino" element={<PersonalizarTreino />} />
 
-         <Route path="/AdministrarAluno" element={<ProtectedRoute element={<AdministrarAluno />} requiredRole="PERSONAL" />} />
-         <Route path="/AdministrarTreino" element={<ProtectedRoute element={<AdministrarTreino />} requiredRole="PERSONAL" />} />
-         <Route path="/ImplementarTreino" element={<ProtectedRoute element={<ImplementarTreino />} requiredRole="PERSONAL" />} />
+         <Route path="/AdministrarAluno" element={
+           <PersonalRoute>
+             <AdministrarAluno />
+           </PersonalRoute>
+         } />
+         <Route path="/AdministrarTreino" element={
+           <PersonalRoute>
+             <AdministrarTreino />
+           </PersonalRoute>
+         } />
+         <Route path="/ImplementarTreino" element={
+           <PersonalRoute>
+             <ImplementarTreino />
+           </PersonalRoute>
+         } />
 
+          <Route path="/nao-autorizado" element={<NaoAutorizado />} />
         {/* Adicione outras rotas conforme necessário */}
       </Routes>
     </Router>
