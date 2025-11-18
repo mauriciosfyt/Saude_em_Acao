@@ -176,6 +176,12 @@ async function makeAuthPatchRequest(url) {
   }
 }
 
+
+export async function aprovarRetirada(id) {
+  console.log(`🔃 Aprovando retirada ${id}...`);
+  const url = `${RESERVAS_LIST_URL}/${id}/concluir`;
+  return makeAuthPatchRequest(url);
+}
 /**
  * APROVA uma reserva (Admin).
  * Rota: PATCH /api/reservas/{id}/aprovar
