@@ -13,7 +13,7 @@ const UserIcon = () => (
 const MenuPersonal = () => {
   // Inicializa com o valor do sessionStorage se existir, senão com "Carregando..."
   const [personalName, setPersonalName] = useState(() => {
-    return sessionStorage.getItem('personalName') || 'Carregando...';
+    return sessionStorage.getItem('userName') || 'Carregando...';
   });
 
   useEffect(() => {

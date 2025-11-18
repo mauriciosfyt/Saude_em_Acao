@@ -110,7 +110,7 @@ const MenuAdm = () => {
     { nome: 'Gerenciar Treinos', path: '/GerenciarTreino' },
     { nome: 'Gerenciar Produtos', path: '/GerenciarProduto' },
     { nome: 'Reservas', path: '/ReservasPendentes' },
-    { nome: 'Historico', path: '/GerenciarReservas' } // Corrigi o path para ser único
+    { nome: 'Histórico', path: '/GerenciarReservas' } // Corrigi o path para ser único
   ];
 
   return (

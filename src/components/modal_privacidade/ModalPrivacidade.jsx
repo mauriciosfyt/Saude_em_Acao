@@ -54,7 +54,7 @@ const ModalPrivacidade = ({ onConcordo, onClose }) => {
             Seus dados são utilizados para:<br />
             Fornecer e melhorar nossos serviços;<br />
             Personalizar sua experiência na plataforma;<br />
-            Processar de reservas;<br />
+            Processos de reservas;<br />
             Enviar notificações e comunicados;<br />
             Cumprir obrigações legais.<br /><br />
             <strong>3. Compartilhamento de dados</strong><br />
