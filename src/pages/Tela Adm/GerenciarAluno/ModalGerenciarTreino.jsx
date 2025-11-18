@@ -1,324 +1,107 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react'; // 1. Importei o useEffect
 import './ModalGerenciarTreino.css';
-import { getAllTreinos } from '../../../services/treinoService';
 
-const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
+const sampleTreinos = [
+  { id: 1, title: 'Treino A', tags: ['Emagrecimento', 'Feminino', 'De 20 a 60 anos', '3 sessões'], type: 'Emagrecimento' },
+  { id: 2, title: 'Treino B', tags: ['Hipertrofia', 'Feminino', 'De 20 a 60 anos', '3 sessões'], type: 'Hipertrofia' },
+  { id: 3, title: 'Treino C', tags: ['Adaptado', 'Masculino', 'De 20 a 60 anos', '3 sessões'], type: 'Adaptado' },
+  { id: 4, title: 'Treino D', tags: ['Emagrecimento', 'Feminino', 'De 20 a 60 anos', '3 sessões'], type: 'Emagrecimento' },
+];
+
+const ModalGerenciarTreino = ({ open, onClose, aluno, onChoose }) => {
   const [nameQuery, setNameQuery] = useState('');
   const [typeQuery, setTypeQuery] = useState('');
   const [selectedId, setSelectedId] = useState(null);
-  const [treinos, setTreinos] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [alunoIdSalvo, setAlunoIdSalvo] = useState(null);
 
-  // Controla o scroll do body e salva o alunoId quando o modal abrir
+  // --- ⬇️ CÓDIGO ADICIONADO ⬇️ ---
+  // Este hook controla o scroll do <body>
   useEffect(() => {
+    // Quando o modal abrir
     if (open) {
+      // Adiciona a classe que esconde o overflow do body
       document.body.style.overflow = 'hidden';
-      // Resetar seleção quando o modal abrir para um novo aluno
-      setSelectedId(null);
-      // Salvar o alunoId (prioridade: prop alunoId > aluno.id > aluno.idAluno > aluno.usuarioId)
-      const idParaSalvar = alunoId || 
-        (aluno?.id && String(aluno.id)) ||
-        (aluno?.idAluno && String(aluno.idAluno)) ||
-        (aluno?.usuarioId && String(aluno.usuarioId)) ||
-        null;
-      console.log('🔵 Modal abrindo - Salvando alunoId:', {
-        alunoIdProp: alunoId,
-        alunoIdDoAluno: aluno?.id,
-        alunoIdAluno: aluno?.idAluno,
-        alunoUsuarioId: aluno?.usuarioId,
-        idParaSalvar,
-        alunoCompleto: aluno
-      });
-      setAlunoIdSalvo(idParaSalvar);
-    } else {
-      // Limpar quando o modal fechar
-      console.log('🔴 Modal fechando - Limpando alunoIdSalvo');
-      setAlunoIdSalvo(null);
     }
+
+    // Esta é a "função de limpeza" do useEffect.
+    // Ela roda quando o modal é fechado ou desmontado.
     return () => {
-      document.body.style.overflow = 'auto';
+      // Restaura o scroll do body
+      document.body.style.overflow = 'auto'; // ou 'unset'
     };
-  }, [open, alunoId, aluno]);
+  }, [open]); // O hook só roda novamente se a prop 'open' mudar
+  // --- ⬆️ FIM DO CÓDIGO ADICIONADO ⬆️ ---
 
-  // Atualizar o alunoIdSalvo sempre que o alunoId ou aluno mudar
-  useEffect(() => {
-    const idParaSalvar = alunoId || 
-      (aluno?.id && String(aluno.id)) ||
-      (aluno?.idAluno && String(aluno.idAluno)) ||
-      (aluno?.usuarioId && String(aluno.usuarioId)) ||
-      null;
-    if (idParaSalvar) {
-      console.log('🟡 Atualizando alunoIdSalvo:', {
-        alunoIdProp: alunoId,
-        alunoIdDoAluno: aluno?.id,
-        alunoIdAluno: aluno?.idAluno,
-        alunoUsuarioId: aluno?.usuarioId,
-        idParaSalvar,
-        alunoIdSalvoAtual: alunoIdSalvo
-      });
-      setAlunoIdSalvo(idParaSalvar);
-    }
-  }, [alunoId, aluno?.id, aluno?.idAluno, aluno?.usuarioId]);
 
-  // Resetar seleção quando o aluno mudar
-  useEffect(() => {
-    if (open && aluno) {
-      setSelectedId(null);
-    }
-  }, [aluno?.id, open]);
-
-  // Carregar treinos da API quando o modal abrir
-  useEffect(() => {
-    const carregarTreinos = async () => {
-      if (open) {
-        try {
-          setLoading(true);
-          setError(null);
-          
-          const filtros = {};
-          if (nameQuery.trim()) filtros.nome = nameQuery.trim();
-          if (typeQuery.trim()) filtros.tipo = typeQuery.trim();
-          
-          const dados = await getAllTreinos(filtros);
-          setTreinos(Array.isArray(dados) ? dados : []);
-        } catch (err) {
-          console.error('Erro ao carregar treinos:', err);
-          setError(err.message || 'Erro ao carregar treinos');
-          setTreinos([]);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-    
-    carregarTreinos();
-  }, [open, nameQuery, typeQuery]);
-
-  // Formatar dados do treino para exibição (mesma função da tela GerenciarTreino)
-  const formatarTreinoParaExibicao = (treino) => {
-    const titulo = treino.nome || treino.titulo || 'Treino sem nome';
-    const frequencia = treino.frequenciaSemanal || treino.frequencia || 0;
-    const sessaoTag = `${frequencia}x sessões`;
-    
-    const tags = [];
-    if (treino.tipoDeTreino || treino.tipoTreino || treino.tipo) {
-      tags.push(treino.tipoDeTreino || treino.tipoTreino || treino.tipo);
-    }
-    if (treino.sexo) {
-      const sexoTexto = treino.sexo === 'MASCULINO' ? 'Masculino' : 
-                       treino.sexo === 'FEMININO' ? 'Feminino' : 
-                       treino.sexo;
-      tags.push(sexoTexto);
-    }
-    if (treino.idadeMinima || treino.idadeMin) {
-      const idadeMin = treino.idadeMinima || treino.idadeMin;
-      const idadeMax = treino.idadeMaxima || treino.idadeMax;
-      if (idadeMin && idadeMax) {
-        tags.push(`De ${idadeMin} a ${idadeMax} anos`);
-      } else if (idadeMin) {
-        tags.push(`Acima de ${idadeMin} anos`);
-      } else if (idadeMax) {
-        tags.push(`Até ${idadeMax} anos`);
-      }
-    }
-    
-    return {
-      id: treino.id,
-      titulo,
-      sessaoTag,
-      tags,
-      ...treino
-    };
-  };
-
-  const treinosFiltrados = useMemo(() => {
-    return treinos.map(formatarTreinoParaExibicao);
-  }, [treinos]);
+  const treinos = useMemo(() => {
+    return sampleTreinos.filter(t => {
+      const nameMatch = t.title.toLowerCase().includes(nameQuery.toLowerCase());
+      const typeMatch = t.type.toLowerCase().includes(typeQuery.toLowerCase());
+      return nameMatch && typeMatch;
+    });
+  }, [nameQuery, typeQuery]);
 
   const handleChoose = () => {
-    console.log('🟢 handleChoose chamado:', {
-      selectedId,
-      alunoIdSalvo,
-      alunoIdProp: alunoId,
-      alunoIdDoAluno: aluno?.id,
-      alunoCompleto: aluno,
-      open
-    });
-    
-    if (!selectedId) {
-      alert('Por favor, selecione um treino antes de escolher.');
-      return;
+    const selectedTreino = sampleTreinos.find(t => t.id === selectedId);
+    if (selectedTreino) {
+      onChoose(selectedTreino);
     }
-    
-    // Usar o alunoId salvo (prioridade: alunoIdSalvo > prop alunoId > aluno.id > aluno.idAluno > aluno.usuarioId)
-    const alunoIdFinal = alunoIdSalvo || alunoId || 
-      (aluno?.id && String(aluno.id)) ||
-      (aluno?.idAluno && String(aluno.idAluno)) ||
-      (aluno?.usuarioId && String(aluno.usuarioId)) ||
-      null;
-    
-    console.log('🔍 Verificando alunoIdFinal:', {
-      alunoIdFinal,
-      alunoIdSalvo,
-      alunoIdProp: alunoId,
-      alunoIdDoAluno: aluno?.id,
-      resultadoFinal: alunoIdFinal ? '✅ ENCONTRADO' : '❌ NÃO ENCONTRADO'
-    });
-    
-    // Se não tiver alunoId, não pode continuar
-    if (!alunoIdFinal) {
-      console.error('❌ Aluno não disponível - DETALHES COMPLETOS:', { 
-        aluno, 
-        alunoIdSalvo, 
-        alunoIdProp: alunoId,
-        alunoIdDoAluno: aluno?.id,
-        open,
-        selectedId,
-        treinosLength: treinos.length
-      });
-      alert('Erro: Aluno não encontrado. Por favor, feche o modal e tente novamente.');
-      return;
-    }
-    
-    // Buscar o treino no array original (treinos) usando o selectedId
-    // Tentar diferentes formas de comparação para garantir que encontre
-    let selectedTreino = treinos.find(t => t.id === selectedId);
-    
-    if (!selectedTreino) {
-      // Tentar comparação numérica
-      selectedTreino = treinos.find(t => Number(t.id) === Number(selectedId));
-    }
-    
-    if (!selectedTreino) {
-      // Tentar comparação por string
-      selectedTreino = treinos.find(t => String(t.id) === String(selectedId));
-    }
-    
-    if (!selectedTreino) {
-      console.error('Treino não encontrado:', { selectedId, treinos });
-      alert('Erro: Treino selecionado não encontrado. Tente novamente.');
-      return;
-    }
-    
-    // Passar tanto o treino quanto o alunoId para garantir que o ID correto seja usado
-    onChoose(selectedTreino, alunoIdFinal);
-    
-    // Limpar seleção após escolher
-    setSelectedId(null);
-    
-    // Fechar o modal após escolher
-    handleCloseModal();
   };
 
-  const handleCloseModal = () => {
-    setSelectedId(null);
-    setNameQuery('');
-    setTypeQuery('');
-    onClose();
-  };
-
-  // Se não estiver aberto, não renderiza nada
+  // Se não estiver aberto, não renderiza nada (e o useEffect acima vai limpar o estilo)
   if (!open) {
     return null;
   }
 
   return (
-    <div className="modal-overlay" onClick={handleCloseModal}>
+    <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <h2 className="modal-title-adm">Gerenciar Treinos do Aluno: {aluno?.nome || ''}</h2>
 
         <div className="modal-filters">
-          <div className="modal-filter-group">
+          <div>
+            <label className="modal-label-adm">Nome do treino</label>
             <input
               className="modal-input-adm"
-              placeholder="Nome"
+              placeholder="Pesquisar por nome do treino"
               value={nameQuery}
               onChange={(e) => setNameQuery(e.target.value)}
             />
-            <div className="modal-input-underline"></div>
           </div>
 
-          <div className="modal-filter-group">
+          <div>
+            <label className="modal-label-adm">Tipo do treino</label>
             <input
               className="modal-input-adm"
-              placeholder="Tipo do treino"
+              placeholder="Pesquisar por tipo de treino"
               value={typeQuery}
               onChange={(e) => setTypeQuery(e.target.value)}
             />
-            <div className="modal-input-underline"></div>
           </div>
         </div>
 
-        <div className="modal-list">
-          {loading && (
-            <div style={{ padding: '20px', textAlign: 'center' }}>Carregando treinos...</div>
-          )}
-
-          {error && (
-            <div style={{ padding: '20px', textAlign: 'center', color: 'red' }}>
-              Erro: {error}
-            </div>
-          )}
-
-          {!loading && !error && treinosFiltrados.length === 0 && (
-            <div style={{ padding: '20px', textAlign: 'center' }}>
-              Nenhum treino encontrado.
-            </div>
-          )}
-
-          {!loading && !error && treinosFiltrados.map((treino) => {
-            // Usar o ID original do treino para evitar problemas de conversão
-            const treinoId = treino.id;
-            const isSelected = selectedId !== null && (
-              selectedId === treinoId || 
-              Number(selectedId) === Number(treinoId) ||
-              String(selectedId) === String(treinoId)
-            );
-            
-            const handleCardClick = () => {
-              setSelectedId(treinoId);
-            };
-            
-            const handleRadioChange = (e) => {
-              e.stopPropagation();
-              setSelectedId(treinoId);
-            };
-            
-            return (
-            <div 
-              className={`modal-item-card ${isSelected ? 'radio-selected' : ''}`} 
-              key={treino.id}
-              onClick={handleCardClick}
-            >
+        {/* Esta lista interna do modal ainda poderá rolar, o que é o correto */}
+        <div className="modal-list"> 
+          {treinos.map((t) => (
+            <div className="modal-item" key={t.id}>
               <div className="modal-item-row">
-                <input 
-                  type="radio" 
-                  name="treino-select" 
-                  checked={isSelected} 
-                  onChange={handleRadioChange}
-                  onClick={handleRadioChange}
-                />
-                <div className="modal-item-content">
-                  <div className="modal-item-title">{treino.titulo}</div>
-                  <div className="modal-item-tags">
-                    {[...treino.tags, treino.sessaoTag].map((tag, i) => (
-                      <span className="modal-tag" key={i}>{tag}</span>
-                    ))}
-                  </div>
-                </div>
+                <input type="radio" name="treino-select" checked={selectedId === t.id} onChange={() => setSelectedId(t.id)} />
+                <div className="modal-item-info">{t.title}</div>
               </div>
+
+              <div className="modal-tags">
+                {t.tags.map((tag, i) => (
+                  <span className="tag-admin" key={i}>{tag}</span>
+                ))}
+              </div>
+
+              <hr className="modal-sep" />
             </div>
-            );
-          })}
+          ))}
         </div>
 
         <div className="modal-actions">
-          <button className="btn btn-back" onClick={handleCloseModal}>Voltar</button>
-          <button className="btn btn-choose" onClick={handleChoose} disabled={!selectedId}>
-            Escolher
-          </button>
+          <button className="btn btn-back" onClick={onClose}>Voltar</button>
+          <button className="btn btn-choose" onClick={handleChoose}>Escolher</button>
         </div>
       </div>
     </div>
