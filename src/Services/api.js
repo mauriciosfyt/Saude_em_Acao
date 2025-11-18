@@ -5,7 +5,7 @@ import axios from 'axios';
 // MUDANÇA: 'import.meta.env' não existe no Expo.
 // Como suas rotas principais já usam o IP absoluto (http://34.205.11.57),
 // podemos definir a baseURL diretamente para a raiz da API.
-const API_BASE_URL = 'http://34.205.11.57'; // <-- DEFINA SEU IP DA API AQUI
+export const API_BASE_URL = 'http://34.205.11.57'; // <-- DEFINA SEU IP DA API AQUI
 
 // Instância axios central
 const api = axios.create({
