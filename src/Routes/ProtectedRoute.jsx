@@ -61,7 +61,7 @@ const hasRequiredRole = (perfil, requiredRoles, requiredPlan) => {
 };
 
 const ProtectedRoute = ({ element, requiredRole, requiredRoles, requiredPlan }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, perfil } = useAuth();
   const [checking, setChecking] = useState(true);
   const [allowed, setAllowed] = useState(false);
 
@@ -90,25 +90,22 @@ const ProtectedRoute = ({ element, requiredRole, requiredRoles, requiredPlan }) 
       }
 
       try {
-        // Tenta checar cache rápido
-        const rolesStr = finalRequiredRoles.join('_').toUpperCase();
-        const planStr = (requiredPlan || '').toUpperCase();
-        const cacheKey = `role_plan_allowed_${rolesStr}_${planStr}`;
-        const cached = sessionStorage.getItem(cacheKey);
-        if (cached === 'true') {
+        // Se o perfil já está disponível no contexto, usa diretamente
+        if (perfil) {
+          console.log('ProtectedRoute: usando perfil do contexto:', perfil);
+          const hasAccess = hasRequiredRole(perfil, finalRequiredRoles, requiredPlan);
           if (mounted) {
-            setAllowed(true);
-            setChecking(false);
+            setAllowed(hasAccess);
           }
-          return;
-        }
-
-        // Busca o perfil do usuário e decide se tem a role/plano requeridos
-        const perfil = await getMeuPerfil();
-        const hasAccess = hasRequiredRole(perfil, finalRequiredRoles, requiredPlan);
-        sessionStorage.setItem(cacheKey, hasAccess ? 'true' : 'false');
-        if (mounted) {
-          setAllowed(hasAccess);
+        } else {
+          // Fallback: se o perfil não está no contexto (apenas em casos raros),
+          // tenta buscar via API
+          console.log('ProtectedRoute: perfil não disponível no contexto, buscando da API...');
+          const perfilAPI = await getMeuPerfil();
+          const hasAccess = hasRequiredRole(perfilAPI, finalRequiredRoles, requiredPlan);
+          if (mounted) {
+            setAllowed(hasAccess);
+          }
         }
       } catch (err) {
         // Em caso de erro, não permite
@@ -122,12 +119,13 @@ const ProtectedRoute = ({ element, requiredRole, requiredRoles, requiredPlan }) 
     // Se o contexto ainda está carregando, espere
     if (loading) {
       setChecking(true);
+      return;
     }
 
     check();
 
     return () => { mounted = false; };
-  }, [isAuthenticated, loading, finalRequiredRoles, requiredPlan]);
+  }, [isAuthenticated, loading, perfil, finalRequiredRoles, requiredPlan]);
 
 
   if (loading || checking) {
