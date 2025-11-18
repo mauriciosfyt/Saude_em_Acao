@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { FaSearch, FaFilter } from "react-icons/fa"; // <-- MUDANÇA AQUI
 import "./ReservasEfetuadas.css";
 import HeaderAdmin from "../../../components/header_admin";
+import { aprovarRetirada } from '../../../services/reservasService';
 
 // Importando imagens específicas
 import camiseta from "../../../assets/IMG PRODUTO.jpg";
@@ -24,6 +25,7 @@ export default function ReservasEfetuadas() {
   const [toastMessage, setToastMessage] = useState('');
   const [termoBusca, setTermoBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
+  const [processingId, setProcessingId] = useState(null);
 
   const handleStatusChange = (reservaId, novoStatus, mensagem) => {
     if (window.confirm(`Tem certeza que deseja ${mensagem.toLowerCase()} esta reserva?`)) {
@@ -36,6 +38,25 @@ export default function ReservasEfetuadas() {
     }
   };
 
+  // Chama a rota /reservas/{id}/concluir para marcar retirada
+  const handleMarcarRetirado = async (reservaId) => {
+    if (!window.confirm('Confirma marcar esta reserva como retirada?')) return;
+    setProcessingId(reservaId);
+    try {
+      const resp = await aprovarRetirada(reservaId);
+      const novoStatus = resp?.status || 'Retirado';
+      setReservas((prev) => prev.map(r => r.id === reservaId ? { ...r, status: novoStatus } : r));
+      setShowToast(true);
+      setToastMessage('Reserva marcada como retirada.');
+      setTimeout(() => setShowToast(false), 2000);
+    } catch (e) {
+      console.error('Erro ao marcar retirada:', e);
+      alert('Erro ao marcar como retirado: ' + (e?.message || e));
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const reservasFiltradas = reservas.filter(reserva => {
     const condicaoStatus = filtroStatus === '' || reserva.status === filtroStatus;
     const condicaoBusca = termoBusca === '' ||
@@ -43,6 +64,15 @@ export default function ReservasEfetuadas() {
                           reserva.produto.toLowerCase().includes(termoBusca.toLowerCase());
     return condicaoStatus && condicaoBusca;
   });
+
+  // Ordena reservas filtradas por data decrescente (mais recentes primeiro)
+  const ordenarPorDataDesc = (arr) => {
+    const time = (d) => {
+      const t = new Date(d).getTime();
+      return isNaN(t) ? 0 : t;
+    };
+    return arr.slice().sort((a, b) => time(b.data) - time(a.data));
+  };
 
   return (
     <div>
@@ -82,7 +112,7 @@ export default function ReservasEfetuadas() {
         </div>
 
         <div className="lista-reservas">
-          {reservasFiltradas.map((reserva) => (
+          {ordenarPorDataDesc(reservasFiltradas).map((reserva) => (
             <div className="reserva-item" key={reserva.id}>
               <img src={reserva.imagem} alt={reserva.produto} className="produto-img" />
 
@@ -109,6 +139,23 @@ export default function ReservasEfetuadas() {
                       <button className="btn-cancelar" onClick={() => handleStatusChange(reserva.id, 'Cancelada', 'Cancelar')}>CANCELAR</button>
                       <button className="btn-aprovar" onClick={() => handleStatusChange(reserva.id, 'Efetuada', 'Aprovar')}>APROVAR</button>
                     </>
+                  )}
+
+                  {/* Botão 'Retirado' apenas para reservas já efetuadas/aprovadas */}
+                  {(reserva.status.toLowerCase() === 'efetuada' || reserva.status.toLowerCase() === 'aprovada') && (
+                    <>
+                      <button
+                        className="btn-retirado"
+                        onClick={() => handleMarcarRetirado(reserva.id)}
+                        disabled={processingId === reserva.id}
+                      >
+                        {processingId === reserva.id ? 'Processando...' : 'Retirado'}
+                      </button>
+                    </>
+                  )}
+                  {/* Rótulo estático caso já esteja retirado/concluído */}
+                  {(reserva.status.toLowerCase().includes('retir') || reserva.status.toLowerCase().includes('concl')) && (
+                    <span className="status-retirado">Retirado</span>
                   )}
                 </div>
               </div>

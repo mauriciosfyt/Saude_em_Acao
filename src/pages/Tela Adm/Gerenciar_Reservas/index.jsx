@@ -89,7 +89,15 @@ const GerenciarReservas = () => {
                     ['APROVADA', 'CANCELADA'].includes(r.status)
                 );
 
-                setReservas(filtradas);
+                // Ordena por data decrescente (mais recentes primeiro)
+                const time = (d) => {
+                    const t = new Date(d).getTime();
+                    return isNaN(t) ? 0 : t;
+                };
+
+                const ordenadas = filtradas.sort((a, b) => time(b.data) - time(a.data));
+
+                setReservas(ordenadas);
             } catch (e) {
                 const msg = e?.message || 'Erro ao carregar reservas.';
                 setErro(msg);
