@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import logo from "../../assets/logo_dia.png";
 import "./styles.css";
-import "./modal_login.css";
 import { useAuth } from "../../contexts/AuthContext";
 
 // Importando os modais
