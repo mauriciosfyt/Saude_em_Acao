@@ -203,8 +203,8 @@ const GerenciarProduto = () => {
                     <td>{`R$ ${produto.preco.toFixed(2).replace('.', ',')}`}</td>
                     <td>{produto.estoque === 0 ? (<span className="produto-sem-estoque-label">Sem estoque</span>) : produto.estoque}</td>
                     <td>
-                      <a href="#" onClick={(e) => { e.preventDefault(); handleEditClick(produto.id); }} className="produto-action-link-edit">Edit</a>
-                      <a href="#" onClick={(e) => { e.preventDefault(); handleDeleteClick(produto.id); }} className="produto-action-link-delete">Delete</a>
+                      <a href="#" onClick={(e) => { e.preventDefault(); handleEditClick(produto.id); }} className="produto-action-link-edit">Editar</a>
+                      <a href="#" onClick={(e) => { e.preventDefault(); handleDeleteClick(produto.id); }} className="produto-action-link-delete">Excluir</a>
                     </td>
                   </tr>
                 ))
