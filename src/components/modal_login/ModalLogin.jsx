@@ -1,11 +1,14 @@
 import React, { useState } from "react";
+import "./modal_login.css";
 import logo from "../../assets/logo1.png";
 import { solicitarToken } from "../../services/api";
 import ErrorMessage from "./ErrorMessage";
+import EyeIcon from "../EyeIcon/EyeIcon";
 
 export default function LoginModal({ onClose, onLogin, onRecover }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [showSenha, setShowSenha] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -14,6 +17,12 @@ export default function LoginModal({ onClose, onLogin, onRecover }) {
     return () => {
       document.body.classList.remove('modal-open');
     };
+  }, []);
+
+  // Foca o campo de email ao abrir o modal
+  React.useEffect(() => {
+    const el = document.getElementById('email');
+    el?.focus?.();
   }, []);
 
   const handleLogin = async () => {
@@ -79,18 +88,42 @@ export default function LoginModal({ onClose, onLogin, onRecover }) {
           placeholder="Digite seu e-mail"
           value={email}
           onChange={e => setEmail(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              // Se houver senha focar o campo de senha, senão submeter
+              const pwd = document.getElementById('senha');
+              if (pwd) pwd.focus(); else handleLogin();
+            }
+          }}
         />
         <label htmlFor="senha" className="modal-label">
           SENHA
         </label>
-        <input
-          id="senha"
-          type="password"
-          className="modal-input"
-          placeholder="Digite sua senha"
-          value={senha}
-          onChange={e => setSenha(e.target.value)}
-        />
+        <div className="password-input-wrapper">
+          <input
+            id="senha"
+            type={showSenha ? 'text' : 'password'}
+            className="modal-input"
+            placeholder="Digite sua senha"
+            value={senha}
+            onChange={e => setSenha(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleLogin();
+              }
+            }}
+          />
+          <span
+            className="password-toggle password-toggleLogin"
+            onClick={() => setShowSenha(s => !s)}
+            title={showSenha ? 'Ocultar senha' : 'Mostrar senha'}
+            onMouseDown={e => e.preventDefault()}
+          >
+            <EyeIcon visible={showSenha} />
+          </span>
+        </div>
         <ErrorMessage message={error} />
         <a href="#" className="modal-link" onClick={onRecover}>
           Esqueci minha senha

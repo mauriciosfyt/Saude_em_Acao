@@ -59,6 +59,37 @@
     transition: border 0.3s;
 }
 
+/* Password wrapper and toggle for modal inputs (keeps eye centered) */
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper .modal-input {
+  flex: 1;
+  /* reserve space for the icon on the right */
+  padding-right: 44px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 41%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cbd5e0;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.password-toggle:hover {
+  color: #fff;
+}
+
 .modal-input:focus {
     border-color: #0057ff;
 }

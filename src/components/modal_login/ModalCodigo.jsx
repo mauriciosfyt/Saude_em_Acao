@@ -42,16 +42,59 @@ export default function CodeModal({
   }, []);
 
   const handleKeyDown = (e, idx) => {
-    if (e.key === "Backspace" && idx > 0) {
+    if (e.key === "Backspace") {
       e.preventDefault();
       setLocalCode((prev) => {
         const next = [...prev];
-        next[idx] = "";
+        // if current has a value, clear it; otherwise move back and clear previous
+        if (next[idx]) {
+          next[idx] = "";
+          return next;
+        }
+        if (idx > 0) {
+          next[idx - 1] = "";
+        }
         return next;
       });
-      const prevField = document.getElementById(`code-input-${idx - 1}`);
-      prevField?.focus();
+      if (idx > 0) {
+        const prevField = document.getElementById(`code-input-${idx - 1}`);
+        prevField?.focus();
+      }
+      return;
     }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const codigo = (localCode || []).join("");
+      if (codigo.length >= codeFields.length) {
+        handleValidateClick();
+      } else if (idx < codeFields.length - 1) {
+        const nextField = document.getElementById(`code-input-${idx + 1}`);
+        nextField?.focus();
+      }
+    }
+  };
+
+  const handlePaste = (e, idx) => {
+    e.preventDefault();
+    const paste = (e.clipboardData || window.clipboardData).getData("Text") || "";
+    const chars = paste.toUpperCase().replace(/\s+/g, "").split("");
+    if (!chars.length) return;
+    setLocalCode((prev) => {
+      const next = [...prev];
+      for (let i = 0; i < chars.length && idx + i < next.length; i++) {
+        next[idx + i] = chars[i].slice(-1);
+      }
+      return next;
+    });
+    // focus the field after the pasted characters (or submit if complete)
+    setTimeout(() => {
+      const end = Math.min(codeFields.length - 1, idx + chars.length - 1);
+      const endField = document.getElementById(`code-input-${end}`);
+      endField?.focus();
+      const currentValue = (Array.isArray(localCode) ? localCode.join("") : "") + (chars || []).join("");
+      if (currentValue.length >= codeFields.length) handleValidateClick();
+    }, 0);
   };
 
   const handleValidateClick = async () => {
@@ -217,6 +260,7 @@ export default function CodeModal({
                 }
               }}
               onKeyDown={(e) => handleKeyDown(e, idx)}
+              onPaste={(e) => handlePaste(e, idx)}
               style={{
                 textAlign: "center",
                 fontSize: "2rem",

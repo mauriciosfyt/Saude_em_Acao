@@ -15,6 +15,12 @@ export default function RecoverModal({ onClose, onSend }) {
     };
   }, []);
 
+  // Foca o campo de email de recuperação ao abrir
+  React.useEffect(() => {
+    const el = document.getElementById('recover-email');
+    el?.focus?.();
+  }, []);
+
   const handleSend = async () => {
     setMensagem("");
     setErro("");
@@ -87,6 +93,12 @@ export default function RecoverModal({ onClose, onSend }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={loading}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
         />
         <ErrorMessage message={erro} />
         {mensagem && (
