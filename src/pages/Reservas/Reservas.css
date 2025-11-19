@@ -81,9 +81,32 @@
   white-space: nowrap; 
 }
 
-.status-em-analise { color: #007bff; background-color: #e7f3ff; }
-.status-retirado { color: #28a745; background-color: #eaf7ed; }
-.status-cancelado { color: #dc3545; background-color: #fbe9eb; }
+/* --- Em Reservas.css (Substitua as cores antigas por estas) --- */
+
+/* Azul */
+.status-em-analise { 
+  color: #007bff; 
+  background-color: #e7f3ff; 
+}
+
+/* Verde Sucesso */
+.status-aprovado { 
+  color: #27ae60; 
+  background-color: #e9f7ef; 
+}
+
+/* Teal / Verde Água (Retirado e Concluida iguais) */
+.status-retirado,
+.status-concluida { 
+  color: #0ea5a4; 
+  background-color: #e0f7fa; 
+}
+
+/* Vermelho */
+.status-cancelado { 
+  color: #dc3545; 
+  background-color: #fbe9eb; 
+}
 
 .pedido-nome { margin: 0; font-size: 14px; color: #666; }
 
@@ -200,13 +223,11 @@
 }
 
 .status-em-analise { color: #007bff; background-color: #e7f3ff; }
+.status-aprovado { color: #2ecc71; font-weight: bold; }
+.status-retirado {  color: #0ea5a4; font-weight: bold;}
+.status-cancelado {  color: #e74c3c; font-weight: bold; }
 
-/* ADICIONE ESTA NOVA CLASSE ABAIXO: */
-.status-aprovado { color: #28a745; background-color: #eaf7ed; }
-/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
 
-.status-retirado { color: #28a745; background-color: #eaf7ed; }
-.status-cancelado { color: #dc3545; background-color: #fbe9eb; }
 
 /* =================================================================== */
 /* --- 1. BARRA DE BUSCA (Fiel ao Figma) --- */
@@ -290,3 +311,5 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* --- Cores dos Status --- */

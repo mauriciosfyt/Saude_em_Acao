@@ -27,15 +27,7 @@ const agruparPedidosPorData = (pedidos) => {
     return acc;
   }, {});
 };
-const getStatusClassName = (status) => {
-  switch (status) {
-    case 'Em Análise': return 'status-em-analise';
-    case 'Aprovado': return 'status-aprovado'; 
-    case 'Retirado': return 'status-retirado'; 
-    case 'Cancelado': return 'status-cancelado'; 
-    default: return '';
-  }
-};
+
 const formatarDataParaDia = (isoString) => {
   if (!isoString) return 'Data Indefinida';
   try {
@@ -46,6 +38,20 @@ const formatarDataParaDia = (isoString) => {
     return 'Data Inválida';
   }
 };
+// --- Em Reservas.jsx ---
+
+const getStatusClassName = (status) => {
+  switch (status) {
+    case 'Em Análise': return 'status-em-analise';
+    case 'Aprovado': return 'status-aprovado'; 
+    case 'Retirado': return 'status-retirado'; 
+    case 'Cancelado': return 'status-cancelado';
+    // ADICIONE ESTA LINHA:
+    case 'Concluida': return 'status-concluida'; 
+    default: return '';
+  }
+};
+
 const mapearStatusUI = (apiStatus) => {
   switch (String(apiStatus).toUpperCase()) {
     case 'PENDENTE':
@@ -53,9 +59,15 @@ const mapearStatusUI = (apiStatus) => {
       return 'Em Análise';
     case 'APROVADA': 
     case 'APROVADO':
-      return 'Aprovado'; // Pronto para retirar
+      return 'Aprovado';
     case 'RETIRADO':
       return 'Retirado';
+    // ADICIONE ESTE BLOCO:
+    case 'CONCLUIDA':
+    case 'CONCLUIDO':
+    case 'COMPLETED':
+      return 'Concluida';
+    // -------------------
     case 'CANCELADA': 
     case 'CANCELADO':
     case 'REJEITADO':
@@ -64,7 +76,6 @@ const mapearStatusUI = (apiStatus) => {
       return apiStatus; 
   }
 };
-// ---
 
 // == COMPONENTE PRINCIPAL ==
 
