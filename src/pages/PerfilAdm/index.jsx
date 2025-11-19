@@ -5,6 +5,8 @@ import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import "./PerfilAdm.css";
 import performLogout from "../../components/LogoutButton/LogoutButton";
+import { getMeuPerfil, API_URL } from "../../services/usuarioService";
+import { fixImageUrl } from "../../utils/image";
 
 const PerfilAdm = () => {
   const navigate = useNavigate();
@@ -13,6 +15,16 @@ const PerfilAdm = () => {
     email: "",
     perfil: "",
   });
+  // Estado para estatísticas exibidas nos cards (produtos, vendas, etc.)
+  const [stats, setStats] = useState({
+    produtosReservados: 0,
+    produtosAtivos: 0,
+    totalVendido: 0,
+    pagamentoPendente: 0,
+  });
+
+  // Estado para URL da imagem do perfil (usa imagem da API ou fallback local)
+  const [profileImage, setProfileImage] = useState(perfilPhoto);
 
   // Função para buscar o token salvo e decodificá-lo
   const getDecodedToken = () => {
@@ -60,7 +72,7 @@ const PerfilAdm = () => {
       return;
     }
 
-    // Carrega os dados salvos no sessionStorage durante o login
+    // Primeiro tenta carregar dados rápidos do sessionStorage
     const cachedName = sessionStorage.getItem('userName');
     const cachedEmail = sessionStorage.getItem('userEmail');
     const cachedPerfil = sessionStorage.getItem('userPerfil');
@@ -71,38 +83,89 @@ const PerfilAdm = () => {
         email: cachedEmail || "",
         perfil: cachedPerfil || "ADMIN",
       });
-        if (cachedPerfil !== "ADMIN") {
-          navigate("/nao-autorizado");
+      if (cachedPerfil !== "ADMIN") {
+        navigate("/nao-autorizado");
+        return;
+      }
+    }
+
+    // Busca o perfil completo do usuário logado na API e popula dados/estatísticas
+    const fetchProfile = async () => {
+      try {
+        const perfilCompleto = await getMeuPerfil();
+
+        if (!perfilCompleto) {
+          // Mantém dados anteriores se nada for retornado
           return;
         }
-    } else {
-      // Se não houver cache, tenta extrair do token
-      const nome = 
-        payload.nome ||
-        payload.name ||
-        payload.user?.nome ||
-        payload.user?.name ||
-        payload.usuario?.nome ||
-        payload.fullName ||
-        payload.nome_completo ||
-        payload.nomeCompleto ||
-        "Administrador";
-      const email = payload.email || payload.usuario?.email || payload.user?.email || payload.sub || "sem-email@dominio.com";
-      const perfil = payload.perfil || payload.role || payload.userRole || "ADMIN";
 
-      setAdminData({
-        nome,
-        email,
-        perfil,
-      });
+
+        // Mapeia campos comuns retornados pela API para o estado local
+        const nome = perfilCompleto.nome || perfilCompleto.name || perfilCompleto.fullName || perfilCompleto.usuario?.nome || perfilCompleto.user?.name || adminData.nome || "Administrador";
+        const email = perfilCompleto.email || perfilCompleto.usuario?.email || perfilCompleto.user?.email || adminData.email || "sem-email@dominio.com";
+        const perfil = perfilCompleto.perfil || perfilCompleto.role || perfilCompleto.userRole || perfilCompleto.perfilUsuario || adminData.perfil || "ADMIN";
+
+        setAdminData({ nome, email, perfil });
+
+        // Extrai a URL da imagem do perfil a partir de várias chaves possíveis
+        const possibleImage =
+          perfilCompleto.foto ||
+          perfilCompleto.fotoUrl ||
+          perfilCompleto.imagem ||
+          perfilCompleto.imagemUrl ||
+          perfilCompleto.avatar ||
+          perfilCompleto.avatarUrl ||
+          perfilCompleto.profilePicture ||
+          perfilCompleto.photo ||
+          perfilCompleto.usuario?.foto ||
+          perfilCompleto.user?.foto ||
+          perfilCompleto.user?.avatar ||
+          null;
+
+        if (possibleImage) {
+          try {
+            // Se a API retornar caminho relativo (ex: /uploads/...), prefixamos com a base do servidor
+            const baseServer = API_URL.replace(/\/api$/, '');
+            const isAbsolute = /^https?:\/\//i.test(possibleImage);
+            const fotoUrl = isAbsolute
+              ? possibleImage
+              : (possibleImage.startsWith('/') ? `${baseServer}${possibleImage}` : `${baseServer}/${possibleImage}`);
+
+            setProfileImage(fixImageUrl(fotoUrl));
+          } catch (e) {
+            console.warn('Erro ao normalizar URL da imagem:', e);
+            setProfileImage(perfilPhoto);
+          }
+        } else {
+          // Mantém fallback local
+          setProfileImage(perfilPhoto);
+        }
+
+        // Se houver campos de estatísticas no retorno, popula-los
+        // Usa nomes tolerantes (stats, resumo, dashboard, contabilidades)
+        const stats = perfilCompleto.stats || perfilCompleto.resumo || perfilCompleto.dashboard || perfilCompleto.contagem || {};
+
+        setStats({
+          produtosReservados: stats.produtosReservados ?? stats.reservados ?? stats.produtos_reservados ?? 0,
+          produtosAtivos: stats.produtosAtivos ?? stats.ativos ?? stats.produtos_ativos ?? 0,
+          totalVendido: stats.totalVendido ?? stats.vendido ?? stats.total_vendido ?? 0,
+          pagamentoPendente: stats.pagamentoPendente ?? stats.pendentes ?? stats.pagamentos_pendentes ?? 0,
+        });
+
         if (perfil !== "ADMIN") {
           navigate("/nao-autorizado");
           return;
         }
-    }
+      } catch (err) {
+        console.error('Erro ao buscar perfil completo:', err);
+        // Em caso de erro, mantemos os dados existentes (token/cached) e não bloqueamos a rota
+      }
+    };
+
+    fetchProfile();
   }, [navigate]);
 
-
+ 
   return (
     <div>
       <HeaderUser />
@@ -111,9 +174,10 @@ const PerfilAdm = () => {
         <section className="perfil-section">
           <div className="perfil-header">
             <img
-              src={perfilPhoto}
+              src={profileImage}
               alt="Foto do Perfil"
               className="perfil-foto"
+              onError={() => setProfileImage(perfilPhoto)}
             />
             <h2>OLÁ, {adminData.nome.toUpperCase()}</h2>
             <p className="perfil-status">Ativo: {adminData.perfil}</p>
@@ -122,14 +186,14 @@ const PerfilAdm = () => {
           <div className="perfil-dados">
             {/* Card 1 - Produtos */}
             <div className="card-produtos">
-              <p className="produtos-reservados-label">Produtos Reservados:</p>
+              <p className="produtos-reservados-label">Produtos Retirados:</p>
               <p className="produtos-reservados-valor">
-                <strong>100</strong>
+                <strong>{stats.produtosReservados ?? 0}</strong>
               </p>
               <hr className="divisor-produtos" />
               <p className="produtos-ativos-label">Produtos Ativos:</p>
               <p className="produtos-ativos-valor">
-                <strong>150</strong>
+                <strong>{stats.produtosAtivos ?? 0}</strong>
               </p>
             </div>
 
@@ -137,12 +201,16 @@ const PerfilAdm = () => {
             <div className="card-vendas">
               <p className="vendas-totais-label">Total Vendido:</p>
               <p className="vendas-totais-valor">
-                <strong>R$99.999,99</strong>
+                <strong>{
+                  typeof stats.totalVendido === 'number'
+                    ? stats.totalVendido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                    : stats.totalVendido || 'R$0,00'
+                }</strong>
               </p>
               <hr className="divisor-vendas" />
-              <p className="pagamento-pendente-label">Aguardando Pagamento:</p>
+              <p className="pagamento-pendente-label">Produtos Reservados:</p>
               <p className="pagamento-pendente-valor">
-                <strong>100</strong>
+                <strong>{stats.pagamentoPendente ?? 0}</strong>
               </p>
             </div>
           </div>

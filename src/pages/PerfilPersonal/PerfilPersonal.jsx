@@ -5,6 +5,8 @@ import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import './PerfilPersonal.css';
 import performLogout from "../../components/LogoutButton/LogoutButton";
+import { getMeuPerfil, API_URL } from "../../services/usuarioService";
+import { fixImageUrl } from "../../utils/image";
 
 const PerfilPersonal = () => {
   const navigate = useNavigate();
@@ -14,6 +16,8 @@ const PerfilPersonal = () => {
     numero: "",
     perfil: "",
   });
+
+  const [profileImage, setProfileImage] = useState(perfilPhoto);
 
   // Função para buscar o token salvo e decodificá-lo
   const getDecodedToken = () => {
@@ -74,6 +78,38 @@ const PerfilPersonal = () => {
         perfil: cachedPerfil || "PERSONAL",
         numero: cachedNumero || "",
       });
+      // busca imagem via API em background
+      (async () => {
+        try {
+          const perfilCompleto = await getMeuPerfil();
+          if (!perfilCompleto) return;
+          const possibleImage =
+            perfilCompleto.fotoPerfil ||
+            perfilCompleto.foto ||
+            perfilCompleto.imagem ||
+            perfilCompleto.img ||
+            perfilCompleto.imageUrl ||
+            perfilCompleto.avatar ||
+            perfilCompleto.profilePicture ||
+            perfilCompleto.photo ||
+            perfilCompleto.urlFoto ||
+            perfilCompleto.usuario?.foto ||
+            perfilCompleto.user?.foto ||
+            perfilCompleto.user?.avatar ||
+            null;
+
+          if (possibleImage) {
+            const baseServer = API_URL.replace(/\/api$/, '');
+            const isAbsolute = /^https?:\/\//i.test(possibleImage);
+            const fotoUrl = isAbsolute
+              ? possibleImage
+              : (possibleImage.startsWith('/') ? `${baseServer}${possibleImage}` : `${baseServer}/${possibleImage}`);
+            setProfileImage(fixImageUrl(fotoUrl));
+          }
+        } catch (e) {
+          console.warn('Erro ao buscar imagem do perfil personal:', e);
+        }
+      })();
     } else {
       // Se não houver cache, tenta extrair do token
       const nome = 
@@ -97,6 +133,38 @@ const PerfilPersonal = () => {
         perfil,
       });
 
+      // busca imagem via API em background
+      (async () => {
+        try {
+          const perfilCompleto = await getMeuPerfil();
+          if (!perfilCompleto) return;
+          const possibleImage =
+            perfilCompleto.foto ||
+            perfilCompleto.fotoUrl ||
+            perfilCompleto.imagem ||
+            perfilCompleto.imagemUrl ||
+            perfilCompleto.avatar ||
+            perfilCompleto.avatarUrl ||
+            perfilCompleto.profilePicture ||
+            perfilCompleto.photo ||
+            perfilCompleto.usuario?.foto ||
+            perfilCompleto.user?.foto ||
+            perfilCompleto.user?.avatar ||
+            null;
+
+          if (possibleImage) {
+            const baseServer = API_URL.replace(/\/api$/, '');
+            const isAbsolute = /^https?:\/\//i.test(possibleImage);
+            const fotoUrl = isAbsolute
+              ? possibleImage
+              : (possibleImage.startsWith('/') ? `${baseServer}${possibleImage}` : `${baseServer}/${possibleImage}`);
+            setProfileImage(fixImageUrl(fotoUrl));
+          }
+        } catch (e) {
+          console.warn('Erro ao buscar imagem do perfil personal:', e);
+        }
+      })();
+
       // Salva os dados no sessionStorage
       sessionStorage.setItem('userName', nome);
       sessionStorage.setItem('userEmail', email);
@@ -112,8 +180,8 @@ const PerfilPersonal = () => {
 
     <main className="perfil-container-personal">
   <section className="perfil-section-personal">
-    <div className="perfil-header-personal">
-      <img src={perfilPhoto} alt="Foto do Perfil" className="perfil-foto-personal" />
+      <div className="perfil-header-personal">
+      <img src={profileImage} alt="Foto do Perfil" className="perfil-foto-personal" onError={() => setProfileImage(perfilPhoto)} />
       <h2>OLÁ, {personalData.nome.toUpperCase()}</h2>
       <p className="perfil-status-personal">Ativo: {personalData.perfil}</p>
     </div>

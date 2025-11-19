@@ -5,6 +5,8 @@ import Footer from "../../components/footer";
 import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import './Perfil.css'; // Importa o CSS corrigido
 import performLogout from "../../components/LogoutButton/LogoutButton";
+import { getMeuPerfil, API_URL } from "../../services/usuarioService";
+import { fixImageUrl } from "../../utils/image";
 import { FaTimesCircle } from 'react-icons/fa';
 
 // SVG para o ícone de check circle
@@ -35,6 +37,8 @@ const Perfil = () => {
     dataUltimoTreino: "",
     nivelAtividade: ""
   });
+
+  const [profileImage, setProfileImage] = useState(perfilPhoto);
 
   // Função para buscar o token salvo e decodificá-lo
   const getDecodedToken = () => {
@@ -106,6 +110,38 @@ const Perfil = () => {
         telefone: cachedTelefone || prev.telefone,
         plano: cachedPlano || prev.plano,
       }));
+      // Try to fetch full profile (image) in background
+      (async () => {
+        try {
+          const perfilCompleto = await getMeuPerfil();
+          if (!perfilCompleto) return;
+          const possibleImage =
+            perfilCompleto.fotoPerfil ||
+            perfilCompleto.foto ||
+            perfilCompleto.imagem ||
+            perfilCompleto.img ||
+            perfilCompleto.imageUrl ||
+            perfilCompleto.avatar ||
+            perfilCompleto.profilePicture ||
+            perfilCompleto.photo ||
+            perfilCompleto.urlFoto ||
+            perfilCompleto.usuario?.foto ||
+            perfilCompleto.user?.foto ||
+            perfilCompleto.user?.avatar ||
+            null;
+
+          if (possibleImage) {
+            const baseServer = API_URL.replace(/\/api$/, '');
+            const isAbsolute = /^https?:\/\//i.test(possibleImage);
+            const fotoUrl = isAbsolute
+              ? possibleImage
+              : (possibleImage.startsWith('/') ? `${baseServer}${possibleImage}` : `${baseServer}/${possibleImage}`);
+            setProfileImage(fixImageUrl(fotoUrl));
+          }
+        } catch (e) {
+          console.warn('Erro ao buscar imagem do perfil:', e);
+        }
+      })();
     } else {
       // Se não houver cache, tenta extrair do token
       const nome =
@@ -145,6 +181,38 @@ const Perfil = () => {
       sessionStorage.setItem('userNumero', telefone);
       sessionStorage.setItem('userPlano', plano);
 
+      // Tenta buscar a imagem completa do perfil via API (se possível)
+      (async () => {
+        try {
+          const perfilCompleto = await getMeuPerfil();
+          if (!perfilCompleto) return;
+          const possibleImage =
+            perfilCompleto.foto ||
+            perfilCompleto.fotoUrl ||
+            perfilCompleto.imagem ||
+            perfilCompleto.imagemUrl ||
+            perfilCompleto.avatar ||
+            perfilCompleto.avatarUrl ||
+            perfilCompleto.profilePicture ||
+            perfilCompleto.photo ||
+            perfilCompleto.usuario?.foto ||
+            perfilCompleto.user?.foto ||
+            perfilCompleto.user?.avatar ||
+            null;
+
+          if (possibleImage) {
+            const baseServer = API_URL.replace(/\/api$/, '');
+            const isAbsolute = /^https?:\/\//i.test(possibleImage);
+            const fotoUrl = isAbsolute
+              ? possibleImage
+              : (possibleImage.startsWith('/') ? `${baseServer}${possibleImage}` : `${baseServer}/${possibleImage}`);
+            setProfileImage(fixImageUrl(fotoUrl));
+          }
+        } catch (e) {
+          console.warn('Erro ao buscar imagem do perfil:', e);
+        }
+      })();
+
       // Remove chaves antigas para evitar duplicidade
       sessionStorage.removeItem('alunoName');
       sessionStorage.removeItem('alunoEmail');
@@ -165,7 +233,7 @@ const Perfil = () => {
       <main className="perfil-container">
         <section className="perfil-section">
           <div className="perfil-header">
-            <img src={perfilPhoto} alt="Foto do Perfil" className="perfil-icon" />
+            <img src={profileImage} alt="Foto do Perfil" className="perfil-icon" onError={() => setProfileImage(perfilPhoto)} />
             <h2>OLÁ, {(userData.nome || "").toUpperCase()}</h2>
             <p className="perfil-desc">
               Estudando resolver cenários e aprendendo com os erros
