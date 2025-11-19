@@ -1,5 +1,6 @@
 package br.com.saudeemacao.api.model;
 
+import br.com.saudeemacao.api.model.EnumTreino.ESexo;
 import br.com.saudeemacao.api.model.EnumUsuario.ENivelAtividade;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -83,9 +86,14 @@ public class Usuario implements UserDetails {
 
     private ENivelAtividade nivelAtividade;
 
+    private ESexo sexo;
+
     private EStatus statusPlano;
     private LocalDateTime dataInicioPlano;
     private LocalDateTime dataVencimentoPlano;
+
+    @DBRef
+    private List<Treino> treinosAtribuidos = new ArrayList<>();
 
     public void setPlano(EPlano plano) {
         if (this.perfil != EPerfil.ALUNO && plano != null) {
@@ -134,8 +142,6 @@ public class Usuario implements UserDetails {
     public boolean isAccountNonExpired() {
         return true;
     }
-
-
 
     @Override
     public boolean isAccountNonLocked() {

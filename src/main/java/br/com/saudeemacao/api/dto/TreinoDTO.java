@@ -1,5 +1,6 @@
 package br.com.saudeemacao.api.dto;
 
+import br.com.saudeemacao.api.model.EnumTreino.EDiaDaSemana;
 import br.com.saudeemacao.api.model.EnumTreino.ENivel;
 import br.com.saudeemacao.api.model.EnumTreino.ESexo;
 import jakarta.validation.Valid;
@@ -7,6 +8,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class TreinoDTO {
@@ -37,8 +39,8 @@ public class TreinoDTO {
     private Integer idadeMaxima;
 
     @Valid
-    @NotEmpty(message = "O treino deve conter pelo menos um exercício.")
-    private List<ExercicioDTO> exercicios;
+    @NotEmpty(message = "O treino deve conter exercícios para pelo menos um dia da semana.")
+    private Map<EDiaDaSemana, List<ExercicioDTO>> exerciciosPorDia;
 
     @AssertTrue(message = "A idade máxima não pode ser menor que a idade mínima.")
     private boolean isIdadeValida() {

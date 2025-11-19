@@ -142,25 +142,18 @@ public class ProdutoService {
     }
 
     public Produto update(String id, ProdutoDTO dto) throws IOException {
-        // PASSO 1: Obter o produto existente
         Produto produto = getById(id);
-
-        // PASSO 2: Aplicar a mesma lógica de validação do POST, mas de forma flexível
         validarCamposParaUpdate(dto);
 
-        // PASSO 3: Atualizar os campos
         if (dto.getNome() != null && !dto.getNome().trim().isEmpty()) {
             produto.setNome(dto.getNome());
         }
-
         if (dto.getDescricao() != null && !dto.getDescricao().trim().isEmpty()) {
             produto.setDescricao(dto.getDescricao());
         }
-
         if (dto.getPreco() != null) {
             produto.setPreco(dto.getPreco());
         }
-
         if (dto.getPrecoPromocional() != null) {
             produto.setPrecoPromocional(dto.getPrecoPromocional());
         }
@@ -170,7 +163,6 @@ public class ProdutoService {
         if (dto.getDataFimPromocao() != null) {
             produto.setDataFimPromocao(parseDate(dto.getDataFimPromocao(), "dataFimPromocao"));
         }
-
         if (dto.getCategoria() != null && !dto.getCategoria().equals(produto.getCategoria())) {
             throw new IllegalArgumentException("Alteração de categoria não permitida via atualização.");
         }
@@ -217,7 +209,7 @@ public class ProdutoService {
         repository.deleteById(id);
     }
 
-    public void decrementarEstoque(String produtoId, String identificadorVariacao, ECategoria categoria) {
+    public void decrementarEstoque(String produtoId, String identificadorVariacao, ECategoria categoria, int quantidade) {
         Produto produto = getById(produtoId);
 
         if (!produto.getCategoria().equals(categoria)) {
@@ -229,10 +221,10 @@ public class ProdutoService {
                 ETamanho tamanho = ETamanho.valueOf(identificadorVariacao.toUpperCase());
                 Map<ETamanho, Integer> estoqueTamanho = produto.getEstoquePorTamanho();
                 int estoqueAtualTamanho = estoqueTamanho.getOrDefault(tamanho, 0);
-                if (estoqueAtualTamanho <= 0) {
-                    throw new IllegalStateException("Produto sem estoque para o tamanho " + identificadorVariacao);
+                if (estoqueAtualTamanho < quantidade) {
+                    throw new IllegalStateException("Estoque insuficiente para o tamanho " + identificadorVariacao + ". Disponível: " + estoqueAtualTamanho);
                 }
-                estoqueTamanho.put(tamanho, estoqueAtualTamanho - 1);
+                estoqueTamanho.put(tamanho, estoqueAtualTamanho - quantidade);
                 produto.setEstoquePorTamanho(estoqueTamanho);
                 break;
             case CREATINA:
@@ -240,24 +232,24 @@ public class ProdutoService {
                 ESabor sabor = ESabor.valueOf(identificadorVariacao.toUpperCase());
                 Map<ESabor, Integer> estoqueSabor = produto.getEstoquePorSabor();
                 int estoqueAtualSabor = estoqueSabor.getOrDefault(sabor, 0);
-                if (estoqueAtualSabor <= 0) {
-                    throw new IllegalStateException("Produto sem estoque para o sabor " + identificadorVariacao);
+                if (estoqueAtualSabor < quantidade) {
+                    throw new IllegalStateException("Estoque insuficiente para o sabor " + identificadorVariacao + ". Disponível: " + estoqueAtualSabor);
                 }
-                estoqueSabor.put(sabor, estoqueAtualSabor - 1);
+                estoqueSabor.put(sabor, estoqueAtualSabor - quantidade);
                 produto.setEstoquePorSabor(estoqueSabor);
                 break;
             case VITAMINAS:
                 Integer estoquePadrao = produto.getEstoquePadrao();
-                if (estoquePadrao == null || estoquePadrao <= 0) {
-                    throw new IllegalStateException("Produto sem estoque.");
+                if (estoquePadrao == null || estoquePadrao < quantidade) {
+                    throw new IllegalStateException("Estoque insuficiente. Disponível: " + (estoquePadrao != null ? estoquePadrao : 0));
                 }
-                produto.setEstoquePadrao(estoquePadrao - 1);
+                produto.setEstoquePadrao(estoquePadrao - quantidade);
                 break;
         }
         repository.save(produto);
     }
 
-    public void incrementarEstoque(String produtoId, String identificadorVariacao, ECategoria categoria) {
+    public void incrementarEstoque(String produtoId, String identificadorVariacao, ECategoria categoria, int quantidade) {
         Produto produto = getById(produtoId);
 
         if (!produto.getCategoria().equals(categoria)) {
@@ -266,50 +258,40 @@ public class ProdutoService {
 
         switch (categoria) {
             case CAMISETAS:
-                if (identificadorVariacao == null || identificadorVariacao.isBlank()) {
-                    return;
-                }
+                if (identificadorVariacao == null || identificadorVariacao.isBlank()) return;
                 ETamanho tamanho = ETamanho.valueOf(identificadorVariacao.toUpperCase());
                 Map<ETamanho, Integer> estoqueTamanho = produto.getEstoquePorTamanho();
-                estoqueTamanho.put(tamanho, estoqueTamanho.getOrDefault(tamanho, 0) + 1);
+                estoqueTamanho.put(tamanho, estoqueTamanho.getOrDefault(tamanho, 0) + quantidade);
                 produto.setEstoquePorTamanho(estoqueTamanho);
                 break;
             case CREATINA:
             case WHEY_PROTEIN:
-                if (identificadorVariacao == null || identificadorVariacao.isBlank()) {
-                    return;
-                }
+                if (identificadorVariacao == null || identificadorVariacao.isBlank()) return;
                 ESabor sabor = ESabor.valueOf(identificadorVariacao.toUpperCase());
                 Map<ESabor, Integer> estoqueSabor = produto.getEstoquePorSabor();
-                estoqueSabor.put(sabor, estoqueSabor.getOrDefault(sabor, 0) + 1);
+                estoqueSabor.put(sabor, estoqueSabor.getOrDefault(sabor, 0) + quantidade);
                 produto.setEstoquePorSabor(estoqueSabor);
                 break;
             case VITAMINAS:
                 Integer estoquePadrao = produto.getEstoquePadrao();
-                produto.setEstoquePadrao(estoquePadrao != null ? estoquePadrao + 1 : 1);
+                produto.setEstoquePadrao(estoquePadrao != null ? estoquePadrao + quantidade : quantidade);
                 break;
         }
         repository.save(produto);
     }
 
     private void validarCamposParaUpdate(ProdutoDTO dto) {
-        // Valida o preço apenas se ele foi fornecido
         if (dto.getPreco() != null && dto.getPreco() <= 0) {
             throw new IllegalArgumentException("Preço deve ser maior que zero");
         }
-
-        // Valida o preço promocional e as datas associadas
         if (dto.getPrecoPromocional() != null) {
             if (dto.getPrecoPromocional() <= 0) {
                 throw new IllegalArgumentException("Preço promocional deve ser maior que zero");
             }
-            // Se um preço promocional é enviado, as datas também devem ser válidas
             if (dto.getDataInicioPromocao() == null || dto.getDataFimPromocao() == null) {
                 throw new IllegalArgumentException("Datas de início e fim da promoção são obrigatórias quando um preço promocional é fornecido.");
             }
         }
-
-        // Valida a consistência das datas da promoção, se ambas forem fornecidas
         if (dto.getDataInicioPromocao() != null && dto.getDataFimPromocao() != null) {
             try {
                 LocalDateTime inicio = parseDate(dto.getDataInicioPromocao(), "dataInicioPromocao");
@@ -318,11 +300,9 @@ public class ProdutoService {
                     throw new IllegalArgumentException("Data de fim da promoção não pode ser anterior à data de início.");
                 }
             } catch (IllegalArgumentException e) {
-                throw e; // Relança a exceção de formato de data
+                throw e;
             }
         }
-
-        // Valida os estoques se eles forem fornecidos
         if (dto.getCategoria() != null) {
             switch (dto.getCategoria()) {
                 case CAMISETAS:

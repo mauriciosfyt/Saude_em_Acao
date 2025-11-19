@@ -65,6 +65,13 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/meus-treinos")
+    @PreAuthorize("hasRole('ALUNO') and @usuarioService.isUsuarioGold(authentication.principal.username)")
+    public ResponseEntity<List<MeuTreinoDTO>> getMeusTreinos(@AuthenticationPrincipal UserDetails userDetails) {
+        List<MeuTreinoDTO> treinos = usuarioService.buscarMeusTreinosAtribuidos(userDetails);
+        return ResponseEntity.ok(treinos);
+    }
+
     // == PROFESSORES ==
     @PostMapping(value = "/professor", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Usuario> criarProfessor(@Valid @ModelAttribute ProfessorCreateDTO dto) throws IOException {
@@ -103,6 +110,16 @@ public class UsuarioController {
     public ResponseEntity<Void> excluirProfessor(@PathVariable String id) {
         usuarioService.excluirPorId(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/aluno/{alunoId}/treinos/{treinoId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR')")
+    public ResponseEntity<Void> atribuirTreino(
+            @PathVariable String alunoId,
+            @PathVariable String treinoId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        usuarioService.atribuirTreinoParaAluno(alunoId, treinoId, userDetails);
+        return ResponseEntity.ok().build();
     }
 
     // == ADMINS ==

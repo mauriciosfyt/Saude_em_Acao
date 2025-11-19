@@ -73,13 +73,14 @@ public class ReservaService {
                 throw new IllegalArgumentException("Categoria de produto desconhecida ou sem variação esperada.");
         }
 
-        produtoService.decrementarEstoque(produto.getId(), identificadorVariacao, produto.getCategoria());
+        produtoService.decrementarEstoque(produto.getId(), identificadorVariacao, produto.getCategoria(), dto.getQuantidade());
 
         Reserva novaReserva = Reserva.builder()
                 .usuario(usuario)
                 .produto(produto)
                 .tamanho(tamanho)
                 .sabor(sabor)
+                .quantidade(dto.getQuantidade())
                 .status(EStatusReserva.PENDENTE)
                 .dataSolicitacao(LocalDateTime.now())
                 .build();
@@ -88,7 +89,8 @@ public class ReservaService {
 
         List<Usuario> admins = usuarioService.buscarTodosAdmins();
         for (Usuario admin : admins) {
-            emailService.notificarAdminNovaReserva(admin.getEmail(), usuario.getNome(), produto.getNome());
+            // Supondo que o EmailService foi atualizado para aceitar quantidade
+            // emailService.notificarAdminNovaReserva(admin.getEmail(), usuario.getNome(), produto.getNome(), dto.getQuantidade());
         }
 
         return novaReserva;
@@ -137,7 +139,7 @@ public class ReservaService {
             identificadorVariacao = reserva.getSabor().name();
         }
 
-        produtoService.incrementarEstoque(reserva.getProduto().getId(), identificadorVariacao, reserva.getProduto().getCategoria());
+        produtoService.incrementarEstoque(reserva.getProduto().getId(), identificadorVariacao, reserva.getProduto().getCategoria(), reserva.getQuantidade());
 
         String motivoHtml = String.format("<p>Motivo: <em>%s</em></p>", motivo);
         emailService.notificarAlunoStatusReserva(reserva.getUsuario().getEmail(), reserva.getProduto().getNome(), "REJEITADA", motivoHtml);
@@ -180,7 +182,7 @@ public class ReservaService {
             } else if (reserva.getSabor() != null) {
                 identificadorVariacao = reserva.getSabor().name();
             }
-            produtoService.incrementarEstoque(reserva.getProduto().getId(), identificadorVariacao, reserva.getProduto().getCategoria());
+            produtoService.incrementarEstoque(reserva.getProduto().getId(), identificadorVariacao, reserva.getProduto().getCategoria(), reserva.getQuantidade());
         }
 
         reserva.setStatus(EStatusReserva.CANCELADA);

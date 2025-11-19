@@ -100,7 +100,7 @@ public class EmailService {
         enviarEmail(email, titulo, corpoHtml);
     }
 
-    public void notificarAdminNovaReserva(String adminEmail, String nomeAluno, String nomeProduto) {
+    public void notificarAdminNovaReserva(String adminEmail, String nomeAluno, String nomeProduto, int quantidade) {
         String titulo = "Nova Solicitação de Reserva";
         String preHeader = String.format("O aluno %s solicitou um novo produto.", nomeAluno);
         String conteudo = String.format("""
@@ -109,9 +109,10 @@ public class EmailService {
             <ul>
                 <li><strong>Aluno:</strong> %s</li>
                 <li><strong>Produto:</strong> %s</li>
+                <li><strong>Quantidade:</strong> %d</li>
             </ul>
             <p>Por favor, acesse o painel administrativo para aprovar ou rejeitar a solicitação.</p>
-            """, nomeAluno, nomeProduto);
+            """, nomeAluno, nomeProduto, quantidade);
 
         String corpoHtml = criarBaseTemplate(titulo, preHeader, conteudo);
         enviarEmail(adminEmail, titulo, corpoHtml);
@@ -146,4 +147,23 @@ public class EmailService {
             log.error("Falha ao enviar e-mail para {}: {}", para, e.getMessage());
         }
     }
+
+    public void notificarAlunoNovoTreinoAtribuido(String alunoEmail, String nomeAluno, String nomeTreino, String nomeResponsavel) {
+        String titulo = "Novo Treino Atribuído para Você!";
+        String preHeader = String.format("Um novo plano de treinos, '%s', foi adicionado ao seu perfil.", nomeTreino);
+        String conteudo = String.format("""
+        <h1>Novo Treino Disponível!</h1>
+        <p>Olá, %s,</p>
+        <p>Temos uma ótima notícia! Seu instrutor(a) <strong>%s</strong> acaba de atribuir um novo treino para você:</p>
+        <div class="code-box" style="text-align: left; padding: 20px;">
+            <p style="font-size: 18px; margin: 0; color: #333;"><strong>Nome do Treino:</strong> %s</p>
+        </div>
+        <p>Acesse o aplicativo ou o portal para conferir os detalhes dos exercícios e começar com tudo!</p>
+        <p>Bons treinos,<br>Equipe Saúde em Ação</p>
+        """, nomeAluno, nomeResponsavel, nomeTreino);
+
+        String corpoHtml = criarBaseTemplate(titulo, preHeader, conteudo);
+        enviarEmail(alunoEmail, titulo, corpoHtml);
+    }
+
 }

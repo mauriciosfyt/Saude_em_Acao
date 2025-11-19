@@ -1,17 +1,13 @@
 package br.com.saudeemacao.api.service;
 
-import br.com.saudeemacao.api.dto.AlunoCreateDTO;
-import br.com.saudeemacao.api.dto.PlanoGoldDetalhesDTO;
-import br.com.saudeemacao.api.dto.ProfessorCreateDTO;
-import br.com.saudeemacao.api.dto.UsuarioCreateDTO;
-import br.com.saudeemacao.api.dto.UsuarioPerfilDTO;
-import br.com.saudeemacao.api.dto.UsuarioSaidaDTO;
-import br.com.saudeemacao.api.dto.UsuarioUpdateDTO;
+import br.com.saudeemacao.api.dto.*;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
 import br.com.saudeemacao.api.model.EnumUsuario.EStatus;
+import br.com.saudeemacao.api.model.Treino;
 import br.com.saudeemacao.api.model.Usuario;
+import br.com.saudeemacao.api.repository.TreinoRepository;
 import br.com.saudeemacao.api.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,6 +20,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,20 +38,11 @@ public class UsuarioService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    public boolean isUsuarioGold(String username) {
-        Optional<Usuario> usuarioOpt = repo.findByEmail(username);
-        return usuarioOpt.map(usuario -> usuario.getPlano() == EPlano.GOLD).orElse(false);
-    }
+    @Autowired
+    private TreinoRepository treinoRepository;
 
-    public boolean podeAtualizarPerfil(String idDoPerfil, UserDetails userDetails) {
-        Usuario usuarioAutenticado = repo.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuário autenticado não encontrado."));
-
-        boolean isOwnerAndGold = usuarioAutenticado.getPerfil() == EPerfil.ALUNO &&
-                usuarioAutenticado.getPlano() == EPlano.GOLD &&
-                usuarioAutenticado.getId().equals(idDoPerfil);
-        return isOwnerAndGold;
-    }
+    @Autowired
+    private EmailService emailService;
 
     public Usuario criarAluno(AlunoCreateDTO dto) throws IOException {
         validarUnicidade(dto.getEmail(), dto.getCpf(), dto.getTelefone(), null);
@@ -68,6 +57,12 @@ public class UsuarioService {
         usuario.setPerfil(EPerfil.ALUNO);
         usuario.setPlano(dto.getPlano());
 
+        // Se o sexo for fornecido (opcionalmente para o plano Básico), ele será salvo.
+        // Se não, ficará nulo, o que está correto.
+        if (dto.getSexo() != null) {
+            usuario.setSexo(dto.getSexo());
+        }
+
         if (dto.getPlano() == EPlano.GOLD) {
             validarECarregarDadosPlanoGold(dto, usuario);
             usuario.setStatusPlano(EStatus.ATIVO);
@@ -81,6 +76,105 @@ public class UsuarioService {
         }
 
         return repo.save(usuario);
+    }
+
+    private void validarECarregarDadosPlanoGold(AlunoCreateDTO dto, Usuario usuario) {
+        // >> ALTERAÇÃO: Adicionada a validação do campo 'sexo' aqui.
+        if (dto.getSexo() == null || dto.getIdade() == null || dto.getPeso() == null || dto.getAltura() == null ||
+                dto.getObjetivo() == null || dto.getObjetivo().isBlank() || dto.getNivelAtividade() == null) {
+            throw new IllegalArgumentException("Para o plano Gold, os campos: sexo, idade, peso, altura, objetivo e nível de atividade são obrigatórios.");
+        }
+        // Os campos são definidos no objeto 'usuario' apenas se o plano for Gold
+        usuario.setSexo(dto.getSexo());
+        usuario.setIdade(dto.getIdade());
+        usuario.setPeso(dto.getPeso());
+        usuario.setAltura(dto.getAltura());
+        usuario.setObjetivo(dto.getObjetivo());
+        usuario.setNivelAtividade(dto.getNivelAtividade());
+    }
+
+    // (O restante da classe permanece exatamente o mesmo, pois a lógica de atribuição de treino
+    // já lida corretamente com as validações baseadas nos campos existentes do aluno)
+
+    public void atribuirTreinoParaAluno(String alunoId, String treinoId, UserDetails userDetails) {
+        Usuario aluno = repo.findById(alunoId)
+                .filter(u -> u.getPerfil() == EPerfil.ALUNO && u.getPlano() == EPlano.GOLD)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Aluno do plano Gold não encontrado com ID: " + alunoId));
+
+        Treino treino = treinoRepository.findById(treinoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Treino não encontrado com ID: " + treinoId));
+
+        Usuario responsavel = repo.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuário responsável (admin/professor) não encontrado."));
+
+        if (aluno.getSexo() == null) {
+            throw new IllegalArgumentException("O sexo do aluno não está cadastrado, não é possível validar o treino.");
+        }
+        if (treino.getSexo() != aluno.getSexo()) {
+            throw new IllegalArgumentException(
+                    String.format("Este treino é destinado ao público %s e não pode ser atribuído a este aluno.", treino.getSexo().toString().toLowerCase())
+            );
+        }
+
+        if (aluno.getIdade() == null) {
+            throw new IllegalArgumentException("A idade do aluno não está cadastrada, não é possível validar a faixa etária do treino.");
+        }
+        if (aluno.getIdade() < treino.getIdadeMinima() || aluno.getIdade() > treino.getIdadeMaxima()) {
+            throw new IllegalArgumentException(
+                    String.format("A idade do aluno (%d) está fora da faixa etária recomendada para este treino (%d-%d anos).", aluno.getIdade(), treino.getIdadeMinima(), treino.getIdadeMaxima())
+            );
+        }
+
+        if (aluno.getTreinosAtribuidos() == null) {
+            aluno.setTreinosAtribuidos(new ArrayList<>());
+        }
+        aluno.getTreinosAtribuidos().clear();
+        aluno.getTreinosAtribuidos().add(treino);
+
+        repo.save(aluno);
+
+        emailService.notificarAlunoNovoTreinoAtribuido(
+                aluno.getEmail(),
+                aluno.getNome(),
+                treino.getNome(),
+                responsavel.getNome()
+        );
+    }
+
+    public List<MeuTreinoDTO> buscarMeusTreinosAtribuidos(UserDetails userDetails) {
+        Usuario aluno = repo.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Aluno logado não encontrado no sistema!"));
+
+        if (aluno.getTreinosAtribuidos() == null || aluno.getTreinosAtribuidos().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return aluno.getTreinosAtribuidos().stream()
+                .map(this::toMeuTreinoDTO)
+                .collect(Collectors.toList());
+    }
+
+    private MeuTreinoDTO toMeuTreinoDTO(Treino treino) {
+        return MeuTreinoDTO.builder()
+                .nomeTreino(treino.getNome())
+                .nomeProfessor(treino.getResponsavel() != null ? treino.getResponsavel().getNome() : "Sem responsável")
+                .exerciciosPorDia(treino.getExerciciosPorDia())
+                .build();
+    }
+
+    public boolean isUsuarioGold(String username) {
+        Optional<Usuario> usuarioOpt = repo.findByEmail(username);
+        return usuarioOpt.map(usuario -> usuario.getPlano() == EPlano.GOLD).orElse(false);
+    }
+
+    public boolean podeAtualizarPerfil(String idDoPerfil, UserDetails userDetails) {
+        Usuario usuarioAutenticado = repo.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuário autenticado não encontrado."));
+
+        boolean isOwnerAndGold = usuarioAutenticado.getPerfil() == EPerfil.ALUNO &&
+                usuarioAutenticado.getPlano() == EPlano.GOLD &&
+                usuarioAutenticado.getId().equals(idDoPerfil);
+        return isOwnerAndGold;
     }
 
     public Usuario criarProfessor(ProfessorCreateDTO dto) throws IOException {
@@ -321,18 +415,6 @@ public class UsuarioService {
         sb.append(dias).append(dias > 1 ? " dias" : " dia");
 
         return sb.toString();
-    }
-
-    private void validarECarregarDadosPlanoGold(AlunoCreateDTO dto, Usuario usuario) {
-        if (dto.getIdade() == null || dto.getPeso() == null || dto.getAltura() == null ||
-                dto.getObjetivo() == null || dto.getObjetivo().isBlank() || dto.getNivelAtividade() == null) {
-            throw new IllegalArgumentException("Para o plano Gold, os campos: idade, peso, altura, objetivo e nível de atividade são obrigatórios.");
-        }
-        usuario.setIdade(dto.getIdade());
-        usuario.setPeso(dto.getPeso());
-        usuario.setAltura(dto.getAltura());
-        usuario.setObjetivo(dto.getObjetivo());
-        usuario.setNivelAtividade(dto.getNivelAtividade());
     }
 
     private void validarCpf(String cpf) {

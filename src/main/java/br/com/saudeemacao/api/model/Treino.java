@@ -1,5 +1,6 @@
 package br.com.saudeemacao.api.model;
 
+import br.com.saudeemacao.api.model.EnumTreino.EDiaDaSemana;
 import br.com.saudeemacao.api.model.EnumTreino.ENivel;
 import br.com.saudeemacao.api.model.EnumTreino.ESexo;
 import jakarta.validation.constraints.Max;
@@ -17,6 +18,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -57,6 +59,6 @@ public class Treino {
     @Positive(message = "A idade máxima deve ser um valor positivo.")
     private Integer idadeMaxima;
 
-    @NotEmpty(message = "O treino deve conter pelo menos um exercício.")
-    private List<Exercicio> exercicios;
+    @NotEmpty(message = "O treino deve conter exercícios para pelo menos um dia da semana.")
+    private Map<EDiaDaSemana, List<Exercicio>> exerciciosPorDia;
 }

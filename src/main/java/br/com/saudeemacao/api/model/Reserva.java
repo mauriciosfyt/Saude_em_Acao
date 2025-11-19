@@ -32,6 +32,8 @@ public class Reserva {
     private ETamanho tamanho;
     private ESabor sabor;
 
+    private Integer quantidade;
+
     private EStatusReserva status;
 
     private LocalDateTime dataSolicitacao;

@@ -62,7 +62,8 @@ public class ReservaAgendadaService {
                 produtoService.incrementarEstoque(
                         produto.getId(),
                         identificadorVariacao,
-                        produto.getCategoria()
+                        produto.getCategoria(),
+                        reserva.getQuantidade()
                 );
 
                 reserva.setStatus(EStatusReserva.EXPIRADA);
