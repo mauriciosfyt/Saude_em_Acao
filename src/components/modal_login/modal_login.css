@@ -73,7 +73,7 @@
   padding-right: 44px;
 }
 
-.password-toggle {
+.password-toggle-eye {
   position: absolute;
   right: 12px;
   top: 41%;
@@ -86,7 +86,7 @@
   padding: 4px;
 }
 
-.password-toggle:hover {
+.password-toggle-eye:hover {
   color: #fff;
 }
 

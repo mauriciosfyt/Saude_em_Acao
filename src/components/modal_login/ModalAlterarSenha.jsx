@@ -8,10 +8,20 @@ export default function ChangePasswordModal({ onClose, onChangePassword, token, 
   // Adiciona a classe 'modal-open' ao body do documento quando o componente é montado
   React.useEffect(() => {
     document.body.classList.add('modal-open');
+    const scrollY = window.scrollY || window.pageYOffset;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
 
     // Remove a classe 'modal-open' do body do documento quando o componente é desmontado
     return () => {
       document.body.classList.remove('modal-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      window.scrollTo(0, scrollY);
     };
   }, []);
 
@@ -113,7 +123,7 @@ export default function ChangePasswordModal({ onClose, onChangePassword, token, 
             }}
           />
           <span
-            className="password-toggle"
+            className="password-toggle-eye"
             onClick={() => setShowNewPwd(s => !s)}
             title={showNewPwd ? 'Ocultar senha' : 'Mostrar senha'}
             onMouseDown={e => e.preventDefault()}
@@ -139,7 +149,7 @@ export default function ChangePasswordModal({ onClose, onChangePassword, token, 
             }}
           />
           <span
-            className="password-toggle"
+            className="password-toggle-eye"
             onClick={() => setShowConfirmPwd(s => !s)}
             title={showConfirmPwd ? 'Ocultar senha' : 'Mostrar senha'}
             onMouseDown={e => e.preventDefault()}

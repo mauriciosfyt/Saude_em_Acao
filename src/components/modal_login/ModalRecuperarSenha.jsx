@@ -10,8 +10,19 @@ export default function RecoverModal({ onClose, onSend }) {
   const [erro, setErro] = React.useState("");
   React.useEffect(() => {
     document.body.classList.add('modal-open');
+    const scrollY = window.scrollY || window.pageYOffset;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+
     return () => {
       document.body.classList.remove('modal-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      window.scrollTo(0, scrollY);
     };
   }, []);
 

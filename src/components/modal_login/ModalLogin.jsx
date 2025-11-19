@@ -14,8 +14,21 @@ export default function LoginModal({ onClose, onLogin, onRecover }) {
 
   React.useEffect(() => {
     document.body.classList.add('modal-open');
+    const scrollY = window.scrollY || window.pageYOffset;
+    // Lock scroll by fixing body and preserving scroll position
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+
     return () => {
       document.body.classList.remove('modal-open');
+      // Restore body styles and scroll position
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      window.scrollTo(0, scrollY);
     };
   }, []);
 
@@ -116,7 +129,7 @@ export default function LoginModal({ onClose, onLogin, onRecover }) {
             }}
           />
           <span
-            className="password-toggle password-toggleLogin"
+            className="password-toggle-eye password-toggleLogin"
             onClick={() => setShowSenha(s => !s)}
             title={showSenha ? 'Ocultar senha' : 'Mostrar senha'}
             onMouseDown={e => e.preventDefault()}
