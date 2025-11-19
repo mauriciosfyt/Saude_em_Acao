@@ -1,4 +1,3 @@
-// src/main/java/br/com/saudeemacao/api/dto/ExercicioDTO.java
 package br.com.saudeemacao.api.dto;
 
 import jakarta.validation.constraints.NotBlank;

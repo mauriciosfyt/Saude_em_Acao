@@ -2,6 +2,7 @@ package br.com.saudeemacao.api.controller;
 
 import br.com.saudeemacao.api.dto.TreinoDTO;
 import br.com.saudeemacao.api.dto.TreinoMetricasDTO;
+import br.com.saudeemacao.api.dto.TreinoResponseDTO; // Importado
 import br.com.saudeemacao.api.model.HistoricoTreino;
 import br.com.saudeemacao.api.model.Treino;
 import br.com.saudeemacao.api.service.TreinoService;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.List;
 
 @RestController
@@ -26,9 +28,11 @@ public class TreinoController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN') or hasRole('PROFESSOR')")
-    public ResponseEntity<Treino> criarTreino(@Valid @ModelAttribute TreinoDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<TreinoResponseDTO> criarTreino(@Valid @ModelAttribute TreinoDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
         Treino novoTreino = treinoService.criarTreino(dto, userDetails);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoTreino);
+        // Converte a entidade para o DTO de resposta antes de enviar
+        TreinoResponseDTO responseDTO = treinoService.toResponseDTO(novoTreino);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
     @GetMapping("/{id}")
@@ -57,8 +61,11 @@ public class TreinoController {
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN') or hasRole('PROFESSOR')")
-    public ResponseEntity<Treino> atualizarTreino(@PathVariable String id, @Valid @ModelAttribute TreinoDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(treinoService.atualizarTreino(id, dto, userDetails));
+    public ResponseEntity<TreinoResponseDTO> atualizarTreino(@PathVariable String id, @Valid @ModelAttribute TreinoDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
+        Treino treinoAtualizado = treinoService.atualizarTreino(id, dto, userDetails);
+        // Converte a entidade para o DTO de resposta antes de enviar
+        TreinoResponseDTO responseDTO = treinoService.toResponseDTO(treinoAtualizado);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/{id}")

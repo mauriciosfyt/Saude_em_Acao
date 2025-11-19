@@ -1,10 +1,12 @@
 package br.com.saudeemacao.api.service;
 
 import br.com.saudeemacao.api.dto.ExercicioDTO;
+import br.com.saudeemacao.api.dto.ResponsavelDTO;
 import br.com.saudeemacao.api.dto.TreinoDTO;
 import br.com.saudeemacao.api.dto.TreinoMetricasDTO;
+import br.com.saudeemacao.api.dto.TreinoResponseDTO; // Importado
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
-import br.com.saudeemacao.api.model.EnumTreino.EDiaDaSemana; // >> IMPORTAR O NOVO ENUM
+import br.com.saudeemacao.api.model.EnumTreino.EDiaDaSemana;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
 import br.com.saudeemacao.api.model.Exercicio;
@@ -24,9 +26,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.HashMap; // >> IMPORTAR HASHMAP
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map; // >> IMPORTAR MAP
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,7 +48,6 @@ public class TreinoService {
     public Treino criarTreino(TreinoDTO dto, UserDetails userDetails) {
         Usuario responsavel = getUsuarioAutenticado(userDetails);
 
-        // >> ALTERAÇÃO 1: Mapear o Map de DTOs para o Map do Modelo.
         Map<EDiaDaSemana, List<Exercicio>> exerciciosPorDia = mapExerciciosDtoParaModelo(dto.getExerciciosPorDia());
 
         Treino treino = Treino.builder()
@@ -55,10 +56,9 @@ public class TreinoService {
                 .tipoDeTreino(dto.getTipoDeTreino())
                 .nivel(dto.getNivel())
                 .sexo(dto.getSexo())
-                .frequenciaSemanal(dto.getFrequenciaSemanal())
                 .idadeMinima(dto.getIdadeMinima())
                 .idadeMaxima(dto.getIdadeMaxima())
-                .exerciciosPorDia(exerciciosPorDia) // >> USAR O NOVO CAMPO
+                .exerciciosPorDia(exerciciosPorDia)
                 .build();
 
         return treinoRepository.save(treino);
@@ -73,47 +73,41 @@ public class TreinoService {
             throw new SecurityException("Você não tem permissão para atualizar este treino.");
         }
 
-        // >> ALTERAÇÃO 2: Reutilizar a mesma lógica de mapeamento do Map.
         Map<EDiaDaSemana, List<Exercicio>> exerciciosAtualizados = mapExerciciosDtoParaModelo(dto.getExerciciosPorDia());
 
         treinoExistente.setNome(dto.getNome());
         treinoExistente.setTipoDeTreino(dto.getTipoDeTreino());
         treinoExistente.setNivel(dto.getNivel());
         treinoExistente.setSexo(dto.getSexo());
-        treinoExistente.setFrequenciaSemanal(dto.getFrequenciaSemanal());
         treinoExistente.setIdadeMinima(dto.getIdadeMinima());
         treinoExistente.setIdadeMaxima(dto.getIdadeMaxima());
-        treinoExistente.setExerciciosPorDia(exerciciosAtualizados); // >> USAR O NOVO CAMPO
+        treinoExistente.setExerciciosPorDia(exerciciosAtualizados);
 
         return treinoRepository.save(treinoExistente);
     }
 
-    // >> ALTERAÇÃO 3: Novo método auxiliar para converter o mapa de DTOs para o mapa do modelo.
+
     private Map<EDiaDaSemana, List<Exercicio>> mapExerciciosDtoParaModelo(Map<EDiaDaSemana, List<ExercicioDTO>> dtoMap) {
         if (dtoMap == null || dtoMap.isEmpty()) {
             return new HashMap<>();
         }
 
         Map<EDiaDaSemana, List<Exercicio>> modelMap = new HashMap<>();
-        // Itera sobre cada entrada do mapa (Ex: SEGUNDA -> Lista de Exercícios DTO)
         for (Map.Entry<EDiaDaSemana, List<ExercicioDTO>> entry : dtoMap.entrySet()) {
             EDiaDaSemana dia = entry.getKey();
             List<ExercicioDTO> exerciciosDto = entry.getValue();
 
-            // Converte a lista de DTOs para uma lista de Entidades
             List<Exercicio> exerciciosModel = exerciciosDto.stream()
                     .map(this::mapExercicioDtoToModel)
                     .collect(Collectors.toList());
 
-            modelMap.put(dia, exerciciosModel);
+            // Adiciona ao mapa apenas se a lista de exercícios não estiver vazia
+            if (!exerciciosModel.isEmpty()) {
+                modelMap.put(dia, exerciciosModel);
+            }
         }
         return modelMap;
     }
-
-    // (O restante da classe permanece o mesmo)
-    // ...
-    // ...
-    // ...
 
     public Treino buscarPorId(String id) {
         return treinoRepository.findById(id)
@@ -131,6 +125,8 @@ public class TreinoService {
     public List<Treino> buscarPorTipo(String tipo) {
         return treinoRepository.findByTipoDeTreinoContainingIgnoreCase(tipo);
     }
+
+
 
     public List<Treino> buscarPorResponsavel(String responsavelId) {
         return treinoRepository.findByResponsavelId(responsavelId);
@@ -256,5 +252,32 @@ public class TreinoService {
         exercicio.setObservacao(dto.getObservacao());
         exercicio.setImg(imgUrl);
         return exercicio;
+    }
+
+    // Método adicionado para mapear a entidade para o DTO de resposta
+    public TreinoResponseDTO toResponseDTO(Treino treino) {
+        if (treino == null) {
+            return null;
+        }
+
+        ResponsavelDTO responsavelDTO = null;
+        if (treino.getResponsavel() != null) {
+            responsavelDTO = new ResponsavelDTO(
+                    treino.getResponsavel().getId(),
+                    treino.getResponsavel().getNome()
+            );
+        }
+
+        return new TreinoResponseDTO(
+                treino.getId(),
+                treino.getNome(),
+                treino.getTipoDeTreino(),
+                treino.getNivel(),
+                treino.getSexo(),
+                treino.getIdadeMinima(),
+                treino.getIdadeMaxima(),
+                responsavelDTO,
+                treino.getExerciciosPorDia()
+        );
     }
 }

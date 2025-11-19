@@ -46,11 +46,6 @@ public class Treino {
     @NotNull(message = "O sexo alvo do treino é obrigatório.")
     private ESexo sexo;
 
-    @NotNull(message = "A frequência semanal é obrigatória.")
-    @Min(value = 1, message = "A frequência semanal deve ser de no mínimo 1 vez.")
-    @Max(value = 7, message = "A frequência semanal deve ser de no máximo 7 vezes.")
-    private Integer frequenciaSemanal;
-
     @NotNull(message = "A idade mínima é obrigatória.")
     @Positive(message = "A idade mínima deve ser um valor positivo.")
     private Integer idadeMinima;
