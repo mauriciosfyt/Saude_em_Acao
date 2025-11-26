@@ -165,9 +165,6 @@ pom.xml
 
 ## 📬 Contato
 
-Projeto desenvolvido por [Arthur Pereira](https://github.com/Arthurpereiraa)  
 Caso tenha dúvidas ou sugestões, abra uma issue ou entre em contato pelo GitHub.
 
 ---
-
-> _Este README pode ser adaptado conforme o crescimento do projeto. Recomenda-se documentar os principais endpoints, exemplos de uso via cURL/Postman, e manter informações atualizadas!_
