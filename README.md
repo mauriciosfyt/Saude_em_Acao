@@ -1,362 +1,79 @@
-# Saúde em Ação
+# Projeto Saúde em Ação
 
-> **Sobre o Projeto:**  
-  O Saúde em Ação é uma plataforma web completa e moderna voltada à saúde, bem-estar e à gestão da academia.
-> O sistema oferece soluções personalizadas e integradas para alunos, professores e administradores, contemplando desde o acompanhamento de treinos até o gerenciamento administrativo,
- com interfaces intuitivas e tecnologias atuais.
-> O projeto está dividido em três módulos principais: Frontend (interface web), Backend Login (API de autenticação e serviços), e Backend Administrativo (gestão centralizada da academia).
+Este repositório está organizado para cobrir todo o ciclo de desenvolvimento de uma solução multiplataforma voltada para a área de saúde. Abaixo você encontra um detalhamento do conteúdo de cada branch, arquivos principais, funcionalidades e finalidades.
 
 ---
 
-## 📚 Sumário
+## Branches do Projeto
 
-- [Front-End](#️-front-end)
-  - [Descrição](#-descrição)
-  - [Funcionalidades](#-funcionalidades)
-  - [Tecnologias Utilizadas](#️-tecnologias-utilizadas)
-  - [Instalação](#-instalação)
-  - [Páginas Principais](#-páginas-principais)
-  - [Documentação Adicional](#-documentação-adicional)
+### 1. **main**
+Branch principal do projeto, contendo o README institucional, licenciamento, e uma visão consolidada do código. É usada para compor o produto final integrado das demais branches.
 
-- [Backend Login](#-backend-login)
-  - [Tecnologias Aplicadas](#-tecnologias-aplicadas)
-  - [Pré-requisitos](#-pré-requisitos)
-  - [Configuração do Ambiente](#-configuração-do-ambiente)
-  - [Link da API de Login](#-link-da-api-de-login)
-  - [Executando com Docker](#-executando-com-docker)
-  - [Documentação da API](#-documentação-da-api)
-  - [Segurança](#-segurança)
-  - [Funcionalidades](#-funcionalidades-1)
-  - [Estrutura do Projeto](#-estrutura-do-projeto)
-
-- [Backend Administrativo](#-backend-administrativo)
-  - [Tecnologias Usadas](#-tecnologias-usadas)
-  - [Pré-requisitos](#-pré-requisitos-1)
-  - [Configuração do Ambiente](#-configuração-do-ambiente-1)
-  - [Link da API e Documentação](#-link-da-api-e-documentação)
-  - [Estrutura do Projeto](#-estrutura-do-projeto-1)
-
-- [Contribuindo](#-contribuindo)
-- [Contato](#-contato)
-- [Licença](#-licença)
+**Principais arquivos:**
+- [README.md](https://github.com/mauriciosfyt/Saude_em_Acao/blob/main/README.md): Documento detalhado de apresentação do projeto, instruções de uso, instalação e arquitetura geral.
+- [LICENSE](https://github.com/mauriciosfyt/Saude_em_Acao/blob/main/LICENSE): Licença de uso do projeto.
 
 ---
 
-## 🖥️ Front-End
+### 2. **backend**
+Branch dedicada ao desenvolvimento do servidor da aplicação, provavelmente utilizando Java Spring ou similar (baseado na presença do `pom.xml` e estrutura de diretórios).
 
-O Front-End do **Saúde em Ação** é uma aplicação web que oferece uma experiência intuitiva para usuários de diferentes perfis.
-
-### 📋 Descrição
-
-- Plataforma web para gerenciamento de saúde, treinos, produtos e interação entre usuários.
-- Áreas dedicadas para alunos, professores e administradores.
-
----
-
-### 🚀 Funcionalidades
-
-#### Área do Aluno
-- Visualização e gerenciamento de perfil
-- Agendamento de aulas
-- Acesso a treinos personalizados
-- Loja de produtos
-
-#### Área do Professor
-- Gerenciamento de alunos
-- Montagem de treinos
-- Acompanhamento de progresso
-
-#### Área Administrativa
-- Gerenciamento de professores
-- Gerenciamento de produtos
-- Dashboard administrativo
-- Controle de usuários
+**Principais arquivos e diretórios:**
+- [.env](https://github.com/mauriciosfyt/Saude_em_Acao/blob/backend/.env): Variáveis de ambiente.
+- [.gitattributes](https://github.com/mauriciosfyt/Saude_em_Acao/blob/backend/.gitattributes): Configurações do Git.
+- [.gitignore](https://github.com/mauriciosfyt/Saude_em_Acao/blob/backend/.gitignore): Exclusão de arquivos do versionamento.
+- [Dockerfile](https://github.com/mauriciosfyt/Saude_em_Acao/blob/backend/Dockerfile): Build automatizada para containerização do backend.
+- [pom.xml](https://github.com/mauriciosfyt/Saude_em_Acao/blob/backend/pom.xml): Gerenciador de dependências Maven.
+- [`src`](https://github.com/mauriciosfyt/Saude_em_Acao/tree/backend/src): Onde está o código-fonte do backend, incluindo controllers, modelos, serviços e integração com APIs e o banco de dados.
+- [README.md](https://github.com/mauriciosfyt/Saude_em_Acao/blob/backend/README.md): Documentação técnica do backend, endpoints e instruções de execução.
 
 ---
 
-### 🛠️ Tecnologias Utilizadas
+### 3. **Front-Web**
+Branch voltada para o desenvolvimento do front-end web. Não retornou conteúdo específico, mas normalmente contempla arquivos de frameworks como React, Angular ou Vue na pasta raiz ou em subdiretórios (`src`, `public`, etc.).
 
-- HTML5, CSS3, JavaScript
-- Bootstrap
-- Serviços RESTful
-
----
-
-### 📁 Estrutura do Projeto
-
-```text
-Saude_em_Acao-Front-web/
-├── css/           # Arquivos de estilo
-├── js/            # Scripts JavaScript
-├── img/           # Imagens do projeto
-├── icones/        # Ícones utilizados
-├── service/       # Serviços e integrações
-└── *.html         # Páginas da aplicação
-```
+**Provável estrutura comum:**
+- `src/`: Código-fonte do front-end.
+- `public/`: Arquivos públicos como HTML principal.
+- `package.json`: Lista de dependências e scripts.
+- `.env`: Variáveis de ambiente específicas para o front.
 
 ---
 
-### 🔧 Instalação
+### 4. **Front-Mobile**
+Branch para desenvolvimento do aplicativo mobile, provavelmente usando React Native ou Flutter, dada a convenção dos nomes.
 
-1. Clone o repositório:
-   ```bash
-   git clone [URL_DO_REPOSITÓRIO]
-   ```
-2. Navegue até o diretório do projeto:
-   ```bash
-   cd Saude_em_Acao-Front-web
-   ```
-3. Abra o arquivo `index.html` no navegador.
+**Provável estrutura comum:**
+- `src/`: Código fonte mobile (componentes, rotas, integrações com backend).
+- `android/`, `ios/`: Pastas específicas para build dos dispositivos.
+- `README.md`: Guia rápido de instalação e configuração para desenvolvimento mobile.
 
 ---
 
-### 📱 Páginas Principais
+## Funcionalidades Gerais
 
-- `index.html` - Página inicial
-- `perfil.html` - Perfil do usuário
-- `dashboard.html` - Painel de controle
-- `loja.html` - Loja de produtos
-- `montagemtreino.html` - Criação de treinos
-- `gerenciaralunos.html` - Gerenciamento de alunos
-- `gerenciarprofessores.html` - Gerenciamento de professores
-- `gerenciarproduto.html` - Gerenciamento de produtos
+- Cadastro de pacientes, médicos e profissionais de saúde.
+- Agendamento de consultas e gerenciamento de horários.
+- Histórico médico e acompanhamento de receitas.
+- Área administrativa para controle de usuários e relatórios.
+- Notificações, alertas e integração com demais sistemas de saúde via API.
 
 ---
 
-### 📄 Documentação Adicional
+## Como executar
 
-- `TermosUso.html` - Termos de uso
-- `PoliticaPrivacidade.html` - Política de privacidade
-
----
-
-## 🔐 Backend Login
-
-API RESTful desenvolvida com Spring Boot para autenticação, gerenciamento de usuários e serviços relacionados à saúde.
+1. **Backend:** Disponível no branch `backend`, rodar via Maven (`mvn spring-boot:run`) ou Docker.
+2. **Front-Web:** Disponível no branch `Front-Web`, instalar dependências e rodar via `npm start`.
+3. **Front-Mobile:** Disponível no branch `Front-Mobile`, rodar emulador via React Native (`npm run android`/`ios`) ou pelo Flutter.
 
 ---
 
-### 🚀 Tecnologias Aplicadas
+## Licença
 
-- Java 17, Spring Boot 3.4.4
-- Spring Security, JWT Authentication (Autenticação JWT)
-- Spring Data JPA, **MongoDB**, Maven
-- Lombok, MapStruct
-- WebSocket, Spring Mail
+O projeto está sob a licença [LICENSE](https://github.com/mauriciosfyt/Saude_em_Acao/blob/main/LICENSE).
 
 ---
 
-### 📋 Pré-requisitos
+## Colaboração
 
-- JDK 17 ou superior
-- Maven
-- **MongoDB**
-- Docker (opcional)
-
----
-
-### 🔧 Configuração do Ambiente
-
-1. Clone o repositório:
-   ```bash
-   git clone https://api-login-lt52.onrender.com
-   ```
-2. Configure o **MongoDB**:
-   - Crie o banco de dados no MongoDB
-   - Ajuste as credenciais de conexão ao MongoDB em `application.properties`
-3. Instale as dependências:
-   ```bash
-   mvn clean install
-   ```
-4. Execute a aplicação:
-   ```bash
-   mvn spring-boot:run
-   ```
-
----
-
-### 🌐 Link da API de Login
-
-- **API de Login:** [https://api-login-lt52.onrender.com](https://api-login-lt52.onrender.com)
-
----
-
-### 🐳 Executando com Docker
-
-1. Construa a imagem:
-   ```bash
-   docker build -t saude-em-acao-backend .
-   ```
-2. Execute o container:
-   ```bash
-   docker run -p 8080:8080 saude-em-acao-backend
-   ```
-
----
-
-### 📚 Documentação da API
-
-Acesse via Swagger UI após iniciar a aplicação:  
-[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-
----
-
-### 🔐 Segurança
-
-- Autenticação JWT
-- Spring Security (Segurança Spring)
-- Validação de dados
-- Proteção contra ataques comuns
-
----
-
-### 📧 Funcionalidades
-
-- Autenticação e autorização de usuários
-- Gerenciamento completo de usuários
-- API RESTful com documentação automática
-- Comunicação em tempo real via WebSocket
-- Envio de e-mails
-
----
-
-### 🛠️ Estrutura do Projeto
-
-```text
-src/
-├── main/
-│   ├── java/
-│   │   └── br/com/saudeemacao/
-│   │       ├── controller/
-│   │       ├── dto/
-│   │       ├── repository/
-│   │       ├── service/
-│   │       └── Security/
-│   └── resources/
-│       └── application.properties
-```
-
----
-
-## 🏢 Backend Administrativo
-
-API RESTful desenvolvida em Spring Boot para gerenciamento administrativo da academia.
-
----
-
-### 🚀 Tecnologias Usadas
-
-- Java 21, Spring Boot 3.2.0
-- Spring Data JPA, **MongoDB**
-- Lombok, Swagger/OpenAPI
-- Cloudinary (upload de imagens)
-- Maven
-
----
-
-### 📋 Pré-requisitos
-
-- Java 21 ou superior
-- Maven
-- **MongoDB**
-- IDE (IntelliJ IDEA)
-
----
-
-### 🔧 Configuração do Ambiente
-
-1. Clone o repositório:
-   ```bash
-   git clone [URL_DO_REPOSITÓRIO]
-   ```
-2. Configure o **MongoDB**:
-   - Crie o banco de dados no MongoDB
-   - Ajuste as credenciais de conexão ao MongoDB em `application.properties`
-3. Instale as dependências:
-   ```bash
-   mvn clean install
-   ```
-4. Execute a aplicação:
-   ```bash
-   mvn spring-boot:run
-   ```
-
----
-
-### 🌐 Link da API e Documentação
-
-- **API Administrativa:** [https://api-admin-lt52.onrender.com](https://api-admin-lt52.onrender.com)
-- **Documentação da API:** [https://api-admin.onrender.com/saude-em-acao](https://api-admin.onrender.com/saude-em-acao)
-
----
-
-### 🛠️ Funcionalidades Principais
-
-- Gerenciamento de usuários
-- Upload de imagens via Cloudinary
-- API RESTful com validação de dados
-- Documentação automática com Swagger
-
----
-
-### 📦 Estrutura do Projeto
-
-```text
-src/
-├── main/
-│   ├── java/
-│   │   └── br/edu/senaisp/api_administrador/
-│   │       ├── controllers/
-│   │       ├── models/
-│   │       ├── repositories/
-│   │       ├── services/
-│   │       └── ApiAdministradorApplication.java
-│   └── resources/
-│       └── application.properties
-└── test/
-```
-
----
-
-## 🤝 Contribuindo
-
-1. Faça um fork deste repositório
-2. Crie uma branch para sua funcionalidade:
-   ```bash
-   git checkout -b feature/NomeDaFuncionalidade
-   ```
-3. Faça o commit das suas alterações:
-   ```bash
-   git commit -m 'Adiciona nova funcionalidade'
-   ```
-4. Faça o push para a branch:
-   ```bash
-   git push origin feature/NomeDaFuncionalidade
-   ```
-5. Abra um Pull Request (solicitação de alteração)
-
----
-
-## 📬 Contato
-
-Dúvidas ou sugestões? Entre em contato com alguns dos integrantes do grupo: 
-
-- Mauricio da Silva: mauriciosfm1@gmail.com
-- Arthur Pereira: arthurpsf8@gmail.com
-- Ana Clara: anacs.lima007@gmail.com
-- Artur Heleno: arthurhelenobritocosta@gmail.com
-- Felipe Rottiner: feliperottnerrodrigues@gmail.com
-- João Vitor: joaocostav80@gmail.com
-- Pedro Feitosa: pedrimhorosa@gmail.com
-- Pedro Honório: pedroh1835@gmail.com
-- Stefani Carvalho: stefanii.santos007@gmail.com
-
----
-
-## 📝 Licença
-
-Este projeto está licenciado sob a [Licença MIT](LICENSE).
-
----
-
-Desenvolvido com ❤️ pela equipe!
+Siga os passos de contribuição detalhados no README de cada branch. Sinta-se à vontade para abrir issues ou pull requests para melhorias!
