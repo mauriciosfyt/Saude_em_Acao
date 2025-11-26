@@ -52,9 +52,9 @@ Branch para desenvolvimento do aplicativo mobile, provavelmente usando React Nat
 
 ## Funcionalidades Gerais
 
-- Cadastro de pacientes, médicos e profissionais de saúde.
+- Cadastro de alunos e profissionais de saúde.
 - Agendamento de consultas e gerenciamento de horários.
-- Histórico médico e acompanhamento de receitas.
+- Histórico e acompanhamento de receitas.
 - Área administrativa para controle de usuários e relatórios.
 - Notificações, alertas e integração com demais sistemas de saúde via API.
 
