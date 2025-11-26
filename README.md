@@ -1,362 +1,92 @@
-# Saúde em Ação
+# Saúde em Ação - Front-Mobile
 
-> **Sobre o Projeto:**  
-  O Saúde em Ação é uma plataforma web completa e moderna voltada à saúde, bem-estar e à gestão da academia.
-> O sistema oferece soluções personalizadas e integradas para alunos, professores e administradores, contemplando desde o acompanhamento de treinos até o gerenciamento administrativo,
- com interfaces intuitivas e tecnologias atuais.
-> O projeto está dividido em três módulos principais: Frontend (interface web), Backend Login (API de autenticação e serviços), e Backend Administrativo (gestão centralizada da academia).
+Este projeto é o aplicativo mobile do programa **Saúde em Ação**. Ele visa facilitar o acesso a informações e serviços de saúde, promovendo o bem-estar dos usuários por meio de uma interface moderna, fácil de usar e integrada com recursos fundamentais.
 
----
+## Tecnologias Utilizadas
 
-## 📚 Sumário
+- [React Native](https://reactnative.dev/)
+- [Expo](https://expo.dev/) (se aplicável)
+- [TypeScript](https://www.typescriptlang.org/) (se aplicável)
+- [Axios](https://axios-http.com/) para chamadas HTTP
+- [React Navigation](https://reactnavigation.org/) para navegação
+- [Redux](https://redux.js.org/) ou Context API para gerenciamento de estado (se utilizado)
+- [Styled Components](https://styled-components.com/) para estilização
 
-- [Front-End](#️-front-end)
-  - [Descrição](#-descrição)
-  - [Funcionalidades](#-funcionalidades)
-  - [Tecnologias Utilizadas](#️-tecnologias-utilizadas)
-  - [Instalação](#-instalação)
-  - [Páginas Principais](#-páginas-principais)
-  - [Documentação Adicional](#-documentação-adicional)
-
-- [Backend Login](#-backend-login)
-  - [Tecnologias Aplicadas](#-tecnologias-aplicadas)
-  - [Pré-requisitos](#-pré-requisitos)
-  - [Configuração do Ambiente](#-configuração-do-ambiente)
-  - [Link da API de Login](#-link-da-api-de-login)
-  - [Executando com Docker](#-executando-com-docker)
-  - [Documentação da API](#-documentação-da-api)
-  - [Segurança](#-segurança)
-  - [Funcionalidades](#-funcionalidades-1)
-  - [Estrutura do Projeto](#-estrutura-do-projeto)
-
-- [Backend Administrativo](#-backend-administrativo)
-  - [Tecnologias Usadas](#-tecnologias-usadas)
-  - [Pré-requisitos](#-pré-requisitos-1)
-  - [Configuração do Ambiente](#-configuração-do-ambiente-1)
-  - [Link da API e Documentação](#-link-da-api-e-documentação)
-  - [Estrutura do Projeto](#-estrutura-do-projeto-1)
-
-- [Contribuindo](#-contribuindo)
-- [Contato](#-contato)
-- [Licença](#-licença)
-
----
-
-## 🖥️ Front-End
-
-O Front-End do **Saúde em Ação** é uma aplicação web que oferece uma experiência intuitiva para usuários de diferentes perfis.
-
-### 📋 Descrição
-
-- Plataforma web para gerenciamento de saúde, treinos, produtos e interação entre usuários.
-- Áreas dedicadas para alunos, professores e administradores.
-
----
-
-### 🚀 Funcionalidades
-
-#### Área do Aluno
-- Visualização e gerenciamento de perfil
-- Agendamento de aulas
-- Acesso a treinos personalizados
-- Loja de produtos
-
-#### Área do Professor
-- Gerenciamento de alunos
-- Montagem de treinos
-- Acompanhamento de progresso
-
-#### Área Administrativa
-- Gerenciamento de professores
-- Gerenciamento de produtos
-- Dashboard administrativo
-- Controle de usuários
-
----
-
-### 🛠️ Tecnologias Utilizadas
-
-- HTML5, CSS3, JavaScript
-- Bootstrap
-- Serviços RESTful
-
----
-
-### 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```text
-Saude_em_Acao-Front-web/
-├── css/           # Arquivos de estilo
-├── js/            # Scripts JavaScript
-├── img/           # Imagens do projeto
-├── icones/        # Ícones utilizados
-├── service/       # Serviços e integrações
-└── *.html         # Páginas da aplicação
+Front-Mobile/
+├── assets/           # Imagens, ícones, fontes e recursos estáticos
+├── src/
+│   ├── components/   # Componentes reutilizáveis da interface
+│   ├── screens/      # Telas principais do app
+│   ├── navigation/   # Lógica de navegação e rotas
+│   ├── services/     # Configuração de APIs (ex.: Axios)
+│   ├── store/        # Gerenciamento de estado (Redux/Context)
+│   ├── utils/        # Funções auxiliares
+│   └── App.tsx       # Ponto de entrada do aplicativo
+├── app.json          # Configuração do projeto (Expo)
+├── package.json      # Dependências e scripts do projeto
+└── README.md         # Este arquivo
 ```
 
----
+## Como Rodar Localmente
 
-### 🔧 Instalação
+### Pré-requisitos
 
-1. Clone o repositório:
+- [Node.js](https://nodejs.org/)
+- [npm](https://www.npmjs.com/) ou [Yarn](https://yarnpkg.com/)
+- [Expo CLI](https://docs.expo.dev/get-started/installation/) (se aplicável)
+- Emulador Android/iOS ou dispositivo físico
+
+### Passos
+
+1. **Clone o repositório**
    ```bash
-   git clone [URL_DO_REPOSITÓRIO]
-   ```
-2. Navegue até o diretório do projeto:
-   ```bash
-   cd Saude_em_Acao-Front-web
-   ```
-3. Abra o arquivo `index.html` no navegador.
-
----
-
-### 📱 Páginas Principais
-
-- `index.html` - Página inicial
-- `perfil.html` - Perfil do usuário
-- `dashboard.html` - Painel de controle
-- `loja.html` - Loja de produtos
-- `montagemtreino.html` - Criação de treinos
-- `gerenciaralunos.html` - Gerenciamento de alunos
-- `gerenciarprofessores.html` - Gerenciamento de professores
-- `gerenciarproduto.html` - Gerenciamento de produtos
-
----
-
-### 📄 Documentação Adicional
-
-- `TermosUso.html` - Termos de uso
-- `PoliticaPrivacidade.html` - Política de privacidade
-
----
-
-## 🔐 Backend Login
-
-API RESTful desenvolvida com Spring Boot para autenticação, gerenciamento de usuários e serviços relacionados à saúde.
-
----
-
-### 🚀 Tecnologias Aplicadas
-
-- Java 17, Spring Boot 3.4.4
-- Spring Security, JWT Authentication (Autenticação JWT)
-- Spring Data JPA, **MongoDB**, Maven
-- Lombok, MapStruct
-- WebSocket, Spring Mail
-
----
-
-### 📋 Pré-requisitos
-
-- JDK 17 ou superior
-- Maven
-- **MongoDB**
-- Docker (opcional)
-
----
-
-### 🔧 Configuração do Ambiente
-
-1. Clone o repositório:
-   ```bash
-   git clone https://api-login-lt52.onrender.com
-   ```
-2. Configure o **MongoDB**:
-   - Crie o banco de dados no MongoDB
-   - Ajuste as credenciais de conexão ao MongoDB em `application.properties`
-3. Instale as dependências:
-   ```bash
-   mvn clean install
-   ```
-4. Execute a aplicação:
-   ```bash
-   mvn spring-boot:run
+   git clone https://github.com/mauriciosfyt/Saude_em_Acao.git
+   cd Saude_em_Acao/Front-Mobile
    ```
 
----
-
-### 🌐 Link da API de Login
-
-- **API de Login:** [https://api-login-lt52.onrender.com](https://api-login-lt52.onrender.com)
-
----
-
-### 🐳 Executando com Docker
-
-1. Construa a imagem:
+2. **Instale as dependências**
    ```bash
-   docker build -t saude-em-acao-backend .
-   ```
-2. Execute o container:
-   ```bash
-   docker run -p 8080:8080 saude-em-acao-backend
+   npm install
+   # ou
+   yarn install
    ```
 
----
-
-### 📚 Documentação da API
-
-Acesse via Swagger UI após iniciar a aplicação:  
-[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-
----
-
-### 🔐 Segurança
-
-- Autenticação JWT
-- Spring Security (Segurança Spring)
-- Validação de dados
-- Proteção contra ataques comuns
-
----
-
-### 📧 Funcionalidades
-
-- Autenticação e autorização de usuários
-- Gerenciamento completo de usuários
-- API RESTful com documentação automática
-- Comunicação em tempo real via WebSocket
-- Envio de e-mails
-
----
-
-### 🛠️ Estrutura do Projeto
-
-```text
-src/
-├── main/
-│   ├── java/
-│   │   └── br/com/saudeemacao/
-│   │       ├── controller/
-│   │       ├── dto/
-│   │       ├── repository/
-│   │       ├── service/
-│   │       └── Security/
-│   └── resources/
-│       └── application.properties
-```
-
----
-
-## 🏢 Backend Administrativo
-
-API RESTful desenvolvida em Spring Boot para gerenciamento administrativo da academia.
-
----
-
-### 🚀 Tecnologias Usadas
-
-- Java 21, Spring Boot 3.2.0
-- Spring Data JPA, **MongoDB**
-- Lombok, Swagger/OpenAPI
-- Cloudinary (upload de imagens)
-- Maven
-
----
-
-### 📋 Pré-requisitos
-
-- Java 21 ou superior
-- Maven
-- **MongoDB**
-- IDE (IntelliJ IDEA ou Eclipse recomendado)
-
----
-
-### 🔧 Configuração do Ambiente
-
-1. Clone o repositório:
+3. **Inicie o app**
+   Se estiver usando Expo:
    ```bash
-   git clone [URL_DO_REPOSITÓRIO]
+   npx expo start
    ```
-2. Configure o **MongoDB**:
-   - Crie o banco de dados no MongoDB
-   - Ajuste as credenciais de conexão ao MongoDB em `application.properties`
-3. Instale as dependências:
+   Se for React Native CLI:
    ```bash
-   mvn clean install
-   ```
-4. Execute a aplicação:
-   ```bash
-   mvn spring-boot:run
+   npx react-native run-android
+   # ou
+   npx react-native run-ios
    ```
 
----
+4. **Emule ou escaneie o QR Code**
+   - Utilize um emulador ou o aplicativo Expo Go para visualizar o app no seu dispositivo.
 
-### 🌐 Link da API e Documentação
+## Scripts Úteis
 
-- **API Administrativa:** [https://api-admin-lt52.onrender.com](https://api-admin-lt52.onrender.com)
-- **Documentação da API:** [https://api-admin.onrender.com/saude-em-acao](https://api-admin.onrender.com/saude-em-acao)
+- `start`: Inicia o projeto.
+- `android`: Executa no emulador Android.
+- `ios`: Executa no emulador iOS.
+- `test`: Roda testes unitários (se configurado).
 
----
+## Contribuindo
 
-### 🛠️ Funcionalidades Principais
+1. Faça um fork do projeto.
+2. Crie uma branch com sua feature/bugfix (`git checkout -b minha-feature`)
+3. Faça commits claros e objetivos.
+4. Abra um Pull Request descrevendo suas mudanças.
 
-- Gerenciamento de usuários
-- Upload de imagens via Cloudinary
-- API RESTful com validação de dados
-- Documentação automática com Swagger
+## Contato
 
----
-
-### 📦 Estrutura do Projeto
-
-```text
-src/
-├── main/
-│   ├── java/
-│   │   └── br/edu/senaisp/api_administrador/
-│   │       ├── controllers/
-│   │       ├── models/
-│   │       ├── repositories/
-│   │       ├── services/
-│   │       └── ApiAdministradorApplication.java
-│   └── resources/
-│       └── application.properties
-└── test/
-```
+Dúvidas ou sugestões? Abra uma issue ou envie um email para o mantenedor do repositório.
 
 ---
 
-## 🤝 Contribuindo
-
-1. Faça um fork deste repositório
-2. Crie uma branch para sua funcionalidade:
-   ```bash
-   git checkout -b feature/NomeDaFuncionalidade
-   ```
-3. Faça o commit das suas alterações:
-   ```bash
-   git commit -m 'Adiciona nova funcionalidade'
-   ```
-4. Faça o push para a branch:
-   ```bash
-   git push origin feature/NomeDaFuncionalidade
-   ```
-5. Abra um Pull Request (solicitação de alteração)
-
----
-
-## 📬 Contato
-
-Dúvidas ou sugestões? Entre em contato com alguns dos integrantes do grupo: 
-
-- Mauricio da Silva: mauriciosfm1@gmail.com
-- Arthur Pereira: arthurpsf8@gmail.com
-- Ana Clara: anacs.lima007@gmail.com
-- Artur Heleno: arthurhelenobritocosta@gmail.com
-- Felipe Rottiner: feliperottnerrodrigues@gmail.com
-- João Vitor: joaocostav80@gmail.com
-- Pedro Feitosa: pedrimhorosa@gmail.com
-- Pedro Honório: pedroh1835@gmail.com
-- Stefani Carvalho: stefanii.santos007@gmail.com
-
----
-
-## 📝 Licença
-
-Este projeto está licenciado sob a [Licença MIT](LICENSE).
-
----
-
-Desenvolvido com ❤️ pela equipe!
+_Feito com ♥ por [Arthurpereiraa](https://github.com/Arthurpereiraa) e colaboradores._
