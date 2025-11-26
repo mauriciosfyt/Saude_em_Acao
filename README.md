@@ -88,5 +88,3 @@ Front-Mobile/
 Dúvidas ou sugestões? Abra uma issue ou envie um email para o mantenedor do repositório.
 
 ---
-
-_Feito com ♥ por [Arthurpereiraa](https://github.com/Arthurpereiraa) e colaboradores._
