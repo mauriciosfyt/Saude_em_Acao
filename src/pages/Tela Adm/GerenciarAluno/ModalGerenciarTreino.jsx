@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import './ModalGerenciarTreino.css';
 import { getAllTreinos } from '../../../services/treinoService';
+import { patchAddTreinoToAluno } from '../../../services/usuarioService';
 
 const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
   const [nameQuery, setNameQuery] = useState('');
@@ -9,6 +10,7 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
   const [treinos, setTreinos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [alunoIdSalvo, setAlunoIdSalvo] = useState(null);
 
   // Controla o scroll do body e salva o alunoId quando o modal abrir
@@ -201,15 +203,25 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
       alert('Erro: Treino selecionado não encontrado. Tente novamente.');
       return;
     }
-    
-    // Passar tanto o treino quanto o alunoId para garantir que o ID correto seja usado
-    onChoose(selectedTreino, alunoIdFinal);
-    
-    // Limpar seleção após escolher
-    setSelectedId(null);
-    
-    // Fechar o modal após escolher
-    handleCloseModal();
+    // Chamar API PATCH para associar treino ao aluno
+    (async () => {
+      try {
+        setSaving(true);
+        await patchAddTreinoToAluno(alunoIdFinal, selectedTreino.id ?? selectedId);
+        // Opcional: informar o componente pai que houve escolha
+        onChoose(selectedTreino, alunoIdFinal);
+        // Limpar seleção após escolher
+        setSelectedId(null);
+        // Fechar o modal após escolher
+        handleCloseModal();
+        alert('Treino associado ao aluno com sucesso.');
+      } catch (err) {
+        console.error('Erro ao associar treino ao aluno:', err);
+        alert('Erro ao associar treino ao aluno: ' + (err.message || err));
+      } finally {
+        setSaving(false);
+      }
+    })();
   };
 
   const handleCloseModal = () => {
@@ -316,8 +328,8 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
 
         <div className="modal-actions">
           <button className="btn btn-back" onClick={handleCloseModal}>Voltar</button>
-          <button className="btn btn-choose" onClick={handleChoose} disabled={!selectedId}>
-            Escolher
+          <button className="btn btn-choose" onClick={handleChoose} disabled={!selectedId || saving}>
+            {saving ? 'Associando...' : 'Escolher'}
           </button>
         </div>
       </div>
