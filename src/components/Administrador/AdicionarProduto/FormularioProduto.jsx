@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 // Componentes Reutilizados do formulário
+// Certifique-se de que os caminhos para Modal e ControleQuantidade estão corretos no seu projeto
 import Modal from '../../../components/Administrador/AdicionarProduto/Modal';
 import ControleQuantidade from '../../../components/Administrador/AdicionarProduto/ControleQuantidade';
 
@@ -30,31 +31,38 @@ const CATEGORIAS_PRODUTO = [
 const FormularioProduto = ({ onFormSubmit, onCancel }) => {
   const [dadosFormulario, setDadosFormulario] = useState(ESTADO_INICIAL_FORMULARIO);
   
+  // Estados para controle de estoque
   const [estoquePorVariacao, setEstoquePorVariacao] = useState({});
   const [estoquePadrao, setEstoquePadrao] = useState(0);
 
+  // Estados de imagem
   const [imagem, setImagem] = useState(null);
   const [previaImagem, setPreviaImagem] = useState(null);
   
+  // Estados do Modal
   const [modalAberto, setModalAberto] = useState(false);
   const [estoqueTemporario, setEstoqueTemporario] = useState({});
 
   const inputArquivoRef = useRef(null);
 
+  // Helper para pegar dados da categoria atual
   const getCategoriaAtual = () => {
     return CATEGORIAS_PRODUTO.find(c => c.valor === dadosFormulario.categoria);
   };
 
+  // Manipulação de inputs de texto
   const handleChange = (e) => {
     const { name, value } = e.target;
     setDadosFormulario(prevState => ({ ...prevState, [name]: value }));
 
+    // Reseta o estoque se mudar a categoria para evitar conflitos de dados
     if (name === 'categoria') {
       setEstoquePorVariacao({});
       setEstoquePadrao(0);
     }
   };
 
+  // Manipulação da imagem
   const handleImagemChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -63,12 +71,14 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
     }
   };
 
+  // SUBMIT DO FORMULÁRIO
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // A lógica de submit permanece a mesma e já está correta.
+    
     const { nome, preco, categoria } = dadosFormulario;
     const categoriaInfo = getCategoriaAtual();
     
+    // Validação básica
     if (!nome || !preco || !categoriaInfo || !imagem) {
       alert('Por favor, preencha todos os campos obrigatórios e selecione uma imagem.');
       return;
@@ -83,6 +93,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
 
     let totalEstoque = 0;
 
+    // Lógica de Estoque baseada na categoria
     switch (categoriaInfo.tipoEstoque) {
       case 'tamanho':
         for (const [tamanho, quantidade] of Object.entries(estoquePorVariacao)) {
@@ -109,16 +120,21 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
         return;
     }
 
+    // Validação de quantidade mínima
     if (totalEstoque <= 0) {
         alert(`A quantidade total em estoque para a categoria '${categoriaInfo.rotulo}' deve ser maior que zero.`);
         return;
     }
 
+    // --- CORREÇÃO AQUI ---
+    // Adicionamos o total geral como 'quantidade' para garantir que a API receba o contador geral
+    formData.append('quantidade', totalEstoque);
+
     onFormSubmit(formData);
   };
 
+  // Funções do Modal
   const abrirModalEstoque = () => {
-    // Esta validação crucial foi mantida
     if (!dadosFormulario.categoria) {
       alert('Por favor, selecione uma categoria primeiro.');
       return;
@@ -134,12 +150,11 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
     fecharModalEstoque();
   };
 
-  // ## ALTERAÇÃO PRINCIPAL AQUI ##
-  // Esta função foi ajustada para atender ao seu pedido.
+  // Renderização Condicional do Campo de Estoque
   const renderizarControleEstoque = () => {
     const categoriaInfo = getCategoriaAtual();
 
-    // Se a categoria selecionada for do tipo "padrão", mostramos o input numérico.
+    // Caso 1: Categoria Simples (Vitaminas) - Mostra Input
     if (categoriaInfo && categoriaInfo.tipoEstoque === 'padrao') {
       return (
         <div className="produto-form-group">
@@ -156,8 +171,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
       );
     }
 
-    // Caso contrário (nenhuma categoria selecionada OU uma categoria com variações),
-    // mostramos a seção de estoque por variação.
+    // Caso 2: Categoria com Variações (Camisetas/Whey) - Mostra Botão + Resumo
     const itens = Object.entries(estoquePorVariacao).filter(([, qtd]) => qtd > 0);
     const tipoEstoqueLabel = categoriaInfo ? `(${categoriaInfo.tipoEstoque})` : '';
 
@@ -169,7 +183,9 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
             <span className="resumo-estoque-vazio">Nenhum estoque definido</span>
           ) : (
             <div className="resumo-estoque">
-              {itens.map(([item, qtd]) => <span key={item} className="resumo-item">{`${item}: ${qtd}`}</span>)}
+              {itens.map(([item, qtd]) => (
+                <span key={item} className="resumo-item">{`${item}: ${qtd}`}</span>
+              ))}
             </div>
           )}
           <button type="button" className="btn-definir-estoque" onClick={abrirModalEstoque}>
@@ -184,6 +200,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
     <>
       <form onSubmit={handleSubmit}>
         <div className="produto-form-layout">
+          {/* Coluna da Esquerda: Imagem */}
           <div className="produto-image-upload-section">
             <div className="produto-image-placeholder" onClick={() => inputArquivoRef.current.click()}>
               {previaImagem ? (
@@ -192,32 +209,68 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
                 <PlusIcon />
               )}
             </div>
-            <input type="file" ref={inputArquivoRef} onChange={handleImagemChange} accept="image/*" style={{ display: 'none' }} />
+            <input 
+              type="file" 
+              ref={inputArquivoRef} 
+              onChange={handleImagemChange} 
+              accept="image/*" 
+              style={{ display: 'none' }} 
+            />
           </div>
 
+          {/* Coluna da Direita: Inputs */}
           <div className="produto-form-fields-section">
             <div className="produto-form-group">
               <label htmlFor="nome">Nome</label>
-              <input type="text" id="nome" name="nome" value={dadosFormulario.nome} onChange={handleChange} required />
+              <input 
+                type="text" 
+                id="nome" 
+                name="nome" 
+                value={dadosFormulario.nome} 
+                onChange={handleChange} 
+                required 
+              />
             </div>
             <div className="produto-form-group">
               <label htmlFor="preco">Preço</label>
-              <input type="text" id="preco" name="preco" value={dadosFormulario.preco} onChange={handleChange} placeholder="ex: 99,90" required />
+              <input 
+                type="text" 
+                id="preco" 
+                name="preco" 
+                value={dadosFormulario.preco} 
+                onChange={handleChange} 
+                placeholder="ex: 99,90" 
+                required 
+              />
             </div>
             <div className="produto-form-group">
               <label htmlFor="categoria">Categoria</label>
-              <select id="categoria" name="categoria" value={dadosFormulario.categoria} onChange={handleChange} required>
+              <select 
+                id="categoria" 
+                name="categoria" 
+                value={dadosFormulario.categoria} 
+                onChange={handleChange} 
+                required
+              >
                 <option value="" disabled>Selecione...</option>
-                {CATEGORIAS_PRODUTO.map(cat => <option key={cat.valor} value={cat.valor}>{cat.rotulo}</option>)}
+                {CATEGORIAS_PRODUTO.map(cat => (
+                  <option key={cat.valor} value={cat.valor}>{cat.rotulo}</option>
+                ))}
               </select>
             </div>
             
-            {/* O controle de estoque agora aparece desde o início */}
+            {/* Componente de Estoque Inserido Aqui */}
             {renderizarControleEstoque()}
 
             <div className="produto-form-group-vertical">
               <label htmlFor="descricao">Descrição</label>
-              <textarea id="descricao" name="descricao" value={dadosFormulario.descricao} onChange={handleChange} rows="4" />
+              <textarea 
+                id="descricao" 
+                name="descricao" 
+                value={dadosFormulario.descricao} 
+                onChange={handleChange} 
+                rows="4" 
+              />
             </div>
           </div>
         </div>
@@ -228,6 +281,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
         </div>
       </form>
       
+      {/* Modal de Estoque */}
       <Modal titulo="Definir Estoque" aberto={modalAberto} aoFechar={fecharModalEstoque}>
         {(getCategoriaAtual()?.itens || []).map(item => (
           <ControleQuantidade
@@ -238,7 +292,9 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
             onDiminuir={() => setEstoqueTemporario(p => ({ ...p, [item]: Math.max(0, (p[item] || 0) - 1) }))}
           />
         ))}
-        <button className="produto-save-button modal-save-button" onClick={salvarEstoque}>Salvar Estoque</button>
+        <button className="produto-save-button modal-save-button" onClick={salvarEstoque}>
+            Salvar Estoque
+        </button>
       </Modal>
     </>
   );
