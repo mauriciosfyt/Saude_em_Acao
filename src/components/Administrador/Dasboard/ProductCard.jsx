@@ -30,15 +30,15 @@ const ProductCard = ({ nome, preco, tipo, imagem, total }) => {
   const getIconColor = (tipo) => {
     switch (tipo) {
       case 'tshirt':
-        return '#27ae60'; // Verde para camiseta
+        return '#C2E541'; // Camisa: C2E541
       case 'supplement':
-        return '#f39c12'; // Laranja/Amarelo para suplemento
+        return '#FEBF01'; // Creatina: FEBF01
       case 'whey':
-        return '#9b59b6'; // Roxo para whey
+        return '#5F77AF'; // Whey protein: 5F77AF
       case 'pills':
-        return '#27ae60'; // Verde para pílulas
+        return '#41E5E5'; // Vitaminas: 41E5E5
       default:
-        return '#27ae60';
+        return '#C2E541';
     }
   };
 

@@ -11,8 +11,15 @@ const performLogout = (navigate, options = { reload: false }) => {
     try { localStorage.removeItem('token'); localStorage.removeItem('userEmail'); } catch (e) { /* ignore */ }
     try { sessionStorage.removeItem('token'); sessionStorage.removeItem('userEmail'); } catch (e) { /* ignore */ }
 
-    // Opcionalmente limpa todo storage (mantemos tentativa anterior para compatibilidade)
-    try { localStorage.clear(); sessionStorage.clear(); } catch (e) { /* ignore */ }
+    // Opcionalmente limpa todo storage, mas preserva atribuições locais de treinos
+    try {
+      // Preserve assignedTreinos so assignments survive logout
+      const assignedTreinos = localStorage.getItem('assignedTreinos');
+      localStorage.clear();
+      if (assignedTreinos) {
+        try { localStorage.setItem('assignedTreinos', assignedTreinos); } catch (e) { /* ignore */ }
+      }
+    } catch (e) { /* ignore */ }
 
   // Dispara evento customizado para informar outros listeners na mesma aba
   try { window.dispatchEvent(new Event('app-logout')); } catch (e) { /* ignore */ }

@@ -70,11 +70,11 @@ export const solicitarCodigoRecuperacao = async (email) => {
   }
 };
 
-// Fluxo oficial conforme Rotas da API: POST http://34.205.11.57/api/auth/esqueci-senha/solicitar
+// Fluxo oficial conforme Rotas da API: POST http://54.81.240.117/api/auth/esqueci-senha/solicitar
 // Usa URL absoluta para não depender de configuração de proxy/baseURL
 export const solicitarEsqueciSenha = async (email) => {
   try {
-    const response = await api.post('http://34.205.11.57/api/auth/esqueci-senha/solicitar', { 
+    const response = await api.post('http://54.81.240.117/api/auth/esqueci-senha/solicitar', { 
       email: email.trim().toLowerCase() 
     });
     
@@ -97,7 +97,7 @@ export const solicitarEsqueciSenha = async (email) => {
 // Etapa 2: valida o código de 5 dígitos enviado ao e-mail
 export const validarCodigoEsqueciSenha = async (codigo) => {
   try {
-    const response = await api.post('http://34.205.11.57/api/auth/esqueci-senha/validar-codigo', { codigo });
+    const response = await api.post('http://54.81.240.117/api/auth/esqueci-senha/validar-codigo', { codigo });
     return response.data; // Ex.: { codigo: '123456' }
   } catch (error) {
     if (error.response && error.response.data) throw error.response.data;
@@ -106,11 +106,11 @@ export const validarCodigoEsqueciSenha = async (codigo) => {
 };
 
 // Etapa 3: redefine a senha usando o código validado na etapa 2
-// Rota: POST http://34.205.11.57/api/auth/esqueci-senha/redefinir/{codigo}
+// Rota: POST http://54.81.240.117/api/auth/esqueci-senha/redefinir/{codigo}
 // Envia apenas a nova senha no corpo da requisição
 export const redefinirSenhaEsquecida = async (codigo, novaSenha) => {
   try {
-    const url = `http://34.205.11.57/api/auth/esqueci-senha/redefinir/${encodeURIComponent(codigo)}`;
+    const url = `http://54.81.240.117/api/auth/esqueci-senha/redefinir/${encodeURIComponent(codigo)}`;
     const response = await api.post(url, { novaSenha });
     return response.data; // Ex.: { message: 'Senha redefinida com sucesso' }
   } catch (error) {

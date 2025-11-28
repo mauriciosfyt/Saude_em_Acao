@@ -1,7 +1,7 @@
 // Serviço para buscar estatísticas do dashboard (com filtro opcional de ano)
 import api from './api';
 
-const DASHBOARD_STATS_URL = '/dashboard/stats';
+const DASHBOARD_STATS_URL = '/api/dashboard/stats';
 
 /**
  * Busca estatísticas consolidadas do dashboard.
@@ -37,12 +37,41 @@ export async function fetchAlunosPorPlanos() {
   try {
     console.log('[dashboardService] 🚀 Buscando alunos por planos...');
     
-    // Busca todos os alunos
-    const response = await api.get('/aluno');
-    const alunos = response.data.data || response.data || [];
-    
-    console.log('[dashboardService] ✅ Alunos recebidos:', alunos.length);
-    console.log('[dashboardService] 📋 Amostra de aluno recebida:', alunos[0]);
+    // Garante que o header Authorization seja enviado (tenta sessionStorage, depois localStorage)
+    const token = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('token')) || (typeof localStorage !== 'undefined' && localStorage.getItem('authToken')) || null;
+    console.log('[dashboardService] Token presente?:', token ? 'SIM' : 'NÃO');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    // Busca todos os alunos (usar /api para garantir proxy/rewrite em dev)
+    const response = await api.get('/api/aluno', { headers });
+    // Normaliza possíveis formatos: { data: [...] } | { content: [...] } | [...] | { alunos: [...] }
+    const alunosRaw = response.data;
+    let alunos = [];
+
+    if (Array.isArray(alunosRaw)) {
+      alunos = alunosRaw;
+    } else if (Array.isArray(alunosRaw?.data)) {
+      alunos = alunosRaw.data;
+    } else if (Array.isArray(alunosRaw?.content)) {
+      alunos = alunosRaw.content;
+    } else if (Array.isArray(alunosRaw?.alunos)) {
+      alunos = alunosRaw.alunos;
+    } else if (alunosRaw && typeof alunosRaw === 'object') {
+      // Tenta encontrar a primeira propriedade que seja array
+      const firstArray = Object.values(alunosRaw).find(v => Array.isArray(v));
+      if (Array.isArray(firstArray)) alunos = firstArray;
+    }
+
+    // Se ainda estiver vazio e o servidor retornou um objeto único representando um aluno,
+    // tenta encapsular em um array (útil em respostas que retornam um único recurso)
+    if (alunos.length === 0 && alunosRaw && typeof alunosRaw === 'object' && !Array.isArray(alunosRaw)) {
+      if (alunosRaw.id || alunosRaw.nome || alunosRaw.email) {
+        alunos = [alunosRaw];
+      }
+    }
+
+    console.log('[dashboardService] ✅ Alunos recebidos (count):', alunos.length);
+    console.log('[dashboardService] 📋 Amostra de aluno recebida:', alunos[0] || alunosRaw);
     
     // Agrupar alunos por plano
     const alunosPorPlano = {};
@@ -88,8 +117,11 @@ export async function fetchAlunosPorPlanos() {
     return resultado;
   } catch (error) {
     console.error('[dashboardService] ❌ Erro ao buscar alunos por planos:', error?.response?.status, error?.message);
-    if (error.response && error.response.data) {
-      throw error.response.data;
+    if (error.response) {
+      console.error('[dashboardService] response.data:', error.response.data);
+      if (error.response.data) {
+        throw error.response.data;
+      }
     }
     throw error;
   }

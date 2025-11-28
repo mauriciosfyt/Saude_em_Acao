@@ -1,5 +1,5 @@
 // URL base da nossa API
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://34.205.11.57') + '/api';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://54.81.240.117') + '/api';
 const API_URL = `${API_BASE_URL}/treinos`;
 
 // Função para obter o token de autenticação
@@ -98,8 +98,21 @@ export const getAllTreinos = async (filtros = {}) => {
     }
     
     const data = await response.json();
-    console.log('✅ Treinos encontrados:', data);
-    return data;
+    console.log('✅ Treinos encontrados (raw):', data);
+    // Normaliza várias formas de resposta que o backend pode devolver
+    // Exemplos: [] | { content: [] } | { data: [] } | { treinos: [] } | { resultados: [] }
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.content)) return data.content;
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.treinos)) return data.treinos;
+    if (Array.isArray(data?.resultados)) return data.resultados;
+    // Caso não reconheça, tenta extrair um array do primeiro campo que for array
+    for (const key of Object.keys(data || {})) {
+      if (Array.isArray(data[key])) return data[key];
+    }
+    // Fallback: se for objeto único, retorná-lo em um array
+    if (data && typeof data === 'object') return [data];
+    return [];
     
   } catch (error) {
     console.error('❌ Erro em getAllTreinos:', error);
@@ -322,8 +335,18 @@ export const getMeusTreinos = async () => {
     }
 
     const data = await response.json();
-    console.log('✅ Meus treinos encontrados:', data);
-    return data;
+    console.log('✅ Meus treinos encontrados (raw):', data);
+    // Normaliza formatos similares aos de getAllTreinos
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.content)) return data.content;
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.treinos)) return data.treinos;
+    if (Array.isArray(data?.resultados)) return data.resultados;
+    for (const key of Object.keys(data || {})) {
+      if (Array.isArray(data[key])) return data[key];
+    }
+    if (data && typeof data === 'object') return [data];
+    return [];
 
   } catch (error) {
     console.error('❌ Erro em getMeusTreinos:', error);

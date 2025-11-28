@@ -1,6 +1,7 @@
 // URL base da nossa API
-// CORREÇÃO: Usar a mesma base URL do usuarioService
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://34.205.11.57') + '/api';
+// Em desenvolvimento, preferimos usar o proxy do Vite (definido em `vite.config.js`).
+// Se `VITE_API_BASE_URL` estiver definida, usaremos esse valor (produção).
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '') + '/api';
 const API_URL = `${API_BASE_URL}/produtos`;
 
 // Função para obter o token de autenticação
@@ -34,8 +35,17 @@ export const getAllProdutos = async (nome = null) => {
     }
     
     const data = await response.json();
-    console.log('✅ Produtos recebidos:', data);
-    return data;
+    console.log('✅ Produtos recebidos (raw):', data);
+
+    // Normaliza formatos de resposta comuns: array direto, { data: [...] }, { content: [...] }, { produtos: [...] }
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.data)) return data.data;
+    if (Array.isArray(data.content)) return data.content;
+    if (Array.isArray(data.produtos)) return data.produtos;
+
+    // Caso não seja um array conhecido, retorna um array vazio e loga para debug
+    console.warn('produtoService.getAllProdutos: resposta inesperada, retornando array vazio.');
+    return [];
 
   } catch (error) {
     console.error("❌ Erro em getAllProdutos:", error);
