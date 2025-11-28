@@ -22,51 +22,65 @@ const getAuthToken = () => {
  * @param {FormData} [formData] - O FormData existente (para recursão).
  * @param {string} [parentKey] - A chave pai (para recursão).
  */
+// Helper: normaliza dia (remove acentos e coloca em MAIÚSCULAS)
+const normalizeDia = (dia) => {
+  if (!dia && dia !== 0) return dia;
+  return String(dia)
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '') // remove acentos
+    .toUpperCase()
+    .replace(/\s+/g, '');
+};
+
 const objectToFormData = (obj, formData = new FormData(), parentKey = '') => {
-  if (obj === null || obj === undefined) {
-    // Se o objeto for nulo ou indefinido, não anexe nada
-    // ou anexe um valor vazio se a chave pai existir
-    if (parentKey) {
-      formData.append(parentKey, '');
-    }
+  if (obj === null || obj === undefined) return formData;
+
+  // Arquivo direto
+  if (obj instanceof File) {
+    if (parentKey) formData.append(parentKey, obj, obj.name);
     return formData;
   }
 
-  // Se o item for um Array
+  // Arrays => parentKey[index] e continuar recursão
   if (Array.isArray(obj)) {
     obj.forEach((item, index) => {
-      // Chave para o item do array: 'parentKey[index]'
-      const itemKey = `${parentKey}[${index}]`;
-      // Chama recursivamente para o item
+      const itemKey = parentKey ? `${parentKey}[${index}]` : `${index}`;
       objectToFormData(item, formData, itemKey);
     });
     return formData;
   }
 
-  // Se o item for um Objeto (mas não um File e não um Array)
-  if (typeof obj === 'object' && !(obj instanceof File)) {
-    Object.keys(obj).forEach(key => {
+  // Objetos (mapas/objetos aninhados)
+  if (typeof obj === 'object') {
+    Object.keys(obj).forEach((key) => {
       const value = obj[key];
-      
-      // *** ESTA É A MUDANÇA PRINCIPAL ***
-      // Se a chave pai existir, use NOTAÇÃO DE PONTO para a nova chave
-      // Se a chave pai for um array (ex: 'exercicios[0]'), o resultado é 'exercicios[0].nome'
-      // Se for o primeiro nível, o resultado é apenas 'nome'
-      const newKey = parentKey ? `${parentKey}.${key}` : key;
+      let newKey;
 
-      // Chama recursivamente para o valor
+      if (parentKey) {
+        // Caso especial: o mapa de dias deve usar bracket com CHAVE do dia NORMALIZADA
+        // ex: exerciciosPorDia[SEGUNDA] -> exerciciosPorDia[SEGUNDA]
+        if (parentKey === 'exerciciosPorDia') {
+          newKey = `${parentKey}[${normalizeDia(key)}]`;
+        } else {
+          // Se já temos um índice (ex: exerciciosPorDia[SEGUNDA][0]) anexamos propriedade com ponto
+          if (/\[\d+\]$/.test(parentKey) || /\]\[\d+\]$/.test(parentKey) || /\]\[/.test(parentKey)) {
+            newKey = `${parentKey}.${key}`;
+          } else {
+            newKey = `${parentKey}.${key}`;
+          }
+        }
+      } else {
+        newKey = key;
+      }
+
       objectToFormData(value, formData, newKey);
     });
     return formData;
   }
-  
-  // Se for um valor primitivo (string, number, boolean) ou um File
+
+  // Valor primitivo
   if (parentKey) {
-    if (obj instanceof File) {
-      formData.append(parentKey, obj, obj.name);
-    } else {
-      formData.append(parentKey, obj);
-    }
+    formData.append(parentKey, String(obj));
   }
 
   return formData;
@@ -98,21 +112,8 @@ export const getAllTreinos = async (filtros = {}) => {
     }
     
     const data = await response.json();
-    console.log('✅ Treinos encontrados (raw):', data);
-    // Normaliza várias formas de resposta que o backend pode devolver
-    // Exemplos: [] | { content: [] } | { data: [] } | { treinos: [] } | { resultados: [] }
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data?.content)) return data.content;
-    if (Array.isArray(data?.data)) return data.data;
-    if (Array.isArray(data?.treinos)) return data.treinos;
-    if (Array.isArray(data?.resultados)) return data.resultados;
-    // Caso não reconheça, tenta extrair um array do primeiro campo que for array
-    for (const key of Object.keys(data || {})) {
-      if (Array.isArray(data[key])) return data[key];
-    }
-    // Fallback: se for objeto único, retorná-lo em um array
-    if (data && typeof data === 'object') return [data];
-    return [];
+    console.log('✅ Treinos encontrados:', data);
+    return data;
     
   } catch (error) {
     console.error('❌ Erro em getAllTreinos:', error);
@@ -158,23 +159,76 @@ export const createTreino = async (treinoData) => {
       throw new Error('Não autorizado. Faça login novamente.');
     }
 
-    console.log('🚀 Enviando treino (FormData):', treinoData);
-    
-    // A função corrigida será chamada aqui
-    const formData = objectToFormData(treinoData);
-    
-    // Debug: Verifique as chaves geradas no console
-    // for (let [key, value] of formData.entries()) {
-    //   console.log(key, value);
-    // }
+    // Constrói FormData
+    const formData = treinoData instanceof FormData ? treinoData : objectToFormData(treinoData);
 
+    // DEBUG: logar todas as entradas para inspeção (antes do envio)
+    console.debug('--- FormData original ---');
+    for (const pair of formData.entries()) {
+      console.debug('FormData', pair[0], pair[1]);
+    }
+
+    // Filtra entradas indesejadas que podem causar binding errado no Spring
+    const filtered = new FormData();
+    const plainMapKeyRegex = /^exerciciosPorDia\[[^\]]+\]$/;
+
+    // remove entradas com chave "null" (caso existam) e normalize keys de dias
+    for (const pair of formData.entries()) {
+      const key = pair[0];
+      const value = pair[1];
+
+      // pule qualquer entrada com chave "null"
+      if (key === 'null') continue;
+
+      // Se for chave de dia sem índice (ex: exerciciosPorDia[QUARTA]) e existir
+      // detalhes indexados para esse dia, pule a chave plana.
+      if (plainMapKeyRegex.test(key)) {
+        // vamos verificar se há alguma entrada detalhada para esse dia; se houver, pule-a
+        const dayName = key.match(/^exerciciosPorDia\[(.+)\]$/)?.[1];
+        const normalizedDay = dayName ? normalizeDia(dayName) : dayName;
+        const hasDetail = Array.from(formData.keys()).some(k => k.startsWith(`exerciciosPorDia[${normalizedDay}][`));
+        if (hasDetail) continue;
+        // se não houver detalhe e o value for Blob/JSON vazio, mantenha — caso contrário pule
+        if (value instanceof File) continue; // não anexar file direto nesse key
+        // se value for string vazia ou "[]" mantemos como blob para evitar binding incorreto
+        if (String(value).trim() === '' || String(value).trim() === '[]') {
+          filtered.append(key, new Blob([JSON.stringify([])], { type: 'application/json' }));
+          continue;
+        }
+        // caso geral: pule
+        continue;
+      }
+
+      // Normal append (tratando Files)
+      if (value instanceof File) filtered.append(key, value, value.name);
+      else filtered.append(key, value);
+    }
+
+    // Garante adicionar dias vazios como JSON blob (usa chaves normalizadas)
+    if (treinoData && treinoData.exerciciosPorDia && typeof treinoData.exerciciosPorDia === 'object') {
+      Object.keys(treinoData.exerciciosPorDia).forEach((diaKey) => {
+        const diaUpper = normalizeDia(diaKey);
+        const arr = treinoData.exerciciosPorDia[diaKey] || [];
+        if (Array.isArray(arr) && arr.length === 0) {
+          // só adiciona se ainda não existir entrada detalhada
+          const plainKey = `exerciciosPorDia[${diaUpper}]`;
+          const exists = Array.from(filtered.keys()).some(k => k === plainKey || k.startsWith(`exerciciosPorDia[${diaUpper}][`));
+          if (!exists) filtered.append(plainKey, new Blob([JSON.stringify([])], { type: 'application/json' }));
+        }
+      });
+    }
+    
+    console.debug('--- FormData final (enviado) ---');
+    for (const pair of filtered.entries()) {
+      console.debug('Final FormData', pair[0], pair[1]);
+    }
+    
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
-        // 'Content-Type' não é definido, o browser cuida disso para multipart
       },
-      body: formData,
+      body: filtered,
     });
 
     if (!response.ok) {
@@ -183,9 +237,7 @@ export const createTreino = async (treinoData) => {
     }
 
     const data = await response.json();
-    console.log('✅ Treino criado com sucesso:', data);
     return data;
-
   } catch (error) {
     console.error('❌ Erro em createTreino:', error);
     throw error;
@@ -205,16 +257,47 @@ export const updateTreino = async (id, treinoData) => {
     }
 
     console.log(`🚀 Atualizando treino ${id} (FormData):`, treinoData);
-    
-    // A função corrigida será chamada aqui
-    const formData = objectToFormData(treinoData);
+
+    // Constrói FormData da mesma forma que createTreino (inclui tratamento para dias vazios)
+    let formData = treinoData instanceof FormData ? treinoData : objectToFormData(treinoData);
+
+    // Filtra entradas indesejadas (remove chaves planas exerciciosPorDia[SEGUNDA] quando há índices)
+    const filtered = new FormData();
+    const plainMapKeyRegex = /^exerciciosPorDia\[[^\]]+\]$/;
+
+    for (const pair of formData.entries()) {
+      const key = pair[0];
+      const value = pair[1];
+      if (plainMapKeyRegex.test(key)) {
+        // pule chaves planas — vamos adicionar blobs vazios explicitamente abaixo quando necessário
+        continue;
+      }
+      if (value instanceof File) filtered.append(key, value, value.name);
+      else filtered.append(key, value);
+    }
+
+    // Anexa blobs JSON vazios para dias definidos no objeto mas sem exercícios (evita binding para String)
+    if (treinoData && treinoData.exerciciosPorDia && typeof treinoData.exerciciosPorDia === 'object') {
+      Object.keys(treinoData.exerciciosPorDia).forEach((diaKey) => {
+        const diaUpper = String(diaKey).toUpperCase();
+        const arr = treinoData.exerciciosPorDia[diaKey] || [];
+        if (Array.isArray(arr) && arr.length === 0) {
+          filtered.append(`exerciciosPorDia[${diaUpper}]`, new Blob([JSON.stringify([])], { type: 'application/json' }));
+        }
+      });
+    }
+
+    // DEBUG opcional
+    for (const pair of filtered.entries()) {
+      console.debug('Update FormData', pair[0], pair[1]);
+    }
 
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
       },
-      body: formData,
+      body: filtered,
     });
 
     if (!response.ok) {
@@ -335,18 +418,8 @@ export const getMeusTreinos = async () => {
     }
 
     const data = await response.json();
-    console.log('✅ Meus treinos encontrados (raw):', data);
-    // Normaliza formatos similares aos de getAllTreinos
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data?.content)) return data.content;
-    if (Array.isArray(data?.data)) return data.data;
-    if (Array.isArray(data?.treinos)) return data.treinos;
-    if (Array.isArray(data?.resultados)) return data.resultados;
-    for (const key of Object.keys(data || {})) {
-      if (Array.isArray(data[key])) return data[key];
-    }
-    if (data && typeof data === 'object') return [data];
-    return [];
+    console.log('✅ Meus treinos encontrados:', data);
+    return data;
 
   } catch (error) {
     console.error('❌ Erro em getMeusTreinos:', error);
