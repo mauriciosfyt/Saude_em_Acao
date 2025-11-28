@@ -6,61 +6,59 @@ import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import "./PerfilAdm.css";
 import performLogout from "../../components/LogoutButton/LogoutButton";
 import { getMeuPerfil, API_URL } from "../../services/usuarioService";
+import { getAllProdutos } from "../../services/produtoService";
+import { fetchReservas } from "../../services/reservasService";
 import { fixImageUrl } from "../../utils/image";
 
 const PerfilAdm = () => {
   const navigate = useNavigate();
-  const [adminData, setAdminData] = useState({
-    nome: "",
-    email: "",
-    perfil: "",
-  });
-  // Estado para estatísticas exibidas nos cards (produtos, vendas, etc.)
-  const [stats, setStats] = useState({
-    produtosReservados: 0,
-    produtosAtivos: 0,
-    totalVendido: 0,
-    pagamentoPendente: 0,
+  
+  // --- 1. CARREGAMENTO INSTANTÂNEO DE DADOS DO USUÁRIO ---
+  // Inicializa o estado lendo direto do sessionStorage (se existir), sem esperar o useEffect
+  const [adminData, setAdminData] = useState(() => {
+    return {
+      nome: sessionStorage.getItem('userName') || "",
+      email: sessionStorage.getItem('userEmail') || "",
+      perfil: sessionStorage.getItem('userPerfil') || "",
+    };
   });
 
-  // Estado para URL da imagem do perfil (usa imagem da API ou fallback local)
+  // --- 2. CARREGAMENTO INSTANTÂNEO DOS CARDS (STATS) ---
+  // Essa função roda antes da tela aparecer. Se tiver cache, mostra na hora.
+  const getInitialStats = () => {
+    try {
+      const cached = sessionStorage.getItem('dashboard_stats_cache');
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (e) {
+      console.error("Erro ao ler cache:", e);
+    }
+    // Estado inicial (Loading) se for o primeiro acesso absoluto
+    return {
+      produtosReservados: 0,
+      produtosAtivos: 0,
+      totalVendido: 0,
+      pagamentoPendente: 0,
+    };
+  };
+
+  const [stats, setStats] = useState(getInitialStats);
   const [profileImage, setProfileImage] = useState(perfilPhoto);
 
-  // Função para buscar o token salvo e decodificá-lo
   const getDecodedToken = () => {
     try {
-      // Procura o token no localStorage ou sessionStorage
-      let token =
-        localStorage.getItem("token") ||
-        sessionStorage.getItem("token") ||
-        "";
-
-      if (!token) {
-        // procura tokens salvos incorretamente (tipo tokeneyJ...)
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          const value = localStorage.getItem(key);
-          if (value && value.includes("eyJ")) {
-            token = value;
-            break;
-          }
-        }
-      }
-
+      let token = localStorage.getItem("token") || sessionStorage.getItem("token") || "";
       if (!token) return null;
 
-      // Corrige tokens com prefixos tipo 'tokeneyJ...' ou 'Bearer eyJ...'
       token = token.replace(/^token/i, "").trim();
       if (token.toLowerCase().startsWith("bearer ")) {
         token = token.slice(7);
       }
 
-      const payload = JSON.parse(
-        atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
-      );
+      const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
       return payload;
     } catch (err) {
-      console.error("Erro ao decodificar token:", err);
       return null;
     }
   };
@@ -68,104 +66,123 @@ const PerfilAdm = () => {
   useEffect(() => {
     const payload = getDecodedToken();
     if (!payload) {
-      navigate("/"); // se não houver token, redireciona para login ou home
+      navigate("/"); 
       return;
     }
 
-    // Primeiro tenta carregar dados rápidos do sessionStorage
-    const cachedName = sessionStorage.getItem('userName');
-    const cachedEmail = sessionStorage.getItem('userEmail');
-    const cachedPerfil = sessionStorage.getItem('userPerfil');
-
-    if (cachedName || cachedEmail) {
-      setAdminData({
-        nome: cachedName || "",
-        email: cachedEmail || "",
-        perfil: cachedPerfil || "ADMIN",
-      });
-      if (cachedPerfil !== "ADMIN") {
-        navigate("/nao-autorizado");
-        return;
-      }
+    // Se o perfil não veio do cache inicial, redireciona se não for admin
+    if (adminData.perfil && adminData.perfil !== "ADMIN") {
+      navigate("/nao-autorizado");
+      return;
     }
 
-    // Busca o perfil completo do usuário logado na API e popula dados/estatísticas
-    const fetchProfile = async () => {
+    const loadDashboardData = async () => {
       try {
+        // --- A. ATUALIZAÇÃO DO PERFIL EM BACKGROUND ---
         const perfilCompleto = await getMeuPerfil();
+        if (perfilCompleto) {
+            const nome = perfilCompleto.nome || perfilCompleto.name || adminData.nome || "Administrador";
+            const email = perfilCompleto.email || perfilCompleto.usuario?.email || adminData.email;
+            const perfil = perfilCompleto.perfil || perfilCompleto.role || "ADMIN";
 
-        if (!perfilCompleto) {
-          // Mantém dados anteriores se nada for retornado
-          return;
+            // Atualiza estado e Cache da Sessão
+            setAdminData({ nome, email, perfil });
+            sessionStorage.setItem('userName', nome);
+            sessionStorage.setItem('userEmail', email);
+            sessionStorage.setItem('userPerfil', perfil);
+
+            // Imagem
+            const possibleImage = perfilCompleto.foto || perfilCompleto.fotoUrl || perfilCompleto.imagem || perfilCompleto.imagemUrl || null;
+            if (possibleImage) {
+                const baseServer = API_URL.replace(/\/api$/, '');
+                const isAbsolute = /^https?:\/\//i.test(possibleImage);
+                const fotoUrl = isAbsolute
+                ? possibleImage
+                : (possibleImage.startsWith('/') ? `${baseServer}${possibleImage}` : `${baseServer}/${possibleImage}`);
+                setProfileImage(fixImageUrl(fotoUrl));
+            }
         }
 
+        // --- B. ATUALIZAÇÃO DOS CARDS (STATS) EM BACKGROUND ---
+        const [produtosData, reservasData] = await Promise.all([
+            getAllProdutos(),
+            fetchReservas()
+        ]);
 
-        // Mapeia campos comuns retornados pela API para o estado local
-        const nome = perfilCompleto.nome || perfilCompleto.name || perfilCompleto.fullName || perfilCompleto.usuario?.nome || perfilCompleto.user?.name || adminData.nome || "Administrador";
-        const email = perfilCompleto.email || perfilCompleto.usuario?.email || perfilCompleto.user?.email || adminData.email || "sem-email@dominio.com";
-        const perfil = perfilCompleto.perfil || perfilCompleto.role || perfilCompleto.userRole || perfilCompleto.perfilUsuario || adminData.perfil || "ADMIN";
-
-        setAdminData({ nome, email, perfil });
-
-        // Extrai a URL da imagem do perfil a partir de várias chaves possíveis
-        const possibleImage =
-          perfilCompleto.foto ||
-          perfilCompleto.fotoUrl ||
-          perfilCompleto.imagem ||
-          perfilCompleto.imagemUrl ||
-          perfilCompleto.avatar ||
-          perfilCompleto.avatarUrl ||
-          perfilCompleto.profilePicture ||
-          perfilCompleto.photo ||
-          perfilCompleto.usuario?.foto ||
-          perfilCompleto.user?.foto ||
-          perfilCompleto.user?.avatar ||
-          null;
-
-        if (possibleImage) {
-          try {
-            // Se a API retornar caminho relativo (ex: /uploads/...), prefixamos com a base do servidor
-            const baseServer = API_URL.replace(/\/api$/, '');
-            const isAbsolute = /^https?:\/\//i.test(possibleImage);
-            const fotoUrl = isAbsolute
-              ? possibleImage
-              : (possibleImage.startsWith('/') ? `${baseServer}${possibleImage}` : `${baseServer}/${possibleImage}`);
-
-            setProfileImage(fixImageUrl(fotoUrl));
-          } catch (e) {
-            console.warn('Erro ao normalizar URL da imagem:', e);
-            setProfileImage(perfilPhoto);
-          }
-        } else {
-          // Mantém fallback local
-          setProfileImage(perfilPhoto);
+        let listaReservas = [];
+        if (Array.isArray(reservasData)) {
+            listaReservas = reservasData;
+        } else if (reservasData && Array.isArray(reservasData.content)) {
+            listaReservas = reservasData.content;
         }
 
-        // Se houver campos de estatísticas no retorno, popula-los
-        // Usa nomes tolerantes (stats, resumo, dashboard, contabilidades)
-        const stats = perfilCompleto.stats || perfilCompleto.resumo || perfilCompleto.dashboard || perfilCompleto.contagem || {};
+        const listaProdutos = Array.isArray(produtosData) ? produtosData : (produtosData.content || []);
 
-        setStats({
-          produtosReservados: stats.produtosReservados ?? stats.reservados ?? stats.produtos_reservados ?? 0,
-          produtosAtivos: stats.produtosAtivos ?? stats.ativos ?? stats.produtos_ativos ?? 0,
-          totalVendido: stats.totalVendido ?? stats.vendido ?? stats.total_vendido ?? 0,
-          pagamentoPendente: stats.pagamentoPendente ?? stats.pendentes ?? stats.pagamentos_pendentes ?? 0,
-        });
+        // --- CÁLCULOS ---
+        const parseValor = (val) => {
+            if (!val) return 0;
+            if (typeof val === 'number') return val;
+            const clean = val.toString().replace(/[R$\s.]/g, '').replace(',', '.');
+            return parseFloat(clean) || 0;
+        };
 
-        if (perfil !== "ADMIN") {
-          navigate("/nao-autorizado");
-          return;
-        }
+        // 1. Produtos Retirados (Status Finalizados)
+        const countRetirados = listaReservas.filter(r => {
+            const s = r.status ? r.status.toUpperCase() : '';
+            return ['RETIRADO', 'CONCLUIDA', 'CONCLUÍDA', 'CONCLUIDO'].includes(s);
+        }).length;
+
+        // 2. Produtos Reservados (Histórico: Aprovado, Cancelado, Retirado)
+        const countReservados = listaReservas.filter(r => {
+            const s = r.status ? r.status.toUpperCase() : '';
+            return [
+                'APROVADA', 'APROVADO',
+                'CANCELADA', 'CANCELADO',
+                'RETIRADO', 
+                'CONCLUIDA', 'CONCLUÍDA', 'CONCLUIDO'
+            ].includes(s);
+        }).length;
+
+        // 3. TOTAL VENDIDO (Preço * Quantidade dos Concluídos)
+        const somaVendas = listaReservas
+            .filter(r => {
+                const s = r.status ? r.status.toUpperCase() : '';
+                return ['RETIRADO', 'CONCLUIDA', 'CONCLUÍDA', 'CONCLUIDO'].includes(s);
+            })
+            .reduce((acc, curr) => {
+                let totalDaReserva = parseValor(curr.valorTotal || curr.total);
+
+                if (!totalDaReserva) {
+                    const precoUnitario = parseValor(curr.preco || curr.produto?.preco || curr.valor || 0);
+                    const quantidade = parseValor(curr.quantidade || curr.qtd || curr.amount || 1);
+                    totalDaReserva = precoUnitario * quantidade;
+                }
+                
+                return acc + totalDaReserva;
+            }, 0);
+
+        // 4. Produtos Ativos
+        const countAtivos = listaProdutos.length;
+
+        const newStats = {
+            produtosReservados: countRetirados, 
+            produtosAtivos: countAtivos,        
+            totalVendido: somaVendas,           
+            pagamentoPendente: countReservados  
+        };
+
+        // Atualiza a tela e SALVA NA SESSÃO para o próximo F5 ser instantâneo
+        setStats(newStats);
+        sessionStorage.setItem('dashboard_stats_cache', JSON.stringify(newStats));
+
       } catch (err) {
-        console.error('Erro ao buscar perfil completo:', err);
-        // Em caso de erro, mantemos os dados existentes (token/cached) e não bloqueamos a rota
+        console.error('Erro ao carregar dashboard:', err);
       }
     };
 
-    fetchProfile();
-  }, [navigate]);
+    loadDashboardData();
+  }, [navigate, adminData.nome]); // Atualiza se mudar usuário
 
- 
   return (
     <div>
       <HeaderUser />
@@ -179,8 +196,9 @@ const PerfilAdm = () => {
               className="perfil-foto"
               onError={() => setProfileImage(perfilPhoto)}
             />
-            <h2>OLÁ, {adminData.nome.toUpperCase()}</h2>
-            <p className="perfil-status">Ativo: {adminData.perfil}</p>
+            {/* Dados lidos instantaneamente do adminData */}
+            <h2>OLÁ, {adminData.nome ? adminData.nome.toUpperCase() : "..."}</h2>
+            <p className="perfil-status">Ativo: {adminData.perfil || "..."}</p>
           </div>
 
           <div className="perfil-dados">
@@ -188,12 +206,12 @@ const PerfilAdm = () => {
             <div className="card-produtos">
               <p className="produtos-reservados-label">Produtos Retirados:</p>
               <p className="produtos-reservados-valor">
-                <strong>{stats.produtosReservados ?? 0}</strong>
+                <strong>{stats.produtosReservados}</strong>
               </p>
               <hr className="divisor-produtos" />
               <p className="produtos-ativos-label">Produtos Ativos:</p>
               <p className="produtos-ativos-valor">
-                <strong>{stats.produtosAtivos ?? 0}</strong>
+                <strong>{stats.produtosAtivos}</strong>
               </p>
             </div>
 
@@ -210,7 +228,7 @@ const PerfilAdm = () => {
               <hr className="divisor-vendas" />
               <p className="pagamento-pendente-label">Produtos Reservados:</p>
               <p className="pagamento-pendente-valor">
-                <strong>{stats.pagamentoPendente ?? 0}</strong>
+                <strong>{stats.pagamentoPendente}</strong>
               </p>
             </div>
           </div>
