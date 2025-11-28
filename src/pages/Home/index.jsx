@@ -2,6 +2,7 @@
 import "./styles.css";
 import banner_home from "../../assets/banners/banner_home.svg";
 import img_abaixo_banner from "../../assets/img_home.jpeg";
+import QRcode from "../../assets/QRcode.jpg";
 import modalidade1 from "../../assets/banners/thayfit.jpg";
 import modalidade2 from "../../assets/banners/pilates.jpg";
 import modalidade3 from "../../assets/banners/funcional.jpg";
@@ -45,6 +46,9 @@ function Home() {
       }
     }
   }, [location]);
+
+  // Link que será aberto ao clicar no QR code. Altere para a URL desejada.
+  const qrLink = "https://seusite.com";
 
   return (
     <div className="home-container">
@@ -168,7 +172,9 @@ function Home() {
                 </li>
               </ul>
               <div className="qr-section">
-                <img src={null} alt="QR Code" />
+                <a href={"https://drive.google.com/drive/folders/14QIwecSJWc-K1gIv1NrkElDX8_nzp-nv?usp=drive_link"} target="_blank" rel="noopener noreferrer">
+                  <img src={QRcode} alt="QR Code" style={{ cursor: "pointer" }} />
+                </a>
               </div>
             </div>
 

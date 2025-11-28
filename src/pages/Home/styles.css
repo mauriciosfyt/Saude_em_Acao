@@ -464,9 +464,10 @@
 }
 
 .qr-section img {
-    width: 120px;
+    width: 160px;
     height: auto;
     margin-bottom: 8px;
+    border-radius: 15px;
 }
 
 .qr-section p {
