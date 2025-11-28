@@ -112,14 +112,15 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/aluno/{alunoId}/treinos/{treinoId}")
+    @PatchMapping("/aluno/{alunoId}/treino")
     @PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR')")
     public ResponseEntity<Void> atribuirTreino(
             @PathVariable String alunoId,
-            @PathVariable String treinoId,
+            @Valid @RequestBody AtribuirTreinoDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
-        usuarioService.atribuirTreinoParaAluno(alunoId, treinoId, userDetails);
-        return ResponseEntity.ok().build();
+
+        usuarioService.atribuirTreinoParaAluno(alunoId, dto.getTreinoId(), userDetails);
+        return ResponseEntity.noContent().build();
     }
 
     // == ADMINS ==
@@ -174,9 +175,4 @@ public class UsuarioController {
         return ResponseEntity.ok(detalhesAtualizados);
     }
 
-    @DeleteMapping("/me")
-    public ResponseEntity<Void> excluirMinhaConta(@AuthenticationPrincipal UserDetails userDetails) {
-        usuarioService.excluirPorEmail(userDetails.getUsername());
-        return ResponseEntity.noContent().build();
-    }
 }
