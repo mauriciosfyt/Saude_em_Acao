@@ -671,8 +671,9 @@ export default function AdicionarTreino() {
         if (imagemInfo && imagemInfo.file) obj.img = imagemInfo.file;
         return obj;
       });
-      // Sempre incluir a chave do dia — envia array vazio quando não houver exercícios.
-      payload[dia] = list;
+      // Incluir a chave do dia apenas se houver exercícios — evita enviar arrays vazios que
+      // causam problemas de binding no backend.
+      if (list && list.length > 0) payload[dia] = list;
     });
     return payload;
   };
