@@ -89,146 +89,98 @@ const objectToFormData = (obj, formData = new FormData(), parentKey = '') => {
 // *** FIM DA CORREÇÃO ***
 // ====================================================================
 
+// Lista padrão dos dias da semana (normalizada) — usada para garantir chaves mesmo quando ausentes
+const WEEK_DAYS = ['SEGUNDA','TERCA','QUARTA','QUINTA','SEXTA','SABADO','DOMINGO'];
 
-/**
- * Lista todos os treinos com filtros opcionais.
- * Rota: GET /api/treinos (Pública)
- * @param {Object} filtros - Filtros opcionais: { nome, tipo, responsavelId }
- */
-export const getAllTreinos = async (filtros = {}) => {
+// Helper para debug: retorna um array legível com chave e descrição do valor (file/name ou string)
+const debugFormDataEntries = (fd) => {
   try {
-    console.log('🔍 Buscando treinos...', filtros);
-    
-    const params = new URLSearchParams();
-    if (filtros.nome) params.append('nome', filtros.nome);
-    if (filtros.tipo) params.append('tipo', filtros.tipo);
-    if (filtros.responsavelId) params.append('responsavelId', filtros.responsavelId);
-    
-    const url = params.toString() ? `${API_URL}?${params.toString()}` : API_URL;
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`Erro HTTP ${response.status}: Falha ao buscar treinos`);
-    }
-    
-    const data = await response.json();
-    console.log('✅ Treinos encontrados:', data);
-    return data;
-    
-  } catch (error) {
-    console.error('❌ Erro em getAllTreinos:', error);
-    throw error;
-  }
-};
-
-/**
- * Busca um treino específico pelo ID.
- * Rota: GET /api/treinos/{id} (Pública)
- */
-export const getTreinoById = async (id) => {
-  try {
-    console.log(`🔍 Buscando treino por ID: ${id}`);
-    const response = await fetch(`${API_URL}/${id}`);
-    
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('Treino não encontrado');
+    return Array.from(fd.entries()).map(([k, v]) => {
+      if (v instanceof File) return [k, `(File) ${v.name}`];
+      try {
+        const s = String(v);
+        // corta strings longas
+        return [k, s.length > 200 ? s.slice(0, 200) + '…' : s];
+      } catch (e) {
+        return [k, String(v)];
       }
-      throw new Error(`Erro HTTP ${response.status}: Falha ao buscar treino`);
-    }
-    
-    const data = await response.json();
-    console.log('✅ Treino encontrado:', data);
-    return data;
-    
-  } catch (error) {
-    console.error(`❌ Erro em getTreinoById(${id}):`, error);
-    throw error;
+    });
+  } catch (e) {
+    return [['<error>', String(e)]];
   }
 };
 
-/**
- * Cria um novo treino.
- * Rota: POST /api/treinos (Admin/Professor)
- * Envia como 'multipart/form-data' por causa dos exercícios.
- */
+// Constroi FormData especificamente para o formato esperado pelo backend Spring.
+// Gera chaves no formato: exerciciosPorDia[SEGUNDA][0].nome, exerciciosPorDia[SEGUNDA][0].repeticoes, ...
+const buildTreinoFormData = (treinoData) => {
+  const fd = new FormData();
+  if (!treinoData || typeof treinoData !== 'object') return fd;
+
+  // Append campos simples (exceto exerciciosPorDia)
+  Object.keys(treinoData).forEach((key) => {
+    if (key === 'exerciciosPorDia') return;
+    const val = treinoData[key];
+    if (val === undefined || val === null) return;
+    if (val instanceof File) fd.append(key, val, val.name);
+    else if (typeof val === 'object') fd.append(key, JSON.stringify(val));
+    else fd.append(key, String(val));
+  });
+
+  // Normaliza mapa de dias: { 'SEGUNDA': [...], 'TERCA': [...] }
+  const rawMap = treinoData.exerciciosPorDia || {};
+  const normMap = {};
+  Object.keys(rawMap).forEach((k) => {
+    normMap[normalizeDia(k)] = rawMap[k];
+  });
+
+  // Helper recursivo para anexar objetos/arrays usando notação 'base[index].prop'
+  const appendRecursive = (baseKey, value) => {
+    if (value === null || value === undefined) return;
+    if (value instanceof File) {
+      fd.append(baseKey, value, value.name);
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item, idx) => appendRecursive(`${baseKey}[${idx}]`, item));
+      return;
+    }
+    if (typeof value === 'object') {
+      Object.keys(value).forEach((prop) => {
+        const v = value[prop];
+        appendRecursive(`${baseKey}.${prop}`, v);
+      });
+      return;
+    }
+    // primitivo
+    fd.append(baseKey, String(value));
+  };
+
+  // Para cada dia da semana, anexa os exercícios detalhados ou adiciona lista vazia
+  WEEK_DAYS.forEach((dia) => {
+    const arr = Array.isArray(normMap[dia]) ? normMap[dia] : [];
+    if (arr.length === 0) {
+      // se não houver exercícios para o dia, não adiciona chave — evita binding incorreto no backend
+      return;
+    }
+    arr.forEach((ex, idx) => appendRecursive(`exerciciosPorDia[${dia}][${idx}]`, ex));
+  });
+
+  return fd;
+};
 export const createTreino = async (treinoData) => {
   try {
     const token = getAuthToken();
-    if (!token) {
-      throw new Error('Não autorizado. Faça login novamente.');
-    }
+    if (!token) throw new Error('Não autorizado. Faça login novamente.');
 
-    // Constrói FormData
-    const formData = treinoData instanceof FormData ? treinoData : objectToFormData(treinoData);
+    const formData = treinoData instanceof FormData ? treinoData : buildTreinoFormData(treinoData);
 
-    // DEBUG: logar todas as entradas para inspeção (antes do envio)
-    console.debug('--- FormData original ---');
-    for (const pair of formData.entries()) {
-      console.debug('FormData', pair[0], pair[1]);
-    }
+    console.debug('--- FormData (enviado) ---');
+    console.debug(debugFormDataEntries(formData));
 
-    // Filtra entradas indesejadas que podem causar binding errado no Spring
-    const filtered = new FormData();
-    const plainMapKeyRegex = /^exerciciosPorDia\[[^\]]+\]$/;
-
-    // remove entradas com chave "null" (caso existam) e normalize keys de dias
-    for (const pair of formData.entries()) {
-      const key = pair[0];
-      const value = pair[1];
-
-      // pule qualquer entrada com chave "null"
-      if (key === 'null') continue;
-
-      // Se for chave de dia sem índice (ex: exerciciosPorDia[QUARTA]) e existir
-      // detalhes indexados para esse dia, pule a chave plana.
-      if (plainMapKeyRegex.test(key)) {
-        // vamos verificar se há alguma entrada detalhada para esse dia; se houver, pule-a
-        const dayName = key.match(/^exerciciosPorDia\[(.+)\]$/)?.[1];
-        const normalizedDay = dayName ? normalizeDia(dayName) : dayName;
-        const hasDetail = Array.from(formData.keys()).some(k => k.startsWith(`exerciciosPorDia[${normalizedDay}][`));
-        if (hasDetail) continue;
-        // se não houver detalhe e o value for Blob/JSON vazio, mantenha — caso contrário pule
-        if (value instanceof File) continue; // não anexar file direto nesse key
-        // se value for string vazia ou "[]" mantemos como blob para evitar binding incorreto
-        if (String(value).trim() === '' || String(value).trim() === '[]') {
-          filtered.append(key, new Blob([JSON.stringify([])], { type: 'application/json' }));
-          continue;
-        }
-        // caso geral: pule
-        continue;
-      }
-
-      // Normal append (tratando Files)
-      if (value instanceof File) filtered.append(key, value, value.name);
-      else filtered.append(key, value);
-    }
-
-    // Garante adicionar dias vazios como JSON blob (usa chaves normalizadas)
-    if (treinoData && treinoData.exerciciosPorDia && typeof treinoData.exerciciosPorDia === 'object') {
-      Object.keys(treinoData.exerciciosPorDia).forEach((diaKey) => {
-        const diaUpper = normalizeDia(diaKey);
-        const arr = treinoData.exerciciosPorDia[diaKey] || [];
-        if (Array.isArray(arr) && arr.length === 0) {
-          // só adiciona se ainda não existir entrada detalhada
-          const plainKey = `exerciciosPorDia[${diaUpper}]`;
-          const exists = Array.from(filtered.keys()).some(k => k === plainKey || k.startsWith(`exerciciosPorDia[${diaUpper}][`));
-          if (!exists) filtered.append(plainKey, new Blob([JSON.stringify([])], { type: 'application/json' }));
-        }
-      });
-    }
-    
-    console.debug('--- FormData final (enviado) ---');
-    for (const pair of filtered.entries()) {
-      console.debug('Final FormData', pair[0], pair[1]);
-    }
-    
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: filtered,
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData,
     });
 
     if (!response.ok) {
@@ -236,8 +188,7 @@ export const createTreino = async (treinoData) => {
       throw new Error(`Falha ao criar treino: ${errorText || response.status}`);
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error('❌ Erro em createTreino:', error);
     throw error;
@@ -257,47 +208,17 @@ export const updateTreino = async (id, treinoData) => {
     }
 
     console.log(`🚀 Atualizando treino ${id} (FormData):`, treinoData);
-
     // Constrói FormData da mesma forma que createTreino (inclui tratamento para dias vazios)
-    let formData = treinoData instanceof FormData ? treinoData : objectToFormData(treinoData);
-
-    // Filtra entradas indesejadas (remove chaves planas exerciciosPorDia[SEGUNDA] quando há índices)
-    const filtered = new FormData();
-    const plainMapKeyRegex = /^exerciciosPorDia\[[^\]]+\]$/;
-
-    for (const pair of formData.entries()) {
-      const key = pair[0];
-      const value = pair[1];
-      if (plainMapKeyRegex.test(key)) {
-        // pule chaves planas — vamos adicionar blobs vazios explicitamente abaixo quando necessário
-        continue;
-      }
-      if (value instanceof File) filtered.append(key, value, value.name);
-      else filtered.append(key, value);
-    }
-
-    // Anexa blobs JSON vazios para dias definidos no objeto mas sem exercícios (evita binding para String)
-    if (treinoData && treinoData.exerciciosPorDia && typeof treinoData.exerciciosPorDia === 'object') {
-      Object.keys(treinoData.exerciciosPorDia).forEach((diaKey) => {
-        const diaUpper = String(diaKey).toUpperCase();
-        const arr = treinoData.exerciciosPorDia[diaKey] || [];
-        if (Array.isArray(arr) && arr.length === 0) {
-          filtered.append(`exerciciosPorDia[${diaUpper}]`, new Blob([JSON.stringify([])], { type: 'application/json' }));
-        }
-      });
-    }
+    const formData = treinoData instanceof FormData ? treinoData : buildTreinoFormData(treinoData);
 
     // DEBUG opcional
-    for (const pair of filtered.entries()) {
-      console.debug('Update FormData', pair[0], pair[1]);
-    }
+    console.debug('--- Update FormData (enviado) ---');
+    console.debug(debugFormDataEntries(formData));
 
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: filtered,
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData,
     });
 
     if (!response.ok) {
@@ -496,6 +417,45 @@ export const getDesempenhoSemanal = async () => {
     
   } catch (error) {
     console.error('❌ Erro em getDesempenhoSemanal:', error);
+    throw error;
+  }
+};
+/**
+ * Lista todos os treinos com filtros opcionais.
+ * Rota: GET /api/treinos (Pública)
+ * @param {Object} filtros - Filtros opcionais: { nome, tipo, responsavelId }
+ */
+export const getAllTreinos = async (filtros = {}) => {
+  try {
+    const params = new URLSearchParams();
+    if (filtros.nome) params.append('nome', filtros.nome);
+    if (filtros.tipo) params.append('tipo', filtros.tipo);
+    if (filtros.responsavelId) params.append('responsavelId', filtros.responsavelId);
+
+    const url = params.toString() ? `${API_URL}?${params.toString()}` : API_URL;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Erro HTTP ${response.status}: Falha ao buscar treinos`);
+    return await response.json();
+  } catch (error) {
+    console.error('❌ Erro em getAllTreinos:', error);
+    throw error;
+  }
+};
+
+/**
+ * Busca um treino específico pelo ID.
+ * Rota: GET /api/treinos/{id} (Pública)
+ */
+export const getTreinoById = async (id) => {
+  try {
+    const response = await fetch(`${API_URL}/${id}`);
+    if (!response.ok) {
+      if (response.status === 404) throw new Error('Treino não encontrado');
+      throw new Error(`Erro HTTP ${response.status}: Falha ao buscar treino`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`❌ Erro em getTreinoById(${id}):`, error);
     throw error;
   }
 };
