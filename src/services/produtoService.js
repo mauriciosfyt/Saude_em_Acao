@@ -1,7 +1,7 @@
+// services/produtoService.js
+
 // URL base da nossa API
-// Em desenvolvimento, preferimos usar o proxy do Vite (definido em `vite.config.js`).
-// Se `VITE_API_BASE_URL` estiver definida, usaremos esse valor (produção).
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '') + '/api';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://54.81.240.117') + '/api';
 const API_URL = `${API_BASE_URL}/produtos`;
 
 // Função para obter o token de autenticação
@@ -11,15 +11,11 @@ const getAuthToken = () => {
 
 /**
  * Busca todos os produtos da loja, ou filtra por nome.
- * Rota: GET /api/produtos (Pública)
- * Rota (Filtro): GET /api/produtos?nome=... (Pública)
+ * Rota: GET /api/produtos
  */
 export const getAllProdutos = async (nome = null) => {
   try {
-    // Começa com a URL base
     let url = API_URL;
-
-    // Se um 'nome' (filtro) foi fornecido, anexa ele à URL
     if (nome && nome.trim() !== '') {
       url += `?nome=${encodeURIComponent(nome)}`;
       console.log(`🔍 Buscando produtos com filtro: ${nome}`);
@@ -27,7 +23,6 @@ export const getAllProdutos = async (nome = null) => {
       console.log('🔍 Buscando todos os produtos...');
     }
 
-    // Faz a chamada fetch com a URL (seja ela a base ou a com filtro)
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -35,18 +30,8 @@ export const getAllProdutos = async (nome = null) => {
     }
     
     const data = await response.json();
-    console.log('✅ Produtos recebidos (raw):', data);
-
-    // Normaliza formatos de resposta comuns: array direto, { data: [...] }, { content: [...] }, { produtos: [...] }
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data.data)) return data.data;
-    if (Array.isArray(data.content)) return data.content;
-    if (Array.isArray(data.produtos)) return data.produtos;
-
-    // Caso não seja um array conhecido, retorna um array vazio e loga para debug
-    console.warn('produtoService.getAllProdutos: resposta inesperada, retornando array vazio.');
-    return [];
-
+    console.log('✅ Produtos recebidos:', data);
+    return data;
   } catch (error) {
     console.error("❌ Erro em getAllProdutos:", error);
     throw error;
@@ -55,7 +40,7 @@ export const getAllProdutos = async (nome = null) => {
 
 /**
  * Busca os detalhes de um único produto pelo seu ID.
- * Rota: GET /api/produtos/{id} (Pública)
+ * Rota: GET /api/produtos/{id}
  */
 export const getProdutoById = async (id) => {
   try {
@@ -82,20 +67,14 @@ export const getProdutoById = async (id) => {
 export const createProduto = async (produtoData) => {
   try {
     const token = getAuthToken();
-    
-    if (!token) {
-      throw new Error('Token de autenticação não encontrado. Faça login novamente.');
-    }
+    if (!token) throw new Error('Token de autenticação não encontrado.');
 
     console.log('🆕 Criando novo produto...');
     
     let body;
-    let headers = {
-      'Authorization': `Bearer ${token}`
-    };
+    let headers = { 'Authorization': `Bearer ${token}` };
 
     if (produtoData instanceof FormData) {
-      // Para FormData (com imagem), o navegador define o Content-Type automaticamente
       body = produtoData;
     } else {
       headers['Content-Type'] = 'application/json';
@@ -108,17 +87,21 @@ export const createProduto = async (produtoData) => {
       body,
     });
 
-    console.log('📊 Status da resposta:', response.status);
+    // CORREÇÃO AQUI: Ler como texto uma única vez para evitar erro de stream
+    const responseText = await response.text();
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Erro na resposta:', errorText);
-      throw new Error(`Falha ao criar produto: ${errorText || response.status}`);
+      console.error('❌ Erro na resposta:', responseText);
+      throw new Error(responseText || `Erro ${response.status}`);
     }
 
-    const data = await response.json();
-    console.log('✅ Produto criado com sucesso:', data);
-    return data;
+    try {
+      const data = JSON.parse(responseText);
+      console.log('✅ Produto criado com sucesso:', data);
+      return data;
+    } catch (e) {
+      return { success: true, message: responseText };
+    }
     
   } catch (error) {
     console.error('❌ Erro em createProduto:', error);
@@ -128,7 +111,7 @@ export const createProduto = async (produtoData) => {
 
 /**
  * Lista produtos por categoria.
- * Rota: GET /api/produtos?categoria=... (Pública)
+ * Rota: GET /api/produtos?categoria=...
  */
 export const getProdutosByCategoria = async (categoria) => {
   try {
@@ -157,17 +140,12 @@ export const getProdutosByCategoria = async (categoria) => {
 export const updateProduto = async (id, produtoData) => {
   try {
     const token = getAuthToken();
-    
-    if (!token) {
-      throw new Error('Token de autenticação não encontrado. Faça login novamente.');
-    }
+    if (!token) throw new Error('Token de autenticação não encontrado.');
 
     console.log(`✏️ Atualizando produto ID: ${id}`, produtoData);
 
     let body;
-    let headers = {
-      'Authorization': `Bearer ${token}`
-    };
+    let headers = { 'Authorization': `Bearer ${token}` };
 
     if (produtoData instanceof FormData) {
       body = produtoData;
@@ -175,7 +153,7 @@ export const updateProduto = async (id, produtoData) => {
     } else {
       headers['Content-Type'] = 'application/json';
       body = JSON.stringify(produtoData);
-      console.log('📤 Enviando como JSON:', body);
+      console.log('📤 Enviando como JSON');
     }
 
     const response = await fetch(`${API_URL}/${id}`, {
@@ -184,39 +162,40 @@ export const updateProduto = async (id, produtoData) => {
       body,
     });
 
-    console.log('📊 Status da resposta:', response.status);
-    console.log('📋 Headers da resposta:', Object.fromEntries(response.headers.entries()));
+    // === CORREÇÃO DO ERRO "BODY STREAM ALREADY READ" ===
+    // Lemos o corpo da resposta UMA VEZ como texto
+    const responseText = await response.text();
 
+    // Se a resposta não for OK (200-299), lançamos erro com o texto obtido
     if (!response.ok) {
       let errorMessage = `Erro HTTP ${response.status}`;
       try {
-        const errorData = await response.json();
-        errorMessage = errorData.message || errorMessage;
-        console.error('❌ Erro detalhado:', errorData);
+        // Tentamos converter o erro para JSON para pegar a mensagem detalhada
+        const errorJson = JSON.parse(responseText);
+        errorMessage = errorJson.message || errorMessage;
+        console.error('❌ Erro detalhado (API):', errorJson);
       } catch (e) {
-        const errorText = await response.text();
-        errorMessage = errorText || errorMessage;
-        console.error('❌ Erro texto:', errorText);
+        // Se não for JSON, usamos o texto puro
+        errorMessage = responseText || errorMessage;
+        console.error('❌ Erro texto (API):', responseText);
       }
       throw new Error(errorMessage);
     }
 
-    let data;
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      const textResponse = await response.text();
-      console.log('📄 Resposta não-JSON:', textResponse);
-      data = { success: true, message: 'Produto atualizado com sucesso' };
+    // Se for sucesso, tentamos converter para JSON
+    try {
+      const data = JSON.parse(responseText);
+      console.log('✅ Produto atualizado com sucesso:', data);
+      return data;
+    } catch (e) {
+      // Se a API retornou sucesso mas sem JSON (ex: string vazia), retornamos um objeto dummy
+      console.log('✅ Sucesso (sem corpo JSON).');
+      return { success: true };
     }
-
-    console.log('✅ Produto atualizado com sucesso:', data);
-    return data;
     
   } catch (error) {
     console.error(`❌ Erro em updateProduto(${id}):`, error);
-    throw new Error(`Falha ao atualizar produto: ${error.message}`);
+    throw error; // Repassa o erro original (agora legível) para o componente
   }
 };
 
@@ -227,10 +206,7 @@ export const updateProduto = async (id, produtoData) => {
 export const deleteProduto = async (id) => {
   try {
     const token = getAuthToken();
-    
-    if (!token) {
-      throw new Error('Token de autenticação não encontrado. Faça login novamente.');
-    }
+    if (!token) throw new Error('Token de autenticação não encontrado.');
 
     console.log(`🗑️ Excluindo produto ID: ${id}`);
 
@@ -242,12 +218,11 @@ export const deleteProduto = async (id) => {
       },
     });
 
-    console.log('📊 Status da resposta:', response.status);
+    const responseText = await response.text();
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Erro na resposta:', errorText);
-      throw new Error(`Falha ao excluir produto: ${errorText || response.status}`);
+      console.error('❌ Erro na resposta:', responseText);
+      throw new Error(`Falha ao excluir produto: ${responseText || response.status}`);
     }
 
     console.log('✅ Produto excluído com sucesso');
@@ -260,21 +235,15 @@ export const deleteProduto = async (id) => {
 };
 
 /**
- * Busca produtos em destaque (mais reservados)
- * Rota: GET /api/produtos/destaques (Pública)
+ * Busca produtos em destaque
+ * Rota: GET /api/produtos/destaques
  */
 export const getProdutosDestaques = async () => {
   try {
     console.log('🌟 Buscando produtos em destaque...');
     const response = await fetch(`${API_URL}/destaques`);
-    
-    if (!response.ok) {
-      throw new Error('Falha ao buscar produtos em destaque');
-    }
-    
-    const data = await response.json();
-    console.log('✅ Produtos em destaque:', data);
-    return data;
+    if (!response.ok) throw new Error('Falha ao buscar destaques');
+    return await response.json();
   } catch (error) {
     console.error("❌ Erro em getProdutosDestaques:", error);
     throw error;
