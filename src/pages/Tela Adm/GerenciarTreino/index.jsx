@@ -27,9 +27,8 @@ const GerenciarTreino = () => {
       const filtros = {};
       if (filtroNome.trim()) filtros.nome = filtroNome.trim();
       if (filtroTipo.trim()) filtros.tipo = filtroTipo.trim();
-      // Nota: responsavelId pode precisar ser obtido de outra forma se não for um ID direto
-      // Por enquanto, vamos usar o nome do responsável se disponível
-      
+      if (filtroResponsavel.trim()) filtros.responsavel = filtroResponsavel.trim();
+
       const dados = await getAllTreinos(filtros);
       setTreinos(Array.isArray(dados) ? dados : []);
     } catch (err) {
@@ -51,7 +50,7 @@ const GerenciarTreino = () => {
       carregarTreinos();
     }, 500);
     return () => clearTimeout(timer);
-  }, [filtroNome, filtroTipo]);
+  }, [filtroNome, filtroTipo, filtroResponsavel]);
 
   const handleMenuClick = (item) => {
     setActiveMenuItem(item);
@@ -266,7 +265,6 @@ const GerenciarTreino = () => {
             </div>
             <div className="gerenciartreino-modal-actions">
               <button className="gerenciartreino-modal-btn edit-btn" onClick={handleEditar}>Editar</button>
-              <button className="gerenciartreino-modal-btn duplicate-btn" onClick={handleDuplicar}>Duplicar</button>
               <button className="gerenciartreino-modal-btn remove-btn" onClick={handleRemover}>Remover</button>
             </div>
           </div>

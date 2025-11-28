@@ -3,7 +3,7 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import MenuAdm from './../../../components/MenuAdm/MenuAdm';
 import './AdicionarTreino.css';
 import baixo from '../../../assets/icones/down-arrow.svg';
-import cima  from '../../../assets/icones/up-arrow.svg';
+import cima from '../../../assets/icones/up-arrow.svg';
 import { createTreino, updateTreino, getTreinoById } from '../../../services/treinoService';
 import { getUsuarioById } from '../../../services/usuarioService';
 import { fixImageUrl } from '../../../utils/image';
@@ -102,13 +102,13 @@ export default function AdicionarTreino() {
   const [searchParams] = useSearchParams();
   const treinoId = searchParams.get('id');
   const isEditMode = !!treinoId;
-  
+
   const [activeTab, setActiveTab] = useState("Segunda");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [exerciseImages, setExerciseImages] = useState({});
   const fileInputRefs = useRef({});
-  
+
   // Estados do formulário
   const [formData, setFormData] = useState({
     nome: '',
@@ -138,7 +138,7 @@ export default function AdicionarTreino() {
 
   // unique id generator
   const nextId = useRef(1);
-    // Function to find image URL in various fields
+  // Function to find image URL in various fields
 
   // exercises per day (object keyed by day name)
   // Criando um treino novo: começar sem exercícios visíveis
@@ -354,7 +354,7 @@ export default function AdicionarTreino() {
           setLoading(true);
           const treinoData = await getTreinoById(treinoId);
           console.debug('treinoData recebido (GET):', treinoData);
-          
+
           // Preencher formulário com dados do treino
           if (treinoData) {
             // Tentativa de resolver nome do responsável mesmo quando API retorna apenas ID
@@ -374,124 +374,124 @@ export default function AdicionarTreino() {
             }
 
             setFormData({
-                nome: treinoData.nome || '',
-                responsavel: responsavelNome,
-                tipoTreino: treinoData.tipoDeTreino || treinoData.tipoTreino || treinoData.tipo || 'Musculação',
-                nivel: converterNivelDaAPI(treinoData.nivel) || 'Iniciante',
-                sexo: converterSexoDaAPI(treinoData.sexo) || 'Masculino',
-                idadeMin: treinoData.idadeMinima || treinoData.idadeMin || 15,
-                idadeMax: treinoData.idadeMaxima || treinoData.idadeMax || 30
-              });
-            
+              nome: treinoData.nome || '',
+              responsavel: responsavelNome,
+              tipoTreino: treinoData.tipoDeTreino || treinoData.tipoTreino || treinoData.tipo || 'Musculação',
+              nivel: converterNivelDaAPI(treinoData.nivel) || 'Iniciante',
+              sexo: converterSexoDaAPI(treinoData.sexo) || 'Masculino',
+              idadeMin: treinoData.idadeMinima || treinoData.idadeMin || 15,
+              idadeMax: treinoData.idadeMaxima || treinoData.idadeMax || 30
+            });
+
             // Carregar exercícios por dia se existirem
-              // Prioriza exerciciosPorDia (mapa por dias) — corresponde ao formato que a API espera/retorna
-              const exerciciosMap = {};
-              const mapDisplayDay = {};
-              // cria mapa de normalização: 'SEGUNDA' -> 'Segunda'
-              dias.forEach(d => {
-                const key = String(d).normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase();
-                mapDisplayDay[key] = d;
+            // Prioriza exerciciosPorDia (mapa por dias) — corresponde ao formato que a API espera/retorna
+            const exerciciosMap = {};
+            const mapDisplayDay = {};
+            // cria mapa de normalização: 'SEGUNDA' -> 'Segunda'
+            dias.forEach(d => {
+              const key = String(d).normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase();
+              mapDisplayDay[key] = d;
+            });
+
+            if (treinoData.exerciciosPorDia && typeof treinoData.exerciciosPorDia === 'object') {
+              Object.keys(treinoData.exerciciosPorDia).forEach(rawDayKey => {
+                const norm = String(rawDayKey).normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase();
+                const displayDay = mapDisplayDay[norm];
+                if (!displayDay) return;
+                const raw = treinoData.exerciciosPorDia[rawDayKey];
+                const arr = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' ? Object.values(raw) : []);
+                if (!arr || arr.length === 0) {
+                  exerciciosMap[displayDay] = [];
+                  return;
+                }
+                exerciciosMap[displayDay] = arr.map(ex => ({
+                  id: nextId.current++,
+                  nome: ex.nome || ex.exercicio || '',
+                  series: (ex.series !== undefined && ex.series !== null) ? ex.series : 3,
+                  repeticoes: (ex.repeticoes !== undefined && ex.repeticoes !== null) ? ex.repeticoes : 10,
+                  carga: ex.carga || ex.peso || '',
+                  intervalo: ex.intervalo || ex.tempo || '',
+                  obs: ex.observacao || ex.obs || '',
+                  img: ex.img || ex.imagem || ex.imagemUrl || ex.foto || ex.fotoUrl || ex.image || ex.imageUrl || null
+                }));
               });
+            }
 
-              if (treinoData.exerciciosPorDia && typeof treinoData.exerciciosPorDia === 'object') {
-                Object.keys(treinoData.exerciciosPorDia).forEach(rawDayKey => {
-                  const norm = String(rawDayKey).normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase();
-                  const displayDay = mapDisplayDay[norm];
-                  if (!displayDay) return;
-                  const raw = treinoData.exerciciosPorDia[rawDayKey];
-                  const arr = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' ? Object.values(raw) : []);
-                  if (!arr || arr.length === 0) {
-                    exerciciosMap[displayDay] = [];
-                    return;
-                  }
-                  exerciciosMap[displayDay] = arr.map(ex => ({
-                    id: nextId.current++,
-                    nome: ex.nome || ex.exercicio || '',
-                    series: (ex.series !== undefined && ex.series !== null) ? ex.series : 3,
-                    repeticoes: (ex.repeticoes !== undefined && ex.repeticoes !== null) ? ex.repeticoes : 10,
-                    carga: ex.carga || ex.peso || '',
-                    intervalo: ex.intervalo || ex.tempo || '',
-                    obs: ex.observacao || ex.obs || '',
-                    img: ex.img || ex.imagem || ex.imagemUrl || ex.foto || ex.fotoUrl || ex.image || ex.imageUrl || null
-                  }));
-                });
-              }
-
-              // Fallback compatível com formatos antigos (exercicios array / sessoes)
-              if (Object.keys(exerciciosMap).length === 0 && (treinoData.exercicios || treinoData.sessoes)) {
-                const normalizeForIndex = (container, idx) => {
-                  if (!container) return [];
-                  if (Array.isArray(container)) {
-                    const val = container[idx];
-                    if (Array.isArray(val)) return val;
-                    if (val && typeof val === 'object') return Object.values(val).every(v => typeof v === 'object') && !Array.isArray(val) ? Object.values(val) : [val];
-                    return val ? [val] : [];
-                  }
-                  if (typeof container === 'object') {
-                    if (Object.prototype.hasOwnProperty.call(container, idx)) {
-                      const v = container[idx];
-                      if (Array.isArray(v)) return v;
-                      if (v && typeof v === 'object') return Object.values(v).every(x => typeof x === 'object') && !Array.isArray(v) ? Object.values(v) : [v];
-                      return v ? [v] : [];
-                    }
-                    return [];
+            // Fallback compatível com formatos antigos (exercicios array / sessoes)
+            if (Object.keys(exerciciosMap).length === 0 && (treinoData.exercicios || treinoData.sessoes)) {
+              const normalizeForIndex = (container, idx) => {
+                if (!container) return [];
+                if (Array.isArray(container)) {
+                  const val = container[idx];
+                  if (Array.isArray(val)) return val;
+                  if (val && typeof val === 'object') return Object.values(val).every(v => typeof v === 'object') && !Array.isArray(val) ? Object.values(val) : [val];
+                  return val ? [val] : [];
+                }
+                if (typeof container === 'object') {
+                  if (Object.prototype.hasOwnProperty.call(container, idx)) {
+                    const v = container[idx];
+                    if (Array.isArray(v)) return v;
+                    if (v && typeof v === 'object') return Object.values(v).every(x => typeof x === 'object') && !Array.isArray(v) ? Object.values(v) : [v];
+                    return v ? [v] : [];
                   }
                   return [];
-                };
-                dias.forEach((dia, index) => {
-                  try {
-                    if (treinoData.exercicios) {
-                      const arr = normalizeForIndex(treinoData.exercicios, index);
-                      if (arr && arr.length) {
-                        exerciciosMap[dia] = arr.map((ex) => ({ id: nextId.current++, ...ex }));
-                        return;
-                      }
-                    }
-                    if (treinoData.sessoes && treinoData.sessoes[index]) {
-                      const sess = treinoData.sessoes[index];
-                      const sessEx = sess.exercicios || sess.exercicio || [];
-                      const normalizedSessEx = Array.isArray(sessEx) ? sessEx : (typeof sessEx === 'object' ? Object.values(sessEx) : []);
-                      if (normalizedSessEx && normalizedSessEx.length) {
-                        exerciciosMap[dia] = normalizedSessEx.map((ex) => ({
-                          nome: ex.nome || ex.exercicio || '',
-                          series: ex.series || 3,
-                          repeticoes: ex.repeticoes || 10,
-                          carga: ex.carga || '',
-                          intervalo: ex.intervalo || '',
-                          obs: ex.obs || ex.observacao || '',
-                          id: nextId.current++
-                        }));
-                      }
-                    }
-                  } catch (e) {
-                    console.warn('Erro ao normalizar exercícios para dia', dia, e);
-                  }
-                });
-              }
-
-              if (Object.keys(exerciciosMap).length > 0) {
-                setExerciciosPorDia(prev => ({ ...prev, ...exerciciosMap }));
-                // montar previews de imagens (se houver URLs)
-                const tempImageMap = {};
-                Object.keys(exerciciosMap).forEach((dia) => {
-                  exerciciosMap[dia].forEach((ex) => {
-                    if (!ex || !ex.id) return;
-                    const id = ex.id;
-                    const url = ex.img || ex.imagem || ex.imagemUrl || ex.foto || ex.fotoUrl || ex.image || ex.imageUrl;
-                    if (url) tempImageMap[id] = { preview: fixImageUrl(url), file: null };
-                  });
-                });
-                if (Object.keys(tempImageMap).length > 0) {
-                  setExerciseImages(prev => ({ ...prev, ...tempImageMap }));
                 }
+                return [];
+              };
+              dias.forEach((dia, index) => {
+                try {
+                  if (treinoData.exercicios) {
+                    const arr = normalizeForIndex(treinoData.exercicios, index);
+                    if (arr && arr.length) {
+                      exerciciosMap[dia] = arr.map((ex) => ({ id: nextId.current++, ...ex }));
+                      return;
+                    }
+                  }
+                  if (treinoData.sessoes && treinoData.sessoes[index]) {
+                    const sess = treinoData.sessoes[index];
+                    const sessEx = sess.exercicios || sess.exercicio || [];
+                    const normalizedSessEx = Array.isArray(sessEx) ? sessEx : (typeof sessEx === 'object' ? Object.values(sessEx) : []);
+                    if (normalizedSessEx && normalizedSessEx.length) {
+                      exerciciosMap[dia] = normalizedSessEx.map((ex) => ({
+                        nome: ex.nome || ex.exercicio || '',
+                        series: ex.series || 3,
+                        repeticoes: ex.repeticoes || 10,
+                        carga: ex.carga || '',
+                        intervalo: ex.intervalo || '',
+                        obs: ex.obs || ex.observacao || '',
+                        id: nextId.current++
+                      }));
+                    }
+                  }
+                } catch (e) {
+                  console.warn('Erro ao normalizar exercícios para dia', dia, e);
+                }
+              });
+            }
+
+            if (Object.keys(exerciciosMap).length > 0) {
+              setExerciciosPorDia(prev => ({ ...prev, ...exerciciosMap }));
+              // montar previews de imagens (se houver URLs)
+              const tempImageMap = {};
+              Object.keys(exerciciosMap).forEach((dia) => {
+                exerciciosMap[dia].forEach((ex) => {
+                  if (!ex || !ex.id) return;
+                  const id = ex.id;
+                  const url = ex.img || ex.imagem || ex.imagemUrl || ex.foto || ex.fotoUrl || ex.image || ex.imageUrl;
+                  if (url) tempImageMap[id] = { preview: fixImageUrl(url), file: null };
+                });
+              });
+              if (Object.keys(tempImageMap).length > 0) {
+                setExerciseImages(prev => ({ ...prev, ...tempImageMap }));
               }
-             }
-          } catch (error) {
-            console.error('Erro ao carregar treino:', error);
-            alert('Erro ao carregar dados do treino. ' + (error.message || ''));
-          } finally {
-            setLoading(false);
+            }
           }
+        } catch (error) {
+          console.error('Erro ao carregar treino:', error);
+          alert('Erro ao carregar dados do treino. ' + (error.message || ''));
+        } finally {
+          setLoading(false);
+        }
       } else if (location.state?.treinoData) {
         // Se vier dados de duplicação
         const treinoData = location.state.treinoData;
@@ -596,7 +596,7 @@ export default function AdicionarTreino() {
         }
       }
     };
-    
+
     loadTreinoData();
   }, [treinoId, isEditMode]);
 
@@ -683,7 +683,7 @@ export default function AdicionarTreino() {
     e.preventDefault();
     try {
       setSaving(true);
-      
+
       // Validar campos obrigatórios
       if (!formData.nome.trim()) {
         alert('Por favor, preencha o nome do treino.');
@@ -700,13 +700,13 @@ export default function AdicionarTreino() {
       // Preparar dados para envio (usando os nomes de campos que a API espera)
       const idadeMinima = parseInt(formData.idadeMin, 10);
       const idadeMaxima = parseInt(formData.idadeMax, 10);
-      
+
       if (isNaN(idadeMinima) || idadeMinima <= 0) {
         alert('Por favor, preencha uma idade mínima válida.');
         setSaving(false);
         return;
       }
-      
+
       if (isNaN(idadeMaxima) || idadeMaxima <= 0) {
         alert('Por favor, preencha uma idade máxima válida.');
         setSaving(false);
@@ -725,7 +725,7 @@ export default function AdicionarTreino() {
         idadeMaxima: idadeMaxima,
         // Envia a estrutura por dia (obrigatória para o backend)
         exerciciosPorDia: exerciciosPorDiaPayload,
-        
+
         // Esta linha já estava correta
         responsavel: formData.responsavel.trim()
       };
@@ -737,7 +737,7 @@ export default function AdicionarTreino() {
         await createTreino(dadosTreino);
         alert('Treino criado com sucesso!');
       }
-      
+
       navigate('/GerenciarTreino');
     } catch (error) {
       console.error('Erro ao salvar treino:', error);
@@ -771,294 +771,309 @@ export default function AdicionarTreino() {
       <main className="adicionartreino-main-content">
         {/* CORREÇÃO: Wrapper adicionado para centralizar e limitar a largura */}
         <div className="adicionartreino-form-wrapper">
-            <h1 className="adicionartreino-form-title">{isEditMode ? 'Editar Treino' : 'Adicionar Treinos'}</h1>
+          <h1 className="adicionartreino-form-title">{isEditMode ? 'Editar Treino' : 'Adicionar Treinos'}</h1>
 
-            {/* --- Formulário Principal --- */}
-            <div className="adicionartreino-form-container">
-              <div className="adicionartreino-form-row adicionartreino-form-row-2">
-                <div className="adicionartreino-form-field">
-                  <label htmlFor="nome">Nome *</label>
-                  <input 
-                    id="nome" 
-                    type="text" 
-                    value={formData.nome}
-                    onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-                    placeholder="Ex: 3x - Fem - Iniciante - Emagrecimento"
-                  />
-                </div>
-                <div className="adicionartreino-form-field">
-                  <label htmlFor="responsavel">Responsável</label>
-                  <input 
-                    id="responsavel" 
-                    type="text" 
-                    value={formData.responsavel}
-                    onChange={(e) => setFormData(prev => ({ ...prev, responsavel: e.target.value }))}
-                    placeholder="Nome do responsável"
-                  />
-                </div>
+          {/* --- Formulário Principal --- */}
+          <div className="adicionartreino-form-container">
+            <div className="adicionartreino-form-row adicionartreino-form-row-2">
+              <div className="adicionartreino-form-field">
+                <label htmlFor="nome">Nome *</label>
+                <input
+                  id="nome"
+                  type="text"
+                  value={formData.nome}
+                  onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+                  placeholder="Ex: 3x - Fem - Iniciante - Emagrecimento"
+                />
               </div>
-              <div className="adicionartreino-form-row adicionartreino-form-row-3">
-                <div className="adicionartreino-form-field">
-                  <label htmlFor="tipoTreino">Tipo de treino</label>
-                  <input 
-                    id="tipoTreino" 
-                    type="text" 
-                    value={formData.tipoTreino}
-                    onChange={(e) => setFormData(prev => ({ ...prev, tipoTreino: e.target.value }))}
-                    placeholder="Ex: Musculação"
-                  />
-                </div>
-                <div className="adicionartreino-form-field">
-                  <label htmlFor="nivel">Nível</label>
-                  <select 
-                    id="nivel" 
-                    value={formData.nivel}
-                    onChange={(e) => setFormData(prev => ({ ...prev, nivel: e.target.value }))}
-                  >
-                    <option>Iniciante</option>
-                    <option>Intermediário</option>
-                    <option>Avançado</option>
-                  </select>
-                </div>
-                <div className="adicionartreino-form-field">
-                  <label htmlFor="sexo">Sexo</label>
-                  <select 
-                    id="sexo" 
-                    value={formData.sexo}
-                    onChange={(e) => setFormData(prev => ({ ...prev, sexo: e.target.value }))}
-                  >
-                    <option>Masculino</option>
-                    <option>Feminino</option>
-                  </select>
-                </div>
-              </div>
-              <div className="adicionartreino-form-row adicionartreino-form-row-3">
-                <div className="adicionartreino-form-field">
-                  <label htmlFor="idadeMin">Idade mínima</label>
-                  <input 
-                    id="idadeMin" 
-                    type="number" 
-                    value={formData.idadeMin}
-                    onChange={(e) => setFormData(prev => ({ ...prev, idadeMin: e.target.value }))}
-                    min="0"
-                  />
-                </div>
-                <div className="adicionartreino-form-field">
-                  <label htmlFor="idadeMax">Idade máxima</label>
-                  <input 
-                    id="idadeMax" 
-                    type="number" 
-                    value={formData.idadeMax}
-                    onChange={(e) => setFormData(prev => ({ ...prev, idadeMax: e.target.value }))}
-                    min="0"
-                  />
-                </div>
-                <div className="adicionartreino-form-field" style={{ visibility: 'hidden' }} />
+              <div className="adicionartreino-form-field">
+                <label htmlFor="responsavel">Responsável</label>
+                <input
+                  id="responsavel"
+                  type="text"
+                  value={formData.responsavel}
+                  onChange={(e) => setFormData(prev => ({ ...prev, responsavel: e.target.value }))}
+                  placeholder="Nome do responsável"
+                />
               </div>
             </div>
-
-            {/* --- Abas de Navegação --- */}
-            <nav className="adicionartreino-tabs-nav">
-              {dias.map((dia) => (
-                <button
-                  key={dia}
-                  className={`adicionartreino-tab-button ${activeTab === dia ? "active" : ""}`}
-                  onClick={() => handleTabClick(dia)}
-                >
-                  {dia}
-                </button>
-              ))}
-            </nav>
-
-            {/* --- Seção de Exercícios --- */}
-            <div className="adicionartreino-exercicios-section">
-              <button className="adicionartreino-add-exercise-btn" onClick={addExercise} type="button">
-                <PlusIcon /> Exercício
-              </button>
-
-              {/* Cabeçalho visível apenas em telas maiores */}
-              <div className="adicionartreino-exercise-header">
-                <span></span> {/* Coluna para setas */}
-                <span>Exercício *</span>
-                <span>Séries *</span>
-                <span>Repetições</span>
-                <span>Carga(KG)</span>
-                <span>Observação</span>
-                <span>Imagem</span>
-                <span></span> {/* Coluna para ações */}
+            <div className="adicionartreino-form-row adicionartreino-form-row-3">
+              <div className="adicionartreino-form-field">
+                <label htmlFor="tipoTreino">Tipo de treino</label>
+                <input
+                  id="tipoTreino"
+                  type="text"
+                  value={formData.tipoTreino}
+                  onChange={(e) => setFormData(prev => ({ ...prev, tipoTreino: e.target.value }))}
+                  placeholder="Ex: Musculação"
+                />
               </div>
+              <div className="adicionartreino-form-field">
+                <label htmlFor="nivel">Nível</label>
+                <select
+                  id="nivel"
+                  value={formData.nivel}
+                  onChange={(e) => setFormData(prev => ({ ...prev, nivel: e.target.value }))}
+                >
+                  <option>Iniciante</option>
+                  <option>Intermediário</option>
+                  <option>Avançado</option>
+                </select>
+              </div>
+              <div className="adicionartreino-form-field">
+                <label htmlFor="sexo">Sexo</label>
+                <select
+                  id="sexo"
+                  value={formData.sexo}
+                  onChange={(e) => setFormData(prev => ({ ...prev, sexo: e.target.value }))}
+                >
+                  <option>Masculino</option>
+                  <option>Feminino</option>
+                </select>
+              </div>
+            </div>
+            <div className="adicionartreino-form-row adicionartreino-form-row-3">
+              <div className="adicionartreino-form-field">
+                <label htmlFor="idadeMin">Idade mínima</label>
+                <input
+                  id="idadeMin"
+                  type="number"
+                  value={formData.idadeMin}
+                  onChange={(e) => setFormData(prev => ({ ...prev, idadeMin: e.target.value }))}
+                  min="0"
+                />
+              </div>
+              <div className="adicionartreino-form-field">
+                <label htmlFor="idadeMax">Idade máxima</label>
+                <input
+                  id="idadeMax"
+                  type="number"
+                  value={formData.idadeMax}
+                  onChange={(e) => setFormData(prev => ({ ...prev, idadeMax: e.target.value }))}
+                  min="0"
+                />
+              </div>
+              <div className="adicionartreino-form-field" style={{ visibility: 'hidden' }} />
+            </div>
+          </div>
 
-              {/* Lista de Exercícios */}
-              <div className="adicionartreino-exercicios-list" ref={listRef}>
-                {currentList.map((item, index) => (
-                  <div
-                    key={item.id}
-                    className={`adicionartreino-exercise-row`}
-                    ref={(el) => {
-                      if (el) itemRefs.current.set(item.id, el);
-                      else itemRefs.current.delete(item.id);
-                    }}
-                    draggable
-                    onDragStart={(e) => {
-                      draggingId.current = item.id;
-                      e.dataTransfer.effectAllowed = 'move';
-                      // small data to satisfy HTML5 drag
-                      e.dataTransfer.setData('text/plain', String(item.id));
-                      elAndAddDraggingClass(item.id, true);
-                    }}
-                    onDragEnd={() => {
-                      elAndAddDraggingClass(draggingId.current, false);
-                      draggingId.current = null;
-                    }}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      const overId = item.id;
-                      const dragId = parseInt(e.dataTransfer.getData('text/plain') || draggingId.current, 10);
-                      if (!isNaN(dragId) && dragId !== overId) {
-                        // show potential drop location (do minimal work here)
-                      }
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const fromId = parseInt(e.dataTransfer.getData('text/plain') || draggingId.current, 10);
-                      const toId = item.id;
-                      const fromIndex = currentList.findIndex((x) => x.id === fromId);
-                      const toIndex = currentList.findIndex((x) => x.id === toId);
-                      if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
-                        moveItem(fromIndex, toIndex);
-                      }
-                    }}
-                  >
-                    <div className="adicionartreino-field-content adicionartreino-reorder-col">
-                      <ReorderArrows
-                        onUp={() => moveItem(index, index - 1)}
-                        onDown={() => moveItem(index, index + 1)}
-                        disabledUp={index === 0}
-                        disabledDown={index === currentList.length - 1}
-                        upIconSrc={cima}
-                        downIconSrc={baixo}
+          {/* --- Abas de Navegação --- */}
+          <nav className="adicionartreino-tabs-nav">
+            {dias.map((dia) => (
+              <button
+                key={dia}
+                className={`adicionartreino-tab-button ${activeTab === dia ? "active" : ""}`}
+                onClick={() => handleTabClick(dia)}
+              >
+                {dia}
+              </button>
+            ))}
+          </nav>
+
+          {/* --- Seção de Exercícios --- */}
+          <div className="adicionartreino-exercicios-section">
+            <button className="adicionartreino-add-exercise-btn" onClick={addExercise} type="button">
+              <PlusIcon /> Exercício
+            </button>
+
+            {/* Cabeçalho visível apenas em telas maiores */}
+            <div className="adicionartreino-exercise-header">
+              <span></span> {/* Coluna para setas */}
+              <span>Exercício *</span>
+              <span>Séries *</span>
+              <span>Repetições</span>
+              <span>Carga(KG)</span>
+              <span>Intervalo</span>
+              <span>Observação</span>
+              <span></span> {/* Coluna para ações */}
+            </div>
+
+            {/* Lista de Exercícios */}
+            <div className="adicionartreino-exercicios-list" ref={listRef}>
+              {currentList.map((item, index) => (
+                <div
+                  key={item.id}
+                  className={`adicionartreino-exercise-row`}
+                  ref={(el) => {
+                    if (el) itemRefs.current.set(item.id, el);
+                    else itemRefs.current.delete(item.id);
+                  }}
+                  draggable
+                  onDragStart={(e) => {
+                    draggingId.current = item.id;
+                    e.dataTransfer.effectAllowed = 'move';
+                    // small data to satisfy HTML5 drag
+                    e.dataTransfer.setData('text/plain', String(item.id));
+                    elAndAddDraggingClass(item.id, true);
+                  }}
+                  onDragEnd={() => {
+                    elAndAddDraggingClass(draggingId.current, false);
+                    draggingId.current = null;
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    const overId = item.id;
+                    const dragId = parseInt(e.dataTransfer.getData('text/plain') || draggingId.current, 10);
+                    if (!isNaN(dragId) && dragId !== overId) {
+                      // show potential drop location (do minimal work here)
+                    }
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const fromId = parseInt(e.dataTransfer.getData('text/plain') || draggingId.current, 10);
+                    const toId = item.id;
+                    const fromIndex = currentList.findIndex((x) => x.id === fromId);
+                    const toIndex = currentList.findIndex((x) => x.id === toId);
+                    if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+                      moveItem(fromIndex, toIndex);
+                    }
+                  }}
+                >
+                  <div className="adicionartreino-field-content adicionartreino-reorder-col">
+                    <ReorderArrows
+                      onUp={() => moveItem(index, index - 1)}
+                      onDown={() => moveItem(index, index + 1)}
+                      disabledUp={index === 0}
+                      disabledDown={index === currentList.length - 1}
+                      upIconSrc={cima}
+                      downIconSrc={baixo}
+                    />
+                  </div>
+
+                  <div className="adicionartreino-field-content adicionartreino-exercise-name-col">
+                    <label className="adicionartreino-mobile-label">Exercício *</label>
+                    <input
+                      type="text"
+                      value={item.nome || ''}
+                      onChange={(e) => updateExerciseField(item.id, 'nome', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="adicionartreino-field-content adicionartreino-series-col">
+                    <label className="adicionartreino-mobile-label">Séries *</label>
+                    <input
+                      type="number"
+                      value={item.series !== undefined && item.series !== null ? item.series : ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : (parseInt(e.target.value, 10) || 0);
+                        updateExerciseField(item.id, 'series', val);
+                      }}
+                    />
+                  </div>
+
+                  <div className="adicionartreino-field-content adicionartreino-repeticoes-col">
+                    <label className="adicionartreino-mobile-label">Repetições</label>
+                    <input
+                      type="number"
+                      value={item.repeticoes !== undefined && item.repeticoes !== null ? item.repeticoes : ''}
+                      onChange={(e) => {
+                        const val = e.target.value === '' ? '' : (parseInt(e.target.value, 10) || 0);
+                        updateExerciseField(item.id, 'repeticoes', val);
+                      }}
+                    />
+                  </div>
+
+                  <div className="adicionartreino-field-content adicionartreino-carga-col">
+                    <label className="adicionartreino-mobile-label">Carga(KG)</label>
+                    <div className="adicionartreino-inline-input-wrapper">
+                      <input
+                        type="text"
+                        placeholder="--"
+                        value={item.carga || ''}
+                        onChange={(e) => updateExerciseField(item.id, 'carga', e.target.value)}
                       />
-                    </div>
-
-                    <div className="adicionartreino-field-content adicionartreino-exercise-name-col">
-                        <label className="adicionartreino-mobile-label">Exercício *</label>
-                        <input 
-                          type="text" 
-                          value={item.nome || ''} 
-                          onChange={(e) => updateExerciseField(item.id, 'nome', e.target.value)}
-                        />
-                    </div>
-
-                    <div className="adicionartreino-field-content adicionartreino-series-col">
-                        <label className="adicionartreino-mobile-label">Séries *</label>
-                        <input 
-                          type="number" 
-                          value={item.series !== undefined && item.series !== null ? item.series : ''} 
-                          onChange={(e) => {
-                            const val = e.target.value === '' ? '' : (parseInt(e.target.value, 10) || 0);
-                            updateExerciseField(item.id, 'series', val);
-                          }}
-                        />
-                    </div>
-
-                    <div className="adicionartreino-field-content adicionartreino-repeticoes-col">
-                        <label className="adicionartreino-mobile-label">Repetições</label>
-                        <input 
-                          type="number" 
-                          value={item.repeticoes !== undefined && item.repeticoes !== null ? item.repeticoes : ''} 
-                          onChange={(e) => {
-                            const val = e.target.value === '' ? '' : (parseInt(e.target.value, 10) || 0);
-                            updateExerciseField(item.id, 'repeticoes', val);
-                          }}
-                        />
-                    </div>
-
-                    <div className="adicionartreino-field-content adicionartreino-carga-col">
-                      <label className="adicionartreino-mobile-label">Carga(KG)</label>
-                      <div className="adicionartreino-inline-input-wrapper">
-                        <input 
-                          type="text" 
-                          placeholder="--" 
-                          value={item.carga || ''} 
-                          onChange={(e) => updateExerciseField(item.id, 'carga', e.target.value)}
-                        />
-                        <InfoIcon />
-                      </div>
-                    </div>
-
-                    <div className="adicionartreino-field-content adicionartreino-observacao-col">
-                        <label className="adicionartreino-mobile-label">Observação</label>
-                        <input 
-                          type="text" 
-                          placeholder="--" 
-                          value={item.obs || ''} 
-                          onChange={(e) => updateExerciseField(item.id, 'obs', e.target.value)}
-                        />
-                    </div>
-
-                    <div className="adicionartreino-field-content adicionartreino-exercise-image-col">
-                      <div
-                        className={`adicionartreino-exercise-image-upload ${exerciseImages[item.id] ? 'has-image' : ''}`}
-                        onClick={() => handleImagemClick(item.id)}
-                      >
-                        <input
-                          ref={(el) => {
-                            if (el) fileInputRefs.current[item.id] = el;
-                          }}
-                          type="file"
-                          accept="image/*"
-                          className="adicionartreino-exercise-image-input"
-                          onChange={(e) => handleImagemChange(item.id, e)}
-                          aria-label="Upload de imagem do exercício"
-                        />
-                        {exerciseImages[item.id] ? (
-                          <>
-                            <img 
-                              src={exerciseImages[item.id].preview} 
-                              alt="Preview da imagem" 
-                              className="adicionartreino-exercise-image-preview"
-                            />
-                            <button
-                              className="adicionartreino-exercise-image-remove"
-                              onClick={(e) => handleRemoverImagem(item.id, e)}
-                              title="Remover imagem"
-                            >
-                              ×
-                            </button>
-                          </>
-                        ) : (
-                          <div className="adicionartreino-exercise-image-content">+</div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="adicionartreino-field-content adicionartreino-actions-col">
-                      <button className="adicionartreino-icon-btn" title="Excluir" onClick={() => deleteExercise(item.id)}>
-                        <TrashIcon />
-                      </button>
+                      <InfoIcon />
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {/* --- Botões do Rodapé --- */}
-            <div className="adicionartreino-footer-buttons">
-              <button 
-                className="adicionartreino-btn adicionartreino-btn-cancel" 
-                onClick={handleCancelar}
-                disabled={saving}
-              >
-                Cancelar
-              </button>
-              <button 
-                className="adicionartreino-btn adicionartreino-btn-save" 
-                onClick={handleSalvar}
-                disabled={saving}
-              >
-                {saving ? 'Salvando...' : 'Salvar'}
-              </button>
+                  <div className="adicionartreino-field-content adicionartreino-intervalo-col">
+                    <label className="adicionartreino-mobile-label">Intervalo</label>
+                    <input
+                      type="time"
+                      id="duracao"
+                      name="duracao"
+                      step="1"
+                      min="00:00"
+                      max="59:59"
+                      className="adicionartreino-tempo-intervalo"
+                      value={item.intervalo || ''}
+                      onChange={(e) => updateExerciseField(item.id, 'intervalo', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="adicionartreino-field-content adicionartreino-observacao-col">
+                    <label className="adicionartreino-mobile-label">Observação</label>
+                    <input
+                      type="text"
+                      placeholder="--"
+                      value={item.obs || ''}
+                      onChange={(e) => updateExerciseField(item.id, 'obs', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="adicionartreino-field-content adicionartreino-exercise-image-col">
+                    <div
+                      className={`adicionartreino-exercise-image-upload ${exerciseImages[item.id] ? 'has-image' : ''}`}
+                      onClick={() => handleImagemClick(item.id)}
+                    >
+                      <input
+                        ref={(el) => {
+                          if (el) fileInputRefs.current[item.id] = el;
+                        }}
+                        type="file"
+                        accept="image/*"
+                        className="adicionartreino-exercise-image-input"
+                        onChange={(e) => handleImagemChange(item.id, e)}
+                        aria-label="Upload de imagem do exercício"
+                      />
+                      {exerciseImages[item.id] ? (
+                        <>
+                          <img
+                            src={exerciseImages[item.id].preview}
+                            alt="Preview da imagem"
+                            className="adicionartreino-exercise-image-preview"
+                          />
+                          <button
+                            className="adicionartreino-exercise-image-remove"
+                            onClick={(e) => handleRemoverImagem(item.id, e)}
+                            title="Remover imagem"
+                          >
+                            ×
+                          </button>
+                        </>
+                      ) : (
+                        <div className="adicionartreino-exercise-image-content">+</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="adicionartreino-field-content adicionartreino-actions-col">
+                    <button className="adicionartreino-icon-btn" title="Excluir" onClick={() => deleteExercise(item.id)}>
+                      <TrashIcon />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
+
+          {/* --- Botões do Rodapé --- */}
+          <div className="adicionartreino-footer-buttons">
+            <button
+              className="adicionartreino-btn adicionartreino-btn-cancel"
+              onClick={handleCancelar}
+              disabled={saving}
+            >
+              Cancelar
+            </button>
+            <button
+              className="adicionartreino-btn adicionartreino-btn-save"
+              onClick={handleSalvar}
+              disabled={saving}
+            >
+              {saving ? 'Salvando...' : 'Salvar'}
+            </button>
+          </div>
         </div>
       </main>
     </div>
