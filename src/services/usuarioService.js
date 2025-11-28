@@ -223,6 +223,55 @@ export const deleteAluno = async (id) => {
   }
 };
 
+/**
+ * Associa (adiciona) um treino a um aluno usando PATCH
+ * Rota: PATCH /api/aluno/{alunoId}/treino
+ * @param {string} alunoId - ID do aluno
+ * @param {string|number} treinoId - ID do treino a ser associado
+ */
+export const patchAddTreinoToAluno = async (alunoId, treinoId) => {
+  try {
+    const token = getAuthToken();
+    if (!token) throw new Error('Token de autenticação não encontrado. Faça login novamente.');
+
+    if (!alunoId) throw new Error('alunoId é obrigatório');
+    if (!treinoId && treinoId !== 0) throw new Error('treinoId é obrigatório');
+
+    console.log(`🔧 Associando treino ${treinoId} ao aluno ${alunoId} via PATCH /aluno/${alunoId}/treino`);
+
+    const response = await fetch(`${API_URL}/aluno/${encodeURIComponent(alunoId)}/treino`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ treinoId })
+    });
+
+    const text = await response.text();
+
+    if (!response.ok) {
+      try {
+        const err = JSON.parse(text);
+        throw new Error(err.message || `Falha ao associar treino: ${response.status}`);
+      } catch (e) {
+        throw new Error(text || `Falha ao associar treino: ${response.status}`);
+      }
+    }
+
+    if (!text) return { success: true };
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      return { success: true, message: text };
+    }
+
+  } catch (error) {
+    console.error('Erro em patchAddTreinoToAluno:', error);
+    throw error;
+  }
+};
+
 
 // --- Funções de Professor (seguem o mesmo padrão) ---
 /**
