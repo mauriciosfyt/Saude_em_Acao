@@ -5,6 +5,7 @@ import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { FaSearch } from "react-icons/fa";
 import { setAuthToken } from '../../../services/api';
 import { fetchReservas, fetchReservaStats, aprovarRetirada } from '../../../services/reservasService';
+import { getProdutoById, updateProduto } from '../../../services/produtoService';
 import { fixImageUrl } from '../../../utils/image';
 
 const formatarData = (dataString) => {
@@ -12,7 +13,6 @@ const formatarData = (dataString) => {
     try {
         const data = new Date(dataString);
         if (isNaN(data.getTime())) return dataString;
-        // Retorna apenas a data (sem hora)
         return new Intl.DateTimeFormat('pt-BR', {
             day: '2-digit',
             month: '2-digit',
@@ -29,8 +29,8 @@ const GerenciarReservas = () => {
     const [loading, setLoading] = useState(false);
     const [erro, setErro] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('APROVADA'); // padrão: aprovadas
-    const [processingId, setProcessingId] = useState(null); // id da reserva em processamento
+    const [statusFilter, setStatusFilter] = useState('APROVADA'); 
+    const [processingId, setProcessingId] = useState(null);
 
     useEffect(() => {
         const carregarReservas = async () => {
@@ -40,61 +40,56 @@ const GerenciarReservas = () => {
                 const token = sessionStorage.getItem('token');
                 if (token) setAuthToken(token);
 
-                // Busca estatísticas gerais
                 const statsResp = await fetchReservaStats();
                 setStats(statsResp);
 
-                // Busca todas as reservas
                 const listaResp = await fetchReservas({});
-                const lista = Array.isArray(listaResp?.content)
-                    ? listaResp.content
-                    : Array.isArray(listaResp)
-                    ? listaResp
-                    : [];
+                const lista = Array.isArray(listaResp?.content) ? listaResp.content : Array.isArray(listaResp) ? listaResp : [];
 
                 const normalizado = lista.map((r) => {
-                    const produtoNome = r?.produto?.nome || r?.produtoNome || 'Produto';
-                    const categoriaNome = r?.produto?.categoria || r?.categoria || '';
-                    const imagemUrl = r?.produto?.img || r?.produto?.imagem || r?.img || r?.imagem || '';
-                    const cliente = r?.usuario?.nome || r?.cliente || 'Cliente';
-                    const email = r?.usuario?.email || r?.email || '';
-                    const telefone = r?.usuario?.telefone || r?.telefone || '';
-                    const quantidade = r?.quantidade ? `${r.quantidade}X` : '1X';
+                    const produtoObj = r?.produto || {};
+                    const produtoId = produtoObj.id || r.produtoId || null;
+                    const produtoNome = produtoObj.nome || r.produtoNome || 'Produto';
+                    
+                    const usuarioObj = r?.usuario || {};
+                    const cliente = usuarioObj.nome || r.cliente || 'Cliente';
+                    const email = usuarioObj.email || r.email || '';
+                    const telefone = usuarioObj.telefone || r.telefone || '';
+                    
+                    const quantidadeNum = r?.quantidade || 1;
+                    const quantidade = `${quantidadeNum}X`;
+                    
                     const tamanho = r?.tamanho || 'N/A';
+                    const sabor = r?.sabor || 'N/A';
+
                     const preco = r?.precoUnitario || r?.preco || '';
                     const data = r?.dataSolicitacao || r?.data || r?.criadoEm || r?.createdAt || new Date().toISOString();
                     const status = (r?.status || '').toUpperCase();
 
                     return {
                         id: r?.id || Math.random().toString(36).slice(2),
+                        produtoId,
                         nome: cliente,
                         produto: produtoNome,
-                        categoria: categoriaNome,
+                        categoria: r.categoria || produtoObj.categoria || '',
                         quantidade,
+                        quantidadeNum,
                         tamanho,
-                        preco:
-                            typeof preco === 'number'
-                                ? preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-                                : String(preco || ''),
+                        sabor,
+                        preco: typeof preco === 'number' ? preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : String(preco || ''),
                         data,
                         email,
                         telefone,
-                        imagem: imagemUrl,
+                        imagem: produtoObj.img || produtoObj.imagem || r.img || r.imagem || '',
                         status,
                     };
                 });
 
-                // Filtra apenas aprovadas e canceladas
                 const filtradas = normalizado.filter(r =>
-                    ['APROVADA', 'CANCELADA'].includes(r.status)
+                    ['APROVADA', 'CANCELADA', 'CONCLUIDA', 'RETIRADO'].includes(r.status)
                 );
 
-                // Ordena por data decrescente (mais recentes primeiro)
-                const time = (d) => {
-                    const t = new Date(d).getTime();
-                    return isNaN(t) ? 0 : t;
-                };
-
+                const time = (d) => { const t = new Date(d).getTime(); return isNaN(t) ? 0 : t; };
                 const ordenadas = filtradas.sort((a, b) => time(b.data) - time(a.data));
 
                 setReservas(ordenadas);
@@ -111,36 +106,86 @@ const GerenciarReservas = () => {
     const filteredReservas = reservas
         .filter((r) => {
             if (statusFilter === 'Todos') return true;
+            if (statusFilter === 'CONCLUIDA') {
+                return r.status === 'CONCLUIDA' || r.status === 'RETIRADO';
+            }
             return r.status === statusFilter;
         })
-        .filter(
-            (r) =>
-                r.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                r.produto.toLowerCase().includes(searchTerm.toLowerCase())
+        .filter((r) =>
+            r.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            r.produto.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-        // Marca uma reserva como RETIRADO via API e atualiza o estado com o retorno
-        const handleMarcarRetirado = async (id) => {
-            if (!window.confirm('Confirma marcar esta reserva como retirada?')) return;
-            setProcessingId(id);
-            try {
-                const resp = await aprovarRetirada(id);
-                // A API pode retornar o objeto atualizado ou texto; tentamos extrair o status
-                const novoStatus = (resp?.status || 'RETIRADO').toString().toUpperCase();
-                setReservas((prev) => prev.map((r) => (r.id === id ? { ...r, status: novoStatus } : r)));
-            } catch (error) {
-                console.error('Erro ao aprovar retirada:', error);
-                alert('Erro ao marcar como retirado: ' + (error?.message || error));
-            } finally {
-                setProcessingId(null);
+    // --- FUNÇÃO CORRIGIDA PARA USAR FORMDATA ---
+    const handleMarcarRetirado = async (id) => {
+        const reservaAtual = reservas.find(r => r.id === id);
+        if (!reservaAtual) return;
+
+        if (!window.confirm(`Confirmar retirada de "${reservaAtual.produto}"?\nO estoque será reduzido em ${reservaAtual.quantidadeNum} unidade(s).`)) return;
+        
+        setProcessingId(id);
+
+        try {
+            // 1. Atualiza Status da Reserva
+            const resp = await aprovarRetirada(id);
+            
+            // 2. Atualiza Estoque do Produto
+            if (reservaAtual.produtoId) {
+                try {
+                    const produtoDados = await getProdutoById(reservaAtual.produtoId);
+                    
+                    const estoqueAtual = parseInt(produtoDados.quantidade || produtoDados.estoque || 0);
+                    const qtdRetirada = parseInt(reservaAtual.quantidadeNum || 1);
+                    let novoEstoque = estoqueAtual - qtdRetirada;
+                    if (novoEstoque < 0) novoEstoque = 0;
+
+                    // --- CORREÇÃO: Criar FormData ao invés de JSON ---
+                    // Como o backend rejeita JSON, empacotamos os dados como se fosse um formulário
+                    const formData = new FormData();
+                    formData.append('nome', produtoDados.nome || '');
+                    formData.append('preco', produtoDados.preco || 0);
+                    formData.append('categoria', produtoDados.categoria || '');
+                    formData.append('descricao', produtoDados.descricao || '');
+                    formData.append('quantidade', novoEstoque); // Novo estoque
+                    // formData.append('estoque', novoEstoque); // Descomente se seu backend usar 'estoque' e não 'quantidade'
+                    
+                    // IMPORTANTE: Não enviamos o campo 'img' se não houver nova imagem, 
+                    // pois enviar string (URL) onde espera arquivo pode quebrar.
+                    
+                    await updateProduto(reservaAtual.produtoId, formData);
+                    console.log(`Estoque atualizado via FormData: ${estoqueAtual} -> ${novoEstoque}`);
+
+                } catch (stockError) {
+                    console.error("Erro ao atualizar estoque:", stockError);
+                    // Exibe mensagem amigável sem travar o fluxo
+                    alert(`A reserva foi marcada como concluída, mas houve um erro ao atualizar o estoque: ${stockError.message}`);
+                }
+            } else {
+                console.warn("ID do produto não encontrado na reserva.");
             }
-        };
+
+            // 3. Atualiza Interface
+            const statusDaApi = (resp?.status || '').toUpperCase();
+            const novoStatus = (statusDaApi === 'RETIRADO' || statusDaApi === 'CONCLUIDA') 
+                               ? statusDaApi 
+                               : 'CONCLUIDA';
+
+            setReservas((prev) => prev.map((r) => (r.id === id ? { ...r, status: novoStatus } : r)));
+
+        } catch (error) {
+            console.error('Erro ao aprovar retirada:', error);
+            alert('Erro ao marcar como retirado: ' + (error?.message || error));
+        } finally {
+            setProcessingId(null);
+        }
+    };
 
     return (
         <div style={{ display: 'flex' }}>
             <MenuAdm />
             <main className="reservas-content-wrapper">
-                <div className="reservas-header">
+                
+                <div className="reservas-header" style={{ gap: '20px' }}>
                     <h1 className="reservas-title">Histórico</h1>
 
                     <div className="reservas-search-container">
@@ -193,20 +238,19 @@ const GerenciarReservas = () => {
                     )}
                 </div>
 
-                {/* ======================= MODIFICAÇÃO AQUI ======================= */}
                 {loading && (
-                  <div className="personal-loading"> {/* Classe do GerenciarPersonal */}
-                    <div className="loading-spinner"></div> {/* Spinner */}
-                    Carregando histórico...
-                  </div>
+                    <div className="personal-loading">
+                        <div className="loading-spinner"></div>
+                        Carregando histórico...
+                    </div>
                 )}
-                
+
                 {!!erro && !loading && (
-                    <div className="personal-error" style={{ padding: '20px', textAlign: 'center' }}> {/* Estilo de erro similar */}
+                    <div className="personal-error" style={{ padding: '20px', textAlign: 'center' }}>
                         <strong>Erro:</strong> {erro}
                     </div>
                 )}
-                
+
                 {!loading && !erro && (
                     <div className="reservas-list">
                         {filteredReservas.length > 0 ? (
@@ -231,17 +275,19 @@ const GerenciarReservas = () => {
                                     <div className="reserva-card-details">
                                         <p>
                                             <strong>Status:</strong>{' '}
-                                            <span className={`status-${reserva.status.toLowerCase()}`}>{reserva.status}</span>
+                                            <span className={`status-${(reserva.status === 'RETIRADO' ? 'CONCLUIDA' : reserva.status).toLowerCase()}`}>
+                                                {reserva.status === 'RETIRADO' ? 'CONCLUÍDA' : reserva.status}
+                                            </span>
                                         </p>
                                         <p><strong>Quantidade:</strong> {reserva.quantidade}</p>
                                         <p><strong>Tamanho:</strong> {reserva.tamanho}</p>
+                                        <p><strong>Sabor:</strong> {reserva.sabor}</p>
                                     </div>
 
                                     <div className="reserva-card-actions">
                                         <p className="reserva-price">{reserva.preco}</p>
                                         <p className="reserva-date">Data: {formatarData(reserva.data)}</p>
 
-                                        {/* Botão de marcar como RETIRADO: exibir apenas para reservas aprovadas */}
                                         {reserva.status === 'APROVADA' ? (
                                             <button
                                                 className="retirado-btn"
@@ -250,8 +296,8 @@ const GerenciarReservas = () => {
                                             >
                                                 {processingId === reserva.id ? 'Processando...' : 'Retirado'}
                                             </button>
-                                        ) : reserva.status === 'RETIRADO' ? (
-                                            <span className="status-retirado">Retirado</span>
+                                        ) : (reserva.status === 'CONCLUIDA' || reserva.status === 'RETIRADO') ? (
+                                            <span className="status-concluida">Concluída</span>
                                         ) : null}
                                     </div>
                                 </div>
@@ -263,8 +309,6 @@ const GerenciarReservas = () => {
                         )}
                     </div>
                 )}
-                {/* ================================================================ */}
-
             </main>
         </div>
     );
