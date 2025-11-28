@@ -4,7 +4,7 @@ import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { getAlunoById, updateAluno, deleteAluno, API_URL } from '../../../services/usuarioService';
 
-// Reuse PlusIcon and EyeIcon from EditarPersonal pattern
+// Ícones reutilizados
 const PlusIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 5V19" stroke="#007bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -40,12 +40,11 @@ const EditarAluno = () => {
   const { id } = useParams();
   const location = useLocation();
 
-  // Support receiving aluno via location.state (existing behavior) or via param id
   const alunoState = location.state?.aluno;
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); 
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -58,6 +57,7 @@ const EditarAluno = () => {
     senha: '',
     confirmarSenha: '',
     idade: '',
+    sexo: '', 
     peso: '',
     altura: '',
     objetivo: '',
@@ -66,9 +66,8 @@ const EditarAluno = () => {
 
   const [imagemPreview, setImagemPreview] = useState(null);
   const [imagemFile, setImagemFile] = useState(null);
-  const [imagemOriginal, setImagemOriginal] = useState(null); // URL original do servidor
+  const [imagemOriginal, setImagemOriginal] = useState(null);
 
-  // Busca dados do aluno quando houver id; caso contrário usa estado ou localStorage
   useEffect(() => {
     let mounted = true;
 
@@ -81,6 +80,7 @@ const EditarAluno = () => {
         telefone: dados.telefone || dados.numero || prev.telefone || '',
         plano: dados.plano || prev.plano || '',
         idade: dados.idade || prev.idade || '',
+        sexo: dados.sexo || prev.sexo || '',
         peso: dados.peso || prev.peso || '',
         altura: dados.altura || prev.altura || '',
         objetivo: dados.objetivo || prev.objetivo || '',
@@ -92,9 +92,9 @@ const EditarAluno = () => {
         const baseServer = API_URL.replace(/\/api$/, '');
         const isAbsolute = /^https?:\/\//i.test(foto);
         const fotoUrl = isAbsolute ? foto : (foto.startsWith('/') ? `${baseServer}${foto}` : `${baseServer}/${foto}`);
-        setImagemOriginal(fotoUrl); // Salva URL original
-        setImagemPreview(fotoUrl); // Mostra preview inicial
-        setImagemFile(null); // Limpa o arquivo selecionado
+        setImagemOriginal(fotoUrl);
+        setImagemPreview(fotoUrl);
+        setImagemFile(null);
       }
     };
 
@@ -104,7 +104,6 @@ const EditarAluno = () => {
           const aluno = await getAlunoById(id);
           if (!mounted) return;
           if (!aluno) {
-            // fallback to local state
             if (alunoState) preencherCampos(alunoState);
             return;
           }
@@ -117,7 +116,6 @@ const EditarAluno = () => {
     } else if (alunoState) {
       preencherCampos(alunoState);
     } else {
-      // fallback to localStorage (compatibilidade com versão anterior)
       const alunoLocal = localStorage.getItem('alunoParaEditar');
       if (alunoLocal) {
         try {
@@ -127,7 +125,6 @@ const EditarAluno = () => {
           console.warn('Aluno no localStorage inválido');
         }
       } else if (!id) {
-        // nada encontrado, redireciona
         alert('Dados do aluno não encontrados.');
         navigate('/GerenciarAlunos');
       }
@@ -141,7 +138,6 @@ const EditarAluno = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // senha validation helpers
   const senha = formData.senha || '';
   const validations = {
     length: senha.length >= 6,
@@ -155,41 +151,22 @@ const EditarAluno = () => {
   const handleImagemChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validação de tamanho (máx 5MB)
       const maxSizeMB = 5;
-      const maxSizeBytes = maxSizeMB * 1024 * 1024;
-      
-      if (file.size > maxSizeBytes) {
-        alert(`A imagem deve ter no máximo ${maxSizeMB}MB. Tamanho atual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        alert(`A imagem deve ter no máximo ${maxSizeMB}MB.`);
         return;
       }
-
-      // Validação de tipo
       const tiposAceitos = ['image/png', 'image/jpeg', 'image/webp'];
       if (!tiposAceitos.includes(file.type)) {
-        alert('Por favor, selecione uma imagem válida (PNG, JPEG ou WebP)');
+        alert('Por favor, selecione uma imagem válida.');
         return;
       }
-
-      console.log('📸 Imagem selecionada:', file.name, 'Tipo:', file.type, 'Tamanho:', (file.size / 1024).toFixed(2) + 'KB');
-      
-      // Criar nova URL local para preview
       const novaPreview = URL.createObjectURL(file);
-      console.log('🖼️ Preview URL criada:', novaPreview);
-      
-      // Limpar URL anterior se for local
       if (imagemPreview && imagemPreview.startsWith('blob:')) {
         URL.revokeObjectURL(imagemPreview);
-        console.log('🗑️ URL anterior limpa');
       }
-      
-      // Atualizar estado
       setImagemFile(file);
       setImagemPreview(novaPreview);
-      
-      console.log('✅ Nova imagem pronta para envio');
-    } else {
-      console.warn('⚠️ Nenhum arquivo selecionado');
     }
   };
 
@@ -197,30 +174,19 @@ const EditarAluno = () => {
     navigate('/GerenciarAlunos');
   };
 
-  const handleExcluir = async () => {
-    try {
-      setIsDeleting(true);
-      const alvoId = id || (JSON.parse(localStorage.getItem('alunoParaEditar') || '{}').id);
-      if (!alvoId) throw new Error('ID do aluno não encontrado para exclusão.');
-      await deleteAluno(alvoId);
-      alert('Aluno excluído com sucesso!');
-      navigate('/GerenciarAlunos');
-    } catch (err) {
-      console.error('Erro ao excluir aluno:', err);
-      alert(err?.message || 'Falha ao excluir aluno.');
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteModal(false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validações simples
-    if (!formData.nome || !formData.email || !formData.cpf || !formData.telefone) {
+    if (!formData.nome || !formData.email || !formData.cpf || !formData.telefone || !formData.plano) {
       alert('Por favor, preencha todos os campos obrigatórios.');
       return;
+    }
+
+    if (formData.plano === 'GOLD') {
+      if (!formData.idade || !formData.sexo || !formData.peso || !formData.altura || !formData.objetivo || !formData.nivelAtividade) {
+        alert('Para o plano GOLD, os campos: idade, sexo, peso, altura, objetivo e nível de atividade são obrigatórios.');
+        return;
+      }
     }
 
     if (formData.senha && formData.senha !== formData.confirmarSenha) {
@@ -231,30 +197,30 @@ const EditarAluno = () => {
     try {
       setIsSubmitting(true);
       const dados = new FormData();
-      dados.append('nome', formData.nome || '');
-      dados.append('email', formData.email || '');
-      dados.append('cpf', formData.cpf || '');
-      dados.append('telefone', formData.telefone || '');
-      dados.append('plano', formData.plano || '');
-      if (formData.senha) dados.append('senha', formData.senha);
-      if (formData.idade) dados.append('idade', formData.idade);
-      if (formData.peso) dados.append('peso', formData.peso);
-      if (formData.altura) dados.append('altura', formData.altura);
-      if (formData.objetivo) dados.append('objetivo', formData.objetivo);
-      if (formData.nivelAtividade) dados.append('nivelAtividade', formData.nivelAtividade);
+      dados.append('nome', formData.nome);
+      dados.append('email', formData.email);
+      dados.append('cpf', formData.cpf);
+      dados.append('telefone', formData.telefone);
+      dados.append('plano', formData.plano);
       
-      // Debug da imagem
+      if (formData.senha) dados.append('senha', formData.senha);
+
+      if (formData.plano === 'GOLD') {
+        dados.append('idade', formData.idade);
+        dados.append('sexo', formData.sexo); 
+        dados.append('peso', formData.peso);
+        dados.append('altura', formData.altura);
+        dados.append('objetivo', formData.objetivo);
+        dados.append('nivelAtividade', formData.nivelAtividade);
+      }
+
       if (imagemFile) {
-        console.log('✅ Imagem será enviada:', imagemFile.name, imagemFile.type);
-        dados.append('fotoPerfil', imagemFile); // Usar 'fotoPerfil' consistente com criar
-      } else {
-        console.warn('⚠️ Nenhuma imagem para enviar');
+        dados.append('fotoPerfil', imagemFile);
       }
 
       const alvoId = id || (JSON.parse(localStorage.getItem('alunoParaEditar') || '{}').id);
       if (!alvoId) throw new Error('ID do aluno não encontrado para atualização.');
 
-      console.log('📤 Enviando dados do aluno para API...');
       await updateAluno(alvoId, dados);
 
       alert('Aluno atualizado com sucesso.');
@@ -275,6 +241,7 @@ const EditarAluno = () => {
         <h1 className="editar-aluno-title">Editar Aluno</h1>
 
         <div className="editar-aluno-form-layout">
+          {/* Seção da Imagem */}
           <div className="editar-aluno-image-section">
             <label htmlFor="profile-pic" className="editar-aluno-image-placeholder">
               {imagemPreview ? (
@@ -296,7 +263,6 @@ const EditarAluno = () => {
                 onClick={() => {
                   setImagemFile(null);
                   setImagemPreview(imagemOriginal);
-                  console.log('🔄 Imagem resetada para original');
                 }}
               >
                 Desfazer alteração
@@ -304,6 +270,7 @@ const EditarAluno = () => {
             )}
           </div>
 
+          {/* Seção do Formulário */}
           <div className="editar-aluno-fields-section">
             <form onSubmit={handleSubmit}>
               <div className="editar-aluno-form-group">
@@ -326,6 +293,89 @@ const EditarAluno = () => {
                 <input type="tel" id="telefone" name="telefone" value={formData.telefone} onChange={handleChange} required />
               </div>
 
+              {/* Seletor de Plano */}
+              <div className="editar-aluno-form-group">
+                <label htmlFor="plano">Plano</label>
+                <select 
+                  id="plano" 
+                  name="plano" 
+                  value={formData.plano} 
+                  onChange={handleChange} 
+                  required
+                >
+                  <option value="" disabled>Selecione um plano</option>
+                  <option value="BASICO">Básico</option>
+                  <option value="ESSENCIAL">Essencial</option>
+                  <option value="GOLD">Gold</option>
+                </select>
+              </div>
+
+              {/* Campos Condicionais (Plano GOLD) */}
+              {(formData.plano === 'GOLD') && (
+                <>
+                  <div className="editar-aluno-form-group">
+                    <label htmlFor="idade">Idade</label>
+                    <input type="number" id="idade" name="idade" value={formData.idade} onChange={handleChange} placeholder="Ex: 25" required />
+                  </div>
+
+                  <div className="editar-aluno-form-group">
+                    <label htmlFor="sexo">Sexo</label>
+                    <select 
+                      id="sexo" 
+                      name="sexo" 
+                      value={formData.sexo} 
+                      onChange={handleChange} 
+                      required
+                    >
+                      <option value="" disabled>Selecione</option>
+                      <option value="MASCULINO">Masculino</option>
+                      <option value="FEMININO">Feminino</option>
+                    </select>
+                  </div>
+                  
+                  <div className="editar-aluno-form-group">
+                    <label htmlFor="peso">Peso (kg)</label>
+                    <input type="number" id="peso" name="peso" value={formData.peso} onChange={handleChange} placeholder="Ex: 70.5" step="0.1" required />
+                  </div>
+
+                  <div className="editar-aluno-form-group">
+                    <label htmlFor="altura">Altura (cm)</label>
+                    <input 
+                      type="number" 
+                      id="altura" 
+                      name="altura" 
+                      value={formData.altura} 
+                      onChange={handleChange} 
+                      placeholder="Ex: 175" 
+                      step="1" 
+                      required 
+                    />
+                  </div>
+
+                  <div className="editar-aluno-form-group">
+                    <label htmlFor="objetivo">Objetivo</label>
+                    <input type="text" id="objetivo" name="objetivo" value={formData.objetivo} onChange={handleChange} placeholder="Ex: Hipertrofia" required />
+                  </div>
+
+                  <div className="editar-aluno-form-group">
+                    <label htmlFor="nivelAtividade">Nível Atividade</label>
+                    <select 
+                      id="nivelAtividade" 
+                      name="nivelAtividade" 
+                      value={formData.nivelAtividade} 
+                      onChange={handleChange} 
+                      required
+                    >
+                      <option value="" disabled>Selecione</option>
+                      <option value="INICIANTE">Iniciante</option>
+                      <option value="INTERMEDIARIO">Intermediário</option>
+                      <option value="AVANCADO">Avançado</option> 
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {/* Campos de Senha */}
               <div className="editar-aluno-form-group">
                 <label htmlFor="senha">Nova Senha</label>
                 <div className="password-input-wrapper">
@@ -335,6 +385,7 @@ const EditarAluno = () => {
                     name="senha" 
                     value={formData.senha} 
                     onChange={handleChange}
+                    placeholder="Deixe em branco para manter"
                   />
                   <span 
                     className="password-toggle"
@@ -346,29 +397,31 @@ const EditarAluno = () => {
                 </div>
               </div>
 
-              <div className="password-requirements">
-                <p className="password-hint">A senha deve conter:</p>
-                <ul>
-                  <li className={`requirement ${validations.length ? 'met' : 'unmet'}`}>
-                    Pelo menos 6 caracteres
-                  </li>
-                  <li className={`requirement ${validations.upper ? 'met' : 'unmet'}`}>
-                    Pelo menos uma letra maiúscula
-                  </li>
-                  <li className={`requirement ${validations.lower ? 'met' : 'unmet'}`}>
-                    Pelo menos uma letra minúscula
-                  </li>
-                  <li className={`requirement ${validations.number ? 'met' : 'unmet'}`}>
-                    Pelo menos um número
-                  </li>
-                  <li className={`requirement ${validations.special ? 'met' : 'unmet'}`}>
-                    Pelo menos um caractere especial
-                  </li>
-                </ul>
-              </div>
+              {formData.senha && (
+                <div className="password-requirements">
+                  <p className="password-hint">A senha deve conter:</p>
+                  <ul>
+                    <li className={`requirement ${validations.length ? 'met' : 'unmet'}`}>
+                      Pelo menos 6 caracteres
+                    </li>
+                    <li className={`requirement ${validations.upper ? 'met' : 'unmet'}`}>
+                      Pelo menos uma letra maiúscula
+                    </li>
+                    <li className={`requirement ${validations.lower ? 'met' : 'unmet'}`}>
+                      Pelo menos uma letra minúscula
+                    </li>
+                    <li className={`requirement ${validations.number ? 'met' : 'unmet'}`}>
+                      Pelo menos um número
+                    </li>
+                    <li className={`requirement ${validations.special ? 'met' : 'unmet'}`}>
+                      Pelo menos um caractere especial
+                    </li>
+                  </ul>
+                </div>
+              )}
 
               <div className="editar-aluno-form-group">
-                <label htmlFor="confirmarSenha">Confirmar Nova Senha</label>
+                <label htmlFor="confirmarSenha">Confirmar</label>
                 <div className="password-input-wrapper">
                   <input 
                     type={showConfirmPassword ? "text" : "password"} 
@@ -376,6 +429,7 @@ const EditarAluno = () => {
                     name="confirmarSenha" 
                     value={formData.confirmarSenha} 
                     onChange={handleChange}
+                    disabled={!formData.senha}
                   />
                   <span 
                     className="password-toggle"
@@ -387,13 +441,15 @@ const EditarAluno = () => {
                 </div>
               </div>
 
-              <div className="password-requirements">
-                <ul>
-                  <li className={`requirement ${confirmMatches ? 'met' : 'unmet'}`}>
-                    Confirmação corresponde à nova senha
-                  </li>
-                </ul>
-              </div>
+              {formData.senha && (
+                <div className="password-requirements">
+                  <ul>
+                    <li className={`requirement ${confirmMatches ? 'met' : 'unmet'}`}>
+                      Confirmação corresponde à nova senha
+                    </li>
+                  </ul>
+                </div>
+              )}
 
               <div className="editar-aluno-actions">
                 <button 
