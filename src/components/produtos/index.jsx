@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'; // 1. Importar useCallback
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllProdutos } from '../../services/produtoService';
 import './produto.css';
 import { fixImageUrl } from '../../utils/image';
 
-// --- 2. FUNÇÃO HELPER DE ESTOQUE ADICIONADA ---
+// --- FUNÇÃO HELPER DE ESTOQUE ---
 /**
  * Calcula o estoque total de um produto, independentemente do seu tipo.
  */
@@ -21,11 +21,18 @@ const calcularEstoqueTotal = (produto) => {
   if (produto.estoquePorTamanho && typeof produto.estoquePorTamanho === 'object') {
     return Object.values(produto.estoquePorTamanho).reduce((total, qtd) => total + (Number(qtd) || 0), 0);
   }
-  // 4. Fallback
+  
+  // 4. Fallback (Segurança para caso a API retorne 'quantidade' ou 'estoque')
+  if (produto.quantidade !== undefined && produto.quantidade !== null) {
+    return Number(produto.quantidade);
+  }
+  if (produto.estoque !== undefined && produto.estoque !== null) {
+    return Number(produto.estoque);
+  }
+
   return 0;
 };
 // --- FIM DA FUNÇÃO HELPER ---
-
 
 const ProdutosSection = () => {
   const navigate = useNavigate();
@@ -34,7 +41,7 @@ const ProdutosSection = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // --- 3. fetchProdutos refatorado com useCallback ---
+  // --- fetchProdutos refatorado ---
   const fetchProdutos = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -52,20 +59,17 @@ const ProdutosSection = () => {
       });
 
       const limitedProducts = [];
+      
       for (const categoryArray of grouped.values()) {
-        
-        // --- 4. ALTERAÇÃO PRINCIPAL: FILTRO DE ESTOQUE APLICADO ---
-        // 1. Filtra o array da categoria para conter apenas produtos com estoque
+        // --- LÓGICA DE FILTRO DE ESTOQUE ---
+        // 1. Filtra o array da categoria para conter APENAS produtos com estoque maior que 0
         const produtosComEstoque = categoryArray.filter(p => calcularEstoqueTotal(p) > 0);
 
-        // 2. Se houver produtos com estoque nessa categoria...
+        // 2. Se houver produtos com estoque nessa categoria, pega o primeiro
         if (produtosComEstoque.length > 0) {
-          // 3. Pega o primeiro item *da lista já filtrada* (A LÓGICA DE 1 POR CATEGORIA)
           const firstOne = produtosComEstoque.slice(0, 1); 
           limitedProducts.push(...firstOne);
         }
-        // Se 'produtosComEstoque' estiver vazio, nada desta categoria será adicionado.
-        // --- FIM DA ALTERAÇÃO ---
       }
 
       setProdutos(limitedProducts); 
@@ -76,14 +80,13 @@ const ProdutosSection = () => {
     } finally {
       setLoading(false);
     }
-  }, []); // Array de dependência vazio
+  }, []);
 
-  // useEffect agora apenas chama a função
   useEffect(() => {
     fetchProdutos();
   }, [fetchProdutos]); 
 
-  // --- Funções de Navegação (sem alterações) ---
+  // --- Funções de Navegação ---
   const irParaDetalhes = (produtoId) => {
     navigate(`/LojaProduto/${produtoId}`);
   };
@@ -91,16 +94,12 @@ const ProdutosSection = () => {
   const adicionarAoCarrinho = (produtoId) => {
     navigate(`/carrinho?add=${produtoId}`);
   };
-  // --- Fim das Funções de Navegação ---
 
-
-  // --- 5. RENDERIZAÇÃO ATUALIZADA (Spinner e Erro) ---
   return (
     <section className="products-section">
       <h2 className="section-title">Destaques da Loja</h2>
 
-      {/* === INÍCIO DA LÓGICA DE LOADING/ERROR (Padrão GerenciarPersonal) === */}
-      
+      {/* === LÓGICA DE LOADING/ERROR === */}
       {loading && (
         <div 
           className="personal-loading" 
@@ -132,7 +131,6 @@ const ProdutosSection = () => {
 
       {!loading && !error && (
         <>
-          {/* 6. Adicionando mensagem de "nenhum produto" */}
           {produtos.length === 0 ? (
             <div style={{ 
               minHeight: '200px', 
@@ -146,7 +144,7 @@ const ProdutosSection = () => {
             </div>
           ) : (
             <div className="cards-container">
-              {/* Mapeia o array (1 por categoria, COM estoque) */}
+              {/* Renderiza apenas os produtos filtrados (1 por categoria e COM estoque) */}
               {produtos.map((produto) => (
                 <div className="product-card" key={produto.id}>
                   <img src={fixImageUrl(produto.img)} alt={produto.nome} />
@@ -171,8 +169,6 @@ const ProdutosSection = () => {
           )}
         </>
       )}
-      {/* === FIM DA LÓGICA DE LOADING/ERROR === */}
-
     </section>
   );
 };
