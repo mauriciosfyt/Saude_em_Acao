@@ -86,7 +86,7 @@ const EditarPersonal = () => {
         if (foto) {
           // Se retornar URL absoluta, usa direto.
           // Se retornar caminho relativo (ex: /uploads/xyz.jpg ou uploads/xyz.jpg), prefixa com a base do servidor (sem /api).
-          const baseServer = API_URL.replace(/\/api$/, ''); // ex: http://34.205.11.57
+          const baseServer = API_URL.replace(/\/api$/, ''); // ex: http://54.81.240.117
           const isAbsolute = /^https?:\/\//i.test(foto);
           const fotoUrl = isAbsolute ? foto : (foto.startsWith('/') ? `${baseServer}${foto}` : `${baseServer}/${foto}`);
           setImagemOriginal(fotoUrl); // Salva URL original

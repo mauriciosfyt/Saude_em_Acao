@@ -4,7 +4,7 @@ import MenuPersonal from '../../../components/MenuPersonal/MenuPersonal'
 import { Link } from 'react-router-dom';
 import ModalGerenciarTreino from '../../../pages/Tela Adm/GerenciarAluno/ModalGerenciarTreino';
 // --- Importação da função da API ---
-import { getAllAlunos } from '../../../services/usuarioService';
+import { getAllAlunos, updateAluno } from '../../../services/usuarioService';
 // --- Você pode precisar do useAuth se a sua API exigir token ---
 // import { useAuth } from '../../../contexts/AuthContext'; 
 
@@ -46,6 +46,18 @@ const AdministrarAluno = () => {
   // Executa a busca na montagem do componente
   useEffect(() => {
     fetchAlunos();
+    // Carregar atribuições salvas localmente
+    try {
+      const raw = localStorage.getItem('assignedTreinos');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          setSelectedTreinos(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn('Falha ao ler assignedTreinos do localStorage', e);
+    }
   }, []);
 
   const handleOpenModal = (aluno) => {
@@ -58,10 +70,27 @@ const AdministrarAluno = () => {
     setSelectedAluno(null);
   };
 
-  // Recebe o treino escolhido no modal e salva por aluno
-  const handleChooseTreino = (treino) => {
-    if (!selectedAluno) return;
-    setSelectedTreinos(prev => ({ ...prev, [selectedAluno.id]: treino }));
+  // Recebe o treino escolhido no modal e salva por aluno (tenta persistir no servidor, sempre salva localmente)
+  const handleChooseTreino = async (treino, alunoIdParam) => {
+    const alunoIdFinal = alunoIdParam || (selectedAluno?.id && String(selectedAluno.id));
+    if (!alunoIdFinal) {
+      alert('ID do aluno não encontrado. Tente novamente.');
+      return;
+    }
+
+    setSelectedTreinos(prev => {
+      const next = { ...prev, [alunoIdFinal]: treino };
+      try { localStorage.setItem('assignedTreinos', JSON.stringify(next)); } catch (e) { console.warn('Erro salvando assignedTreinos', e); }
+      return next;
+    });
+
+    // Tenta persistir no backend usando updateAluno (campo sugerido: treinoId)
+    try {
+      await updateAluno(alunoIdFinal, { treinoId: treino.id });
+      console.log('Treino associado ao aluno via API com sucesso (personal)');
+    } catch (err) {
+      console.warn('Falha ao salvar associação de treino no servidor (personal), persistido localmente.', err);
+    }
     setModalOpen(false);
     setSelectedAluno(null);
   };

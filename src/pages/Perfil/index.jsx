@@ -6,6 +6,7 @@ import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import './Perfil.css'; // Importa o CSS corrigido
 import performLogout from "../../components/LogoutButton/LogoutButton";
 import { getMeuPerfil, API_URL } from "../../services/usuarioService";
+import { getMeusTreinos } from "../../services/treinoService";
 import { fixImageUrl } from "../../utils/image";
 import { FaTimesCircle } from 'react-icons/fa';
 
@@ -138,6 +139,20 @@ const Perfil = () => {
               : (possibleImage.startsWith('/') ? `${baseServer}${possibleImage}` : `${baseServer}/${possibleImage}`);
             setProfileImage(fixImageUrl(fotoUrl));
           }
+          // Também tenta buscar treinos atribuídos ao aluno
+          try {
+            const meus = await getMeusTreinos();
+            if (meus) {
+              // Normaliza para array
+              const arr = Array.isArray(meus) ? meus : (meus.data || meus.content || []);
+              if (arr && arr.length > 0) {
+                // adiciona campo treinos no estado para renderização simples
+                setUserData(prev => ({ ...prev, treinosAtribuidos: arr }));
+              }
+            }
+          } catch (e) {
+            console.warn('Não foi possível carregar meus treinos:', e);
+          }
         } catch (e) {
           console.warn('Erro ao buscar imagem do perfil:', e);
         }
@@ -208,6 +223,18 @@ const Perfil = () => {
               : (possibleImage.startsWith('/') ? `${baseServer}${possibleImage}` : `${baseServer}/${possibleImage}`);
             setProfileImage(fixImageUrl(fotoUrl));
           }
+          // Também tenta buscar treinos atribuídos ao aluno
+          try {
+            const meus = await getMeusTreinos();
+            if (meus) {
+              const arr = Array.isArray(meus) ? meus : (meus.data || meus.content || []);
+              if (arr && arr.length > 0) {
+                setUserData(prev => ({ ...prev, treinosAtribuidos: arr }));
+              }
+            }
+          } catch (e) {
+            console.warn('Não foi possível carregar meus treinos:', e);
+          }
         } catch (e) {
           console.warn('Erro ao buscar imagem do perfil:', e);
         }
@@ -254,6 +281,24 @@ const Perfil = () => {
                   <hr className="perfil-linha-divisoria" />
                   <p className="perfil-ultimo-treino"><strong>{userData.ultimoTreino}</strong></p>
                   <p className="perfil-info-label">Último Treino</p>
+                </div>
+              </div>
+            )}
+
+            {/* Card para mostrar treinos atribuídos ao aluno */}
+            {Array.isArray(userData.treinosAtribuidos) && userData.treinosAtribuidos.length > 0 && (
+              <div className="perfil-card-info perfil-treinos-card">
+                <div className="perfil-card-header">
+                  <span className="perfil-icon-treino">🏋️</span>
+                  <h4>Meus Treinos</h4>
+                </div>
+                <div className="perfil-treinos-list">
+                  {userData.treinosAtribuidos.map((t, i) => (
+                    <div key={t.id || i} className="perfil-treino-item">
+                      <strong>{t.nome || t.titulo || t.title || 'Treino'}</strong>
+                      <div className="perfil-treino-meta">{t.frequenciaSemanal ? `${t.frequenciaSemanal}x por semana` : ''}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

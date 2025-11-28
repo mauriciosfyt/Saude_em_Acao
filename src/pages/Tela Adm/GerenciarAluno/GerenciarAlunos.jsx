@@ -3,7 +3,7 @@ import './GerenciarAlunos.css';
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { Link } from 'react-router-dom';
 import ModalGerenciarTreino from './ModalGerenciarTreino';
-import { getAllAlunos, deleteAluno } from '../../../services/usuarioService'; // Importar as funções da API
+import { getAllAlunos, deleteAluno, updateAluno } from '../../../services/usuarioService'; // Importar as funções da API
 import { useAuth } from '../../../contexts/AuthContext'; // Importar o contexto de auth
 
 // Ícone de busca (mantido igual)
@@ -38,6 +38,28 @@ const GerenciarAlunos = () => {
       const alunosData = await getAllAlunos();
       console.log(' Dados recebidos:', alunosData);
       setAlunos(alunosData);
+
+      // Extrair possíveis treinos já associados no objeto aluno (se existirem)
+      try {
+        const saved = {};
+        alunosData.forEach(a => {
+          // Possíveis campos que podem conter um treino associado
+          const candidato = a.treino || a.treinoId || a.treinoAtual || a.assignedTreino || a.treinos || null;
+          if (candidato) {
+            // Se for array, pega primeiro; se for objeto, usa objeto; se for id, tenta construir um objeto leve
+            if (Array.isArray(candidato) && candidato.length > 0) saved[a.id] = candidato[0];
+            else if (typeof candidato === 'object') saved[a.id] = candidato;
+            else saved[a.id] = { id: candidato, titulo: 'Treino atribuído' };
+          }
+        });
+        // Merge com localStorage (localStorage tem prioridade)
+        const raw = localStorage.getItem('assignedTreinos');
+        const local = raw ? JSON.parse(raw) : {};
+        const merged = { ...saved, ...local };
+        if (Object.keys(merged).length > 0) setSelectedTreinos(merged);
+      } catch (e) {
+        console.warn('Erro ao extrair treinos dos alunos:', e);
+      }
     } catch (err) {
       console.error(' Erro ao carregar alunos:', err);
       setError('Erro ao carregar lista de alunos. Verifique sua conexão e permissões.');
@@ -48,6 +70,18 @@ const GerenciarAlunos = () => {
 
   useEffect(() => {
     fetchAlunos();
+    // Carregar atribuições salvas localmente (fallback)
+    try {
+      const raw = localStorage.getItem('assignedTreinos');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          setSelectedTreinos(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn('Falha ao ler assignedTreinos do localStorage', e);
+    }
   }, []);
 
   // Função para deletar aluno
@@ -75,9 +109,30 @@ const GerenciarAlunos = () => {
     setSelectedAluno(null);
   };
 
-  const handleChooseTreino = (treino) => {
-    if (!selectedAluno) return;
-    setSelectedTreinos(prev => ({ ...prev, [selectedAluno.id]: treino }));
+  const handleChooseTreino = async (treino, alunoIdParam) => {
+    // Recebe (treino, alunoId) vindo do modal
+    const alunoIdFinal = alunoIdParam || (selectedAluno?.id && String(selectedAluno.id));
+    if (!alunoIdFinal) {
+      alert('ID do aluno não encontrado. Tente novamente.');
+      return;
+    }
+
+    // Atualiza UI local primeiro
+    setSelectedTreinos(prev => {
+      const next = { ...prev, [alunoIdFinal]: treino };
+      try { localStorage.setItem('assignedTreinos', JSON.stringify(next)); } catch (e) { console.warn('Erro salvando assignedTreinos', e); }
+      return next;
+    });
+
+    // Tenta persistir no backend usando updateAluno (campo sugerido: treinoId)
+    try {
+      // Usamos JSON simples — updateAluno aceita FormData ou JSON
+      await updateAluno(alunoIdFinal, { treinoId: treino.id });
+      console.log('Treino associado ao aluno via API com sucesso');
+    } catch (err) {
+      console.warn('Falha ao salvar associação de treino no servidor, persistido localmente.', err);
+    }
+
     setModalOpen(false);
     setSelectedAluno(null);
   };

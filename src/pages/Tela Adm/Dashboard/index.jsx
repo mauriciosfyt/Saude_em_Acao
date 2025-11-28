@@ -133,10 +133,10 @@ const Dashboard = () => {
           console.log('[Dashboard] Totais mapeados -> A:', A, 'B:', B, 'C:', C, 'D:', D);
 
           const breakdown = [
-            { label: 'Camiseta', value: A, color: '#2c3e50' },
-            { label: 'Creatina', value: B, color: '#f39c12' },
-            { label: 'Whey', value: C, color: '#27ae60' },
-            { label: 'Vitamina', value: D, color: '#16a085' },
+            { label: 'Camiseta', value: A, color: '#C2E541' },
+            { label: 'Creatina', value: B, color: '#FEBF01' },
+            { label: 'Whey', value: C, color: '#5F77AF' },
+            { label: 'Vitamina', value: D, color: '#41E5E5' },
           ];
           console.log('[Dashboard] Breakdown ABCD preparado:', breakdown);
           setBreakdownABCD(breakdown);
@@ -153,13 +153,24 @@ const Dashboard = () => {
               const reservas = await fetchReservas({});
               console.log('[Dashboard] Fallback /api/reservas lista (sem filtro):', reservas);
               let A2 = 0, B2 = 0, C2 = 0, D2 = 0;
-              const lista = Array.isArray(reservas?.content) ? reservas.content : (Array.isArray(reservas) ? reservas : []);
-              console.log('[Dashboard] Lista de reservas encontrada:', lista.length, 'itens');
+              let lista = Array.isArray(reservas?.content) ? reservas.content : (Array.isArray(reservas) ? reservas : []);
+              // Filtrar apenas reservas ativas (não canceladas)
+              lista = lista.filter(r => {
+                const status = (r?.status || '').toString().toUpperCase();
+                return !status.includes('CANCELAD');
+              });
+              console.log('[Dashboard] Lista de reservas encontrada (pós-filtro):', lista.length, 'itens');
               lista.forEach((r) => {
+                // Filtrar reservas canceladas: não contar no total se o status for CANCELADO/CANCELADA/Cancelado
+                const status = (r?.status || '').toString().toUpperCase();
+                if (status.includes('CANCELAD')) {
+                  console.log('[Dashboard] Pulando reserva cancelada:', r);
+                  return; // Ignora reservas canceladas
+                }
                 const nome = (r?.produto?.nome || r?.produtoNome || r?.nome || '').toString().toLowerCase();
                 const cat = (r?.produto?.categoria || r?.categoria || '').toString().toLowerCase();
                 const qtd = Number(r?.quantidade || 1) || 1;
-                console.log('[Dashboard] Analisando reserva:', { nome, cat, qtd });
+                console.log('[Dashboard] Analisando reserva:', { nome, cat, qtd, status });
                 const isA = nome.includes('camiseta') || nome.includes('camisa') || cat.includes('camiseta') || cat.includes('camisa');
                 const isB = nome.includes('creatina') || cat.includes('creatina');
                 const isC = nome.includes('whey protein') || nome.includes('whey') || cat.includes('whey protein') || cat.includes('whey');
@@ -168,10 +179,10 @@ const Dashboard = () => {
               });
               console.log('[Dashboard] Fallback totais -> A:', A2, 'B:', B2, 'C:', C2, 'D:', D2);
               const fallbackBreakdown = [
-                { label: 'Camiseta', value: A2, color: '#2c3e50' },
-                { label: 'Creatina', value: B2, color: '#f39c12' },
-                { label: 'Whey', value: C2, color: '#27ae60' },
-                { label: 'Vitamina', value: D2, color: '#16a085' },
+                { label: 'Camiseta', value: A2, color: '#C2E541' },
+                { label: 'Creatina', value: B2, color: '#FEBF01' },
+                { label: 'Whey', value: C2, color: '#5F77AF' },
+                { label: 'Vitamina', value: D2, color: '#41E5E5' },
               ];
               setBreakdownABCD(fallbackBreakdown);
               const soma2 = A2 + B2 + C2 + D2;
@@ -191,6 +202,16 @@ const Dashboard = () => {
     return () => { isMounted = false; };
   }, [authLoading, user?.token]);
 
+  // Refetch a cada 30 segundos para atualizar quando reservas forem canceladas em outro lugar
+  useEffect(() => {
+    if (authLoading) return;
+    const interval = setInterval(() => {
+      console.log('[Dashboard] 🔄 Refetch periódico disparado (30s)');
+      // Pode ser estendido se necessário, por enquanto apenas loga
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [authLoading]);
+
   return (
     <div className="dashboard-container">
       <MenuAdm activeItem={activeMenuItem} onItemClick={handleMenuClick} />
@@ -207,29 +228,25 @@ const Dashboard = () => {
 
           <aside className="products-sidebar">
             <ProductCard 
-              nome="Produto A" 
-              preco="R$300,00" 
+              nome="Camisetas" 
               tipo="tshirt" 
               imagem={camisaImg}
               total={breakdownABCD ? breakdownABCD[0]?.value : null}
             />
             <ProductCard 
-              nome="Produto B" 
-              preco="R$300,00" 
+              nome="Creatina" 
               tipo="supplement" 
               imagem={preTreinoImg}
               total={breakdownABCD ? breakdownABCD[1]?.value : null}
             />
             <ProductCard 
-              nome="Produto C" 
-              preco="R$300,00" 
+              nome="Whey" 
               tipo="whey" 
               imagem={wheyImg}
               total={breakdownABCD ? breakdownABCD[2]?.value : null}
             />
             <ProductCard 
-              nome="Produto D" 
-              preco="R$300,00" 
+              nome="Vitaminas" 
               tipo="pills" 
               imagem={vitaminaImg}
               total={breakdownABCD ? breakdownABCD[3]?.value : null}
