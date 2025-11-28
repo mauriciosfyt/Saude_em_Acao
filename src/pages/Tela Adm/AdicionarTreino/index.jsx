@@ -116,7 +116,6 @@ export default function AdicionarTreino() {
     tipoTreino: 'Musculação',
     nivel: 'Iniciante',
     sexo: 'Masculino',
-    frequencia: 3,
     idadeMin: 15,
     idadeMax: 30
   });
@@ -380,128 +379,119 @@ export default function AdicionarTreino() {
                 tipoTreino: treinoData.tipoDeTreino || treinoData.tipoTreino || treinoData.tipo || 'Musculação',
                 nivel: converterNivelDaAPI(treinoData.nivel) || 'Iniciante',
                 sexo: converterSexoDaAPI(treinoData.sexo) || 'Masculino',
-                frequencia: treinoData.frequenciaSemanal || treinoData.frequencia || 3,
                 idadeMin: treinoData.idadeMinima || treinoData.idadeMin || 15,
                 idadeMax: treinoData.idadeMaxima || treinoData.idadeMax || 30
               });
             
             // Carregar exercícios por dia se existirem
-              if (treinoData.exercicios || treinoData.sessoes) {
-              // Mapear exercícios para os dias da semana
-              // A estrutura pode variar (array, objeto com índices, objeto único), então vamos normalizar
+              // Prioriza exerciciosPorDia (mapa por dias) — corresponde ao formato que a API espera/retorna
               const exerciciosMap = {};
-
-              const normalizeForIndex = (container, idx) => {
-                if (!container) return [];
-                // If container is array and has element at idx
-                if (Array.isArray(container)) {
-                  const val = container[idx];
-                  if (Array.isArray(val)) return val;
-                  if (val && typeof val === 'object') return Object.values(val).every((v) => typeof v === 'object') && !Array.isArray(val) ? Object.values(val) : [val];
-                  return val ? [val] : [];
-                }
-                // If container is object, it may use numeric keys or day keys
-                if (typeof container === 'object') {
-                  // Try numeric key
-                  if (Object.prototype.hasOwnProperty.call(container, idx)) {
-                    const v = container[idx];
-                    if (Array.isArray(v)) return v;
-                    if (v && typeof v === 'object') return Object.values(v).every((x) => typeof x === 'object') && !Array.isArray(v) ? Object.values(v) : [v];
-                    return v ? [v] : [];
-                  }
-                  // Maybe container itself is a map of day names
-                  // Try mapping by week order: if container[dia] exists
-                  return [];
-                }
-                return [];
-              };
-
-              dias.forEach((dia, index) => { try {
-                  // Priorizar treinoData.exercicios
-                  if (treinoData.exercicios) {
-                    const arr = normalizeForIndex(treinoData.exercicios, index);
-                    if (arr && arr.length) {
-                      exerciciosMap[dia] = arr.map((ex) => ({ id: nextId.current++, ...ex }));
-                      return;
-                    }
-                  }
-
-                  // Fallback: sessoes -> sessoes[index].exercicios
-                  if (treinoData.sessoes && treinoData.sessoes[index]) {
-                    const sess = treinoData.sessoes[index];
-                    const sessEx = sess.exercicios || sess.exercicio || [];
-                    const normalizedSessEx = Array.isArray(sessEx) ? sessEx : (typeof sessEx === 'object' ? Object.values(sessEx) : []);
-                    if (normalizedSessEx && normalizedSessEx.length) {
-                      exerciciosMap[dia] = normalizedSessEx.map((ex) => ({
-                        nome: ex.nome || ex.exercicio || '',
-                        series: ex.series || 3,
-                        repeticoes: ex.repeticoes || 10,
-                        carga: ex.carga || '',
-                        intervalo: ex.intervalo || '',
-                        obs: ex.obs || ex.observacao || '',
-                        id: nextId.current++
-                      }));
-                    }
-                  }
-                } catch (e) {
-                  console.warn('Erro ao normalizar exercícios para dia', dia, e);
-                }
+              const mapDisplayDay = {};
+              // cria mapa de normalização: 'SEGUNDA' -> 'Segunda'
+              dias.forEach(d => {
+                const key = String(d).normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase();
+                mapDisplayDay[key] = d;
               });
+
+              if (treinoData.exerciciosPorDia && typeof treinoData.exerciciosPorDia === 'object') {
+                Object.keys(treinoData.exerciciosPorDia).forEach(rawDayKey => {
+                  const norm = String(rawDayKey).normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase();
+                  const displayDay = mapDisplayDay[norm];
+                  if (!displayDay) return;
+                  const raw = treinoData.exerciciosPorDia[rawDayKey];
+                  const arr = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' ? Object.values(raw) : []);
+                  if (!arr || arr.length === 0) {
+                    exerciciosMap[displayDay] = [];
+                    return;
+                  }
+                  exerciciosMap[displayDay] = arr.map(ex => ({
+                    id: nextId.current++,
+                    nome: ex.nome || ex.exercicio || '',
+                    series: (ex.series !== undefined && ex.series !== null) ? ex.series : 3,
+                    repeticoes: (ex.repeticoes !== undefined && ex.repeticoes !== null) ? ex.repeticoes : 10,
+                    carga: ex.carga || ex.peso || '',
+                    intervalo: ex.intervalo || ex.tempo || '',
+                    obs: ex.observacao || ex.obs || '',
+                    img: ex.img || ex.imagem || ex.imagemUrl || ex.foto || ex.fotoUrl || ex.image || ex.imageUrl || null
+                  }));
+                });
+              }
+
+              // Fallback compatível com formatos antigos (exercicios array / sessoes)
+              if (Object.keys(exerciciosMap).length === 0 && (treinoData.exercicios || treinoData.sessoes)) {
+                const normalizeForIndex = (container, idx) => {
+                  if (!container) return [];
+                  if (Array.isArray(container)) {
+                    const val = container[idx];
+                    if (Array.isArray(val)) return val;
+                    if (val && typeof val === 'object') return Object.values(val).every(v => typeof v === 'object') && !Array.isArray(val) ? Object.values(val) : [val];
+                    return val ? [val] : [];
+                  }
+                  if (typeof container === 'object') {
+                    if (Object.prototype.hasOwnProperty.call(container, idx)) {
+                      const v = container[idx];
+                      if (Array.isArray(v)) return v;
+                      if (v && typeof v === 'object') return Object.values(v).every(x => typeof x === 'object') && !Array.isArray(v) ? Object.values(v) : [v];
+                      return v ? [v] : [];
+                    }
+                    return [];
+                  }
+                  return [];
+                };
+                dias.forEach((dia, index) => {
+                  try {
+                    if (treinoData.exercicios) {
+                      const arr = normalizeForIndex(treinoData.exercicios, index);
+                      if (arr && arr.length) {
+                        exerciciosMap[dia] = arr.map((ex) => ({ id: nextId.current++, ...ex }));
+                        return;
+                      }
+                    }
+                    if (treinoData.sessoes && treinoData.sessoes[index]) {
+                      const sess = treinoData.sessoes[index];
+                      const sessEx = sess.exercicios || sess.exercicio || [];
+                      const normalizedSessEx = Array.isArray(sessEx) ? sessEx : (typeof sessEx === 'object' ? Object.values(sessEx) : []);
+                      if (normalizedSessEx && normalizedSessEx.length) {
+                        exerciciosMap[dia] = normalizedSessEx.map((ex) => ({
+                          nome: ex.nome || ex.exercicio || '',
+                          series: ex.series || 3,
+                          repeticoes: ex.repeticoes || 10,
+                          carga: ex.carga || '',
+                          intervalo: ex.intervalo || '',
+                          obs: ex.obs || ex.observacao || '',
+                          id: nextId.current++
+                        }));
+                      }
+                    }
+                  } catch (e) {
+                    console.warn('Erro ao normalizar exercícios para dia', dia, e);
+                  }
+                });
+              }
 
               if (Object.keys(exerciciosMap).length > 0) {
                 setExerciciosPorDia(prev => ({ ...prev, ...exerciciosMap }));
-
-                // Build image previews map for exercises that include image URLs
+                // montar previews de imagens (se houver URLs)
                 const tempImageMap = {};
                 Object.keys(exerciciosMap).forEach((dia) => {
                   exerciciosMap[dia].forEach((ex) => {
+                    if (!ex || !ex.id) return;
                     const id = ex.id;
-                        // Try to locate image URL in several common fields or nested objects
-                        const findImageUrl = (obj) => {
-                          if (!obj) return null;
-                          if (typeof obj === 'string') {
-                            // heuristic: looks like URL
-                            if (/^https?:\/\//.test(obj) || obj.startsWith('//')) return obj;
-                            return null;
-                          }
-                          if (typeof obj !== 'object') return null;
-                          const keys = Object.keys(obj || {});
-                          for (const k of keys) {
-                            const v = obj[k];
-                            if (!v) continue;
-                            if (typeof v === 'string' && (/img|foto|image|url|src/i.test(k) || /^https?:\/\//.test(v) || v.startsWith('//'))) return v;
-                            if (typeof v === 'object') {
-                              const found = findImageUrl(v);
-                              if (found) return found;
-                            }
-                          }
-                          return null;
-                        };
-
-                        // *** CORREÇÃO: "img" ***
-                        // Coloca ex.img como prioridade para encontrar a URL
-                        const url = ex.img || findImageUrl(ex) || ex.imagem || ex.imagemUrl || ex.foto || ex.fotoUrl || ex.image || ex.imageUrl;
-                        if (url) {
-                          tempImageMap[id] = { preview: fixImageUrl(url), file: null };
-                        } else {
-                          // debug: log keys to help identify unexpected structures
-                          console.debug('No image found for exercise, keys:', Object.keys(ex), 'exercise:', ex);
-                        }
+                    const url = ex.img || ex.imagem || ex.imagemUrl || ex.foto || ex.fotoUrl || ex.image || ex.imageUrl;
+                    if (url) tempImageMap[id] = { preview: fixImageUrl(url), file: null };
                   });
                 });
-
                 if (Object.keys(tempImageMap).length > 0) {
                   setExerciseImages(prev => ({ ...prev, ...tempImageMap }));
                 }
               }
-            }
+             }
+          } catch (error) {
+            console.error('Erro ao carregar treino:', error);
+            alert('Erro ao carregar dados do treino. ' + (error.message || ''));
+          } finally {
+            setLoading(false);
           }
-        } catch (error) {
-          console.error('Erro ao carregar treino:', error);
-          alert('Erro ao carregar dados do treino. ' + (error.message || ''));
-        } finally {
-          setLoading(false);
-        }
       } else if (location.state?.treinoData) {
         // Se vier dados de duplicação
         const treinoData = location.state.treinoData;
@@ -529,7 +519,6 @@ export default function AdicionarTreino() {
           tipoTreino: treinoData.tipoDeTreino || treinoData.tipoTreino || treinoData.tipo || 'Musculação',
           nivel: converterNivelDaAPI(treinoData.nivel) || 'Iniciante',
           sexo: converterSexoDaAPI(treinoData.sexo) || 'Masculino',
-          frequencia: treinoData.frequenciaSemanal || treinoData.frequencia || 3,
           idadeMin: treinoData.idadeMinima || treinoData.idadeMin || 15,
           idadeMax: treinoData.idadeMaxima || treinoData.idadeMax || 30
         });
@@ -611,78 +600,86 @@ export default function AdicionarTreino() {
     loadTreinoData();
   }, [treinoId, isEditMode]);
 
-  // Função para coletar dados dos exercícios de todos os inputs (retorna ARRAY)
-  // Agora usa diretamente o estado, não precisa buscar do DOM
-  const coletarDadosExercicios = () => {
-    const normalizarIntervalo = (valor) => {
-      if (!valor) return null;
-      const v = String(valor).trim();
-      // Somente número => considerar segundos
-      if (/^\d+$/.test(v)) {
-        const totalSeg = parseInt(v, 10);
-        const horas = Math.floor(totalSeg / 3600);
-        const minutos = Math.floor((totalSeg % 3600) / 60);
-        const segundos = totalSeg % 60;
-        const pad = (n) => String(n).padStart(2, '0');
-        return `${pad(horas)}:${pad(minutos)}:${pad(segundos)}`;
-      }
-      // Formatos 1:30, 10:05, etc -> completar para HH:mm:ss
-      if (/^\d{1,2}:\d{2}$/.test(v)) {
-        return `00:${v}`; // mm:ss
-      }
-      if (/^\d{1,2}:\d{2}:\d{2}$/.test(v)) {
-        return v; // HH:mm:ss
-      }
-      // Tentar parse de mm (com sufixos simples)
-      if (/^(\d+)m(in)?$/i.test(v)) {
-        const minutos = parseInt(v, 10);
-        const pad = (n) => String(n).padStart(2, '0');
-        return `00:${pad(minutos)}:00`;
-      }
-      if (/^(\d+)s(ec)?$/i.test(v)) {
-        const segundos = parseInt(v, 10);
-        const pad = (n) => String(n).padStart(2, '0');
-        return `00:00:${pad(segundos)}`;
-      }
-      // Fallback: retornar nulo para evitar erro
-      return null;
-    };
+  // Normaliza o campo de intervalo para HH:mm:ss (reutilizável)
+  const normalizarIntervalo = (valor) => {
+    if (!valor) return null;
+    const v = String(valor).trim();
+    if (/^\d+$/.test(v)) {
+      const totalSeg = parseInt(v, 10);
+      const horas = Math.floor(totalSeg / 3600);
+      const minutos = Math.floor((totalSeg % 3600) / 60);
+      const segundos = totalSeg % 60;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(horas)}:${pad(minutos)}:${pad(segundos)}`;
+    }
+    if (/^\d{1,2}:\d{2}$/.test(v)) {
+      return `00:${v}`;
+    }
+    if (/^\d{1,2}:\d{2}:\d{2}$/.test(v)) {
+      return v;
+    }
+    if (/^(\d+)m(in)?$/i.test(v)) {
+      const minutos = parseInt(v, 10);
+      const pad = (n) => String(n).padStart(2, '0');
+      return `00:${pad(minutos)}:00`;
+    }
+    if (/^(\d+)s(ec)?$/i.test(v)) {
+      const segundos = parseInt(v, 10);
+      const pad = (n) => String(n).padStart(2, '0');
+      return `00:00:${pad(segundos)}`;
+    }
+    return null;
+  };
 
+  // Coleta dados dos exercícios como ARRAY (mantido para compatibilidade interna)
+  const coletarDadosExercicios = () => {
     const lista = [];
-    
     dias.forEach((dia) => {
       const exerciciosDia = exerciciosPorDia[dia] || [];
       exerciciosDia.forEach((ex) => {
-        
-        // Pega as informações da imagem (preview e file) do estado
         const imagemInfo = exerciseImages[ex.id];
-
-        // Agora usa diretamente os dados do estado
         const exercicioData = {
           nome: ex.nome || '',
           series: ex.series !== undefined && ex.series !== null && ex.series !== '' ? parseInt(ex.series, 10) : 3,
           repeticoes: ex.repeticoes !== undefined && ex.repeticoes !== null && ex.repeticoes !== '' ? parseInt(ex.repeticoes, 10) : 10,
           carga: ex.carga || '',
-          intervalo: normalizarIntervalo(ex.intervalo || ''),
           observacao: ex.obs || '',
           dia
         };
-
-        // *** CORREÇÃO: "img" ***
-        // Se existir uma imagem E ela for um arquivo novo (file), anexe-o como "img".
         if (imagemInfo && imagemInfo.file) {
-          exercicioData.img = imagemInfo.file; 
+          exercicioData.img = imagemInfo.file;
         }
-        
         lista.push(exercicioData);
       });
     });
-
     return lista;
   };
 
+  // Monta o objeto `exerciciosPorDia` esperado pela API (chaves por dia)
+  const montarExerciciosPorDia = () => {
+    const payload = {};
+    dias.forEach((dia) => {
+      const list = (exerciciosPorDia[dia] || []).map((ex) => {
+        const imagemInfo = exerciseImages[ex.id];
+        const obj = {
+          nome: ex.nome || '',
+          series: ex.series !== undefined && ex.series !== null && ex.series !== '' ? parseInt(ex.series, 10) : 3,
+          repeticoes: ex.repeticoes !== undefined && ex.repeticoes !== null && ex.repeticoes !== '' ? parseInt(ex.repeticoes, 10) : 10,
+          carga: ex.carga || '',
+          observacao: ex.obs || ''
+        };
+        if (imagemInfo && imagemInfo.file) obj.img = imagemInfo.file;
+        return obj;
+      });
+      // Sempre incluir a chave do dia — envia array vazio quando não houver exercícios.
+      payload[dia] = list;
+    });
+    return payload;
+  };
+
   // Função para salvar treino
-  const handleSalvar = async () => {
+  const handleSalvar = async (e) => {
+    e.preventDefault();
     try {
       setSaving(true);
       
@@ -715,18 +712,18 @@ export default function AdicionarTreino() {
         return;
       }
 
-      // Coletar dados dos exercícios (array)
-      const exercicios = coletarDadosExercicios();
+      // Montar payload `exerciciosPorDia` no formato esperado pela API
+      const exerciciosPorDiaPayload = montarExerciciosPorDia();
 
       const dadosTreino = {
         nome: formData.nome.trim(),
         tipoDeTreino: formData.tipoTreino.trim(),
         nivel: converterNivelParaAPI(formData.nivel),
         sexo: converterSexoParaAPI(formData.sexo),
-        frequenciaSemanal: parseInt(formData.frequencia, 10),
         idadeMinima: idadeMinima,
         idadeMaxima: idadeMaxima,
-        exercicios: exercicios,
+        // Envia a estrutura por dia (obrigatória para o backend)
+        exerciciosPorDia: exerciciosPorDiaPayload,
         
         // Esta linha já estava correta
         responsavel: formData.responsavel.trim()
@@ -836,17 +833,6 @@ export default function AdicionarTreino() {
               </div>
               <div className="adicionartreino-form-row adicionartreino-form-row-3">
                 <div className="adicionartreino-form-field">
-                  <label htmlFor="frequencia">Frequência semanal *</label>
-                  <input 
-                    id="frequencia" 
-                    type="number" 
-                    value={formData.frequencia}
-                    onChange={(e) => setFormData(prev => ({ ...prev, frequencia: e.target.value }))}
-                    min="1"
-                    max="7"
-                  />
-                </div>
-                <div className="adicionartreino-form-field">
                   <label htmlFor="idadeMin">Idade mínima</label>
                   <input 
                     id="idadeMin" 
@@ -866,6 +852,7 @@ export default function AdicionarTreino() {
                     min="0"
                   />
                 </div>
+                <div className="adicionartreino-form-field" style={{ visibility: 'hidden' }} />
               </div>
             </div>
 
@@ -895,7 +882,6 @@ export default function AdicionarTreino() {
                 <span>Séries *</span>
                 <span>Repetições</span>
                 <span>Carga(KG)</span>
-                <span>Intervalo</span>
                 <span>Observação</span>
                 <span>Imagem</span>
                 <span></span> {/* Coluna para ações */}
@@ -999,19 +985,6 @@ export default function AdicionarTreino() {
                       </div>
                     </div>
 
-                    <div className="adicionartreino-field-content adicionartreino-intervalo-col">
-                      <label className="adicionartreino-mobile-label">Intervalo</label>
-                      <div className="adicionartreino-inline-input-wrapper">
-                        <input 
-                          type="text" 
-                          placeholder="--" 
-                          value={item.intervalo || ''} 
-                          onChange={(e) => updateExerciseField(item.id, 'intervalo', e.target.value)}
-                        />
-                        <InfoIcon />
-                      </div>
-                    </div>
-
                     <div className="adicionartreino-field-content adicionartreino-observacao-col">
                         <label className="adicionartreino-mobile-label">Observação</label>
                         <input 
@@ -1059,8 +1032,9 @@ export default function AdicionarTreino() {
                     </div>
 
                     <div className="adicionartreino-field-content adicionartreino-actions-col">
-                      <button className="adicionartreino-icon-btn" title="Editar"><EditIcon /></button>
-                      <button className="adicionartreino-icon-btn" title="Excluir" onClick={() => deleteExercise(item.id)}><TrashIcon /></button>
+                      <button className="adicionartreino-icon-btn" title="Excluir" onClick={() => deleteExercise(item.id)}>
+                        <TrashIcon />
+                      </button>
                     </div>
                   </div>
                 ))}
