@@ -10,7 +10,7 @@ const UserIcon = () => (
   </svg>
 );
 
-// Ícone de olho para mostrar/ocultar senha (reutilizado do AdicionarPersonal)
+// Ícone de olho para mostrar/ocultar senha
 const EyeIcon = ({ visible }) => (
   <svg
     width="24"
@@ -46,10 +46,11 @@ const AdicionarAluno = () => {
     senha: '',
     confirmarSenha: '',
     idade: '',
+    sexo: '', // Novo campo adicionado ao estado
     peso: '',
-    altura: '', // (Este será enviado como inteiro, ex: 175)
+    altura: '', 
     objetivo: '',
-    nivelAtividade: '', // (Este usará INICIANTE, INTERMEDIARIO, AVANCADO)
+    nivelAtividade: '', 
   });
 
   const [imagemArquivo, setImagemArquivo] = useState(null); 
@@ -74,7 +75,6 @@ const AdicionarAluno = () => {
     navigate('/GerenciarAlunos'); 
   };
 
-  // Obter senha atual para validação
   const senha = formData.senha || '';
 
   const handleSubmit = async (e) => {
@@ -93,8 +93,9 @@ const AdicionarAluno = () => {
     const planoExigeDadosExtras = formData.plano === 'GOLD';
     
     if (planoExigeDadosExtras) {
-      if (!formData.idade || !formData.peso || !formData.altura || !formData.objetivo || !formData.nivelAtividade) {
-        alert('Para o plano GOLD, os campos: idade, peso, altura, objetivo e nível de atividade são obrigatórios.');
+      // Adicionada validação para o campo sexo
+      if (!formData.idade || !formData.sexo || !formData.peso || !formData.altura || !formData.objetivo || !formData.nivelAtividade) {
+        alert('Para o plano GOLD, os campos: idade, sexo, peso, altura, objetivo e nível de atividade são obrigatórios.');
         return;
       }
     }
@@ -120,10 +121,10 @@ const AdicionarAluno = () => {
 
     if (planoExigeDadosExtras) {
       dadosFormulario.append('idade', formData.idade);
+      dadosFormulario.append('sexo', formData.sexo); // Adicionado ao FormData
       dadosFormulario.append('peso', formData.peso);
       dadosFormulario.append('altura', formData.altura); 
       dadosFormulario.append('objetivo', formData.objetivo);
-      // 'nivelAtividade' agora enviará INICIANTE, INTERMEDIARIO, ou AVANCADO
       dadosFormulario.append('nivelAtividade', formData.nivelAtividade);
     }
 
@@ -184,7 +185,7 @@ const AdicionarAluno = () => {
                 <input type="tel" id="telefone" name="telefone" value={formData.telefone} onChange={handleChange} required />
               </div>
 
-              {/* Campo Plano (Correto) */}
+              {/* Campo Plano */}
               <div className="aluno-form-group">
                 <label htmlFor="plano">Plano</label>
                 <select 
@@ -208,13 +209,29 @@ const AdicionarAluno = () => {
                     <label htmlFor="idade">Idade</label>
                     <input type="number" id="idade" name="idade" value={formData.idade} onChange={handleChange} placeholder="Ex: 25" required />
                   </div>
+
+                  {/* --- NOVO CAMPO: SEXO --- */}
+                  <div className="aluno-form-group">
+                    <label htmlFor="sexo">Sexo</label>
+                    <select 
+                      id="sexo" 
+                      name="sexo" 
+                      value={formData.sexo} 
+                      onChange={handleChange} 
+                      required
+                    >
+                      <option value="" disabled>Selecione</option>
+                      <option value="MASCULINO">Masculino</option>
+                      <option value="FEMININO">Feminino</option>
+                    </select>
+                  </div>
+                  {/* --- FIM DO NOVO CAMPO --- */}
                   
                   <div className="aluno-form-group">
                     <label htmlFor="peso">Peso (kg)</label>
                     <input type="number" id="peso" name="peso" value={formData.peso} onChange={handleChange} placeholder="Ex: 70.5" step="0.1" required />
                   </div>
 
-                  {/* Campo Altura (Corrigido para CM) */}
                   <div className="aluno-form-group">
                     <label htmlFor="altura">Altura (cm)</label>
                     <input 
@@ -224,7 +241,7 @@ const AdicionarAluno = () => {
                       value={formData.altura} 
                       onChange={handleChange} 
                       placeholder="Ex: 175" 
-                      step="1" // Força número inteiro
+                      step="1" 
                       required 
                     />
                   </div>
@@ -234,7 +251,6 @@ const AdicionarAluno = () => {
                     <input type="text" id="objetivo" name="objetivo" value={formData.objetivo} onChange={handleChange} placeholder="Ex: Hipertrofia" required />
                   </div>
 
-                  {/* --- CORREÇÃO AQUI (Nível Atividade) --- */}
                   <div className="aluno-form-group">
                     <label htmlFor="nivelAtividade">Nível Atividade</label>
                     <select 
@@ -245,16 +261,11 @@ const AdicionarAluno = () => {
                       required
                     >
                       <option value="" disabled>Selecione um nível</option>
-                      {/* Valores (value="...") atualizados para o que a API Java 
-                        provavelmente espera (maiúsculas, com base no seu feedback).
-                      */}
                       <option value="INICIANTE">Iniciante</option>
                       <option value="INTERMEDIARIO">Intermediário</option>
                       <option value="AVANCADO">Avançado</option> 
-                      {/* (Assumi "AVANCADO" para "avançado") */}
                     </select>
                   </div>
-                  {/* --- FIM DA CORREÇÃO --- */}
                 </>
               )}
               {/* --- FIM DOS CAMPOS CONDICIONAIS --- */}
@@ -330,7 +341,6 @@ const AdicionarAluno = () => {
                 </ul>
               </div>
 
-              {/* Seção de Botões */}
               <div className="aluno-action-buttons">
                 <button type="button" className="button-cancelar-aluno" onClick={handleCancelar}>
                   cancelar
