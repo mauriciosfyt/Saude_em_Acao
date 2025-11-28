@@ -66,7 +66,7 @@ const mapearStatusUI = (apiStatus) => {
     case 'CONCLUIDA':
     case 'CONCLUIDO':
     case 'COMPLETED':
-      return 'Concluida';
+      return 'Retirado';
     // -------------------
     case 'CANCELADA': 
     case 'CANCELADO':

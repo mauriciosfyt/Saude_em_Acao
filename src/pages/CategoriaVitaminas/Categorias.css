@@ -381,35 +381,33 @@
 
 /* Container para a mensagem de erro */
 .categoria-vitamina-error {
+  color: #721c24;
+  padding: 15px;
+  border-radius: 4px;
+  margin: 10px 0;
+  text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 10px;
   align-items: center;
-  padding: 60px 20px;
-  gap: 15px;
-  min-height: 50vh; /* Garante altura mínima */
-  
-  background-color: #fff8f8; /* Fundo vermelho bem claro */
-  border: 1px solid #e0baba; /* Borda vermelha clara */
-  color: #a94442; /* Texto vermelho escuro */
-  border-radius: 8px;
 }
 
 .personal-error strong {
   font-size: 1.2rem;
 }
 
+.categoria-vitamina-error strong{
+    font-size: 1.2rem;
+}
+
 /* Botão "Tentar Novamente" */
 .retry-button {
-  padding: 10px 20px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
-  background-color: #007bff; /* Azul */
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
 .retry-button:hover {
