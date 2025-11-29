@@ -10,6 +10,36 @@ import { setAuthToken } from '../Services/api';
 
 const AuthContext = createContext();
 
+// Helper seguro para ler o payload de um JWT sem depender de bibliotecas externas
+function parseJwtSafe(token) {
+  try {
+    if (!token || typeof token !== 'string') return null;
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+    let payload = parts[1];
+    payload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = payload.length % 4;
+    if (pad) payload += '='.repeat(4 - pad);
+
+    // Tenta usar Buffer (Metro normalmente fornece) ou atob como fallback
+    let decoded = null;
+    if (typeof Buffer !== 'undefined') {
+      decoded = Buffer.from(payload, 'base64').toString('utf8');
+    } else if (typeof atob === 'function') {
+      decoded = atob(payload);
+    } else if (typeof globalThis?.atob === 'function') {
+      decoded = globalThis.atob(payload);
+    } else {
+      return null;
+    }
+
+    return JSON.parse(decoded);
+  } catch (err) {
+    if (__DEV__) console.warn('parseJwtSafe failed', err?.message || err);
+    return null;
+  }
+}
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -54,9 +84,13 @@ export const AuthProvider = ({ children }) => {
           // ADIÇÃO CRÍTICA: Configurar o token no Axios assim que o app carregar
           setAuthToken(token);
 
-          // Atualiza o estado da aplicação
+          // Extrair claims do JWT (se possível) para obter role/roles
+          const claims = parseJwtSafe(token);
+          const role = claims?.role || claims?.perfil || claims?.tipo || claims?.roles || null;
+
+          // Atualiza o estado da aplicação com dados completos do usuário
           setIsAuthenticated(true);
-          setUser({ token, email: email || 'no-email' });
+          setUser({ token, email: email || 'no-email', claims, role });
         } else {
           console.log('❌ Nenhum token JWT encontrado');
           setIsAuthenticated(false);
@@ -114,9 +148,14 @@ export const AuthProvider = ({ children }) => {
       // ADIÇÃO CRÍTICA: Configura o token no Axios imediatamente após o login
       setAuthToken(token);
 
-      // Atualiza o estado
+      // Tentar extrair claims do JWT para pegar a role
+      const claims = parseJwtSafe(token);
+      const role = claims?.role || claims?.perfil || claims?.tipo || claims?.roles || null;
+
+      // Atualiza o estado com o objeto completo (útil para regras de UI)
+      const fullUser = typeof userData === 'object' ? { ...userData, token, email, claims, role } : { token, email, claims, role };
       setIsAuthenticated(true);
-      setUser({ email, token });
+      setUser(fullUser);
 
       console.log("✅ Login concluído com sucesso:", { 
         isAuthenticated: true, 

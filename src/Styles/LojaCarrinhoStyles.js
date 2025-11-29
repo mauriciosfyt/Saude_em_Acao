@@ -230,6 +230,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  // --- ADICIONE ESTE ESTILO ---
+  productVariation: {
+    fontSize: 14,
+    color: '#666', // Um cinza para diferenciar
+    marginTop: 2,
+    fontStyle: 'italic',
+  },
 
 });
 

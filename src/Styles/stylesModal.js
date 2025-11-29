@@ -79,6 +79,7 @@ const stylesModal = StyleSheet.create({
   conteudoContainer: {
     flex: 1,
     paddingHorizontal: 20,
+    minHeight: 0,
   },
   cardContainer: {
     flex: 1,
@@ -140,55 +141,53 @@ const stylesModal = StyleSheet.create({
     fontWeight: '600',
   },
   conteudoScroll: {
-    flex: 1,
     paddingVertical: 25,
-    paddingHorizontal: 20,
   },
   logoTopo: {
-    width: 36,
-    height: 36,
+    width: 90,
+    height: 90,
     // não colocar resizeMode aqui — passe como prop no <Image resizeMode="contain" />
     alignSelf: 'center',
     marginBottom: 10,
   },
   titulo: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 20,
     textAlign: 'center',
   },
   subtitulo: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
     marginTop: 20,
     marginBottom: 12,
   },
   paragrafo: {
-    fontSize: 15,
+    fontSize: 18,
     color: '#555',
-    lineHeight: 22,
+    lineHeight: 26,
     marginBottom: 15,
     textAlign: 'justify',
   },
   itemLista: {
-    fontSize: 15,
+    fontSize: 17,
     color: '#555',
-    lineHeight: 22,
+    lineHeight: 25,
     marginBottom: 8,
     paddingLeft: 15,
   },
   botaoConcordarContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 25,
+    paddingVertical: 15,
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
   },
   botaoConcordar: {
     backgroundColor: '#405CBA',
     borderRadius: 15,
-    paddingVertical: 18,
+    paddingVertical: 12,
     alignItems: 'center',
     ...platformShadow({
       boxShadow: '0px 3px 6px rgba(64,92,186,0.12)',
@@ -201,7 +200,7 @@ const stylesModal = StyleSheet.create({
   },
   textoBotaoConcordar: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });

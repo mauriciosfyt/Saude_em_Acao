@@ -3,8 +3,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { playSuccessSound, TestSoundButton, setSoundEnabled } from '../../Components/Sounds';
 import { useAuth } from '../../context/AuthContext';
-import { deleteAdminAccount, obterMeuPerfil, API_BASE_URL } from '../../Services/api';
-import * as FileSystem from 'expo-file-system';
+import { deleteAdminAccount, obterMeuPerfil } from '../../Services/api';
 
 import {
   View,
@@ -30,7 +29,7 @@ const Perfil = ({ navigation }) => {
   const [vibracao, setVibracao] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const { isDark, colors, toggleTheme } = useTheme();
-  const { user, logout, loading: authLoading } = useAuth();
+  const { user, logout } = useAuth();
   const styles = useMemo(() => createStyles(isDark), [isDark]);
 
   // Dados do usuário
@@ -44,11 +43,6 @@ const Perfil = ({ navigation }) => {
     nivelAtividade: 'Iniciante',
   });
 
-  // URL da foto do perfil (pode ser null)
-  const [fotoUrl, setFotoUrl] = useState(null);
-  const [localImageUri, setLocalImageUri] = useState(null);
-  const [triedProtectedDownload, setTriedProtectedDownload] = useState(false);
-
   // Dados temporários para edição
   const [dadosEditaveis, setDadosEditaveis] = useState({});
 
@@ -57,13 +51,6 @@ const Perfil = ({ navigation }) => {
     const carregarPerfil = async () => {
       try {
         setCarregando(true);
-        // Garante que temos um token (AuthContext configura o axios)
-        if (!user || !user.token) {
-          console.warn('Perfil: sem usuário/tokem no contexto — pulando requisição');
-          setCarregando(false);
-          return;
-        }
-
         const dados = await obterMeuPerfil();
         
         // Mapeando os dados da API para o estado local
@@ -76,56 +63,18 @@ const Perfil = ({ navigation }) => {
           objetivo: dados.objetivo || '',
           nivelAtividade: dados.nivelAtividade || 'Iniciante',
         });
-
-        // Normaliza a URL da foto quando disponível (prioriza `fotoPerfil`)
-        const possiblePhoto =
-          dados.fotoPerfil || dados.foto || dados.avatar || dados.img || dados.imageUrl || dados.urlFoto || dados.imagem || null;
-
-        const normalizePhoto = (p) => {
-          if (!p) return null;
-          if (p.startsWith('data:')) return p;
-          // preserve http/https for now
-          if (p.startsWith('http')) return p;
-          if (p.startsWith('/')) return API_BASE_URL + p;
-          return API_BASE_URL + '/' + p;
-        };
-        let normalized = normalizePhoto(possiblePhoto);
-
-        console.log('Perfil: campo de foto cru ->', possiblePhoto);
-        console.log('Perfil: foto normalizada (antes)->', normalized);
-
-        // Forçar https quando possível (Cloudinary normalmente suporta https)
-        if (normalized && normalized.startsWith('http:')) {
-          normalized = normalized.replace(/^http:/, 'https:');
-          console.log('Perfil: foto normalizada (forçada https)->', normalized);
-        }
-
-        setFotoUrl(normalized);
         
         console.log('✅ Dados do perfil carregados com sucesso:', dados);
       } catch (error) {
         console.error('❌ Erro ao carregar perfil:', error);
-        // Se a API respondeu 401, limpamos sessão e direcionamos para login
-        if (error?.response?.status === 401) {
-          console.warn('Perfil: não autorizado (401). Efetuando logout local.');
-          try {
-            await logout();
-            navigation.navigate('Inicial');
-          } catch (e) {
-            console.error('Erro ao fazer logout após 401:', e);
-          }
-        }
         // Mantém os dados mockados em caso de erro
       } finally {
         setCarregando(false);
       }
     };
 
-    // Só carregar quando a checagem de autenticação terminar
-    if (!authLoading) {
-      carregarPerfil();
-    }
-  }, [authLoading]);
+    carregarPerfil();
+  }, []);
 
 const handleVoltar = () => {
   navigation.navigate('Home');
@@ -201,8 +150,7 @@ const handleVoltar = () => {
             try {
               setConfigModalVisible(false);
               await logout();
-                  const dados = await obterMeuPerfil();
-                  console.log('Refresh: dados completos do perfil ->', dados);
+              navigation.navigate('Inicial');
               console.log('✅ Logout realizado com sucesso');
             } catch (error) {
               console.error('❌ Erro ao fazer logout:', error);
@@ -350,36 +298,9 @@ const handleVoltar = () => {
             {/* Foto e Informações Básicas */}
             <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                {fotoUrl ? (
-                  <Image
-                    source={{ uri: localImageUri || fotoUrl }}
-                    style={styles.avatarImage}
-                    onError={async (e) => {
-                      console.warn('Imagem do perfil falhou ao carregar:', e.nativeEvent?.error || e);
-
-                      // Se ainda não tentamos baixar com o token, tentamos baixar para cache
-                      if (!triedProtectedDownload && user?.token && fotoUrl) {
-                        setTriedProtectedDownload(true);
-                        try {
-                          const fileName = `profile_${(user.email || 'me').replace(/[^a-z0-9]/gi, '_')}.jpg`;
-                          const dest = FileSystem.cacheDirectory + fileName;
-                          console.log('Tentando baixar imagem protegida para', dest);
-                          const downloadRes = await FileSystem.downloadAsync(fotoUrl, dest, {
-                            headers: { Authorization: `Bearer ${user.token}` },
-                          });
-                          console.log('Download concluído:', downloadRes.uri);
-                          setLocalImageUri(downloadRes.uri);
-                        } catch (err) {
-                          console.error('Erro ao baixar imagem protegida:', err);
-                        }
-                      }
-                    }}
-                  />
-                ) : (
-                  <Ionicons name="person" size={60} color={isDark ? "#FFFFFF" : "#405CBA"} />
-                )}
-              </View>
+            <View style={styles.avatar}>
+              <Ionicons name="person" size={60} color={isDark ? "#FFFFFF" : "#405CBA"} />
+            </View>
             <TouchableOpacity style={styles.editAvatarButton}>
               <Ionicons name="camera" size={20} color="white" />
             </TouchableOpacity>

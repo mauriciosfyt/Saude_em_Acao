@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import { useTreinos } from '../../context/TreinosContext';
 
 const TreinoSexta = ({ navigation, route }) => {
   const { isDark, colors } = useTheme();
-  const { marcarTreinoComoConcluido, marcarTreinoComoIncompleto } = useTreinos();
+  const { marcarTreinoComoConcluido, marcarTreinoComoIncompleto, salvarProgresso, obterProgresso, progressoTreinos } = useTreinos();
 
   // 🎨 Definição das cores do tema
   const theme = {
@@ -32,7 +32,6 @@ const TreinoSexta = ({ navigation, route }) => {
     modalBg: isDark ? '#2c2c2c' : '#ffffff',
     modalTitle: isDark ? '#FFFFFF' : '#000000',
     modalText: isDark ? '#C9CEDA' : '#222222',
-    progressTrack: isDark ? '#444' : '#E0E0E0',
     iconColor: isDark ? '#FFFFFF' : '#000000',
     menuBg: isDark ? '#2C2C2C' : '#FFFFFF',
     menuText: isDark ? '#fafafa' : '#000000',
@@ -40,9 +39,30 @@ const TreinoSexta = ({ navigation, route }) => {
   // Overlay do menu lateral (segue o tema)
   const menuOverlayColor = isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.15)';
 
-  // 🏋️‍♂️ Exercícios de sexta-feira
-  // 🏋️‍♂️ Exercícios de sexta-feira
-  const exercicios = {
+  // Se vierem exercícios da API via route.params, usar como única fonte; caso contrário, usar hardcoded
+  const getExerciciosPorCategoria = () => {
+    if (route?.params?.exercicios && Array.isArray(route.params.exercicios)) {
+      const apiExercicios = route.params.exercicios;
+      const agrupado = apiExercicios.reduce((acc, ex, idx) => {
+        const grupo = (ex.grupo || ex.categoria || 'geral').toLowerCase();
+        if (!acc[grupo]) acc[grupo] = [];
+        const safeId = ex.id ?? ex._id ?? ex.uid ?? `api_${idx}`;
+        const imagemUri = ex.img || ex.imagem || null;
+        acc[grupo].push({
+          id: safeId,
+          nome: ex.nome || `Exercício ${safeId}`,
+          series: ex.series || 4,
+          repeticoes: ex.repeticoes || 15,
+          carga: ex.carga || 0,
+          imagem: imagemUri ? { uri: imagemUri } : require('../../../assets/banner_whey_piqueno.jpg'),
+          descricao: ex.descricao || 'Realize o exercício conforme instruído.',
+        });
+        return acc;
+      }, {});
+      return agrupado;
+    }
+    
+    return {
     costas: [
       {
         id: 1,
@@ -107,24 +127,45 @@ const TreinoSexta = ({ navigation, route }) => {
           'Sentado, segure um peso e gire o tronco de um lado para o outro, trabalhando o abdômen oblíquo.',
       },
     ],
+    };
   };
-  const totalExercicios = exercicios.costas.length + exercicios.abdomen.length;
+  const exercicios = getExerciciosPorCategoria();
+  const totalExercicios = Object.values(exercicios).reduce((total, arr) => total + (Array.isArray(arr) ? arr.length : 0), 0) || 6;
   const [exerciciosSelecionados, setExerciciosSelecionados] = useState({});
   const [exerciciosConcluidos, setExerciciosConcluidos] = useState(0);
   const [modalExercicio, setModalExercicio] = useState({ visivel: false, exercicio: null });
   const [modalFinalizar, setModalFinalizar] = useState(false);
   const [modalAviso, setModalAviso] = useState(false);
 
+  useEffect(() => {
+    const treinoKey = route?.params?.treinoId || 'Sexta';
+    const saved = obterProgresso(treinoKey) || [];
+    if (saved && saved.length) {
+      const inicial = {};
+      Object.entries(exercicios).forEach(([grupo, arr]) => {
+        if (Array.isArray(arr)) arr.forEach(e => {
+          if (saved.includes(String(e.id)) || saved.includes(e.id)) inicial[`${grupo}_${e.id}`] = true;
+        });
+      });
+      setExerciciosSelecionados(inicial);
+      setExerciciosConcluidos(Object.keys(inicial).length);
+    }
+  }, [exercicios, route?.params, progressoTreinos]);
+
   // ✅ Alterna o estado de conclusão do exercício
   const toggleExercicio = (id) => {
-    const novoEstado = { ...exerciciosSelecionados };
-    if (novoEstado[id]) {
-      delete novoEstado[id];
-    } else {
-      novoEstado[id] = true;
-    }
-    setExerciciosSelecionados(novoEstado);
-    setExerciciosConcluidos(Object.keys(novoEstado).length);
+    setExerciciosSelecionados(prev => {
+      const novoEstado = { ...prev };
+      if (novoEstado[id]) {
+        delete novoEstado[id];
+      } else {
+        novoEstado[id] = true;
+      }
+      // Atualiza o contador de forma sincronizada
+      const novoContador = Object.keys(novoEstado).length;
+      setExerciciosConcluidos(novoContador);
+      return novoEstado;
+    });
   };
 
   // ✅ Selecionar ou desmarcar todos
@@ -134,7 +175,11 @@ const TreinoSexta = ({ navigation, route }) => {
       setExerciciosConcluidos(0);
     } else {
       const todos = {};
-      exercicios.costas.concat(exercicios.abdomen).forEach((e) => (todos[e.id] = true));
+      Object.entries(exercicios).forEach(([grupo, arr]) => {
+        if (Array.isArray(arr)) {
+          arr.forEach((e) => (todos[`${grupo}_${e.id}`] = true));
+        }
+      });
       setExerciciosSelecionados(todos);
       setExerciciosConcluidos(totalExercicios);
     }
@@ -151,16 +196,27 @@ const TreinoSexta = ({ navigation, route }) => {
 
   // ✅ Confirma o término do treino
   const handleConfirmarFinalizar = () => {
-    setModalFinalizar(false);
-    playSuccessSound();
+    (async () => {
+      setModalFinalizar(false);
+      playSuccessSound();
 
-    if (exerciciosConcluidos === totalExercicios) {
-      marcarTreinoComoConcluido && marcarTreinoComoConcluido('Sexta-Feira');
-    } else {
-      marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Sexta-Feira');
-    }
+      const treinoId = route?.params?.treinoId || null;
+      const selecionados = Object.keys(exerciciosSelecionados || {}).map(k => k.split('_').slice(1).join('_'));
+      try {
+        const treinoKey = treinoId || 'Sexta';
+        salvarProgresso(treinoKey, selecionados);
+      } catch (err) {
+        console.error('Erro ao salvar progresso localmente:', err);
+      }
 
-    navigation.navigate('MeuTreino');
+      if (exerciciosConcluidos === totalExercicios) {
+        marcarTreinoComoConcluido && marcarTreinoComoConcluido('Sexta');
+      } else {
+        marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Sexta');
+      }
+
+      navigation.navigate('MeuTreino');
+    })();
   };
 
   const [menuVisivel, setMenuVisivel] = useState(false);
@@ -202,7 +258,7 @@ const TreinoSexta = ({ navigation, route }) => {
           <View key={grupo} style={styles.secaoContainer}>
             {lista.map((exercicio) => (
               <View
-                key={exercicio.id}
+                key={`${grupo}_${exercicio.id}`}
                 style={[
                   styles.exercicioCard,
                   {
@@ -213,16 +269,16 @@ const TreinoSexta = ({ navigation, route }) => {
               >
                 <TouchableOpacity
                   style={styles.checkbox}
-                  onPress={() => toggleExercicio(exercicio.id)}
+                  onPress={() => toggleExercicio(`${grupo}_${exercicio.id}`)}
                 >
                   <Ionicons
                     name={
-                      exerciciosSelecionados[exercicio.id]
+                      exerciciosSelecionados[`${grupo}_${exercicio.id}`]
                         ? 'checkmark-circle'
                         : 'ellipse-outline'
                     }
                     size={24}
-                    color={exerciciosSelecionados[exercicio.id] ? colors.primary : colors.textTertiary}
+                    color={exerciciosSelecionados[`${grupo}_${exercicio.id}`] ? colors.primary : colors.textTertiary}
                   />
                 </TouchableOpacity>
 
@@ -234,15 +290,9 @@ const TreinoSexta = ({ navigation, route }) => {
                   <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>
                     {exercicio.nome}
                   </Text>
-                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
-                    Série: {exercicio.series}
-                  </Text>
-                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
-                    Repetição: {exercicio.repeticoes}
-                  </Text>
-                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
-                    Carga: {exercicio.carga} (kg)
-                  </Text>
+                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Série: {exercicio.series}</Text>
+                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Repetição: {exercicio.repeticoes}</Text>
+                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>Carga: {exercicio.carga} (kg)</Text>
                 </View>
 
                 <TouchableOpacity
@@ -262,7 +312,7 @@ const TreinoSexta = ({ navigation, route }) => {
         <Text style={[styles.progressText, { color: theme.textPrimary }]}>
           {exerciciosConcluidos} de {totalExercicios} Treinos concluídos
         </Text>
-        <View style={[styles.progressBar, { backgroundColor: theme.progressTrack }]}>
+        <View style={styles.progressBar}>
           <View
             style={[
               styles.progressFill,

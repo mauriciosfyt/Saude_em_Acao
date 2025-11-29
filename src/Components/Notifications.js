@@ -9,8 +9,16 @@ async function getNotifications() {
   if (Platform.OS === 'web') return null;
   if (!NotificationsModule) {
     // carregamento dinâmico — somente em mobile
-    // eslint-disable-next-line global-require
-    NotificationsModule = await import('expo-notifications');
+    // Usamos require dentro de try/catch para evitar problemas com o bundler
+    // (algumas configurações do Metro / web tentam resolver import() cedo e falham)
+    try {
+      // eslint-disable-next-line global-require
+      NotificationsModule = require('expo-notifications');
+    } catch (err) {
+      // Caso não esteja disponível na plataforma (ex: web ou build sem o pacote)
+      if (__DEV__) console.warn('expo-notifications unavailable:', err?.message || err);
+      NotificationsModule = null;
+    }
   }
   return NotificationsModule;
 }

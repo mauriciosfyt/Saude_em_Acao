@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginTop: 2,
         marginBottom: 4,
-        alignSelf: 'flex-start',
+        alignSelf: 'center',
     },
     descontoContainer: {
         position: 'absolute',

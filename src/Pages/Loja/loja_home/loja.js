@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,15 @@ import {
   Dimensions,
   FlatList,
   Platform,
+  ActivityIndicator, // ADICIONADO
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONTS, BORDERS } from '../../../constants/constants';
 import HeaderLoja from '../../../Components/HeaderLoja.js';
 import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
+
+// ADICIONADO: Importar a função da API
+import { obterProdutos } from '../../../Services/api'; 
 
 const { width } = Dimensions.get('window');
 
@@ -22,8 +26,13 @@ const Loja = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
+  // ADICIONADO: States para os produtos e loading
+  const [horizontalProducts, setHorizontalProducts] = useState([]);
+  const [verticalProducts, setVerticalProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Dados dos banners
+  // Dados dos banners (Seu código original)
   const banners = [
     {
       id: 1,
@@ -39,82 +48,58 @@ const Loja = ({ navigation }) => {
     },
   ];
 
-  // Categorias
-const categories = [
-  { id: 1, name: 'Roupas', icon: require('../../../../assets/icons/camisa.png'), type: 'image' },
-  { id: 2, name: 'Whey Protein', icon: require('../../../../assets/icons/whey.png'), type: 'image' },
-  { id: 3, name: 'Vitaminas', icon: require('../../../../assets/icons/vitamina.png'), type: 'image' },
-  { id: 4, name: 'Creatina', icon: require('../../../../assets/icons/pre-treino.png'), type: 'image' },
-];
-
-  // Produtos horizontais
-  const horizontalProducts = [
-    {
-      id: 1,
-      name: 'Whey Protein 80%',
-      description: 'Proteína de alta qualidade para seus treinos',
-      price: 'R$ 100,00',
-      image: require('../../../../assets/banner_whey.png'),
-      isFavorite: false,
-    },
-    {
-      id: 2,
-      name: 'Creatina Monohidratada',
-      description: 'Força e resistência para atletas',
-      price: 'R$ 100,00',
-      image: require('../../../../assets/banner_creatina.png'),
-      isFavorite: false,
-    },
-    {
-      id: 3,
-      name: 'Multivitamínico',
-      description: 'Completo para sua saúde diária',
-      price: 'R$ 89,90',
-      image: require('../../../../assets/banner_vitaminas.png'),
-      isFavorite: false,
-    },
+  // Categorias (Seu código original)
+  const categories = [
+    { id: 1, name: 'Roupas', icon: require('../../../../assets/icons/camisa.png'), type: 'image' },
+    { id: 2, name: 'Whey Protein', icon: require('../../../../assets/icons/whey.png'), type: 'image' },
+    { id: 3, name: 'Vitaminas', icon: require('../../../../assets/icons/vitamina.png'), type: 'image' },
+    { id: 4, name: 'Creatina', icon: require('../../../../assets/icons/pre-treino.png'), type: 'image' },
   ];
 
-  // Produtos verticais
-  const verticalProducts = [
-    {
-      id: 1,
-      name: 'Vitamina D3 2000UI',
-      description: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXX\nXXXXXXXX',
-      price: '100,99',
-      image: require('../../../../assets/banner_vitamina.jpg'),
-    },
-    {
-      id: 2,
-      name: 'Camiseta Dark Lab',
-      description: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXX\nXXXXXXXX',
-      price: '50,99',
-      image: require('../../../../assets/banner_roupas.jpg'),
-    },
-    {
-      id: 3,
-      name: 'Creatina Monohidratada',
-      description: 'Força e resistência para atletas',
-      price: '120,00',
-      image: require('../../../../assets/banner_creatina.png'),
-    },
-    {
-      id: 4,
-      name: 'Whey Protein 80%',
-      description: 'Proteína de alta qualidade',
-      price: '150,00',
-      image: require('../../../../assets/banner_whey.png'),
-    },
-    {
-      id: 5,
-      name: 'Multivitamínico',
-      description: 'Completo para sua saúde diária',
-      price: '89,90',
-      image: require('../../../../assets/banner_vitaminas.png'),
-    },
-  ];
+  // REMOVIDO: const horizontalProducts = [...] (estático)
+  // REMOVIDO: const verticalProducts = [...] (estático)
+
+  // ADICIONADO: useEffect para carregar dados da API na montagem
+  useEffect(() => {
+    const carregarDadosLoja = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // 1. Buscamos TODOS os produtos, SEM filtros (para evitar o erro 'isEnum()')
+        console.log("Buscando todos os produtos (sem filtro)...");
+        const todosProdutosData = await obterProdutos(); 
+
+        // 2. Formatamos os dados da API para bater com o que seu JSX espera
+        const produtosFormatados = todosProdutosData.map(p => ({
+          id: p.id,
+          name: p.nome,
+          description: p.descricao || p.nome,
+          price: `R$ ${p.preco ? p.preco.toFixed(2).replace('.', ',') : '0,00'}`,
+          image: { uri: p.img }, // API envia 'imagemUrl'
+          isFavorite: false // Propriedade esperada pelo 'renderHorizontalProduct'
+        }));
+
+        // 3. Dividimos a lista (mesclagem)
+        // Destaques (Horizontal): Pegamos os 5 primeiros
+        setHorizontalProducts(produtosFormatados.slice(0, 5));
+        
+        // Recomendados (Vertical): Pegamos os 5 seguintes (do 6º ao 10º)
+        setVerticalProducts(produtosFormatados.slice(5, 10));
+
+      } catch (err) {
+        console.error("Erro ao carregar dados da loja:", err);
+        setError(err.message || "Não foi possível carregar os produtos.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarDadosLoja();
+  }, []); // [] = Roda apenas uma vez
+
   
-
+  // renderBanner (Seu código original - Intocado)
   const renderBanner = ({ item }) => (
     <View style={styles.bannerContainer}>
       <Image source={item.image} style={styles.bannerImage} resizeMode="cover" />
@@ -125,9 +110,13 @@ const categories = [
     </View>
   );
 
-
+  // renderHorizontalProduct (Seu código original - 'onPress' MODIFICADO)
   const renderHorizontalProduct = ({ item }) => (
-    <TouchableOpacity style={styles.horizontalProductCard} onPress={() => navigation.navigate('LojaProdutos', { produto: item })}>
+    <TouchableOpacity 
+      style={styles.horizontalProductCard} 
+      // MODIFICADO: Passando 'produtoId' em vez do objeto 'produto'
+      onPress={() => navigation.navigate('LojaProdutos', { produtoId: item.id })}
+    >
       <TouchableOpacity style={styles.favoriteButton}>
         <Ionicons 
           name={item.isFavorite ? 'heart' : 'heart-outline'} 
@@ -136,6 +125,7 @@ const categories = [
         />
       </TouchableOpacity>
       <View style={styles.productContent}>
+        {/* 'item.image' agora é { uri: '...' } vindo da API */}
         <Image source={item.image} style={styles.horizontalProductImage} resizeMode="contain" />
         <View style={styles.textContainer}>
           <Text style={styles.horizontalProductName} numberOfLines={2}>
@@ -152,8 +142,14 @@ const categories = [
     </TouchableOpacity>
   );
 
+  // renderVerticalProduct (Seu código original - 'onPress' MODIFICADO)
   const renderVerticalProduct = ({ item }) => (
-    <TouchableOpacity style={styles.verticalProductCard} onPress={() => navigation.navigate('LojaProdutos', { produto: item })}>
+    <TouchableOpacity 
+      style={styles.verticalProductCard} 
+      // MODIFICADO: Passando 'produtoId' em vez do objeto 'produto'
+      onPress={() => navigation.navigate('LojaProdutos', { produtoId: item.id })}
+    >
+      {/* 'item.image' agora é { uri: '...' } vindo da API */}
       <Image source={item.image} style={styles.verticalProductImage} resizeMode="contain" />
       <View style={styles.verticalProductInfo}>
         <Text style={styles.verticalProductDescription} numberOfLines={2}>
@@ -164,6 +160,28 @@ const categories = [
     </TouchableOpacity>
   );
 
+  // ADICIONADO: Telas de Loading e Erro
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color={COLORS.primary || '#007bff'} />
+        <Text style={styles.centeredText}>Carregando loja...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Ionicons name="alert-circle-outline" size={50} color="#cc0000" />
+        <Text style={[styles.centeredText, { color: '#cc0000' }]}>
+          Erro ao carregar produtos: {error}
+        </Text>
+      </View>
+    );
+  }
+
+  // Renderização Principal (Seu JSX original - Intocado)
   return (
     <View style={styles.container}>
       {/* Header com gradiente */}
@@ -235,7 +253,7 @@ const categories = [
           </View>
         </View>
 
-        {/* Produtos Horizontais */}
+        {/* Produtos Horizontais (Agora usa o state) */}
         <View style={styles.horizontalProductsSection}>
           <FlatList
             data={horizontalProducts}
@@ -246,7 +264,7 @@ const categories = [
           />
         </View>
 
-        {/* Produtos Verticais */}
+        {/* Produtos Verticais (Agora usa o state) */}
         <View style={styles.verticalProductsSection}>
           <View style={styles.verticalProductsContainer}>
             {verticalProducts.map((item, index) => (
@@ -261,16 +279,28 @@ const categories = [
         </View>
       </ScrollView>
       {/* Adiciona a nova barra de navegação fixa */}
-  <BottomNavBar navigation={navigation} activeScreen={'Loja'} />
+      <BottomNavBar navigation={navigation} activeScreen={'Loja'} />
     
     </View>
   );
 };
 
+// Seus estilos originais (ADICIONADO 'centered' e 'centeredText')
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+  },
+  // ADICIONADO: Para telas de loading/erro
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  centeredText: {
+    marginTop: 10,
+    color: COLORS.cinzaMedio || '#888',
+    textAlign: 'center',
   },
   content: {
     flex: 1,
@@ -467,8 +497,8 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   verticalProductImage: {
-    width: 80,
-    height: 80,
+    width: 60, // (Seu estilo original tinha 80, o log tinha 60. Voltando para 80)
+    height: 60,
     marginRight: 15,
   },
   verticalProductInfo: {

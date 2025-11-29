@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import {
   View,
@@ -19,7 +19,7 @@ import { useTreinos } from '../../context/TreinosContext';
 
 const TreinoQuarta = ({ navigation, route }) => {
   const { isDark, colors } = useTheme();
-  const { marcarTreinoComoConcluido, marcarTreinoComoIncompleto } = useTreinos();
+  const { marcarTreinoComoConcluido, marcarTreinoComoIncompleto, salvarProgresso, obterProgresso, progressoTreinos } = useTreinos();
 
   const theme = {
     contentBg: isDark ? '#2C2C2C' : '#F5F5F5',
@@ -36,7 +36,30 @@ const TreinoQuarta = ({ navigation, route }) => {
     iconColor: isDark ? '#FFFFFF' : '#333333',
   };
 
-  const exercicios = {
+  // Se vierem exercícios da API via route.params, usar como única fonte; caso contrário, usar hardcoded
+  const getExerciciosPorCategoria = () => {
+    if (route?.params?.exercicios && Array.isArray(route.params.exercicios)) {
+      const apiExercicios = route.params.exercicios;
+      const agrupado = apiExercicios.reduce((acc, ex, idx) => {
+        const grupo = (ex.grupo || ex.categoria || 'geral').toLowerCase();
+        if (!acc[grupo]) acc[grupo] = [];
+        const safeId = ex.id ?? ex._id ?? ex.uid ?? `api_${idx}`;
+        const imagemUri = ex.img || ex.imagem || null;
+        acc[grupo].push({
+          id: safeId,
+          nome: ex.nome || `Exercício ${safeId}`,
+          series: ex.series || 4,
+          repeticoes: ex.repeticoes || 15,
+          carga: ex.carga || 0,
+          imagem: imagemUri ? { uri: imagemUri } : require('../../../assets/banner_whey_piqueno.jpg'),
+          descricao: ex.descricao || 'Realize o exercício conforme instruído.',
+        });
+        return acc;
+      }, {});
+      return agrupado;
+    }
+    
+    return {
     perna: [
       {
         id: 1,
@@ -99,22 +122,41 @@ const TreinoQuarta = ({ navigation, route }) => {
           'Sente-se no banco, apoie a ponta dos pés na plataforma e eleve os calcanhares, contraindo a panturrilha. Retorne devagar à posição inicial.',
       },
     ],
+    };
   };
 
-  const totalExercicios = exercicios.perna.length;
+  const exercicios = getExerciciosPorCategoria();
+  const totalExercicios = Object.values(exercicios).reduce((total, arr) => total + (Array.isArray(arr) ? arr.length : 0), 0) || 6;
   const [exerciciosSelecionados, setExerciciosSelecionados] = useState({});
   const [exerciciosConcluidos, setExerciciosConcluidos] = useState(0);
   const [modalExercicio, setModalExercicio] = useState({ visivel: false, exercicio: null });
   const [modalFinalizar, setModalFinalizar] = useState(false);
   const [modalAviso, setModalAviso] = useState(false);
 
-  const toggleExercicio = (id) => {
-    const novoEstado = { ...exerciciosSelecionados };
-    if (novoEstado[id]) delete novoEstado[id];
-    else novoEstado[id] = true;
+  useEffect(() => {
+    const treinoKey = route?.params?.treinoId || 'Quarta';
+    const saved = obterProgresso(treinoKey) || [];
+    if (saved && saved.length) {
+      const inicial = {};
+      Object.entries(exercicios).forEach(([grupo, arr]) => {
+        if (Array.isArray(arr)) arr.forEach(e => {
+          if (saved.includes(String(e.id)) || saved.includes(e.id)) inicial[`${grupo}_${e.id}`] = true;
+        });
+      });
+      setExerciciosSelecionados(inicial);
+      setExerciciosConcluidos(Object.keys(inicial).length);
+    }
+  }, [exercicios, route?.params, progressoTreinos]);
 
-    setExerciciosSelecionados(novoEstado);
-    setExerciciosConcluidos(Object.keys(novoEstado).length);
+  const toggleExercicio = (id) => {
+    setExerciciosSelecionados(prev => {
+      const novoEstado = { ...prev };
+      if (novoEstado[id]) delete novoEstado[id];
+      else novoEstado[id] = true;
+
+      setExerciciosConcluidos(Object.keys(novoEstado).length);
+      return novoEstado;
+    });
   };
 
   const handleSelecionarExercicios = () => {
@@ -123,7 +165,12 @@ const TreinoQuarta = ({ navigation, route }) => {
       setExerciciosConcluidos(0);
     } else {
       const todos = {};
-      exercicios.perna.forEach((e) => (todos[e.id] = true));
+      // Iterar sobre todas as categorias em exercicios
+      Object.entries(exercicios).forEach(([grupo, arr]) => {
+        if (Array.isArray(arr)) {
+          arr.forEach((e) => (todos[`${grupo}_${e.id}`] = true));
+        }
+      });
       setExerciciosSelecionados(todos);
       setExerciciosConcluidos(totalExercicios);
     }
@@ -135,17 +182,27 @@ const TreinoQuarta = ({ navigation, route }) => {
   };
 
   const handleConfirmarFinalizar = () => {
-    setModalFinalizar(false);
-    playSuccessSound();
+    (async () => {
+      setModalFinalizar(false);
+      playSuccessSound();
 
-    // Use TreinosContext instead of functions passed via route params
-    if (exerciciosConcluidos === totalExercicios) {
-      marcarTreinoComoConcluido && marcarTreinoComoConcluido('Quarta-Feira');
-    } else {
-      marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Quarta-Feira');
-    }
+      const treinoId = route?.params?.treinoId || null;
+      const selecionados = Object.keys(exerciciosSelecionados || {}).map(k => k.split('_').slice(1).join('_'));
+      try {
+        const treinoKey = treinoId || 'Quarta';
+        salvarProgresso(treinoKey, selecionados);
+      } catch (err) {
+        console.error('Erro ao salvar progresso localmente:', err);
+      }
 
-    navigation.navigate('MeuTreino');
+      if (exerciciosConcluidos === totalExercicios) {
+        marcarTreinoComoConcluido && marcarTreinoComoConcluido('Quarta');
+      } else {
+        marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Quarta');
+      }
+
+      navigation.navigate('MeuTreino');
+    })();
   };
 
   const [menuVisivel, setMenuVisivel] = useState(false);
@@ -172,52 +229,55 @@ const TreinoQuarta = ({ navigation, route }) => {
         style={[styles.content, { backgroundColor: theme.contentBg }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.secaoContainer}>
-          {exercicios.perna.map((exercicio) => (
-            <View
-              key={exercicio.id}
-              style={[
-                styles.exercicioCard,
-                { backgroundColor: theme.cardBg, borderColor: theme.cardBorder, borderWidth: 1 },
-              ]}
-            >
-              <TouchableOpacity
-                style={styles.checkbox}
-                onPress={() => toggleExercicio(exercicio.id)}
+        {/* Seções dinâmicas */}
+        {Object.entries(exercicios).map(([grupo, lista]) => (
+          <View key={grupo} style={styles.secaoContainer}>
+            {lista.map((exercicio) => (
+              <View
+                key={`${grupo}_${exercicio.id}`}
+                style={[
+                  styles.exercicioCard,
+                  { backgroundColor: theme.cardBg, borderColor: theme.cardBorder, borderWidth: 1 },
+                ]}
               >
-                <Ionicons
-                  name={exerciciosSelecionados[exercicio.id] ? 'checkmark-circle' : 'ellipse-outline'}
-                  size={24}
-                  color={exerciciosSelecionados[exercicio.id] ? colors.primary : colors.divider}
-                />
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.checkbox}
+                  onPress={() => toggleExercicio(`${grupo}_${exercicio.id}`)}
+                >
+                  <Ionicons
+                    name={exerciciosSelecionados[`${grupo}_${exercicio.id}`] ? 'checkmark-circle' : 'ellipse-outline'}
+                    size={24}
+                    color={exerciciosSelecionados[`${grupo}_${exercicio.id}`] ? colors.primary : colors.divider}
+                  />
+                </TouchableOpacity>
 
-              <Image source={exercicio.imagem} style={styles.exercicioImage} />
+                <Image source={exercicio.imagem} style={styles.exercicioImage} />
 
-              <View style={styles.exercicioInfo}>
-                <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>
-                  {exercicio.nome}
-                </Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
-                  Série: {exercicio.series}
-                </Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
-                  Repetição: {exercicio.repeticoes}
-                </Text>
-                <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
-                  Carga: {exercicio.carga}(kg)
-                </Text>
+                <View style={styles.exercicioInfo}>
+                  <Text style={[styles.exercicioNome, { color: theme.textPrimary }]}>
+                    {exercicio.nome}
+                  </Text>
+                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                    Série: {exercicio.series}
+                  </Text>
+                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                    Repetição: {exercicio.repeticoes}
+                  </Text>
+                  <Text style={[styles.exercicioDetalhes, { color: theme.textSecondary }]}>
+                    Carga: {exercicio.carga}(kg)
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.infoButton}
+                  onPress={() => setModalExercicio({ visivel: true, exercicio })}
+                >
+                  <Ionicons name="information-circle" size={24} color={colors.primary} />
+                </TouchableOpacity>
               </View>
-
-              <TouchableOpacity
-                style={styles.infoButton}
-                onPress={() => setModalExercicio({ visivel: true, exercicio })}
-              >
-                <Ionicons name="information-circle" size={24} color={colors.primary} />
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        ))}
       </ScrollView>
 
       {/* Barra de progresso */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     StyleSheet,
     Text,
@@ -9,11 +9,16 @@ import {
     SafeAreaView,
     StatusBar,
     FlatList,
+    ActivityIndicator,
+    Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { LinearGradient } from 'expo-linear-gradient';
 import HeaderLoja from '../../../Components/HeaderLoja';
 import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
+import { useFavoritos } from '../../../context/FavoritosContext';
+import { useCart } from '../../../context/CartContext';
+import { useAuth } from '../../../context/AuthContext';
 
 // Reutilizando o mesmo objeto de tema para manter a consistência
 const theme = {
@@ -45,58 +50,162 @@ const theme = {
     },
 };
 
-// Dados de exemplo (mock data). Em um app real, isso viria de um estado ou API.
-const FAVORITOS_DATA = [
-    {
-        id: '1',
-        nome: 'Creatina monohidratada Growth/ 250g',
-        preco: 'R$100,99',
-        imagem: require('../../../../assets/banner_whey.png'), // Adapte o caminho para sua imagem
-    },
-    {
-        id: '2',
-        nome: 'Creatina monohidratada Growth/ 250g',
-        preco: 'R$100,99',
-        imagem: require('../../../../assets/banner_vitaminas.png'),
-    },
-    {
-        id: '3',
-        nome: 'Creatina monohidratada Growth/ 250g',
-        preco: 'R$100,99',
-        imagem: require('../../../../assets/banner_creatina.png'),
-    },
-    {
-        id: '4',
-        nome: 'Creatina monohidratada Growth/ 250g',
-        preco: 'R$100,99',
-        imagem: require('../../../../assets/banner_camisas.png'),
-    },
-];
-
 // Componente para renderizar um item da lista, para manter o código limpo
-const FavoriteItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-        <Image source={item.imagem} style={styles.itemImage} />
-        <View style={styles.itemDetails}>
-            <Text style={styles.itemName}>{item.nome}</Text>
-            <Text style={styles.itemPriceLabel}>Por apenas</Text>
-            <Text style={styles.itemPrice}>{item.preco}</Text>
-            <View style={styles.itemActions}>
-                <TouchableOpacity>
-                    <Text style={styles.actionLink}>Adicionar ao carrinho</Text>
-                </TouchableOpacity>
-                <TouchableOpacity>
-                    <Text style={styles.actionDelete}>Excluir</Text>
-                </TouchableOpacity>
+const FavoriteItem = ({ item, onAddToCart, onRemove }) => {
+    // Formata o preço para exibição
+    const formatarPreco = (preco) => {
+        if (typeof preco === 'number') {
+            return `R$ ${preco.toFixed(2).replace('.', ',')}`;
+        }
+        if (typeof preco === 'string') {
+            return preco;
+        }
+        return 'R$ 0,00';
+    };
+
+    // Verifica se a imagem é uma URI ou require
+    const getImageSource = () => {
+        // Tenta diferentes formatos de imagem que podem vir da API
+        const imagem = item.imagem || item.img || item.image;
+        
+        if (imagem) {
+            // Se for string (URL)
+            if (typeof imagem === 'string') {
+                // Se já começar com http, retorna URI direto
+                if (imagem.startsWith('http://') || imagem.startsWith('https://')) {
+                    return { uri: imagem };
+                }
+                // Se for caminho relativo, adiciona a base URL da API
+                return { uri: `http://54.81.240.117${imagem.startsWith('/') ? imagem : '/' + imagem}` };
+            }
+            // Se for objeto com uri
+            if (imagem.uri) {
+                return imagem;
+            }
+            // Se for require (objeto local)
+            return imagem;
+        }
+        // Imagem padrão se não houver
+        return require('../../../../assets/banner_whey.png');
+    };
+
+    return (
+        <View style={styles.itemContainer}>
+            <Image 
+                source={getImageSource()} 
+                style={styles.itemImage}
+                resizeMode="contain"
+            />
+            <View style={styles.itemDetails}>
+                <Text style={styles.itemName}>{item.nome || item.productName || 'Produto'}</Text>
+                <Text style={styles.itemPriceLabel}>Por apenas</Text>
+                <Text style={styles.itemPrice}>{formatarPreco(item.preco || item.price)}</Text>
+                <View style={styles.itemActions}>
+                    <TouchableOpacity onPress={() => onAddToCart(item)}>
+                        <Text style={styles.actionLink}>Adicionar ao carrinho</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                        const produtoId = item.id || item.produtoId;
+                        if (produtoId) {
+                            onRemove(produtoId);
+                        }
+                    }}>
+                        <Text style={styles.actionDelete}>Excluir</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
-    </View>
-);
+    );
+};
 
 const Favoritos = ({ navigation }) => {
     const [searchText, setSearchText] = useState("");
+    const { favoritos, removerFavorito, loading: favoritosLoading } = useFavoritos();
+    const { adicionarAoCarrinho } = useCart();
+    const { isAuthenticated } = useAuth();
     const gradientColors = [theme.colors.gradientStart, theme.colors.gradientEnd];
     const gradientLocations = [0, 0.84];
+
+    // Filtrar favoritos por busca
+    const favoritosFiltrados = favoritos.filter(item => {
+        const nome = item.nome || item.productName || '';
+        return nome.toLowerCase().includes(searchText.toLowerCase());
+    });
+
+    // Função para adicionar produto ao carrinho
+    const handleAddToCart = (produto) => {
+        if (!isAuthenticated) {
+            Alert.alert(
+                'Login necessário',
+                'Você precisa estar logado para adicionar produtos ao carrinho.',
+                [
+                    { text: 'Cancelar', style: 'cancel' },
+                    { text: 'Fazer Login', onPress: () => navigation.navigate('TelaLogin') }
+                ]
+            );
+            return;
+        }
+
+        // Adiciona ao carrinho sem variação (null = padrão)
+        adicionarAoCarrinho(produto, null);
+        Alert.alert(
+            'Sucesso!',
+            `${produto.nome || produto.productName} foi adicionado ao carrinho.`,
+            [
+                { text: 'Continuar', style: 'cancel' },
+                { text: 'Ver Carrinho', onPress: () => navigation.navigate('LojaCarrinho') }
+            ]
+        );
+    };
+
+    // Função para remover favorito
+    const handleRemove = (produtoId) => {
+        // Validação: verifica se o ID é válido
+        if (!produtoId) {
+            Alert.alert('Erro', 'Não foi possível identificar o produto para remover.');
+            return;
+        }
+
+        Alert.alert(
+            'Remover dos favoritos',
+            'Deseja remover este produto dos seus favoritos?',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                { 
+                    text: 'Remover', 
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            // A função removerFavorito agora trata os erros internamente
+                            await removerFavorito(produtoId);
+                            // Sucesso - o item já foi removido do estado local
+                        } catch (error) {
+                            // Se ainda assim houver erro, mostra mensagem
+                            if (__DEV__) {
+                                console.error("Erro ao remover favorito:", error);
+                            }
+                            Alert.alert(
+                                'Aviso',
+                                'O favorito foi removido localmente. Pode haver um problema de conexão com o servidor.',
+                                [{ text: 'OK' }]
+                            );
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    // Renderizar lista vazia
+    const renderEmptyList = () => (
+        <View style={styles.emptyContainer}>
+            <Icon name="heart" size={64} color={theme.colors.placeholder} />
+            <Text style={styles.emptyText}>Nenhum produto favoritado</Text>
+            <Text style={styles.emptySubtext}>
+                Não há itens listados nos favoritos
+            </Text>
+        </View>
+    );
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -106,20 +215,38 @@ const Favoritos = ({ navigation }) => {
             <HeaderLoja navigation={navigation} searchText={searchText} setSearchText={setSearchText} />
 
             {/* --- CONTEÚDO DA TELA --- */}
-            <FlatList
-                data={FAVORITOS_DATA.filter(item =>
-                    item.nome.toLowerCase().includes(searchText.toLowerCase())
-                )}
-                renderItem={({ item }) => <FavoriteItem item={item} />}
-                keyExtractor={item => item.id}
-                ListHeaderComponent={<Text style={styles.title}>Meus favoritos</Text>}
-                ItemSeparatorComponent={() => <View style={styles.separator} />}
-                contentContainerStyle={styles.listContentContainer}
-            />
+            {favoritosLoading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={theme.colors.gradientEnd} />
+                    <Text style={styles.loadingText}>Carregando favoritos...</Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={favoritosFiltrados}
+                    renderItem={({ item }) => (
+                        <FavoriteItem 
+                            item={item} 
+                            onAddToCart={handleAddToCart}
+                            onRemove={handleRemove}
+                        />
+                    )}
+                    keyExtractor={item => String(item.id || item.produtoId || Math.random())}
+                    ListHeaderComponent={
+                        favoritosFiltrados.length > 0 ? (
+                            <Text style={styles.title}>Meus favoritos ({favoritosFiltrados.length})</Text>
+                        ) : null
+                    }
+                    ListEmptyComponent={renderEmptyList}
+                    ItemSeparatorComponent={() => <View style={styles.separator} />}
+                    contentContainerStyle={
+                        favoritosFiltrados.length === 0 
+                            ? styles.listContentContainerEmpty 
+                            : styles.listContentContainer
+                    }
+                />
+            )}
 
-             <BottomNavBar navigation={navigation} activeScreen="LojaFavoritos" />
-
-        
+            <BottomNavBar navigation={navigation} activeScreen="LojaFavoritos" />
         </SafeAreaView>
     );
 };
@@ -225,6 +352,41 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         elevation: 10,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: theme.spacing.large * 2,
+        paddingHorizontal: theme.spacing.large,
+    },
+    emptyText: {
+        fontSize: theme.fontSize.large,
+        fontWeight: 'bold',
+        color: theme.colors.text,
+        marginTop: theme.spacing.medium,
+        marginBottom: theme.spacing.small,
+    },
+    emptySubtext: {
+        fontSize: theme.fontSize.regular,
+        color: theme.colors.placeholder,
+        textAlign: 'center',
+        marginBottom: theme.spacing.large,
+    },
+    listContentContainerEmpty: {
+        flex: 1,
+        paddingBottom: 100,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: theme.spacing.large * 2,
+    },
+    loadingText: {
+        marginTop: theme.spacing.medium,
+        fontSize: theme.fontSize.regular,
+        color: theme.colors.placeholder,
     },
 });
 

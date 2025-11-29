@@ -229,14 +229,6 @@ const createStyles = (isDark) => ({
     alignItems: 'center',
     borderWidth: 4,
     borderColor: isDark ? '#FFFFFF' : '#3B82F6',
-    overflow: 'hidden',
-  },
-
-  avatarImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    resizeMode: 'cover',
   },
 
   editAvatarButton: {

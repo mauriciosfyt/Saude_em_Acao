@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,13 @@ import {
   SafeAreaView,
   StatusBar,
   Image,
+  useFocusEffect,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import createStyles from "../../Styles/MeuTreinoStyle";
 import { useTheme } from "../../context/ThemeContext";
 import { useTreinos } from "../../context/TreinosContext";
-import { obterTreinos } from '../../Services/api';
+import { obterMeusTreinos } from '../../Services/api';
 
 const MeuTreino = ({ navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
@@ -40,25 +41,164 @@ const MeuTreino = ({ navigation }) => {
     const carregar = async () => {
       try {
         setCarregandoTreinos(true);
-        const dados = await obterTreinos();
+        const dadosRaw = await obterMeusTreinos();
+        // API pode retornar array direto ou objeto com propriedade (ex: { treinos: [...] } ou { dias: [...] })
+        const dados = Array.isArray(dadosRaw)
+          ? dadosRaw
+          : dadosRaw?.treinos || dadosRaw?.dias || dadosRaw?.items || [];
         if (!mounted) return;
 
         if (Array.isArray(dados) && dados.length > 0) {
           // Mapear resposta da API para o formato esperado pela UI
-          const mapped = dados.map((t, idx) => ({
-            id: t.id || idx + 1,
-            dia: t.dia || t.nome || `Treino ${idx + 1}`,
-            grupos: t.grupos || t.musculos || '',
-            imagem: t.imagem ? { uri: t.imagem } : [
+          const dayNames = [
+            'Segunda-Feira',
+            'Terça-Feira',
+            'Quarta-Feira',
+            'Quinta-Feira',
+            'Sexta-Feira',
+            'Sábado',
+            'Domingo',
+          ];
+
+          // Expande cada treino em entradas separadas por dia quando exericiciosPorDia existir
+          const expanded = [];
+          dados.forEach((t, idx) => {
+            const baseImage = t.imagem ? { uri: t.imagem } : [
               require("../../../assets/banner_whey.png"),
               require("../../../assets/banner_creatina.png"),
               require("../../../assets/banner_vitaminas.png"),
               require("../../../assets/banner_roupas.jpg"),
               require("../../../assets/banner_camisas.png"),
-            ][idx % 5],
-          }));
+            ][idx % 5];
 
-          setTreinos(mapped);
+            // se houver exerciciosPorDia, cria uma entrada por chave (dia)
+            if (t.exerciciosPorDia && typeof t.exerciciosPorDia === 'object' && Object.keys(t.exerciciosPorDia).length) {
+              const dayFullMap = {
+                'SEGUNDA': 'Segunda',
+                'TERCA': 'Terça',
+                'TERÇA': 'Terça',
+                'QUARTA': 'Quarta',
+                'QUINTA': 'Quinta',
+                'SEXTA': 'Sexta',
+                'SABADO': 'Sábado',
+                'SÁBADO': 'Sábado'
+              };
+
+              Object.keys(t.exerciciosPorDia).forEach((k, kidx) => {
+                const up = String(k).toUpperCase();
+                const diaLabel = dayFullMap[up] || (k[0].toUpperCase() + k.slice(1).toLowerCase());
+                expanded.push({
+                  id: `${t.id || idx + 1}_${up}_${kidx}`,
+                  dia: diaLabel,
+                  grupos: Array.isArray(t.exerciciosPorDia[k]) ? `• ${t.exerciciosPorDia[k].map(e => e.nome).join(' • ')}` : (t.grupos || ''),
+                  imagem: baseImage,
+                  exercicios: t.exerciciosPorDia[k],
+                });
+              });
+            } else {
+              // fallback: comportamento anterior (um card por treino)
+              // Tenta extrair um número do treino (vários nomes possíveis)
+              const possibleNumbers = [t.numero, t.treinoNumero, t.treinoId, t.treino, t.id, t.index];
+              let num = possibleNumbers.find((v) => v !== undefined && v !== null);
+              if (typeof num === 'string' && num.trim() !== '') {
+                const parsed = parseInt(num, 10);
+                if (!isNaN(parsed)) num = parsed;
+              }
+
+              let diaValue = null;
+              if (typeof num === 'number' && Number.isFinite(num)) {
+                const idxDia = ((Math.floor(num) - 1) % 7 + 7) % 7;
+                diaValue = dayNames[idxDia];
+              }
+
+              // Prioritiza scheduledLabel/extract de datas (mantém lógica anterior)
+              let scheduledLabel = null;
+              if (t.exerciciosPorDia && typeof t.exerciciosPorDia === 'object') {
+                try {
+                  const keys = Object.keys(t.exerciciosPorDia).filter(Boolean);
+                  if (keys.length) {
+                    const mapped = keys.map(k => {
+                      const up = String(k).toUpperCase();
+                      return (dayFullMap && dayFullMap[up]) || (k[0].toUpperCase() + k.slice(1).toLowerCase());
+                    });
+                    const order = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+                    const unique = Array.from(new Set(mapped));
+                    unique.sort((a,b) => order.indexOf(a) - order.indexOf(b));
+                    const formatDayList = (arr) => {
+                      if (!arr || arr.length === 0) return null;
+                      if (arr.length === 1) return arr[0];
+                      if (arr.length === 2) return `${arr[0]} e ${arr[1]}`;
+                      return `${arr.slice(0, -1).join(', ')} e ${arr[arr.length - 1]}`;
+                    };
+                    scheduledLabel = formatDayList(unique);
+                  }
+                } catch (e) {
+                  scheduledLabel = null;
+                }
+              }
+
+              // Prioridade 2: campos de datas
+              const possibleDateFields = [
+                t.datas,
+                t.dates,
+                t.agendamentos,
+                t.saveDates,
+                t.savedDates,
+                t.salvoEm,
+                t.data,
+                t.dataSalva,
+                t.datasSalvas,
+              ];
+
+              const extractDates = (val) => {
+                if (!val) return [];
+                if (Array.isArray(val)) return val;
+                if (typeof val === 'string') {
+                  if (val.includes(',')) return val.split(',').map(s => s.trim()).filter(Boolean);
+                  return [val.trim()];
+                }
+                return [String(val)];
+              };
+
+              const daysShort = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+              let scheduledDates = [];
+              for (const field of possibleDateFields) {
+                if (field) {
+                  const arr = extractDates(field);
+                  if (arr.length) { scheduledDates = arr; break; }
+                }
+              }
+
+              const scheduledDayNames = (() => {
+                if (!scheduledDates || !scheduledDates.length) return [];
+                const indices = scheduledDates.map(d => { try { const date = new Date(d); if (!isNaN(date.getTime())) return date.getDay(); } catch(e) { return null } return null }).filter(v => v !== null && v !== undefined);
+                const unique = Array.from(new Set(indices));
+                const order = [1,2,3,4,5,6,0]; unique.sort((a,b) => order.indexOf(a) - order.indexOf(b));
+                return unique.map(i => daysShort[i]);
+              })();
+
+              const formatDayList = (arr) => {
+                if (!arr || arr.length === 0) return null;
+                if (arr.length === 1) return arr[0];
+                if (arr.length === 2) return `${arr[0]} e ${arr[1]}`;
+                return `${arr.slice(0, -1).join(', ')} e ${arr[arr.length - 1]}`;
+              };
+
+              const scheduledLabelFromDates = formatDayList(scheduledDayNames);
+              if (!scheduledLabel) scheduledLabel = scheduledLabelFromDates;
+
+              const diaTexto = scheduledLabel || diaValue || t.dia || t.nome || t.nomeDia || `Treino ${idx + 1}`;
+
+              expanded.push({
+                id: t.id || t.treinoId || idx + 1,
+                dia: diaTexto,
+                grupos: t.grupos || t.musculos || t.descricao || '',
+                imagem: baseImage,
+              });
+            }
+          });
+
+          setTreinos(expanded);
         } else {
           // fallback local (sem dados da API)
           setTreinos([
@@ -87,6 +227,15 @@ const MeuTreino = ({ navigation }) => {
     carregar();
     return () => { mounted = false; };
   }, []);
+
+  // Atualizar a tela quando retorna do treino (para refletir mudanças de status)
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Força re-render do componente para mostrar os status atualizados
+    });
+
+    return unsubscribe;
+  }, [navigation, treinosConcluidos, treinosIncompletos]);
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -119,24 +268,45 @@ const MeuTreino = ({ navigation }) => {
     return `${dayName} Feira, ${day} de ${month}`;
   };
 
+  const normalizarDia = (dia) => {
+    if (!dia) return '';
+    const upper = String(dia).toUpperCase();
+    if (upper.includes('SEGUNDA')) return 'Segunda';
+    if (upper.includes('TERÇA') || upper.includes('TERCA')) return 'Terça';
+    if (upper.includes('QUARTA')) return 'Quarta';
+    if (upper.includes('QUINTA')) return 'Quinta';
+    if (upper.includes('SEXTA')) return 'Sexta';
+    if (upper.includes('SÁBADO') || upper.includes('SABADO')) return 'Sábado';
+    if (upper.includes('DOMINGO')) return 'Domingo';
+    return dia;
+  };
+
   const handleIniciarTreino = (treino) => {
+    // Normaliza o dia para garantir consistência
+    const diaQuarta = normalizarDia(treino.dia);
+    
     // Só bloqueia se o treino estiver completamente concluído
-    if (treinosConcluidos.has(treino.dia)) {
-      setModalConcluido({ visivel: true, dia: treino.dia });
+    if (treinosConcluidos.has(diaQuarta)) {
+      setModalConcluido({ visivel: true, dia: diaQuarta });
       return;
     }
-    // Permite acesso a treinos incompletos ou novos
+    // Marca como incompleto quando inicia
+    marcarTreinoComoIncompleto(diaQuarta);
     
-    if (treino.dia === "Segunda-Feira") {
-      navigation.navigate("TreinoSegunda");
-    } else if (treino.dia === "Terça-Feira") {
-      navigation.navigate("TreinoTerca");
-    } else if (treino.dia === "Quarta-Feira") {
-      navigation.navigate("TreinoQuarta");
-    } else if (treino.dia === "Quinta-Feira") {
-      navigation.navigate("TreinoQuinta");
-    } else if (treino.dia === "Sexta-Feira") {
-      navigation.navigate("TreinoSexta");
+    // Tenta extrair exercícios e id do treino (quando vindo de exerciciosPorDia)
+    const treinoId = treino.id || treino.treinoId || treino._id || null;
+    const routeParams = treino.exercicios ? { exercicios: treino.exercicios, treinoId } : { treinoId };
+    
+    if (diaQuarta === "Segunda") {
+      navigation.navigate("TreinoSegunda", routeParams);
+    } else if (diaQuarta === "Terça") {
+      navigation.navigate("TreinoTerca", routeParams);
+    } else if (diaQuarta === "Quarta") {
+      navigation.navigate("TreinoQuarta", routeParams);
+    } else if (diaQuarta === "Quinta") {
+      navigation.navigate("TreinoQuinta", routeParams);
+    } else if (diaQuarta === "Sexta") {
+      navigation.navigate("TreinoSexta", routeParams);
     }
   };
 
@@ -190,46 +360,37 @@ const MeuTreino = ({ navigation }) => {
                 {treino.dia}
               </Text>
             </View>
-            <TouchableOpacity
-              style={[
-                styles.iniciarButton,
-                treinosConcluidos.has(treino.dia) && styles.concluidoButton,
-                treinosIncompletos.has(treino.dia) && {
-                  backgroundColor: "#FF9800",
-                },
-              ]}
-              onPress={() =>
-                !treinosConcluidos.has(treino.dia) &&
-                handleIniciarTreino(treino)
-              }
-              disabled={treinosConcluidos.has(treino.dia)}
-            >
-              <Text
-                style={[
-                  styles.iniciarButtonText,
-                  treinosConcluidos.has(treino.dia) &&
-                    styles.concluidoButtonText,
-                  treinosIncompletos.has(treino.dia) && { color: "#fff" },
-                ]}
-              >
-                {treinosConcluidos.has(treino.dia)
-                  ? "Concluído"
-                  : treinosIncompletos.has(treino.dia)
-                  ? "Incompleto"
-                  : "Iniciar"}
-              </Text>
-              <Ionicons
-                name={
-                  treinosConcluidos.has(treino.dia)
-                    ? "checkmark-circle"
-                    : treinosIncompletos.has(treino.dia)
-                    ? "time-outline"
-                    : "arrow-forward"
-                }
-                size={16}
-                color="white"
-              />
-            </TouchableOpacity>
+            {(() => {
+              const diaNorm = normalizarDia(treino.dia);
+              const isConcluido = treinosConcluidos.has(diaNorm);
+              const isIncompleto = treinosIncompletos.has(diaNorm);
+              return (
+                <TouchableOpacity
+                  style={[
+                    styles.iniciarButton,
+                    isConcluido && styles.concluidoButton,
+                    isIncompleto && { backgroundColor: "#FF9800" },
+                  ]}
+                  onPress={() => !isConcluido && handleIniciarTreino(treino)}
+                  disabled={isConcluido}
+                >
+                  <Text
+                    style={[
+                      styles.iniciarButtonText,
+                      isConcluido && styles.concluidoButtonText,
+                      isIncompleto && { color: "#fff" },
+                    ]}
+                  >
+                    {isConcluido ? "Concluído" : isIncompleto ? "Incompleto" : "Iniciar"}
+                  </Text>
+                  <Ionicons
+                    name={isConcluido ? "checkmark-circle" : isIncompleto ? "time-outline" : "arrow-forward"}
+                    size={16}
+                    color="white"
+                  />
+                </TouchableOpacity>
+              );
+            })()}
           </View>
         ))}
       </ScrollView>
