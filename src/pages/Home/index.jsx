@@ -74,7 +74,7 @@ function Home() {
             >
               <h2>CONHEÇA NOSSA HISTÓRIA</h2>
               <p>
-                A Saúde em Ação nasceu o propósito de transformar vidas
+                A Saúde em Ação nasceu com o propósito de transformar vidas
                 através do movimento.
                 <br />
                 Aqui, cada treino é um passo rumo à sua melhor versão.
