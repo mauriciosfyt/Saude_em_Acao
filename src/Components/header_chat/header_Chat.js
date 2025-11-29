@@ -79,8 +79,9 @@ const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
           <TouchableOpacity onPress={onBackPress} style={styles.iconButton}>
             <Ionicons name="arrow-back" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
           </TouchableOpacity>
+          {/* Ajuste o caminho da imagem do logo se necessário */}
           <Image
-            source={require('../../../assets/icons/logo_dia.png')} // Ajuste o caminho
+            source={require('../../../assets/icons/logo_dia.png')}
             style={styles.logo}
             resizeMode="contain"
           />
