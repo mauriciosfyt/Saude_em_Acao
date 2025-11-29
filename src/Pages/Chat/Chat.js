@@ -22,6 +22,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   obterHistoricoChat,
   enviarMensagemChat,
+  enviarImagemChat,
   setAuthToken,
   apagarMensagemChat,
   apagarHistoricoChat,
@@ -260,13 +261,35 @@ const Chat = ({ navigation, route }) => {
     if (!type) type = 'text';
     const lower = String(conteudo).toLowerCase();
     if (!type || type === 'text') {
-      if (lower.startsWith('http') && (lower.endsWith('.jpg') || lower.endsWith('.png') || lower.includes('image'))) {
+      // Detect common image URI formats: http(s) to images, data URIs, file:// (local), content:// (Android), or paths with image extensions
+      const isHttpImage = lower.startsWith('http') && (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.includes('image'));
+      const isDataImage = lower.startsWith('data:image');
+      const isFileImage = lower.startsWith('file:') || lower.startsWith('content:');
+      const hasImageExt = /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(raw?.conteudo || raw?.text || '');
+      if (isHttpImage || isDataImage || isFileImage || hasImageExt) {
         type = 'image';
       }
     }
 
     // determinar remetente
     const sender = isMessageFromUser(raw, user) ? 'me' : raw?.sender ?? raw?.remetente ?? 'other';
+
+    // detectar se a mensagem foi enviada por um STAFF (ADMIN / PERSONAL)
+    let isFromStaff = false;
+    try {
+      const remetente = raw?.remetente ?? raw?.from ?? raw?.autor ?? raw?.sender ?? null;
+      const roleField =
+        (remetente && (remetente.role || remetente.perfil || remetente.tipo)) || raw?.role || raw?.perfil || null;
+      if (roleField && typeof roleField === 'string') {
+        const r = roleField.trim().toUpperCase();
+        if (['ADMIN', 'PERSONAL'].includes(r)) isFromStaff = true;
+      } else if (Array.isArray(roleField)) {
+        if (roleField.some(r => ['ADMIN', 'PERSONAL'].includes(String(r).trim().toUpperCase()))) isFromStaff = true;
+      }
+    } catch (e) {
+      // não falhar por causa de formato inesperado
+      isFromStaff = false;
+    }
 
     return {
       id: String(id),
@@ -275,6 +298,7 @@ const Chat = ({ navigation, route }) => {
       image: type === 'image' ? conteudo : undefined,
       createdAt,
       sender,
+      isFromStaff,
       raw,
     };
   };
@@ -352,23 +376,40 @@ const Chat = ({ navigation, route }) => {
     }
 
     const fromMe = item.sender === 'me' || isMessageFromUser(item.raw, user);
+    const isStaffMessage = !!item.isFromStaff;
+    const viewerIsStaff = !!canSend; // usuário atual tem papel ADMIN/PERSONAL?
 
     const rowStyle = [styles.messageRow, fromMe ? styles.receiverRow : styles.senderRow];
+
+    // Regra de cor: mensagens do próprio usuário usam colors.primary; mensagens de STAFF
+    // (ADMIN/PERSONAL) devem aparecer em azul (colors.primary) para alunos (viewerIsStaff === false).
+    const shouldShowStaffBlue = !fromMe && isStaffMessage && !viewerIsStaff;
+
     const bubbleStyle = [
       styles.textBubble,
-      { backgroundColor: fromMe ? colors.primary : colors.surface },
+      { backgroundColor: fromMe || shouldShowStaffBlue ? colors.primary : colors.surface },
     ];
 
     if (item.type === 'image' && item.image) {
       return (
-          <TouchableOpacity
+        <TouchableOpacity
           onLongPress={() => (fromMe || canSend) && handleApagarMensagem(item)}
           activeOpacity={0.8}
           style={rowStyle}
           key={item.id}
         >
-          <View style={[styles.imageBubble, { backgroundColor: fromMe ? colors.primary : colors.surface }]}> 
+          <View style={[styles.imageBubble, { backgroundColor: fromMe || shouldShowStaffBlue ? colors.primary : colors.surface }]}> 
             <Image source={{ uri: item.image }} style={styles.messageImage} resizeMode="cover" />
+            {item.uploading && (
+              <View style={styles.imageOverlay}>
+                <ActivityIndicator size="small" color="#fff" />
+              </View>
+            )}
+            {item.uploadError && (
+              <TouchableOpacity style={styles.imageOverlay} onPress={() => handleEnviarImagem(item.raw?.localUri || item.image)}>
+                <Icon name="alert-circle" size={36} color="#ff5252" />
+              </TouchableOpacity>
+            )}
           </View>
         </TouchableOpacity>
       );
@@ -382,7 +423,7 @@ const Chat = ({ navigation, route }) => {
         key={String(item.id)}
       >
         <View style={bubbleStyle}>
-          <Text style={{ color: fromMe ? '#fff' : colors.textPrimary }}>{item.text}</Text>
+          <Text style={{ color: fromMe || shouldShowStaffBlue ? '#fff' : colors.textPrimary }}>{item.text}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -403,13 +444,20 @@ const Chat = ({ navigation, route }) => {
 
       // A resposta pode variar => normalizar
       const nova = resp?.message || resp?.mensagem || resp || { id: Date.now(), conteudo: texto };
-      const normalized = normalizeMessage(nova) || { 
-        id: String(Date.now()), 
-        type: 'text', 
-        text: texto, 
-        sender: 'me',
-        createdAt: new Date().toISOString()
-      };
+      let normalized = normalizeMessage(nova);
+      if (!normalized) {
+        normalized = {
+          id: String(Date.now()),
+          type: 'text',
+          text: texto,
+          sender: 'me',
+          createdAt: new Date().toISOString(),
+          raw: nova,
+        };
+      }
+
+      // Garantir que a mensagem enviada localmente aparece como 'me' (cor do bubble)
+      normalized.sender = 'me';
 
       // Adiciona a nova mensagem no final (embaixo)
       setMensagens((prev) => {
@@ -441,8 +489,86 @@ const Chat = ({ navigation, route }) => {
       return;
     }
     if (!uri) return;
-    // Por enquanto enviamos a URL como conteúdo; dependendo da API pode exigir upload
-    return handleEnviarMensagem(uri);
+    // Cria mensagem local do tipo 'image' para mostrar imediatamente no chat
+    const localMsg = {
+      id: String(Date.now()),
+      type: 'image',
+      image: uri,
+      text: '',
+      sender: 'me',
+      createdAt: new Date().toISOString(),
+      raw: { localUri: uri },
+    };
+
+    // adiciona mensagem local com estado de upload
+    setMensagens((prev) => {
+      const updated = [...prev, { ...localMsg, uploading: true }];
+      return updated.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : (a.raw?.timestamp || 0);
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : (b.raw?.timestamp || 0);
+        return dateA - dateB;
+      });
+    });
+
+    // Scroll para o fim para mostrar a imagem
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 150);
+
+    // Enviar para API em background: dependendo da API, pode precisar de upload multipart
+    // Aqui enviamos a URI como fallback (a API deve tratar upload se suportado)
+    try {
+      const usuarioNome = user?.email || user?.nome || 'Usuário';
+      // Tenta enviar como upload multipart (se a API suportar)
+      const resp = await enviarImagemChat(chatId, uri, usuarioNome);
+
+      // normaliza resposta do servidor para atualizar a mensagem local
+      const servidorMsg = resp?.message || resp?.mensagem || resp || null;
+      if (servidorMsg) {
+        const normalized = normalizeMessage(servidorMsg) || {
+          id: String(Date.now()),
+          type: 'image',
+          image: typeof servidorMsg === 'string' ? servidorMsg : (servidorMsg.conteudo || servidorMsg.image || servidorMsg.url),
+          text: servidorMsg.conteudo || servidorMsg.text || '',
+          sender: 'me',
+          createdAt: servidorMsg.createdAt || new Date().toISOString(),
+          raw: servidorMsg,
+        };
+
+        // substitui a mensagem local (procurando pelo id localMsg.id)
+        setMensagens((prev) => prev.map((m) => (m.id === localMsg.id ? normalized : m)));
+      } else {
+        // se não retornou um objeto esperado, apenas remove o flag de uploading
+        setMensagens((prev) => prev.map((m) => (m.id === localMsg.id ? { ...m, uploading: false } : m)));
+      }
+    } catch (e) {
+      console.error('Erro ao enviar imagem para API:', e);
+      // fallback: tenta enviar como texto/uri
+      try {
+        const usuarioNome = user?.email || user?.nome || 'Usuário';
+        const resp = await enviarMensagemChat(chatId, uri, usuarioNome);
+        const servidorMsg = resp?.message || resp?.mensagem || resp || null;
+        if (servidorMsg) {
+          const normalized = normalizeMessage(servidorMsg) || {
+            id: String(Date.now()),
+            type: 'image',
+            image: typeof servidorMsg === 'string' ? servidorMsg : (servidorMsg.conteudo || servidorMsg.image || servidorMsg.url),
+            text: servidorMsg.conteudo || servidorMsg.text || '',
+            sender: 'me',
+            createdAt: servidorMsg.createdAt || new Date().toISOString(),
+            raw: servidorMsg,
+          };
+          setMensagens((prev) => prev.map((m) => (m.id === localMsg.id ? normalized : m)));
+        } else {
+          setMensagens((prev) => prev.map((m) => (m.id === localMsg.id ? { ...m, uploading: false } : m)));
+        }
+      } catch (err) {
+        if (__DEV__) console.warn('[handleEnviarImagem] fallback enviarMensagemChat falhou', err?.message || err);
+        // marca erro na mensagem local para permitir retry manual
+        setMensagens((prev) => prev.map((m) => (m.id === localMsg.id ? { ...m, uploading: false, uploadError: true } : m)));
+      }
+    }
+    return;
   };
 
   const handleLimparMensagens = async () => {
@@ -623,6 +749,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   iconButton: { padding: 5 },
+  imageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
 });
 
 const extractServerId = (msg) =>
