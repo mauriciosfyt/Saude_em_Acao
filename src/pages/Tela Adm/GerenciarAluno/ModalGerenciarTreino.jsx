@@ -101,8 +101,6 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
   // Formatar dados do treino para exibição (mesma função da tela GerenciarTreino)
   const formatarTreinoParaExibicao = (treino) => {
     const titulo = treino.nome || treino.titulo || 'Treino sem nome';
-    const frequencia = treino.frequenciaSemanal || treino.frequencia || 0;
-    const sessaoTag = `${frequencia}x sessões`;
     
     const tags = [];
     if (treino.tipoDeTreino || treino.tipoTreino || treino.tipo) {
@@ -129,7 +127,6 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
     return {
       id: treino.id,
       titulo,
-      sessaoTag,
       tags,
       ...treino
     };
@@ -315,7 +312,7 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
                 <div className="modal-item-content">
                   <div className="modal-item-title">{treino.titulo}</div>
                   <div className="modal-item-tags">
-                    {[...treino.tags, treino.sessaoTag].map((tag, i) => (
+                    {(treino.tags || []).map((tag, i) => (
                       <span className="modal-tag" key={i}>{tag}</span>
                     ))}
                   </div>

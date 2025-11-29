@@ -85,13 +85,16 @@
 .modal-list {
   overflow-y: auto;
   margin: 6px 0 12px 0;
-  padding-right: 0;
+  padding-right: 12px;
   flex: 1 1 auto;
   padding-left: 0;
   position: relative;
   background-color: #f2f2f2;
   border-radius: 8px;
-  overflow: hidden;
+  /* Permitir que o filho com overflow funcione corretamente dentro do flex container */
+  min-height: 0;
+  /* Limitar altura para criar área rolável considerando o header/filters/actions do modal */
+  max-height: calc(94vh - 160px);
 }
 
 .modal-item-card {

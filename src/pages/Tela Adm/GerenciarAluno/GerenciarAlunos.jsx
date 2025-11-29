@@ -25,7 +25,7 @@ const GerenciarAlunos = () => {
   
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAluno, setSelectedAluno] = useState(null);
-  const [selectedTreinos, setSelectedTreinos] = useState({});
+  // Removido selectedTreinos: agora usamos apenas os dados do backend
 
   
 
@@ -39,27 +39,7 @@ const GerenciarAlunos = () => {
       console.log(' Dados recebidos:', alunosData);
       setAlunos(alunosData);
 
-      // Extrair possíveis treinos já associados no objeto aluno (se existirem)
-      try {
-        const saved = {};
-        alunosData.forEach(a => {
-          // Possíveis campos que podem conter um treino associado
-          const candidato = a.treino || a.treinoId || a.treinoAtual || a.assignedTreino || a.treinos || null;
-          if (candidato) {
-            // Se for array, pega primeiro; se for objeto, usa objeto; se for id, tenta construir um objeto leve
-            if (Array.isArray(candidato) && candidato.length > 0) saved[a.id] = candidato[0];
-            else if (typeof candidato === 'object') saved[a.id] = candidato;
-            else saved[a.id] = { id: candidato, titulo: 'Treino atribuído' };
-          }
-        });
-        // Merge com localStorage (localStorage tem prioridade)
-        const raw = localStorage.getItem('assignedTreinos');
-        const local = raw ? JSON.parse(raw) : {};
-        const merged = { ...saved, ...local };
-        if (Object.keys(merged).length > 0) setSelectedTreinos(merged);
-      } catch (e) {
-        console.warn('Erro ao extrair treinos dos alunos:', e);
-      }
+      // Não usamos mais localStorage para exibir treinos
     } catch (err) {
       console.error(' Erro ao carregar alunos:', err);
       setError('Erro ao carregar lista de alunos. Verifique sua conexão e permissões.');
@@ -70,18 +50,7 @@ const GerenciarAlunos = () => {
 
   useEffect(() => {
     fetchAlunos();
-    // Carregar atribuições salvas localmente (fallback)
-    try {
-      const raw = localStorage.getItem('assignedTreinos');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') {
-          setSelectedTreinos(parsed);
-        }
-      }
-    } catch (e) {
-      console.warn('Falha ao ler assignedTreinos do localStorage', e);
-    }
+    // Não carrega mais treinos do localStorage
   }, []);
 
   // Função para deletar aluno
@@ -117,22 +86,19 @@ const GerenciarAlunos = () => {
       return;
     }
 
-    // Atualiza UI local primeiro
-    setSelectedTreinos(prev => {
-      const next = { ...prev, [alunoIdFinal]: treino };
-      try { localStorage.setItem('assignedTreinos', JSON.stringify(next)); } catch (e) { console.warn('Erro salvando assignedTreinos', e); }
-      return next;
-    });
-
-    // Tenta persistir no backend usando updateAluno (campo sugerido: treinoId)
+    // Persistir no backend usando updateAluno
     try {
-      // Usamos JSON simples — updateAluno aceita FormData ou JSON
-      await updateAluno(alunoIdFinal, { treinoId: treino.id });
+      // Envia treinoId como FormData para evitar erro de Content-Type
+      const formData = new FormData();
+      formData.append('treinoId', treino.id);
+      await updateAluno(alunoIdFinal, formData);
       console.log('Treino associado ao aluno via API com sucesso');
+      // Atualiza lista de alunos para refletir associação
+      await fetchAlunos();
     } catch (err) {
-      console.warn('Falha ao salvar associação de treino no servidor, persistido localmente.', err);
+      console.warn('Falha ao salvar associação de treino no servidor.', err);
+      alert('Erro ao associar treino no servidor. Tente novamente.');
     }
-
     setModalOpen(false);
     setSelectedAluno(null);
   };
@@ -196,53 +162,57 @@ const GerenciarAlunos = () => {
                   </td>
                 </tr>
               ) : (
-                filteredAlunos.map(aluno => (
-                  <tr key={aluno.id}>
-                    <td>{aluno.nome || 'N/A'}</td>
-                    <td>{aluno.email || 'N/A'}</td>
-                    <td>{aluno.funcao || 'Aluno'}</td>
-                    <td>
-                      {aluno.plano?.toLowerCase?.() === 'gold' ? (
-                        <>
-                          <button
-                            className="alunos-treino-link"
-                            onClick={() => handleOpenModal(aluno)}
-                            aria-label={`Gerenciar treino de ${aluno.nome}`}
-                          >
-                            Gerenciar
-                          </button>
-                          {selectedTreinos[aluno.id] && (
-                            <div className="treino-chosen" title={`Treino escolhido: ${selectedTreinos[aluno.id].title}`}>
-                              <span className="treino-dot" aria-hidden="true" />
-                              <span className="treino-title">{selectedTreinos[aluno.id].title}</span>
-                            </div>
-                          )}
-                        </>
-                      ) : null}
-                    </td>
-                    <td>
-                      <Link 
-                        to={`/EditarAluno/${aluno.id}`} 
-                        className="alunos-action-link-edit"
-                      >
-                        Editar
-                      </Link>
-                      <button 
-                        className="alunos-action-link-delete"
-                        onClick={() => handleDeleteAluno(aluno.id, aluno.nome)}
-                        style={{ 
-                          background: 'none', 
-                          border: 'none', 
-                          color: '#dc3545', 
-                          cursor: 'pointer',
-                          textDecoration: 'underline'
-                        }}
-                      >
-                        Excluir
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filteredAlunos.map(aluno => {
+                  // Extrai treino do backend
+                  const treino = aluno.treino || aluno.treinoAtual || aluno.assignedTreino || (Array.isArray(aluno.treinos) ? aluno.treinos[0] : null);
+                  return (
+                    <tr key={aluno.id}>
+                      <td>{aluno.nome || 'N/A'}</td>
+                      <td>{aluno.email || 'N/A'}</td>
+                      <td>{aluno.funcao || 'Aluno'}</td>
+                      <td>
+                        {aluno.plano?.toLowerCase?.() === 'gold' ? (
+                          <>
+                            <button
+                              className="alunos-treino-link"
+                              onClick={() => handleOpenModal(aluno)}
+                              aria-label={`Gerenciar treino de ${aluno.nome}`}
+                            >
+                              Gerenciar
+                            </button>
+                            {treino && (
+                              <div className="treino-chosen" title={`Treino escolhido: ${treino.titulo || treino.nome || 'Treino atribuído'}`}>
+                                <span className="treino-dot" aria-hidden="true" />
+                                <span className="treino-title">{treino.titulo || treino.nome || 'Treino atribuído'}</span>
+                              </div>
+                            )}
+                          </>
+                        ) : null}
+                      </td>
+                      <td>
+                        <Link 
+                          to={`/EditarAluno/${aluno.id}`} 
+                          className="alunos-action-link-edit"
+                        >
+                          Editar
+                        </Link>
+                        <button 
+                          className="alunos-action-link-delete"
+                          onClick={() => handleDeleteAluno(aluno.id, aluno.nome)}
+                          style={{ 
+                            background: 'none', 
+                            border: 'none', 
+                            color: '#dc3545', 
+                            cursor: 'pointer',
+                            textDecoration: 'underline'
+                          }}
+                        >
+                          Excluir
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
