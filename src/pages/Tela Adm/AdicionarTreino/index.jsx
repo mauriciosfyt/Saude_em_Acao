@@ -138,11 +138,8 @@ export default function AdicionarTreino() {
 
   // unique id generator
   const nextId = useRef(1);
-  // Function to find image URL in various fields
 
   // exercises per day (object keyed by day name)
-  // Criando um treino novo: começar sem exercícios visíveis
-  // Ao editar/duplicar: o useEffect preencherá a lista a partir da API/state
   const [exerciciosPorDia, setExerciciosPorDia] = useState(() => {
     const map = {};
     dias.forEach((d) => {
@@ -165,7 +162,8 @@ export default function AdicionarTreino() {
     setExerciciosPorDia((prev) => {
       const dayList = prev[activeTab] || [];
       const template = dayList.length ? dayList[dayList.length - 1] : initial[0];
-      const copy = { ...template, id: nextId.current++ };
+      // Mantendo id para frontend e dbId como null para novos
+      const copy = { ...template, id: nextId.current++, dbId: null };
       return { ...prev, [activeTab]: [...dayList, copy] };
     });
   };
@@ -384,10 +382,8 @@ export default function AdicionarTreino() {
             });
 
             // Carregar exercícios por dia se existirem
-            // Prioriza exerciciosPorDia (mapa por dias) — corresponde ao formato que a API espera/retorna
             const exerciciosMap = {};
             const mapDisplayDay = {};
-            // cria mapa de normalização: 'SEGUNDA' -> 'Segunda'
             dias.forEach(d => {
               const key = String(d).normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase();
               mapDisplayDay[key] = d;
@@ -406,11 +402,14 @@ export default function AdicionarTreino() {
                 }
                 exerciciosMap[displayDay] = arr.map(ex => ({
                   id: nextId.current++,
+                  // MongoDB pode não retornar id nos subdocumentos ou ter nomes variados, capturamos se existir
+                  dbId: ex.id || ex._id || ex.exercicioId || null, 
                   nome: ex.nome || ex.exercicio || '',
                   series: (ex.series !== undefined && ex.series !== null) ? ex.series : 3,
                   repeticoes: (ex.repeticoes !== undefined && ex.repeticoes !== null) ? ex.repeticoes : 10,
                   carga: ex.carga || ex.peso || '',
-                  intervalo: ex.intervalo || ex.tempo || '',
+                  // --- REMOVIDO "00:" NA LEITURA (para exibir só MM:SS) ---
+                  intervalo: (ex.intervalo || ex.tempo || '').replace(/^00:/, ''),
                   obs: ex.observacao || ex.obs || '',
                   img: ex.img || ex.imagem || ex.imagemUrl || ex.foto || ex.fotoUrl || ex.image || ex.imageUrl || null
                 }));
@@ -443,7 +442,7 @@ export default function AdicionarTreino() {
                   if (treinoData.exercicios) {
                     const arr = normalizeForIndex(treinoData.exercicios, index);
                     if (arr && arr.length) {
-                      exerciciosMap[dia] = arr.map((ex) => ({ id: nextId.current++, ...ex }));
+                      exerciciosMap[dia] = arr.map((ex) => ({ id: nextId.current++, dbId: ex.id || null, ...ex }));
                       return;
                     }
                   }
@@ -459,7 +458,8 @@ export default function AdicionarTreino() {
                         carga: ex.carga || '',
                         intervalo: ex.intervalo || '',
                         obs: ex.obs || ex.observacao || '',
-                        id: nextId.current++
+                        id: nextId.current++,
+                        dbId: ex.id || null 
                       }));
                     }
                   }
@@ -471,7 +471,6 @@ export default function AdicionarTreino() {
 
             if (Object.keys(exerciciosMap).length > 0) {
               setExerciciosPorDia(prev => ({ ...prev, ...exerciciosMap }));
-              // montar previews de imagens (se houver URLs)
               const tempImageMap = {};
               Object.keys(exerciciosMap).forEach((dia) => {
                 exerciciosMap[dia].forEach((ex) => {
@@ -495,14 +494,11 @@ export default function AdicionarTreino() {
       } else if (location.state?.treinoData) {
         // Se vier dados de duplicação
         const treinoData = location.state.treinoData;
-        console.debug('treinoData recebido via state (duplicação):', treinoData);
-
-        // Normalizar o responsável (pode ser string, objeto ou id)
+        
         let responsavelNome = typeof treinoData.responsavel === 'string'
           ? treinoData.responsavel
           : (treinoData.responsavel?.nome || treinoData.responsavelNome || '');
 
-        // Se não houver nome e houver um ID, buscar via API
         const possibleIdDup = treinoData.responsavelId || (typeof treinoData.responsavel === 'number' ? treinoData.responsavel : (typeof treinoData.responsavel === 'string' && /^\d+$/.test(treinoData.responsavel) ? treinoData.responsavel : null));
         if (!responsavelNome && possibleIdDup) {
           try {
@@ -523,10 +519,8 @@ export default function AdicionarTreino() {
           idadeMax: treinoData.idadeMaxima || treinoData.idadeMax || 30
         });
 
-        // Se vier exercícios no state (cópia), normalizar e popular o estado
         if (treinoData.exercicios || treinoData.sessoes) {
           const exerciciosMap = {};
-
           const normalizeForIndex = (container, idx) => {
             if (!container) return [];
             if (Array.isArray(container)) {
@@ -556,7 +550,6 @@ export default function AdicionarTreino() {
                   return;
                 }
               }
-
               if (treinoData.sessoes && treinoData.sessoes[index]) {
                 const sess = treinoData.sessoes[index];
                 const sessEx = sess.exercicios || sess.exercicio || [];
@@ -580,13 +573,10 @@ export default function AdicionarTreino() {
 
           if (Object.keys(exerciciosMap).length > 0) {
             setExerciciosPorDia(prev => ({ ...prev, ...exerciciosMap }));
-
             const tempImageMap = {};
             Object.keys(exerciciosMap).forEach((dia) => {
               exerciciosMap[dia].forEach((ex) => {
                 const id = ex.id;
-                // *** CORREÇÃO: "img" ***
-                // Coloca ex.img como prioridade para encontrar a URL
                 const url = ex.img || ex.imagem || ex.imagemUrl || ex.foto || ex.fotoUrl || ex.image || ex.imageUrl;
                 if (url) tempImageMap[id] = { preview: fixImageUrl(url), file: null };
               });
@@ -600,35 +590,21 @@ export default function AdicionarTreino() {
     loadTreinoData();
   }, [treinoId, isEditMode]);
 
-  // Normaliza o campo de intervalo para HH:mm:ss (reutilizável)
+  // Normaliza o campo de intervalo para HH:mm:ss
+  // --- ADAPTAÇÃO: Apenas adiciona 00: se for MM:SS ---
   const normalizarIntervalo = (valor) => {
     if (!valor) return null;
     const v = String(valor).trim();
-    if (/^\d+$/.test(v)) {
-      const totalSeg = parseInt(v, 10);
-      const horas = Math.floor(totalSeg / 3600);
-      const minutos = Math.floor((totalSeg % 3600) / 60);
-      const segundos = totalSeg % 60;
-      const pad = (n) => String(n).padStart(2, '0');
-      return `${pad(horas)}:${pad(minutos)}:${pad(segundos)}`;
-    }
+    
+    // Se for MM:SS, adiciona 00:
     if (/^\d{1,2}:\d{2}$/.test(v)) {
       return `00:${v}`;
     }
+    // Se já for HH:MM:SS, mantem
     if (/^\d{1,2}:\d{2}:\d{2}$/.test(v)) {
       return v;
     }
-    if (/^(\d+)m(in)?$/i.test(v)) {
-      const minutos = parseInt(v, 10);
-      const pad = (n) => String(n).padStart(2, '0');
-      return `00:${pad(minutos)}:00`;
-    }
-    if (/^(\d+)s(ec)?$/i.test(v)) {
-      const segundos = parseInt(v, 10);
-      const pad = (n) => String(n).padStart(2, '0');
-      return `00:00:${pad(segundos)}`;
-    }
-    return null;
+    return null; 
   };
 
   // Coleta dados dos exercícios como ARRAY (mantido para compatibilidade interna)
@@ -656,23 +632,54 @@ export default function AdicionarTreino() {
   };
 
   // Monta o objeto `exerciciosPorDia` esperado pela API (chaves por dia)
+  // --- COM LOGS DE DEBUG COM MINIATURA ---
   const montarExerciciosPorDia = () => {
     const payload = {};
     dias.forEach((dia) => {
       const list = (exerciciosPorDia[dia] || []).map((ex) => {
         const imagemInfo = exerciseImages[ex.id];
+        
+        // --- LOGS DE DEBUG COM MINIATURA ---
+        if (imagemInfo && imagemInfo.preview) {
+            console.log(`%c Imagem: ${ex.nome}`, "font-weight: bold; font-size: 14px; color: #2196F3;");
+            console.log(
+              "%c ",
+              `font-size: 1px; padding: 100px; background: url(${imagemInfo.preview}) no-repeat; background-size: contain;`
+            );
+        } else {
+            console.log(`%c Sem imagem para: ${ex.nome}`, "color: gray;");
+        }
+        // ------------------------------------
+
         const obj = {
+          // No MongoDB, se não mandarmos ID, ele cria novo ou substitui a lista.
+          id: ex.dbId || undefined, 
           nome: ex.nome || '',
           series: ex.series !== undefined && ex.series !== null && ex.series !== '' ? parseInt(ex.series, 10) : 3,
           repeticoes: ex.repeticoes !== undefined && ex.repeticoes !== null && ex.repeticoes !== '' ? parseInt(ex.repeticoes, 10) : 10,
           carga: ex.carga || '',
-          observacao: ex.obs || ''
+          observacao: ex.obs || '',
+          // --- ALTERAÇÃO: Formata intervalo para HH:mm:ss antes de enviar ---
+          intervalo: normalizarIntervalo(ex.intervalo) || '' 
         };
-        if (imagemInfo && imagemInfo.file) obj.img = imagemInfo.file;
+        
+        // LÓGICA DE PERSISTÊNCIA DE IMAGEM (PARA O JSON SER LIMPO COMO VOCÊ QUER)
+        if (imagemInfo) {
+          if (imagemInfo.file) {
+            // Caso 1: Upload de nova imagem -> Envia o arquivo no campo 'img'
+            obj.img = imagemInfo.file;
+            obj.imagem = null; // Garante que não envia string conflituosa
+          } else if (imagemInfo.preview) {
+             // Caso 2: Manter imagem existente (URL) -> Envia no campo 'imagem' (String)
+             // E remove o campo 'img' para o JSON ficar exatamente como você pediu:
+             // "imagem": "https://..."
+             obj.imagem = imagemInfo.preview;
+             obj.img = undefined;
+          }
+        }
+
         return obj;
       });
-      // Incluir a chave do dia apenas se houver exercícios — evita enviar arrays vazios que
-      // causam problemas de binding no backend.
       if (list && list.length > 0) payload[dia] = list;
     });
     return payload;
@@ -684,7 +691,6 @@ export default function AdicionarTreino() {
     try {
       setSaving(true);
 
-      // Validar campos obrigatórios
       if (!formData.nome.trim()) {
         alert('Por favor, preencha o nome do treino.');
         setSaving(false);
@@ -697,7 +703,6 @@ export default function AdicionarTreino() {
         return;
       }
 
-      // Preparar dados para envio (usando os nomes de campos que a API espera)
       const idadeMinima = parseInt(formData.idadeMin, 10);
       const idadeMaxima = parseInt(formData.idadeMax, 10);
 
@@ -713,8 +718,39 @@ export default function AdicionarTreino() {
         return;
       }
 
-      // Montar payload `exerciciosPorDia` no formato esperado pela API
+      // --- VALIDAÇÃO DE SEGURANÇA PARA TEMPO (SEGUNDOS >= 60) ---
+      for (const dia of dias) {
+        const lista = exerciciosPorDia[dia] || [];
+        for (const ex of lista) {
+          if (!ex.intervalo) continue;
+
+          // 1. Bloqueia se for apenas números (ex: "90")
+          if (/^\d+$/.test(ex.intervalo)) {
+            alert(`Erro no exercício "${ex.nome}" (${dia}): O tempo "${ex.intervalo}" está em segundos. Por favor, digite em minutos e segundos (ex: 01:30).`);
+            setSaving(false);
+            return;
+          }
+
+          // 2. Bloqueia se os segundos forem >= 60 (ex: "00:60")
+          if (ex.intervalo.includes(':')) {
+             const parts = ex.intervalo.split(':');
+             // Pega a última parte (segundos) e converte para número
+             const seg = parseInt(parts[parts.length - 1], 10);
+             if (seg >= 60) {
+                alert(`Erro no exercício "${ex.nome}" (${dia}): O tempo "${ex.intervalo}" é inválido. Os segundos não podem ser 60 ou mais.`);
+                setSaving(false);
+                return;
+             }
+          }
+        }
+      }
+      // -----------------------------------------------------------
+
       const exerciciosPorDiaPayload = montarExerciciosPorDia();
+
+      // --- LOG DE DEBUG PARA VER O JSON ---
+      console.log("=== DEBUG JSON PAYLOAD ===", JSON.stringify(exerciciosPorDiaPayload, null, 2));
+      // ------------------------------------
 
       const dadosTreino = {
         nome: formData.nome.trim(),
@@ -723,10 +759,7 @@ export default function AdicionarTreino() {
         sexo: converterSexoParaAPI(formData.sexo),
         idadeMinima: idadeMinima,
         idadeMaxima: idadeMaxima,
-        // Envia a estrutura por dia (obrigatória para o backend)
         exerciciosPorDia: exerciciosPorDiaPayload,
-
-        // Esta linha já estava correta
         responsavel: formData.responsavel.trim()
       };
 
@@ -747,7 +780,6 @@ export default function AdicionarTreino() {
     }
   };
 
-  // Função para cancelar
   const handleCancelar = () => {
     if (window.confirm('Tem certeza que deseja cancelar? As alterações não salvas serão perdidas.')) {
       navigate('/GerenciarTreino');
@@ -769,11 +801,9 @@ export default function AdicionarTreino() {
     <div className="adicionartreino-page">
       <MenuAdm />
       <main className="adicionartreino-main-content">
-        {/* CORREÇÃO: Wrapper adicionado para centralizar e limitar a largura */}
         <div className="adicionartreino-form-wrapper">
           <h1 className="adicionartreino-form-title">{isEditMode ? 'Editar Treino' : 'Adicionar Treinos'}</h1>
 
-          {/* --- Formulário Principal --- */}
           <div className="adicionartreino-form-container">
             <div className="adicionartreino-form-row adicionartreino-form-row-2">
               <div className="adicionartreino-form-field">
@@ -857,7 +887,6 @@ export default function AdicionarTreino() {
             </div>
           </div>
 
-          {/* --- Abas de Navegação --- */}
           <nav className="adicionartreino-tabs-nav">
             {dias.map((dia) => (
               <button
@@ -870,25 +899,22 @@ export default function AdicionarTreino() {
             ))}
           </nav>
 
-          {/* --- Seção de Exercícios --- */}
           <div className="adicionartreino-exercicios-section">
             <button className="adicionartreino-add-exercise-btn" onClick={addExercise} type="button">
               <PlusIcon /> Exercício
             </button>
 
-            {/* Cabeçalho visível apenas em telas maiores */}
             <div className="adicionartreino-exercise-header">
-              <span></span> {/* Coluna para setas */}
+              <span></span>
               <span>Exercício *</span>
               <span>Séries *</span>
               <span>Repetições</span>
               <span>Carga(KG)</span>
               <span>Intervalo</span>
               <span>Observação</span>
-              <span></span> {/* Coluna para ações */}
+              <span></span>
             </div>
 
-            {/* Lista de Exercícios */}
             <div className="adicionartreino-exercicios-list" ref={listRef}>
               {currentList.map((item, index) => (
                 <div
@@ -902,7 +928,6 @@ export default function AdicionarTreino() {
                   onDragStart={(e) => {
                     draggingId.current = item.id;
                     e.dataTransfer.effectAllowed = 'move';
-                    // small data to satisfy HTML5 drag
                     e.dataTransfer.setData('text/plain', String(item.id));
                     elAndAddDraggingClass(item.id, true);
                   }}
@@ -915,7 +940,6 @@ export default function AdicionarTreino() {
                     const overId = item.id;
                     const dragId = parseInt(e.dataTransfer.getData('text/plain') || draggingId.current, 10);
                     if (!isNaN(dragId) && dragId !== overId) {
-                      // show potential drop location (do minimal work here)
                     }
                   }}
                   onDrop={(e) => {
@@ -988,16 +1012,18 @@ export default function AdicionarTreino() {
 
                   <div className="adicionartreino-field-content adicionartreino-intervalo-col">
                     <label className="adicionartreino-mobile-label">Intervalo</label>
+                    {/* --- ALTERAÇÃO: Input tipo TEXTO para MM:SS --- */}
                     <input
-                      type="time"
-                      id="duracao"
-                      name="duracao"
-                      step="1"
-                      min="00:00"
-                      max="59:59"
+                      type="text"
+                      placeholder="MM:SS"
+                      maxLength="5"
                       className="adicionartreino-tempo-intervalo"
                       value={item.intervalo || ''}
-                      onChange={(e) => updateExerciseField(item.id, 'intervalo', e.target.value)}
+                      onChange={(e) => {
+                        // Filtra apenas números e dois pontos
+                        const val = e.target.value.replace(/[^0-9:]/g, '');
+                        updateExerciseField(item.id, 'intervalo', val);
+                      }}
                     />
                   </div>
 
@@ -1057,7 +1083,6 @@ export default function AdicionarTreino() {
             </div>
           </div>
 
-          {/* --- Botões do Rodapé --- */}
           <div className="adicionartreino-footer-buttons">
             <button
               className="adicionartreino-btn adicionartreino-btn-cancel"
