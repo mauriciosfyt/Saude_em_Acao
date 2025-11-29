@@ -64,7 +64,7 @@ const Planos = () => {
             {/* Plano intermediario */}
             <article className="plano-card">
               <h3 className="plano-title-gold">Plano Gold Intermediario</h3>
-                <div className="descricao-text">Perfeito para quem já tem uma rotina ativa e quer acelerar resultados, com foco em força, resistência e estética corporal.</div>
+                <div className="descricao-text">Perfeito para quem já tem uma rotina ativa e quer acelerar seus resultados, com foco em força, resistência e estética corporal.</div>
 
               <div className="plano-cta">
                 <div className="plano-price">
