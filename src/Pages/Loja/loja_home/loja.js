@@ -19,6 +19,7 @@ import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
 
 // ADICIONADO: Importar a função da API
 import { obterProdutos } from '../../../Services/api'; 
+import { useFavoritos } from '../../../context/FavoritosContext';
 
 const { width } = Dimensions.get('window');
 
@@ -31,6 +32,7 @@ const Loja = ({ navigation }) => {
   const [verticalProducts, setVerticalProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { favoritos, adicionarFavorito, removerFavorito } = useFavoritos();
 
   // Dados dos banners (Seu código original)
   const banners = [
@@ -77,7 +79,7 @@ const Loja = ({ navigation }) => {
           description: p.descricao || p.nome,
           price: `R$ ${p.preco ? p.preco.toFixed(2).replace('.', ',') : '0,00'}`,
           image: { uri: p.img }, // API envia 'imagemUrl'
-          isFavorite: false // Propriedade esperada pelo 'renderHorizontalProduct'
+          // isFavorite will be derived from FavoritosContext
         }));
 
         // 3. Dividimos a lista (mesclagem)
@@ -117,11 +119,25 @@ const Loja = ({ navigation }) => {
       // MODIFICADO: Passando 'produtoId' em vez do objeto 'produto'
       onPress={() => navigation.navigate('LojaProdutos', { produtoId: item.id })}
     >
-      <TouchableOpacity style={styles.favoriteButton}>
-        <Ionicons 
-          name={item.isFavorite ? 'heart' : 'heart-outline'} 
-          size={20} 
-          color={item.isFavorite ? '#ff4757' : COLORS.cinzaMedio} 
+      <TouchableOpacity
+        style={styles.favoriteButton}
+        onPress={() => {
+          try {
+            const isFav = favoritos && favoritos.find((f) => String(f.id || f.produtoId) === String(item.id));
+            if (isFav) {
+              removerFavorito(item.id);
+            } else {
+              adicionarFavorito({ id: item.id, nome: item.name, preco: item.price, img: item.image });
+            }
+          } catch (e) {
+            console.error('Erro ao alternar favorito (home):', e);
+          }
+        }}
+      >
+        <Ionicons
+          name={(favoritos && favoritos.find((f) => String(f.id || f.produtoId) === String(item.id))) ? 'heart' : 'heart-outline'}
+          size={20}
+          color={(favoritos && favoritos.find((f) => String(f.id || f.produtoId) === String(item.id))) ? '#ff4757' : COLORS.cinzaMedio}
         />
       </TouchableOpacity>
       <View style={styles.productContent}>

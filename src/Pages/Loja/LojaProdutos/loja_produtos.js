@@ -1,43 +1,29 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    StyleSheet,
-    Text,
-    View,
-    Image,
-    TextInput,
-    TouchableOpacity,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Platform,
-    ActivityIndicator, 
-    Alert,
+    StyleSheet, Text, View, Image, TouchableOpacity,
+    SafeAreaView, ScrollView, StatusBar, Platform, 
+    ActivityIndicator, Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { LinearGradient } from 'expo-linear-gradient';
 import HeaderLoja from '../../../Components/HeaderLoja';
 import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
 
-// Importar a função da API
+// APIs
 import { obterProdutoPorId } from '../../../Services/api'; 
-
-// --- 1. IMPORTAR O CONTEXTO DO CARRINHO ---
-import { useCart } from '../../../context/CartContext';
-
-// --- IMPORTAR O CONTEXTO DE FAVORITOS ---
+import { useCart } from '../../../context/CartContext'; 
 import { useFavoritos } from '../../../context/FavoritosContext';
 
-// --- 2. Lógica de Variações (Corrigida) ---
-// Agora só mapeia o TIPO, não os itens (que virão da API)
+// --- ADICIONADO: Lógica de Variações (do seu index.jsx - fonte 79) ---
 const CATEGORIAS_PRODUTO = [
-  { valor: 'CAMISETAS', tipoEstoque: 'tamanho' },
-  { valor: 'WHEY_PROTEIN', tipoEstoque: 'sabor' },
-  { valor: 'CREATINA', tipoEstoque: 'sabor' },
-  { valor: 'VITAMINAS', tipoEstoque: 'padrao' }, 
+  { valor: 'CAMISETAS', tipoEstoque: 'tamanho', itens: ['P', 'M', 'G', 'GG'] },
+  { valor: 'WHEY_PROTEIN', tipoEstoque: 'sabor', itens: ['Morango', 'Chocolate', 'Baunilha'] },
+  { valor: 'CREATINA', tipoEstoque: 'sabor', itens: ['Morango', 'Chocolate', 'Baunilha'] },
+  // Adicione outras categorias que tenham variações
+  // Categorias sem variação (como 'VITAMINAS') são tratadas automaticamente
 ];
-// -----------------------------------------------------------------
+// -----------------------------------------------------------
 
-// Sua função platformShadow (Intocada)
+// ... (Sua função platformShadow e theme - INTOCADAS) ...
 const platformShadow = ({
     shadowColor = '#000',
     shadowOffset = { width: 0, height: 2 },
@@ -46,33 +32,27 @@ const platformShadow = ({
     elevation,
     boxShadow,
 } = {}) => {
-    // ... (código intocado) ...
     const offset = shadowOffset ?? { width: 0, height: 2 };
     const radius = shadowRadius ?? 4;
     const opacity = shadowOpacity ?? 0.15;
-
     if (Platform.OS === 'web') {
         const blur = Math.max(radius * 2, 1);
         return {
             boxShadow: boxShadow ?? `${offset.width}px ${offset.height}px ${blur}px rgba(0,0,0,${opacity})`,
         };
     }
-
     const nativeShadow = {
         shadowColor,
         shadowOffset: offset,
         shadowOpacity: opacity,
         shadowRadius: radius,
     };
-
     if (typeof elevation === 'number') {
         nativeShadow.elevation = elevation;
     }
-
     return nativeShadow;
 };
 
-// Seu objeto theme (Intocado)
 const theme = {
     colors: {
         primary: '#4CAF50',
@@ -100,130 +80,103 @@ const theme = {
         xlarge: 32,
     },
 };
+// -----------------------------------------------------------
+
 
 const LojaProdutos = ({ navigation, route }) => {
     const [searchText, setSearchText] = useState("");
-    
-    // States (Intocados)
     const [produto, setProduto] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // State da variação (Intocado)
-    const [variacaoSelecionada, setVariacaoSelecionada] = useState(null);
+    // ADICIONADO: State para a variação
+    const [variacaoInfo, setVariacaoInfo] = useState(null); // Info (ex: {tipo: 'tamanho', itens: ['P']})
+    const [variacaoSelecionada, setVariacaoSelecionada] = useState(null); // Valor (ex: 'P')
 
     const { adicionarAoCarrinho } = useCart();
     const { favoritos, adicionarFavorito, removerFavorito } = useFavoritos();
 
-    // useEffect (Intocado)
+    // useEffect para buscar dados (Modificado para incluir variações)
     useEffect(() => {
         const { produtoId } = route.params;
         if (!produtoId) {
             setError("Nenhum ID de produto fornecido.");
-            setLoading(false); return;
+            setLoading(false);
+            return;
         }
+
         const carregarProduto = async () => {
             try {
                 setLoading(true);
                 setError(null);
-                setVariacaoSelecionada(null); 
+                setVariacaoInfo(null);
+                setVariacaoSelecionada(null);
+
                 const data = await obterProdutoPorId(produtoId);
+                
                 const produtoFormatado = {
                     ...data,
-                    id: data.id || produtoId, // Garante que tem ID
-                    nome: data.nome || data.name || 'Produto',
-                    preco: data.preco !== undefined ? data.preco : (data.price !== undefined ? data.price : 0),
-                    img: data.img || data.imagem || data.imagemUrl || data.image,
-                    imagem: { uri: data.img || data.imagem || data.imagemUrl || data.image }, 
-                    precoFormatado: `R$ ${data.preco ? data.preco.toFixed(2).replace('.', ',') : '0,00'}`,
-                    descricao: data.descricao || data.description || '',
-                    categoria: data.categoria || data.category,
+                    // Guardamos os dados brutos para o carrinho
+                    nome: data.nome,
+                    preco: data.preco, 
+                    imagemUrl: data.imagemUrl, 
+                    categoria: data.categoria, // <-- IMPORTANTE PARA VARIAÇÃO
+                    // Formatamos para exibição
+                    imagem: { uri: data.imagemUrl }, 
+                    precoFormatado: `R$ ${data.preco ? data.preco.toFixed(2).replace('.', ',') : '0,00'}`
                 };
-                setProduto(produtoFormatado); 
-            } catch (err) {
+                
+                setProduto(produtoFormatado);
+
+                // 2. Definir as variações (lógica do index.jsx)
+                const info = CATEGORIAS_PRODUTO.find(c => c.valor === data.categoria);
+                if (info) { // Se a categoria (ex: CAMISETA) estiver na nossa lista
+                    setVariacaoInfo(info);
+                }
+
+            } catch (err) { 
                 console.error("Erro ao buscar produto por ID:", err);
                 setError(err.message || "Não foi possível carregar o produto.");
-            } finally {
-                setLoading(false);
-            }
+            } 
+            finally { setLoading(false); }
         };
         carregarProduto();
     }, [route.params.produtoId]); 
 
-    // --- 5. LÓGICA DE VARIAÇÕES (CORRIGIDA - Lógica da Web) ---
-    const variacoesDisponiveis = useMemo(() => {
-        if (!produto || !produto.categoria) return null;
+    // --- LÓGICA DOS BOTÕES (ARRUMADA) ---
+
+    // Verifica se o botão deve estar desabilitado
+    // (Se existe variação E nenhuma foi selecionada)
+    const isBotaoDesabilitado = variacaoInfo && !variacaoSelecionada;
+
+    // Função interna para adicionar (usada pelos dois botões)
+    const handleAdicionar = (navegarParaCarrinho) => {
+        if (isBotaoDesabilitado || !produto) {
+            Alert.alert("Selecione uma opção", `Por favor, escolha um ${variacaoInfo.tipoEstoque}.`);
+            return;
+        }
         
-        const infoCategoria = CATEGORIAS_PRODUTO.find(c => c.valor === produto.categoria);
-        if (!infoCategoria || infoCategoria.tipoEstoque === 'padrao') {
-            return null; // Produto não tem variações (ex: Vitaminas)
+        // 1. Adiciona ao "cofre" com a variação
+        // (Se não houver variaçãoInfo, 'variacaoSelecionada' será null, e o contexto tratará como 'padrao')
+        adicionarAoCarrinho(produto, variacaoSelecionada);
+        
+        // 2. Decide se navega ou mostra alerta
+        if (navegarParaCarrinho) {
+            navigation.navigate('LojaCarrinho');
+        } else {
+            const nomeVariacao = variacaoSelecionada ? `(${variacaoSelecionada})` : '';
+            Alert.alert(
+                "Produto Adicionado!",
+                `${produto.nome} ${nomeVariacao} foi adicionado ao seu carrinho.`,
+                [
+                    { text: "Ver Carrinho", onPress: () => navigation.navigate('LojaCarrinho') },
+                    { text: "Continuar", style: "cancel" }
+                ]
+            );
         }
-
-        let estoqueMap = null;
-        // Pega o mapa de estoque correto (tamanho ou sabor)
-        if (infoCategoria.tipoEstoque === 'tamanho' && produto.estoquePorTamanho) {
-            estoqueMap = produto.estoquePorTamanho;
-        } else if (infoCategoria.tipoEstoque === 'sabor' && produto.estoquePorSabor) {
-            estoqueMap = produto.estoquePorSabor;
-        }
-
-        if (!estoqueMap) {
-            return null; // Categoria deveria ter variações, mas o produto não tem dados de estoque
-        }
-
-        // LÓGICA CHAVE (do seu LojaProduto.js da web):
-        // Filtra o estoque para incluir apenas itens com qty > 0
-        const itensDisponiveis = Object.entries(estoqueMap)
-            .filter(([, qty]) => qty > 0) // <-- O FILTRO DE ESTOQUE
-            .map(([nomeDaVariacao]) => nomeDaVariacao); // <-- Pega só o nome ('P', 'Morango')
-
-        // Se, após filtrar, não sobrar nenhum item, o produto está esgotado
-        if (itensDisponiveis.length === 0) {
-            return { 
-                label: infoCategoria.tipoEstoque.charAt(0).toUpperCase() + infoCategoria.tipoEstoque.slice(1), 
-                itens: [], 
-                esgotado: true // <-- Sinaliza que está esgotado
-            };
-        }
-
-        return {
-            label: infoCategoria.tipoEstoque.charAt(0).toUpperCase() + infoCategoria.tipoEstoque.slice(1),
-            itens: itensDisponiveis,
-            esgotado: false
-        };
-    }, [produto]);
-    // --- FIM DA CORREÇÃO ---
-
-
-    // Funções de clique (Intocadas)
-    const handleAdicionarAoCarrinho = () => {
-        if (!produto) return;
-        const produtoParaCarrinho = { ...produto, imagemUrl: produto.img };
-        adicionarAoCarrinho(produtoParaCarrinho, variacaoSelecionada);
-        Alert.alert("Sucesso!", `${produto.nome} (${variacaoSelecionada || 'Padrão'}) foi adicionado ao carrinho.`);
     };
 
-    const handleReservarAgora = () => {
-        if (!produto) return;
-        const produtoParaCarrinho = { ...produto, imagemUrl: produto.img };
-        adicionarAoCarrinho(produtoParaCarrinho, variacaoSelecionada);
-        navigation.navigate('LojaCarrinho');
-    };
-
-    // --- LÓGICA DE BOTÃO DESABILITADO (Corrigida) ---
-    // Verifica se o produto exige uma variação
-    const variacaoNecessaria = variacoesDisponiveis && variacoesDisponiveis.itens.length > 0;
-    // O botão deve ser desabilitado se:
-    // 1. O produto está totalmente esgotado (variacoesDisponiveis.esgotado)
-    // 2. Ou uma variação é necessária, mas nenhuma foi selecionada
-    const botaoDesabilitado = (variacoesDisponiveis?.esgotado) || (variacaoNecessaria && !variacaoSelecionada);
-    // ---------------------------------------------------
-
-    // Constantes de gradiente (Intocadas)
-    const gradientColors = [theme.colors.gradientStart, theme.colors.gradientEnd];
-    const gradientLocations = [0, 0.84];
-
-    // Telas de Loading, Erro, etc (Intocadas)
+    // --- Telas de Loading / Erro (INTOCADAS) ---
     if (loading) {
         return (
             <SafeAreaView style={styles.safeArea}>
@@ -236,9 +189,8 @@ const LojaProdutos = ({ navigation, route }) => {
             </SafeAreaView>
         );
     }
-
     if (error) {
-        return (
+         return (
             <SafeAreaView style={styles.safeArea}>
                 <HeaderLoja navigation={navigation} searchText={searchText} setSearchText={setSearchText} />
                 <View style={[styles.scrollContent, { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }]}>
@@ -251,9 +203,8 @@ const LojaProdutos = ({ navigation, route }) => {
             </SafeAreaView>
         );
     }
-
     if (!produto) {
-        return (
+       return (
              <SafeAreaView style={styles.safeArea}>
                 <HeaderLoja navigation={navigation} searchText={searchText} setSearchText={setSearchText} />
                 <View style={[styles.scrollContent, { flex: 1, justifyContent: 'center', alignItems: 'center' }]}>
@@ -264,74 +215,62 @@ const LojaProdutos = ({ navigation, route }) => {
         );
     }
 
-    // Renderização principal
+    // --- Renderização Principal ---
     return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
             <HeaderLoja navigation={navigation} searchText={searchText} setSearchText={setSearchText} />
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                {/* --- PRODUCT INFO (Intocado) --- */}
+                {/* --- PRODUCT INFO (INTOCADO) --- */}
                 <Text style={styles.productTitle}>{produto.nome}</Text>
                 <View style={styles.imageContainer}>
-                    <Image source={produto.imagem} style={styles.productImage} resizeMode="contain" />
+                    <Image
+                        source={produto.imagem}
+                        style={styles.productImage}
+                        resizeMode="contain"
+                    />
                     <View style={styles.actionIcons}>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={styles.iconButton}
                             onPress={() => {
                                 try {
-                                    if (!produto || !produto.id) return;
-                                    const produtoId = produto.id || produto.produtoId;
-                                    if (!produtoId) return;
-                                    
-                                    const isFavorito = favoritos.some((p) => (p.id || p.produtoId) === produtoId);
-                                    if (isFavorito) {
-                                        removerFavorito(produtoId).catch(err => {
-                                            if (__DEV__) console.warn("Erro ao remover favorito:", err);
-                                        });
+                                    const isFav = favoritos && favoritos.find((f) => String(f.id || f.produtoId) === String(produto.id));
+                                    if (isFav) {
+                                        removerFavorito(produto.id);
                                     } else {
-                                        adicionarFavorito(produto).catch(err => {
-                                            if (__DEV__) console.warn("Erro ao adicionar favorito:", err);
-                                        });
+                                        adicionarFavorito(produto);
                                     }
-                                } catch (error) {
-                                    if (__DEV__) {
-                                        console.error("Erro ao manipular favorito:", error);
-                                    }
+                                } catch (e) {
+                                    console.error('Erro ao alternar favorito:', e);
                                 }
                             }}
                         >
-                            <Icon 
-                                name="heart" 
-                                size={22} 
-                                color={favoritos.some((p) => (p.id || p.produtoId) === (produto?.id || produto?.produtoId)) ? "#e74c3c" : theme.colors.icon} 
-                            />
+                            {
+                                (favoritos && favoritos.find((f) => String(f.id || f.produtoId) === String(produto.id)))
+                                ? <Icon name="heart" size={22} color="#E24B4B" />
+                                : <Icon name="heart" size={22} color={theme.colors.icon} />
+                            }
                         </TouchableOpacity>
                         <TouchableOpacity style={[styles.iconButton, { marginTop: theme.spacing.small }]}>
                             <Icon name="share-2" size={22} color={theme.colors.icon} />
                         </TouchableOpacity>
                     </View>
                 </View>
-
-                {/* --- PRICE (Intocado) --- */}
                 <View style={styles.priceSection}>
                     <Text style={styles.priceLabel}>Por apenas</Text>
                     <Text style={styles.priceText}>{produto.precoFormatado}</Text>
                 </View>
 
-                {/* --- SELETOR DE VARIAÇÃO (Corrigido) --- */}
-                {variacoesDisponiveis && (
+                {/* --- ADICIONADO: Seletor de Variação --- */}
+                {variacaoInfo && (
                     <View style={styles.variationSection}>
-                        <Text style={styles.variationTitle}>Selecione o {variacoesDisponiveis.label}:</Text>
-                        
-                        {/* Se estiver esgotado, mostra a mensagem */}
-                        {variacoesDisponiveis.esgotado && (
-                            <Text style={styles.variationSoldOutText}>Produto esgotado</Text>
-                        )}
-                        
-                        {/* Mostra os botões (agora filtrados pelo estoque) */}
-                        <View style={styles.variationOptionsContainer}>
-                            {variacoesDisponiveis.itens.map(item => (
+                        <Text style={styles.variationTitle}>
+                            Selecione o {variacaoInfo.tipoEstoque}: 
+                            <Text style={{fontWeight: 'bold'}}> {variacaoSelecionada}</Text>
+                        </Text>
+                        <View style={styles.variationOptions}>
+                            {variacaoInfo.itens.map((item) => (
                                 <TouchableOpacity
                                     key={item}
                                     style={[
@@ -341,36 +280,45 @@ const LojaProdutos = ({ navigation, route }) => {
                                     onPress={() => setVariacaoSelecionada(item)}
                                 >
                                     <Text style={[
-                                        styles.variationButtonText,
-                                        variacaoSelecionada === item && styles.variationButtonTextSelected
+                                        styles.variationText,
+                                        variacaoSelecionada === item && styles.variationTextSelected
                                     ]}>{item}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
                     </View>
                 )}
-                {/* --- FIM DO SELETOR --- */}
+                {/* ------------------------------------------- */}
 
 
-                {/* --- ACTION BUTTONS (Modificado para desabilitar) --- */}
+                {/* --- ACTION BUTTONS (ARRUMADOS) --- */}
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity 
-                        style={[styles.button, styles.primaryButton, botaoDesabilitado && styles.buttonDisabled]}
-                        onPress={handleReservarAgora}
-                        disabled={botaoDesabilitado} // <-- Habilitado
+                        style={[
+                            styles.button, 
+                            styles.primaryButton,
+                            isBotaoDesabilitado && styles.buttonDisabled // <-- ADICIONADO
+                        ]}
+                        onPress={() => handleAdicionar(true)} // true = navegar
+                        disabled={isBotaoDesabilitado}
                     >
                         <Text style={[styles.buttonText, styles.primaryButtonText]}>Reservar agora</Text>
                     </TouchableOpacity>
+                    
                     <TouchableOpacity 
-                        style={[styles.button, styles.secondaryButton, botaoDesabilitado && styles.buttonDisabled]}
-                        onPress={handleAdicionarAoCarrinho}
-                        disabled={botaoDesabilitado} // <-- Habilitado
+                        style={[
+                            styles.button, 
+                            styles.secondaryButton,
+                            isBotaoDesabilitado && styles.buttonDisabled // <-- ADICIONADO
+                        ]}
+                        onPress={() => handleAdicionar(false)} // false = mostrar alerta
+                        disabled={isBotaoDesabilitado}
                     >
-                        <Text style={[styles.buttonText, styles.secondaryButtonText, botaoDesabilitado && styles.buttonTextDisabled]}>Adicionar ao carrinho</Text>
+                        <Text style={[styles.buttonText, styles.secondaryButtonText]}>Adicionar ao carrinho</Text>
                     </TouchableOpacity>
                 </View>
 
-                {/* --- DESCRIPTION (Intocado) --- */}
+                {/* --- DESCRIPTION (INTOCADO) --- */}
                 <View style={styles.descriptionSection}>
                     <Text style={styles.descriptionTitle}>Descrição</Text>
                     <Text style={styles.descriptionText}>{produto.descricao}</Text>
@@ -382,41 +330,18 @@ const LojaProdutos = ({ navigation, route }) => {
     );
 };
 
-// Seus estilos (Intocados, com *adição* dos novos estilos no final)
+// Seus estilos (ADICIONADO estilos de variação e botão disabled)
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: theme.colors.background,
     },
-    // ... (Todos os seus estilos originais: header, searchBarGradient, searchInput, etc...)
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: theme.spacing.medium,
-        paddingVertical: theme.spacing.small,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.colors.border,
-    },
-    searchBarGradient: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderRadius: 25,
-        marginLeft: theme.spacing.medium,
-        height: 40,
-    },
-    searchInput: {
-        flex: 1,
-        paddingHorizontal: theme.spacing.medium,
-        fontSize: theme.fontSize.regular,
-        color: theme.colors.text,
-        backgroundColor: 'transparent',
-    },
+    // ... (seu header, searchInput, etc.)
     scrollContent: {
         paddingBottom: 100,
     },
     productTitle: {
-        fontSize: theme.fontSize.medium,
+        fontSize: theme.fontSize.regular,
         fontWeight: 'bold',
         color: theme.colors.text,
         textAlign: 'center',
@@ -465,6 +390,48 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: theme.colors.text,
     },
+
+    // --- ADICIONADO: Estilos para as Variações ---
+    variationSection: {
+        paddingHorizontal: theme.spacing.large,
+        marginTop: theme.spacing.small,
+        marginBottom: theme.spacing.medium,
+    },
+    variationTitle: {
+        fontSize: theme.fontSize.regular,
+        color: theme.colors.text,
+        marginBottom: theme.spacing.medium,
+    },
+    variationOptions: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+    },
+    variationButton: {
+        minWidth: 50,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        borderRadius: 8,
+        backgroundColor: theme.colors.lightGray,
+        marginRight: 10,
+        marginBottom: 10,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+    },
+    variationButtonSelected: {
+        backgroundColor: theme.colors.primary, // Cor 'primary' do seu 'theme'
+        borderColor: theme.colors.primary,
+    },
+    variationText: {
+        fontSize: theme.fontSize.regular,
+        color: theme.colors.text,
+        fontWeight: '500',
+    },
+    variationTextSelected: {
+        color: theme.colors.white,
+    },
+    // ------------------------------------------
+    
     buttonContainer: {
         paddingHorizontal: theme.spacing.large,
     },
@@ -474,6 +441,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: theme.spacing.medium,
+    },
+    // ADICIONADO: Estilo para botão desabilitado
+    buttonDisabled: {
+        backgroundColor: '#CCC', // Cor cinza para desabilitado
+        borderColor: '#AAA',
     },
     primaryButton: {
         backgroundColor: theme.colors.primary,
@@ -525,56 +497,6 @@ const styles = StyleSheet.create({
             elevation: 10,
         }),
     },
-
-    // --- ESTILOS NOVOS (Adicionados) ---
-    variationSection: {
-        paddingHorizontal: theme.spacing.large,
-        marginBottom: theme.spacing.medium,
-    },
-    variationTitle: {
-        fontSize: theme.fontSize.regular,
-        fontWeight: '600',
-        color: theme.colors.text,
-        marginBottom: theme.spacing.small,
-    },
-    variationOptionsContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-    },
-    variationButton: {
-        borderColor: theme.colors.border,
-        borderWidth: 1.5,
-        borderRadius: 20,
-        paddingVertical: 6,
-        paddingHorizontal: 16,
-        marginRight: theme.spacing.small,
-        marginBottom: theme.spacing.small,
-    },
-    variationButtonSelected: {
-        borderColor: theme.colors.primary,
-        backgroundColor: theme.colors.primary,
-    },
-    variationButtonText: {
-        fontSize: theme.fontSize.regular,
-        color: theme.colors.text,
-    },
-    variationButtonTextSelected: {
-        color: theme.colors.white,
-        fontWeight: '600',
-    },
-    buttonDisabled: {
-        backgroundColor: theme.colors.lightGray, // Cor cinza para desabilitado
-        borderColor: '#AAA',
-    },
-    buttonTextDisabled: {
-        color: '#AAA',
-    },
-    variationSoldOutText: { // Estilo para a mensagem de "Esgotado"
-        fontSize: theme.fontSize.regular,
-        color: theme.colors.placeholder,
-        fontStyle: 'italic',
-        marginBottom: theme.spacing.small,
-    }
 });
 
 export default LojaProdutos;
