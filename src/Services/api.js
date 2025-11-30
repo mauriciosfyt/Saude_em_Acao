@@ -72,12 +72,76 @@ export const solicitarEsqueciSenha = async (email) => {
   }
 };
 
-// ... Faça o mesmo para 'validarCodigoEsqueciSenha' e 'redefinirSenhaEsquecida' ...
-// Remova o 'http://34.205.11.57' e deixe apenas o caminho relativo (ex: '/api/auth/...')
+// Validar código de redefinição (opcional)
+export const validarCodigoEsqueciSenha = async (email, codigo) => {
+  try {
+    const payload = { email: String(email).trim().toLowerCase(), token: String(codigo) };
+    // Algumas APIs usam '/confirmar' para validar; tentamos o caminho mais comum
+    try {
+      const response = await api.post('/api/auth/esqueci-senha/confirmar', payload);
+      return response.data;
+    } catch (err) {
+      // fallback para um endpoint só de validação (caso exista)
+      const resp = await api.post('/api/auth/esqueci-senha/validar', payload);
+      return resp.data;
+    }
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
+
+// Redefinir senha usando token recebido por e-mail
+export const redefinirSenhaEsquecida = async (email, codigo, novaSenha) => {
+  try {
+    const payload = { email: String(email).trim().toLowerCase(), token: String(codigo), novaSenha };
+    // endpoint documentado comumente é '/confirmar'
+    const response = await api.post('/api/auth/esqueci-senha/confirmar', payload);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
 
 // O 'logout' do api.js não é mais necessário,
 // pois o AuthContext agora cuida de limpar o token do Axios.
 // export const logout = () => { ... } // PODE REMOVER
+
+// Atualizar dados do perfil do usuário logado
+export const atualizarPerfil = async (perfilDTO) => {
+  try {
+    const response = await api.put('/api/meu-perfil', perfilDTO);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
+
+// Mudar senha do usuário logado
+export const mudarSenha = async (senhaAtual, novaSenha) => {
+  try {
+    const payload = { senhaAtual, novaSenha };
+    const response = await api.post('/api/meu-perfil/mudar-senha', payload);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
+
+// Atualizar avatar (upload). `formData` deve ser um FormData contendo o arquivo sob a chave 'avatar' ou conforme a API.
+export const atualizarAvatar = async (formData) => {
+  try {
+    const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+    const response = await api.post('/api/meu-perfil/avatar', formData, config);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
 
 // Buscar dados do perfil do usuário logado
 export const obterMeuPerfil = async () => {
@@ -130,14 +194,15 @@ export const obterDesempenhoSemanal = async () => {
 };
 
 // Registrar treino realizado
-export const registrarTreinoRealizado = async (treinoId) => {
-  try {
-    const response = await api.post(`/api/treinos/${treinoId}/realizar`);
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) throw error.response.data;
-    throw error;
-  }
+export const registrarTreinoRealizado = async (treinoId, payload = {}) => {
+  try {
+    // payload pode conter { exercicios: [ids], parcial: true }
+    const response = await api.post(`/api/treinos/${treinoId}/realizar`, payload);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
 };
 
 // Exclusão de Conta (Admin)
@@ -299,92 +364,6 @@ export const enviarMensagemChat = async (chatId, texto, remetente) => {
   }
 };
 
-// Envia imagem (upload multipart/form-data) para o chat
-export const enviarImagemChat = async (chatId, uri, remetente) => {
-  try {
-    if (!chatId) throw new Error('chatId é obrigatório para enviar imagens');
-    if (!uri) throw new Error('uri da imagem é obrigatório');
-
-    // Se a URI já for remota (http/https) e a API aceita apenas texto, fallback para enviarMensagemChat
-    if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-      // Tenta enviar como texto contendo a URL da imagem
-      return await enviarMensagemChat(chatId, uri, remetente);
-    }
-
-    // Gera nome e tipo a partir da URI
-    const getFileInfo = (uriStr) => {
-      try {
-        const uriParts = uriStr.split('/');
-        const filename = uriParts[uriParts.length - 1].split('?')[0] || `photo_${Date.now()}.jpg`;
-        const match = filename.match(/\.([a-zA-Z0-9]+)$/);
-        const ext = match ? match[1].toLowerCase() : 'jpg';
-        let mime = 'image/jpeg';
-        if (ext === 'png') mime = 'image/png';
-        if (ext === 'webp') mime = 'image/webp';
-        return { filename, mime };
-      } catch (e) {
-        return { filename: `photo_${Date.now()}.jpg`, mime: 'image/jpeg' };
-      }
-    };
-
-    const { filename, mime } = getFileInfo(uri);
-
-    const form = new FormData();
-    form.append('chatId', String(chatId));
-    form.append('usuario', remetente || 'usuario');
-    // Em React Native / Expo, o objeto file deve ter { uri, name, type }
-    form.append('file', {
-      uri,
-      name: filename,
-      type: mime,
-    });
-
-    const preferencial = '/api/chat/enviar';
-    try {
-      const resp = await api.post(preferencial, form, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return resp.data;
-    } catch (err) {
-      if (__DEV__) console.warn('[enviarImagemChat] tentativa preferencial falhou', preferencial, err?.response?.status || err?.message);
-    }
-
-    // Tenta outros endpoints conhecidos com multipart
-    const attempts = [
-      `/api/chat/${chatId}/mensagem`,
-      `/api/chat/${chatId}/mensagens`,
-      `/api/chat/${chatId}/upload`,
-      `/api/chat/upload`,
-    ];
-
-    for (const path of attempts) {
-      try {
-        const resp = await api.post(path, form, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        return resp.data;
-      } catch (err) {
-        if (__DEV__) console.debug('[enviarImagemChat] tentativa falhou em', path, err?.response?.status || err?.message);
-        continue;
-      }
-    }
-
-    // Se nenhum endpoint aceitar multipart, tente enviar a URI como texto de queda
-    try {
-      return await enviarMensagemChat(chatId, uri, remetente);
-    } catch (err) {
-      if (__DEV__) console.warn('[enviarImagemChat] fallback enviarMensagemChat falhou', err?.message || err);
-    }
-
-    throw new Error('Falha ao enviar imagem: nenhum endpoint aceitou o upload');
-  } catch (error) {
-    if (error.response && error.response.data) throw error.response.data;
-    throw error;
-  }
-};
-
 // Apaga uma mensagem do chat no servidor
 export const apagarMensagemChat = async (chatId, mensagemId) => {
   try {
@@ -521,7 +500,7 @@ export const obterMinhasReservas = async () => {
     console.log("API /api/reservas/minhas respondeu:", response.data);
     return response.data;
   } catch (error) {
-    if (__DEV__) console.warn("Erro ao buscar 'minhas reservas':", error?.message || error);
+    console.error("Erro ao buscar 'minhas reservas':", error);
     // Lança o erro para a tela (loja_reservas.js) poder tratar
     if (error.response && error.response.data) throw error.response.data;
     throw error; // Lança o erro de rede (ex: Network Error)
@@ -536,7 +515,7 @@ export const obterMeusTreinos = async () => {
     console.log("API /api/meus-treinos respondeu:", response.data);
     return response.data;
   } catch (error) {
-    if (__DEV__) console.warn("Erro ao buscar meus treinos:", error?.message || error);
+    console.error("Erro ao buscar meus treinos:", error);
     if (error.response && error.response.data) throw error.response.data;
     throw error;
   }
@@ -551,43 +530,12 @@ export const obterMeusTreinos = async () => {
  */
 export const obterFavoritos = async () => {
   try {
-    const maxRetries = 2;
-    const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
-
-    if (__DEV__) console.log("Chamando API: /api/favoritos");
-
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        const response = await api.get('/api/favoritos');
-        if (__DEV__) console.log(`API /api/favoritos respondeu (attempt ${attempt}):`, response.data);
-        return response.data;
-      } catch (err) {
-        const status = err?.response?.status;
-        // Se for erro 5xx e ainda temos tentativas, espera e tenta novamente
-        if (status && status >= 500 && status < 600 && attempt < maxRetries) {
-          if (__DEV__) console.debug(`Favoritos: tentativa ${attempt} falhou com ${status}, retrying...`);
-          await sleep(500 * (attempt + 1));
-          continue;
-        }
-        // Re-throw para o catch externo lidar
-        throw err;
-      }
-    }
-    // Se saiu do loop sem retorno, retorna lista vazia
-    if (__DEV__) console.debug('Favoritos: todas as tentativas falharam, retornando lista vazia');
-    return [];
+    console.log("Chamando API: /api/favoritos");
+    const response = await api.get('/api/favoritos');
+    console.log("API /api/favoritos respondeu:", response.data);
+    return response.data;
   } catch (error) {
-    // Evita que erros de servidor (5xx) gerem RedBox/LogBox ruidoso.
-    if (__DEV__) console.warn("Erro ao buscar favoritos:", error?.message || error);
-
-    // Se for erro de servidor (500+), tratamos como sem favoritos por enquanto
-    // para não interromper a experiência do usuário.
-    const status = error?.response?.status;
-    if (status && status >= 500 && status < 600) {
-      if (__DEV__) console.debug('Servidor retornou 5xx, retornando lista vazia de favoritos');
-      return [];
-    }
-
+    console.error("Erro ao buscar favoritos:", error);
     if (error.response && error.response.data) throw error.response.data;
     throw error;
   }
