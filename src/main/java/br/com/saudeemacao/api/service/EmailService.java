@@ -166,4 +166,34 @@ public class EmailService {
         enviarEmail(alunoEmail, titulo, corpoHtml);
     }
 
+    public void enviarEmailConclusaoSemanal(String para, String nomeAluno, String nomeTreino, boolean isAluno) {
+        String titulo = "Parabéns! Semana de Treinos Concluída";
+        String preHeader = "Todos os exercícios da semana foram finalizados com sucesso.";
+
+        String corpoPersonalizado;
+
+        if (isAluno) {
+            corpoPersonalizado = String.format("""
+            <p>Parabéns, <strong>%s</strong>!</p>
+            <p>Você completou todos os dias previstos do seu treino <strong>%s</strong> nesta semana.</p>
+            <p>Mantenha a constância e continue evoluindo!</p>
+            """, nomeAluno, nomeTreino);
+        } else {
+            corpoPersonalizado = String.format("""
+            <p>Olá,</p>
+            <p>O aluno <strong>%s</strong> acabou de concluir a semana completa do treino <strong>%s</strong>.</p>
+            <p>Acompanhe o desempenho dele pelo painel administrativo.</p>
+            """, nomeAluno, nomeTreino);
+        }
+
+        String conteudo = String.format("""
+        <h1>Semana Concluída! 🚀</h1>
+        %s
+        <p>Atenciosamente,<br>Equipe Saúde em Ação</p>
+        """, corpoPersonalizado);
+
+        String corpoHtml = criarBaseTemplate(titulo, preHeader, conteudo);
+        enviarEmail(para, titulo, corpoHtml);
+    }
+
 }

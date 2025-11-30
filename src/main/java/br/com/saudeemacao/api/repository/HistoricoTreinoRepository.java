@@ -9,12 +9,14 @@ import java.util.List;
 
 @Repository
 public interface HistoricoTreinoRepository extends MongoRepository<HistoricoTreino, String> {
+
     List<HistoricoTreino> findByAlunoIdAndDataRealizacaoBetween(String alunoId, LocalDateTime inicio, LocalDateTime fim);
-
     long countByAlunoIdAndDataRealizacaoBetween(String alunoId, LocalDateTime inicio, LocalDateTime fim);
-
     long countByAlunoId(String alunoId);
-
     List<HistoricoTreino> findByAlunoIdOrderByDataRealizacaoDesc(String alunoId);
-}
 
+
+    boolean existsByAlunoIdAndTreinoIdAndDataRealizacaoBetween(String alunoId, String treinoId, LocalDateTime inicio, LocalDateTime fim);
+
+    List<HistoricoTreino> findByAlunoIdAndTreinoIdAndDataRealizacaoBetween(String alunoId, String treinoId, LocalDateTime inicio, LocalDateTime fim);
+}

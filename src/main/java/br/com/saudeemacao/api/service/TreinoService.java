@@ -4,7 +4,7 @@ import br.com.saudeemacao.api.dto.ExercicioDTO;
 import br.com.saudeemacao.api.dto.ResponsavelDTO;
 import br.com.saudeemacao.api.dto.TreinoDTO;
 import br.com.saudeemacao.api.dto.TreinoMetricasDTO;
-import br.com.saudeemacao.api.dto.TreinoResponseDTO; // Importado
+import br.com.saudeemacao.api.dto.TreinoResponseDTO;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
 import br.com.saudeemacao.api.model.EnumTreino.EDiaDaSemana;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
@@ -25,10 +25,9 @@ import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +38,7 @@ public class TreinoService {
     private final UsuarioRepository usuarioRepository;
     private final HistoricoTreinoRepository historicoTreinoRepository;
     private final CloudinaryService cloudinaryService;
+    private final EmailService emailService;
 
     private Usuario getUsuarioAutenticado(UserDetails userDetails) {
         return usuarioRepository.findByEmail(userDetails.getUsername())
@@ -48,7 +48,7 @@ public class TreinoService {
     public Treino criarTreino(TreinoDTO dto, UserDetails userDetails) {
         Usuario responsavel = getUsuarioAutenticado(userDetails);
 
-        Map<EDiaDaSemana, List<Exercicio>> exerciciosPorDia = mapExerciciosDtoParaModelo(dto.getExerciciosPorDia());
+        Map<EDiaDaSemana, List<Exercicio>> exerciciosPorDia = mapExerciciosDtoParaModelo(dto.getExerciciosPorDia(), null);
 
         Treino treino = Treino.builder()
                 .nome(dto.getNome())
@@ -73,7 +73,7 @@ public class TreinoService {
             throw new SecurityException("Você não tem permissão para atualizar este treino.");
         }
 
-        Map<EDiaDaSemana, List<Exercicio>> exerciciosAtualizados = mapExerciciosDtoParaModelo(dto.getExerciciosPorDia());
+        Map<EDiaDaSemana, List<Exercicio>> exerciciosAtualizados = mapExerciciosDtoParaModelo(dto.getExerciciosPorDia(), treinoExistente.getExerciciosPorDia());
 
         treinoExistente.setNome(dto.getNome());
         treinoExistente.setTipoDeTreino(dto.getTipoDeTreino());
@@ -86,8 +86,10 @@ public class TreinoService {
         return treinoRepository.save(treinoExistente);
     }
 
+    private Map<EDiaDaSemana, List<Exercicio>> mapExerciciosDtoParaModelo(
+            Map<EDiaDaSemana, List<ExercicioDTO>> dtoMap,
+            Map<EDiaDaSemana, List<Exercicio>> mapaAntigo) {
 
-    private Map<EDiaDaSemana, List<Exercicio>> mapExerciciosDtoParaModelo(Map<EDiaDaSemana, List<ExercicioDTO>> dtoMap) {
         if (dtoMap == null || dtoMap.isEmpty()) {
             return new HashMap<>();
         }
@@ -97,16 +99,61 @@ public class TreinoService {
             EDiaDaSemana dia = entry.getKey();
             List<ExercicioDTO> exerciciosDto = entry.getValue();
 
+            List<Exercicio> exerciciosAntigosDoDia = (mapaAntigo != null)
+                    ? mapaAntigo.getOrDefault(dia, Collections.emptyList())
+                    : Collections.emptyList();
+
             List<Exercicio> exerciciosModel = exerciciosDto.stream()
-                    .map(this::mapExercicioDtoToModel)
+                    .map(dto -> {
+                        String urlImagemAntiga = exerciciosAntigosDoDia.stream()
+                                .filter(e -> e.getNome().equalsIgnoreCase(dto.getNome()))
+                                .findFirst()
+                                .map(Exercicio::getImg)
+                                .orElse(null);
+
+                        return mapExercicioDtoToModel(dto, urlImagemAntiga);
+                    })
                     .collect(Collectors.toList());
 
-            // Adiciona ao mapa apenas se a lista de exercícios não estiver vazia
             if (!exerciciosModel.isEmpty()) {
                 modelMap.put(dia, exerciciosModel);
             }
         }
         return modelMap;
+    }
+
+    private Exercicio mapExercicioDtoToModel(ExercicioDTO dto, String urlImagemAntiga) {
+        String imgUrl = urlImagemAntiga;
+
+        if (dto.getImg() != null && !dto.getImg().isEmpty()) {
+            try {
+                if (urlImagemAntiga != null) {
+                    deletarImagemSeguro(urlImagemAntiga);
+                }
+                imgUrl = cloudinaryService.uploadFile(dto.getImg());
+            } catch (IOException e) {
+                throw new RuntimeException("Falha ao fazer upload da imagem para o exercício: " + dto.getNome(), e);
+            }
+        }
+
+        Exercicio exercicio = new Exercicio();
+        exercicio.setNome(dto.getNome());
+        exercicio.setSeries(dto.getSeries());
+        exercicio.setRepeticoes(dto.getRepeticoes());
+        exercicio.setCarga(dto.getCarga());
+        exercicio.setIntervalo(dto.getIntervalo());
+        exercicio.setObservacao(dto.getObservacao());
+        exercicio.setImg(imgUrl);
+        return exercicio;
+    }
+
+    private void deletarImagemSeguro(String url) {
+        try {
+            String publicId = url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
+            cloudinaryService.deleteFile(publicId);
+        } catch (Exception e) {
+            System.err.println("Aviso: Falha ao deletar imagem antiga do Cloudinary: " + e.getMessage());
+        }
     }
 
     public Treino buscarPorId(String id) {
@@ -126,8 +173,6 @@ public class TreinoService {
         return treinoRepository.findByTipoDeTreinoContainingIgnoreCase(tipo);
     }
 
-
-
     public List<Treino> buscarPorResponsavel(String responsavelId) {
         return treinoRepository.findByResponsavelId(responsavelId);
     }
@@ -141,6 +186,14 @@ public class TreinoService {
             throw new SecurityException("Você não tem permissão para deletar este treino.");
         }
 
+        if (treinoExistente.getExerciciosPorDia() != null) {
+            treinoExistente.getExerciciosPorDia().values().stream()
+                    .flatMap(List::stream)
+                    .map(Exercicio::getImg)
+                    .filter(Objects::nonNull)
+                    .forEach(this::deletarImagemSeguro);
+        }
+
         treinoRepository.deleteById(id);
     }
 
@@ -148,10 +201,35 @@ public class TreinoService {
         Usuario aluno = getUsuarioAutenticado(userDetails);
         Treino treino = buscarPorId(treinoId);
 
+        LocalDate hoje = LocalDate.now();
+        EDiaDaSemana diaAtualEnum = converterDayOfWeekParaEnum(hoje.getDayOfWeek());
+
+        if (treino.getExerciciosPorDia() == null || !treino.getExerciciosPorDia().containsKey(diaAtualEnum)) {
+            if (diaAtualEnum == null) {
+                throw new IllegalArgumentException("Hoje não é um dia útil de treino configurado no sistema.");
+            }
+            throw new IllegalArgumentException("Este treino não possui exercícios agendados para hoje (" + diaAtualEnum + ").");
+        }
+
+        if (treino.getExerciciosPorDia().get(diaAtualEnum).isEmpty()) {
+            throw new IllegalArgumentException("Não há exercícios cadastrados para " + diaAtualEnum + " neste treino.");
+        }
+
+        LocalDateTime inicioDia = hoje.atStartOfDay();
+        LocalDateTime fimDia = hoje.atTime(LocalTime.MAX);
+
+        boolean jaRealizouHoje = historicoTreinoRepository.existsByAlunoIdAndTreinoIdAndDataRealizacaoBetween(
+                aluno.getId(), treino.getId(), inicioDia, fimDia);
+
+        if (jaRealizouHoje) {
+            throw new IllegalStateException("Você já registrou a conclusão deste treino hoje. Só poderá realizá-lo novamente na próxima " + diaAtualEnum + ".");
+        }
+
         HistoricoTreino historico = HistoricoTreino.builder()
                 .aluno(aluno)
                 .treino(treino)
                 .dataRealizacao(LocalDateTime.now())
+                .diaDaSemanaConcluido(diaAtualEnum)
                 .build();
 
         historicoTreinoRepository.save(historico);
@@ -159,7 +237,47 @@ public class TreinoService {
         aluno.setDataUltimoTreino(historico.getDataRealizacao());
         usuarioRepository.save(aluno);
 
+        verificarENotificarConclusaoSemanal(aluno, treino, hoje);
+
         return historico;
+    }
+
+    private void verificarENotificarConclusaoSemanal(Usuario aluno, Treino treino, LocalDate dataReferencia) {
+        LocalDateTime inicioSemana = dataReferencia.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay();
+        LocalDateTime fimSemana = dataReferencia.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).atTime(LocalTime.MAX);
+
+        List<HistoricoTreino> treinosDaSemana = historicoTreinoRepository.findByAlunoIdAndTreinoIdAndDataRealizacaoBetween(
+                aluno.getId(), treino.getId(), inicioSemana, fimSemana
+        );
+
+        Set<EDiaDaSemana> diasConcluidos = treinosDaSemana.stream()
+                .map(HistoricoTreino::getDiaDaSemanaConcluido)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Set<EDiaDaSemana> diasExigidos = treino.getExerciciosPorDia().keySet().stream()
+                .filter(d -> !treino.getExerciciosPorDia().get(d).isEmpty())
+                .collect(Collectors.toSet());
+
+        if (diasConcluidos.containsAll(diasExigidos)) {
+            // Requer método 'enviarEmailConclusaoSemanal' no EmailService
+            emailService.enviarEmailConclusaoSemanal(aluno.getEmail(), aluno.getNome(), treino.getNome(), true);
+
+            if (treino.getResponsavel() != null && treino.getResponsavel().getEmail() != null) {
+                emailService.enviarEmailConclusaoSemanal(treino.getResponsavel().getEmail(), aluno.getNome(), treino.getNome(), false);
+            }
+        }
+    }
+
+    private EDiaDaSemana converterDayOfWeekParaEnum(DayOfWeek dayOfWeek) {
+        switch (dayOfWeek) {
+            case MONDAY: return EDiaDaSemana.SEGUNDA;
+            case TUESDAY: return EDiaDaSemana.TERCA;
+            case WEDNESDAY: return EDiaDaSemana.QUARTA;
+            case THURSDAY: return EDiaDaSemana.QUINTA;
+            case FRIDAY: return EDiaDaSemana.SEXTA;
+            default: return null;
+        }
     }
 
     public List<HistoricoTreino> buscarDesempenhoSemanal(UserDetails userDetails) {
@@ -233,28 +351,6 @@ public class TreinoService {
         return diasConsecutivos;
     }
 
-    private Exercicio mapExercicioDtoToModel(ExercicioDTO dto) {
-        String imgUrl = null;
-        if (dto.getImg() != null && !dto.getImg().isEmpty()) {
-            try {
-                imgUrl = cloudinaryService.uploadFile(dto.getImg());
-            } catch (IOException e) {
-                throw new RuntimeException("Falha ao fazer upload da imagem para o exercício: " + dto.getNome(), e);
-            }
-        }
-
-        Exercicio exercicio = new Exercicio();
-        exercicio.setNome(dto.getNome());
-        exercicio.setSeries(dto.getSeries());
-        exercicio.setRepeticoes(dto.getRepeticoes());
-        exercicio.setCarga(dto.getCarga());
-        exercicio.setIntervalo(dto.getIntervalo());
-        exercicio.setObservacao(dto.getObservacao());
-        exercicio.setImg(imgUrl);
-        return exercicio;
-    }
-
-    // Método adicionado para mapear a entidade para o DTO de resposta
     public TreinoResponseDTO toResponseDTO(Treino treino) {
         if (treino == null) {
             return null;

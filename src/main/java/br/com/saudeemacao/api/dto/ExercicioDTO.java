@@ -31,5 +31,7 @@ public class ExercicioDTO {
 
     private String observacao;
 
+
+
     private MultipartFile img;
 }
