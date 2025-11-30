@@ -55,12 +55,14 @@ const TelaPlanos = ({ navigation }) => {
         <View style={{ marginVertical: 10 }}>
           {treino.tipo && (
             <Text style={styles.planDescription}>
-              <Text style={{ fontWeight: 'bold' }}>Tipo:</Text> {treino.tipo}
+              <Text style={{ fontWeight: 'bold' }}>Tipo:</Text>
+              <Text>{' '}{treino.tipo}</Text>
             </Text>
           )}
           {treino.responsavel && (
             <Text style={styles.planDescription}>
-              <Text style={{ fontWeight: 'bold' }}>Professor:</Text> {treino.responsavel}
+              <Text style={{ fontWeight: 'bold' }}>Professor:</Text>
+              <Text>{' '}{treino.responsavel}</Text>
             </Text>
           )}
         </View>

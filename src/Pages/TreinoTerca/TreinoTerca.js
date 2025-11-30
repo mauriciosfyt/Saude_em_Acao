@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -17,9 +17,9 @@ import { playSuccessSound } from '../../Components/Sounds';
 import { useTheme } from '../../context/ThemeContext';
 import { useTreinos } from '../../context/TreinosContext';
 
-const TreinoSexta = ({ navigation, route }) => {
+const TreinoTerca = ({ navigation, route }) => {
   const { isDark, colors } = useTheme();
-  const { marcarTreinoComoConcluido, marcarTreinoComoIncompleto, salvarProgresso, obterProgresso, progressoTreinos } = useTreinos();
+  const { marcarTreinoComoConcluido, marcarTreinoComoIncompleto } = useTreinos();
 
   // 🎨 Definição das cores do tema
   const theme = {
@@ -43,18 +43,16 @@ const TreinoSexta = ({ navigation, route }) => {
   const getExerciciosPorCategoria = () => {
     if (route?.params?.exercicios && Array.isArray(route.params.exercicios)) {
       const apiExercicios = route.params.exercicios;
-      const agrupado = apiExercicios.reduce((acc, ex, idx) => {
+      const agrupado = apiExercicios.reduce((acc, ex) => {
         const grupo = (ex.grupo || ex.categoria || 'geral').toLowerCase();
         if (!acc[grupo]) acc[grupo] = [];
-        const safeId = ex.id ?? ex._id ?? ex.uid ?? `api_${idx}`;
-        const imagemUri = ex.img || ex.imagem || null;
         acc[grupo].push({
-          id: safeId,
-          nome: ex.nome || `Exercício ${safeId}`,
+          id: ex.id,
+          nome: ex.nome,
           series: ex.series || 4,
           repeticoes: ex.repeticoes || 15,
           carga: ex.carga || 0,
-          imagem: imagemUri ? { uri: imagemUri } : require('../../../assets/banner_whey_piqueno.jpg'),
+          imagem: ex.img || ex.imagem ? { uri: ex.img || ex.imagem } : require('../../../assets/banner_whey_piqueno.jpg'),
           descricao: ex.descricao || 'Realize o exercício conforme instruído.',
         });
         return acc;
@@ -137,33 +135,16 @@ const TreinoSexta = ({ navigation, route }) => {
   const [modalFinalizar, setModalFinalizar] = useState(false);
   const [modalAviso, setModalAviso] = useState(false);
 
-  useEffect(() => {
-    const treinoKey = route?.params?.treinoId || 'Terça';
-    const saved = obterProgresso(treinoKey) || [];
-    if (saved && saved.length) {
-      const inicial = {};
-      Object.entries(exercicios).forEach(([grupo, arr]) => {
-        if (Array.isArray(arr)) arr.forEach(e => {
-          if (saved.includes(String(e.id)) || saved.includes(e.id)) inicial[`${grupo}_${e.id}`] = true;
-        });
-      });
-      setExerciciosSelecionados(inicial);
-      setExerciciosConcluidos(Object.keys(inicial).length);
-    }
-  }, [exercicios, route?.params, progressoTreinos]);
-
   // ✅ Alterna o estado de conclusão do exercício
   const toggleExercicio = (id) => {
-    setExerciciosSelecionados(prev => {
-      const novoEstado = { ...prev };
-      if (novoEstado[id]) {
-        delete novoEstado[id];
-      } else {
-        novoEstado[id] = true;
-      }
-      setExerciciosConcluidos(Object.keys(novoEstado).length);
-      return novoEstado;
-    });
+    const novoEstado = { ...exerciciosSelecionados };
+    if (novoEstado[id]) {
+      delete novoEstado[id];
+    } else {
+      novoEstado[id] = true;
+    }
+    setExerciciosSelecionados(novoEstado);
+    setExerciciosConcluidos(Object.keys(novoEstado).length);
   };
 
   // ✅ Selecionar ou desmarcar todos
@@ -173,9 +154,9 @@ const TreinoSexta = ({ navigation, route }) => {
       setExerciciosConcluidos(0);
     } else {
       const todos = {};
-      Object.entries(exercicios).forEach(([grupo, arr]) => {
+      Object.values(exercicios).forEach((arr) => {
         if (Array.isArray(arr)) {
-          arr.forEach((e) => (todos[`${grupo}_${e.id}`] = true));
+          arr.forEach((e) => (todos[e.id] = true));
         }
       });
       setExerciciosSelecionados(todos);
@@ -194,27 +175,16 @@ const TreinoSexta = ({ navigation, route }) => {
 
   // ✅ Confirma o término do treino
   const handleConfirmarFinalizar = () => {
-    (async () => {
-      setModalFinalizar(false);
-      playSuccessSound();
+    setModalFinalizar(false);
+    playSuccessSound();
 
-      const treinoId = route?.params?.treinoId || null;
-      const selecionados = Object.keys(exerciciosSelecionados || {}).map(k => k.split('_').slice(1).join('_'));
-      try {
-        const treinoKey = treinoId || 'Terça';
-        salvarProgresso(treinoKey, selecionados);
-      } catch (err) {
-        console.error('Erro ao salvar progresso localmente:', err);
-      }
+    if (exerciciosConcluidos === totalExercicios) {
+      marcarTreinoComoConcluido && marcarTreinoComoConcluido('Terça-Feira');
+    } else {
+      marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Terça-Feira');
+    }
 
-      if (exerciciosConcluidos === totalExercicios) {
-        marcarTreinoComoConcluido && marcarTreinoComoConcluido('Terça');
-      } else {
-        marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Terça');
-      }
-
-      navigation.navigate('MeuTreino');
-    })();
+    navigation.navigate('MeuTreino');
   };
 
   const [menuVisivel, setMenuVisivel] = useState(false);
@@ -254,9 +224,9 @@ const TreinoSexta = ({ navigation, route }) => {
         {/* Seções (Costas e Abdômen) */}
         {Object.entries(exercicios).map(([grupo, lista]) => (
           <View key={grupo} style={styles.secaoContainer}>
-            {lista.map((exercicio) => (
+            {lista.map((exercicio, idx) => (
               <View
-                key={`${grupo}_${exercicio.id}`}
+                key={`${grupo}-${exercicio.id ?? idx}`}
                 style={[
                   styles.exercicioCard,
                   {
@@ -267,16 +237,16 @@ const TreinoSexta = ({ navigation, route }) => {
               >
                 <TouchableOpacity
                   style={styles.checkbox}
-                  onPress={() => toggleExercicio(`${grupo}_${exercicio.id}`)}
+                  onPress={() => toggleExercicio(exercicio.id)}
                 >
                   <Ionicons
                     name={
-                      exerciciosSelecionados[`${grupo}_${exercicio.id}`]
+                      exerciciosSelecionados[exercicio.id]
                         ? 'checkmark-circle'
                         : 'ellipse-outline'
                     }
                     size={24}
-                    color={exerciciosSelecionados[`${grupo}_${exercicio.id}`] ? colors.primary : colors.textTertiary}
+                    color={exerciciosSelecionados[exercicio.id] ? colors.primary : colors.textTertiary}
                   />
                 </TouchableOpacity>
 
@@ -560,4 +530,4 @@ const TreinoSexta = ({ navigation, route }) => {
   );
 };
 
-export default TreinoSexta;
+export default TreinoTerca;

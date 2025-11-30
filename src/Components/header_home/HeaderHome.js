@@ -18,8 +18,9 @@ const HeaderHome = ({ onProfilePress }) => {
       <View style={styles.iconButton} />
 
       {/* 2. A logo agora fica naturalmente no centro */}
+      {/* Ajuste o caminho do seu logo se necessário */}
       <Image
-        source={require('../../../assets/icons/logo_dia.png')} // Ajuste o caminho do seu logo
+        source={require('../../../assets/icons/logo_dia.png')}
         style={styles.logoImage}
         resizeMode="contain"
       />
