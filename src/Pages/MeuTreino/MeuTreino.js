@@ -7,6 +7,7 @@ import {
   Modal,
   SafeAreaView,
   StatusBar,
+  Alert,
   Image,
   useFocusEffect,
 } from "react-native";
@@ -15,6 +16,7 @@ import createStyles from "../../Styles/MeuTreinoStyle";
 import { useTheme } from "../../context/ThemeContext";
 import { useTreinos } from "../../context/TreinosContext";
 import { obterMeusTreinos } from '../../Services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const MeuTreino = ({ navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
@@ -30,6 +32,7 @@ const MeuTreino = ({ navigation }) => {
     marcarTreinoComoConcluido,
     marcarTreinoComoIncompleto,
   } = useTreinos();
+  const { logout } = useAuth();
 
   const [treinos, setTreinos] = useState([]);
   const [carregandoTreinos, setCarregandoTreinos] = useState(true);
@@ -237,7 +240,38 @@ const MeuTreino = ({ navigation }) => {
           ]);
         }
       } catch (error) {
-        console.error('Erro ao carregar treinos:', error);
+        try {
+          const errMsg = error?.message || (typeof error === 'string' ? error : JSON.stringify(error));
+          console.error('Erro ao carregar treinos:', errMsg);
+        } catch (e) {
+          console.error('Erro ao carregar treinos: (erro não serializável)');
+        }
+        // Se for 403 => sessão expirada / sem permissão
+        const is403 = (error && (error.response?.status === 403 || error.status === 403)) || (typeof error === 'string' && error.includes('403')) || (error?.message && String(error.message).includes('403'));
+        if (is403) {
+          try {
+            Alert.alert(
+              'Sessão expirada',
+              'Sua sessão expirou ou você não tem permissão. Faça login novamente.',
+              [
+                {
+                  text: 'OK',
+                  onPress: async () => {
+                    try {
+                      await logout();
+                    } catch (e) {
+                      console.warn('Erro ao chamar logout:', e);
+                    }
+                    navigation.navigate('Inicial');
+                  },
+                },
+              ],
+              { cancelable: false }
+            );
+          } catch (e) {
+            console.warn('Erro ao mostrar alerta de 403', e);
+          }
+        }
         // usar fallback
         setTreinos([
           { id: 1, dia: 'Segunda-Feira', grupos: '• Peito • Tríceps', imagem: require('../../../assets/banner_whey.png') },
@@ -384,7 +418,7 @@ const MeuTreino = ({ navigation }) => {
             <Image source={treino.imagem} style={styles.treinoImage} />
             <View style={styles.treinoInfo}>
               <Text style={[styles.treinoDia, { color: colors.textPrimary }]}>
-                {treino.dia}
+                {String(treino.dia)}
               </Text>
             </View>
             {(() => {
@@ -617,7 +651,7 @@ const MeuTreino = ({ navigation }) => {
             <Text
               style={[styles.modalMessage, { color: colors.textSecondary }]}
             >
-              O treino de {modalConcluido.dia} já foi finalizado hoje.
+              O treino de {String(modalConcluido.dia)} já foi finalizado hoje.
             </Text>
             <TouchableOpacity
               style={styles.modalButton}
