@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   StatusBar,
   Image,
+  useFocusEffect,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import createStyles from "../../Styles/MeuTreinoStyle";
@@ -197,15 +198,42 @@ const MeuTreino = ({ navigation }) => {
             }
           });
 
+          // Ordenar treinos por dia da semana (Segunda -> Sexta, depois Sábado/Domingo)
+          const weekOrder = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+          // normaliza (remove acentos) o weekOrder para comparação confiável
+          const normalizeStr = (s) => String(s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+          const weekOrderNorm = weekOrder.map(normalizeStr);
+          const getDayIndex = (diaStr) => {
+            if (!diaStr) return 99;
+            // tenta casar com algum nome de dia na string (prioriza o primeiro encontrado)
+            const normalized = normalizeStr(diaStr);
+            for (let i = 0; i < weekOrderNorm.length; i++) {
+              const w = weekOrderNorm[i];
+              if (!w) continue;
+              if (normalized.includes(w)) return i;
+            }
+            return 99;
+          };
+
+          expanded.sort((a, b) => {
+            const ia = getDayIndex(a.dia);
+            const ib = getDayIndex(b.dia);
+            if (ia === ib) return 0;
+            return ia - ib;
+          });
+
           setTreinos(expanded);
         } else {
           // fallback local (sem dados da API)
+          // fallback ordenado Domingo -> Sábado
           setTreinos([
+            { id: 0, dia: 'Domingo', grupos: '• Descanso', imagem: require('../../../assets/banner_whey.png') },
             { id: 1, dia: 'Segunda-Feira', grupos: '• Peito • Tríceps', imagem: require('../../../assets/banner_whey.png') },
             { id: 2, dia: 'Terça-Feira', grupos: '• Costas • Bíceps', imagem: require('../../../assets/banner_creatina.png') },
             { id: 3, dia: 'Quarta-Feira', grupos: '• Perna completo', imagem: require('../../../assets/banner_vitaminas.png') },
             { id: 4, dia: 'Quinta-Feira', grupos: '• Cardio • Ombro', imagem: require('../../../assets/banner_roupas.jpg') },
             { id: 5, dia: 'Sexta-Feira', grupos: '• Abdômen • Costas', imagem: require('../../../assets/banner_camisas.png') },
+            { id: 6, dia: 'Sábado', grupos: '• Alongamento', imagem: require('../../../assets/banner_camisas.png') },
           ]);
         }
       } catch (error) {
@@ -226,6 +254,15 @@ const MeuTreino = ({ navigation }) => {
     carregar();
     return () => { mounted = false; };
   }, []);
+
+  // Atualizar a tela quando retorna do treino (para refletir mudanças de status)
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Força re-render do componente para mostrar os status atualizados
+    });
+
+    return unsubscribe;
+  }, [navigation, treinosConcluidos, treinosIncompletos]);
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -258,26 +295,44 @@ const MeuTreino = ({ navigation }) => {
     return `${dayName} Feira, ${day} de ${month}`;
   };
 
+  const normalizarDia = (dia) => {
+    if (!dia) return '';
+    const upper = String(dia).toUpperCase();
+    if (upper.includes('SEGUNDA')) return 'Segunda';
+    if (upper.includes('TERÇA') || upper.includes('TERCA')) return 'Terça';
+    if (upper.includes('QUARTA')) return 'Quarta';
+    if (upper.includes('QUINTA')) return 'Quinta';
+    if (upper.includes('SEXTA')) return 'Sexta';
+    if (upper.includes('SÁBADO') || upper.includes('SABADO')) return 'Sábado';
+    if (upper.includes('DOMINGO')) return 'Domingo';
+    return dia;
+  };
+
   const handleIniciarTreino = (treino) => {
+    // Normaliza o dia para garantir consistência
+    const diaQuarta = normalizarDia(treino.dia);
+    
     // Só bloqueia se o treino estiver completamente concluído
-    if (treinosConcluidos.has(treino.dia)) {
-      setModalConcluido({ visivel: true, dia: treino.dia });
+    if (treinosConcluidos.has(diaQuarta)) {
+      setModalConcluido({ visivel: true, dia: diaQuarta });
       return;
     }
-    // Permite acesso a treinos incompletos ou novos
+    // Marca como incompleto quando inicia
+    marcarTreinoComoIncompleto(diaQuarta);
     
-    // Tenta extrair exercícios do objeto treino (quando vindo de exerciciosPorDia)
-    const routeParams = treino.exercicios ? { exercicios: treino.exercicios } : {};
+    // Tenta extrair exercícios e id do treino (quando vindo de exerciciosPorDia)
+    const treinoId = treino.id || treino.treinoId || treino._id || null;
+    const routeParams = treino.exercicios ? { exercicios: treino.exercicios, treinoId } : { treinoId };
     
-    if (treino.dia === "Segunda") {
+    if (diaQuarta === "Segunda") {
       navigation.navigate("TreinoSegunda", routeParams);
-    } else if (treino.dia === "Terça") {
+    } else if (diaQuarta === "Terça") {
       navigation.navigate("TreinoTerca", routeParams);
-    } else if (treino.dia === "Quarta") {
+    } else if (diaQuarta === "Quarta") {
       navigation.navigate("TreinoQuarta", routeParams);
-    } else if (treino.dia === "Quinta") {
+    } else if (diaQuarta === "Quinta") {
       navigation.navigate("TreinoQuinta", routeParams);
-    } else if (treino.dia === "Sexta") {
+    } else if (diaQuarta === "Sexta") {
       navigation.navigate("TreinoSexta", routeParams);
     }
   };
@@ -332,46 +387,37 @@ const MeuTreino = ({ navigation }) => {
                 {treino.dia}
               </Text>
             </View>
-            <TouchableOpacity
-              style={[
-                styles.iniciarButton,
-                treinosConcluidos.has(treino.dia) && styles.concluidoButton,
-                treinosIncompletos.has(treino.dia) && {
-                  backgroundColor: "#FF9800",
-                },
-              ]}
-              onPress={() =>
-                !treinosConcluidos.has(treino.dia) &&
-                handleIniciarTreino(treino)
-              }
-              disabled={treinosConcluidos.has(treino.dia)}
-            >
-              <Text
-                style={[
-                  styles.iniciarButtonText,
-                  treinosConcluidos.has(treino.dia) &&
-                    styles.concluidoButtonText,
-                  treinosIncompletos.has(treino.dia) && { color: "#fff" },
-                ]}
-              >
-                {treinosConcluidos.has(treino.dia)
-                  ? "Concluído"
-                  : treinosIncompletos.has(treino.dia)
-                  ? "Incompleto"
-                  : "Iniciar"}
-              </Text>
-              <Ionicons
-                name={
-                  treinosConcluidos.has(treino.dia)
-                    ? "checkmark-circle"
-                    : treinosIncompletos.has(treino.dia)
-                    ? "time-outline"
-                    : "arrow-forward"
-                }
-                size={16}
-                color="white"
-              />
-            </TouchableOpacity>
+            {(() => {
+              const diaNorm = normalizarDia(treino.dia);
+              const isConcluido = treinosConcluidos.has(diaNorm);
+              const isIncompleto = treinosIncompletos.has(diaNorm);
+              return (
+                <TouchableOpacity
+                  style={[
+                    styles.iniciarButton,
+                    isConcluido && styles.concluidoButton,
+                    isIncompleto && { backgroundColor: "#FF9800" },
+                  ]}
+                  onPress={() => !isConcluido && handleIniciarTreino(treino)}
+                  disabled={isConcluido}
+                >
+                  <Text
+                    style={[
+                      styles.iniciarButtonText,
+                      isConcluido && styles.concluidoButtonText,
+                      isIncompleto && { color: "#fff" },
+                    ]}
+                  >
+                    {isConcluido ? "Concluído" : isIncompleto ? "Incompleto" : "Iniciar"}
+                  </Text>
+                  <Ionicons
+                    name={isConcluido ? "checkmark-circle" : isIncompleto ? "time-outline" : "arrow-forward"}
+                    size={16}
+                    color="white"
+                  />
+                </TouchableOpacity>
+              );
+            })()}
           </View>
         ))}
       </ScrollView>
