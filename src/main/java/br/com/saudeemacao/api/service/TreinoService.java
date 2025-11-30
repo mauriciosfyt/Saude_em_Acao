@@ -197,19 +197,18 @@ public class TreinoService {
         treinoRepository.deleteById(id);
     }
 
-    public HistoricoTreino registrarTreinoRealizado(String treinoId, UserDetails userDetails) {
+
+    public HistoricoTreino registrarTreinoRealizado(UserDetails userDetails) {
         Usuario aluno = getUsuarioAutenticado(userDetails);
-        Treino treino = buscarPorId(treinoId);
 
         LocalDate hoje = LocalDate.now();
         EDiaDaSemana diaAtualEnum = converterDayOfWeekParaEnum(hoje.getDayOfWeek());
 
-        if (treino.getExerciciosPorDia() == null || !treino.getExerciciosPorDia().containsKey(diaAtualEnum)) {
-            if (diaAtualEnum == null) {
-                throw new IllegalArgumentException("Hoje não é um dia útil de treino configurado no sistema.");
-            }
-            throw new IllegalArgumentException("Este treino não possui exercícios agendados para hoje (" + diaAtualEnum + ").");
+        if (diaAtualEnum == null) {
+            throw new IllegalArgumentException("O sistema só permite registros de treinos de Segunda a Sexta-feira. Bom descanso!");
         }
+
+        Treino treino = identificarTreinoDoDia(aluno, diaAtualEnum);
 
         if (treino.getExerciciosPorDia().get(diaAtualEnum).isEmpty()) {
             throw new IllegalArgumentException("Não há exercícios cadastrados para " + diaAtualEnum + " neste treino.");
@@ -222,7 +221,7 @@ public class TreinoService {
                 aluno.getId(), treino.getId(), inicioDia, fimDia);
 
         if (jaRealizouHoje) {
-            throw new IllegalStateException("Você já registrou a conclusão deste treino hoje. Só poderá realizá-lo novamente na próxima " + diaAtualEnum + ".");
+            throw new IllegalStateException("Você já registrou a conclusão do treino '" + treino.getNome() + "' hoje. Volte amanhã!");
         }
 
         HistoricoTreino historico = HistoricoTreino.builder()
@@ -240,6 +239,30 @@ public class TreinoService {
         verificarENotificarConclusaoSemanal(aluno, treino, hoje);
 
         return historico;
+    }
+
+    private Treino identificarTreinoDoDia(Usuario aluno, EDiaDaSemana diaAtual) {
+        List<Treino> treinosAtribuidos = aluno.getTreinosAtribuidos();
+
+        if (treinosAtribuidos == null || treinosAtribuidos.isEmpty()) {
+            throw new RecursoNaoEncontradoException("Você não possui nenhum treino atribuído. Entre em contato com seu professor.");
+        }
+
+        if (diaAtual == null) {
+            throw new IllegalArgumentException("Hoje não é um dia útil para treinos.");
+        }
+
+        List<Treino> treinosDeHoje = treinosAtribuidos.stream()
+                .filter(t -> t.getExerciciosPorDia() != null
+                        && t.getExerciciosPorDia().containsKey(diaAtual)
+                        && !t.getExerciciosPorDia().get(diaAtual).isEmpty())
+                .collect(Collectors.toList());
+
+        if (treinosDeHoje.isEmpty()) {
+            throw new RecursoNaoEncontradoException("Nenhum dos seus treinos possui exercícios agendados para " + diaAtual + ". Aproveite o descanso!");
+        }
+
+        return treinosDeHoje.get(0);
     }
 
     private void verificarENotificarConclusaoSemanal(Usuario aluno, Treino treino, LocalDate dataReferencia) {
@@ -260,7 +283,6 @@ public class TreinoService {
                 .collect(Collectors.toSet());
 
         if (diasConcluidos.containsAll(diasExigidos)) {
-            // Requer método 'enviarEmailConclusaoSemanal' no EmailService
             emailService.enviarEmailConclusaoSemanal(aluno.getEmail(), aluno.getNome(), treino.getNome(), true);
 
             if (treino.getResponsavel() != null && treino.getResponsavel().getEmail() != null) {

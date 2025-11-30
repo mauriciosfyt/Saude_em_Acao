@@ -75,12 +75,13 @@ public class TreinoController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/realizar")
+    @PostMapping("/realizar")
     @PreAuthorize("hasRole('ALUNO')")
     public ResponseEntity<HistoricoTreino> registrarTreinoRealizado(
-            @PathVariable String id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        HistoricoTreino historico = treinoService.registrarTreinoRealizado(id, userDetails);
+
+        HistoricoTreino historico = treinoService.registrarTreinoRealizado(userDetails);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(historico);
     }
 
