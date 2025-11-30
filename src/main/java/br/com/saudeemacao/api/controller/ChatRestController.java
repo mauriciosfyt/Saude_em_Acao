@@ -1,12 +1,19 @@
 package br.com.saudeemacao.api.controller;
 
+import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.Mensagem;
+import br.com.saudeemacao.api.model.Usuario;
 import br.com.saudeemacao.api.repository.MensagemRepository;
+import br.com.saudeemacao.api.repository.UsuarioRepository;
+import br.com.saudeemacao.api.service.CloudinaryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,10 +28,55 @@ public class ChatRestController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     @GetMapping("/historico/{chatId}")
     public ResponseEntity<List<Mensagem>> getChatHistory(@PathVariable String chatId) {
         List<Mensagem> mensagens = mensagemRepository.findByChatId(chatId);
         return ResponseEntity.ok(mensagens);
+    }
+
+    @PostMapping("/enviar-imagem")
+    public ResponseEntity<?> enviarImagem(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("usuarioId") String usuarioId,
+            @RequestParam("chatId") String chatId,
+            @RequestParam(value = "legenda", required = false) String legenda
+    ) {
+        try {
+            Usuario usuario = usuarioRepository.findById(usuarioId)
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+            if (usuario.getPerfil() != EPerfil.ADMIN) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Apenas administradores têm permissão para enviar imagens no chat.");
+            }
+
+            String urlImagem = cloudinaryService.uploadFile(file);
+
+            Mensagem mensagem = new Mensagem();
+            mensagem.setUsuario(usuarioId);
+            mensagem.setChatId(chatId);
+            mensagem.setConteudo(legenda);
+            mensagem.setImagemUrl(urlImagem);
+            mensagem.setDataEnvio(LocalDateTime.now());
+
+            Mensagem mensagemSalva = mensagemRepository.save(mensagem);
+
+            notificarWebSocket(mensagemSalva);
+
+            return ResponseEntity.ok(mensagemSalva);
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao fazer upload da imagem: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao processar envio: " + e.getMessage());
+        }
     }
 
     @PostMapping("/enviar")
@@ -62,6 +114,9 @@ public class ChatRestController {
                     mensagemRepository.delete(msg);
 
                     msg.setConteudo(null);
+                    // Opcional: Você pode querer remover a imagem do Cloudinary aqui também se desejar
+                    // mas por segurança do histórico, geralmente mantemos ou apagamos apenas do banco.
+
                     if (chatId != null) {
                         messagingTemplate.convertAndSend("/topic/chat/" + chatId, msg);
                     }

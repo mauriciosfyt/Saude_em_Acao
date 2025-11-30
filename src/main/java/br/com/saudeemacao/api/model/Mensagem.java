@@ -19,6 +19,7 @@ public class Mensagem {
     private String id;
     private String usuario;
     private String conteudo;
+    private String imagemUrl;
     private String chatId;
     private LocalDateTime dataEnvio;
 }
