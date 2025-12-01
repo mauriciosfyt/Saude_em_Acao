@@ -4,6 +4,13 @@ import { getProdutoById } from '../../services/produtoService';
 import { fixImageUrl } from '../../utils/image';
 import { createReserva } from '../../services/reservasService';
 
+// --- IMPORTAÇÕES DO TOASTIFY ---
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../components/Mensagem/Sucesso.css';
+import '../../components/Mensagem/Cancelado.css';
+// -------------------------------
+
 // Importações originais
 import './Carrinho.css';
 import Footer from '../../components/footer';
@@ -174,7 +181,7 @@ const Carrinho = () => {
     fecharModalVariacao();
   };
 
-  // --- 5. FUNÇÃO DE RESERVA ---
+  // --- 5. FUNÇÃO DE RESERVA (ATUALIZADA) ---
   const handleReservarProdutos = async () => {
     const produtosParaReservar = produtos.filter(p => p.selecionado);
     if (produtosParaReservar.length === 0) return;
@@ -187,7 +194,8 @@ const Carrinho = () => {
         throw new Error(`O produto "${produtoInvalido.nome}" está em um formato antigo. Remova-o e adicione-o novamente.`);
       }
 
-      const payloads = produtosParaReservar.map(p => {
+      // Mapeamos os produtos para promessas, mas interceptamos erros individuais para saber QUEM falhou
+      const promessasDeReserva = produtosParaReservar.map(async (p) => {
         const payload = {
           produtoId: p.id,
           quantidade: p.quantidade,
@@ -199,12 +207,17 @@ const Carrinho = () => {
         } else if (p.variacaoTipo === 'sabor') {
           payload.sabor = p.variacaoValor;
         }
-        return payload;
+
+        try {
+          // Tenta reservar este produto específico
+          return await createReserva(payload);
+        } catch (apiErr) {
+          // Se falhar, lança um objeto com o contexto do produto + o erro original
+          throw { isCustom: true, produto: p, error: apiErr };
+        }
       });
 
-      console.log("Enviando payloads para a API:", payloads);
-
-      const promessasDeReserva = payloads.map(payload => createReserva(payload));
+      console.log("Enviando reservas...");
       await Promise.all(promessasDeReserva);
 
       setReservaStatus({ loading: false, error: null });
@@ -214,25 +227,68 @@ const Carrinho = () => {
         prevProdutos.filter(p => !idsReservados.has(`${p.id}-${p.variacaoValor}`))
       );
       
-      alert('Produtos reservados com sucesso!');
-      navigate('/Reservas');
+      toast.success('Produtos reservados com sucesso!', {
+        className: 'custom-success-toast',
+      });
+
+      setTimeout(() => {
+        navigate('/Reservas');
+      }, 1000);
 
     } catch (err) {
       console.error("Erro ao reservar produtos:", err);
-      const msgErro = err.message || 'Falha ao reservar um ou mais produtos.';
       
-      try {
-        const erroJson = JSON.parse(err.message);
-        let apiErrorMsg = "Erro de validação da API: ";
-        if (erroJson.categoriaProduto) apiErrorMsg += erroJson.categoriaProduto;
-        else if (erroJson.tamanho) apiErrorMsg += erroJson.tamanho;
-        else if (erroJson.sabor) apiErrorMsg += erroJson.sabor;
-        else apiErrorMsg = msgErro;
+      let displayMsg = "";
+      let rawMsg = "";
+      let produtoNome = "";
+
+      // Verifica se é o nosso erro "enriquecido" com os dados do produto
+      if (err.isCustom) {
+        produtoNome = err.produto.nome;
+        rawMsg = err.error.message || JSON.stringify(err.error);
         
-        setReservaStatus({ loading: false, error: apiErrorMsg });
-      } catch (e) {
-        setReservaStatus({ loading: false, error: msgErro });
+        // Tenta extrair mensagem limpa se for JSON
+        try {
+          const erroJson = JSON.parse(rawMsg);
+          if (erroJson.categoriaProduto) rawMsg = erroJson.categoriaProduto;
+          else if (erroJson.tamanho) rawMsg = erroJson.tamanho;
+          else if (erroJson.sabor) rawMsg = erroJson.sabor;
+        } catch (e) { /* não é json, segue a vida */ }
+
+      } else {
+        // Erro genérico (ex: validação inicial ou erro de rede geral)
+        rawMsg = err.message || 'Falha ao reservar um ou mais produtos.';
       }
+
+      // Lógica de Identificação de Estoque
+      const match = rawMsg.match(/Disponível:\s*(\d+)/i);
+      
+      if (match) {
+        const qtdDisponivel = parseInt(match[1], 10);
+        
+        if (qtdDisponivel === 0) {
+          // CASO 1: Indisponível total
+          displayMsg = `O produto ${produtoNome} está indisponível.`;
+        } else {
+          // CASO 2: Disponível parcial
+          displayMsg = `Estoque insuficiente para ${produtoNome}. Apenas ${qtdDisponivel} disponível(is).`;
+        }
+      } else {
+        // Fallback: Se não achar o padrão "Disponível: X", mostra o erro com o nome (se tiver) ou só o erro
+        if (produtoNome) {
+           displayMsg = `Erro em ${produtoNome}: ${rawMsg}`;
+        } else {
+           displayMsg = rawMsg;
+        }
+      }
+
+      // Exibe no Toast
+      toast.error(displayMsg, {
+        className: 'custom-cancel-toast',
+        progressClassName: 'custom-cancel-progress-bar'
+      });
+
+      setReservaStatus({ loading: false, error: displayMsg });
     }
   };
 
@@ -279,25 +335,19 @@ const Carrinho = () => {
 
   // --- 6. RENDERIZAÇÃO (JSX) ---
 
-  // Componente inline do Modal (COM IMAGEM ADICIONADA)
   const ModalSelecaoVariacao = () => {
     if (!produtoParaSelecionar) return null;
     
-    // Pegamos o 'nome', 'categoriaInfo' e 'img'
     const { nome, categoriaInfo, img } = produtoParaSelecionar;
 
     return (
       <div className="modalcarrinho-overlay">
         <div className="modalcarrinho-content">
-          
-          {/* --- NOVA ADIÇÃO (IMAGEM) --- */}
           <img 
-            src={fixImageUrl(img)} // Usamos a imagem do produto
+            src={fixImageUrl(img)}
             alt={nome} 
-            className="modalcarrinho-imagem" // Classe para estilização
+            className="modalcarrinho-imagem"
           />
-          {/* --- FIM DA ADIÇÃO --- */}
-
           <h3>Selecione uma opção para:</h3>
           <h4>{nome}</h4>
           <div className="modalcarrinho-form-group">
@@ -331,9 +381,7 @@ const Carrinho = () => {
 
   return (
     <div className="carrinho-background">
-      {/* 7. RENDERIZA O MODAL */}
       <ModalSelecaoVariacao />
-
       <Header />
 
       <div className="container-carrinho">
@@ -351,24 +399,18 @@ const Carrinho = () => {
               <span>Todos os produtos</span>
             </div>
           ) : (
-            // ==================================================
-            // 👇 AQUI ESTÁ A MUDANÇA 👇
-            // ==================================================
             !loading && !produtoParaSelecionar && (
               <div className="carrinho-vazio-box">
                 <h3>Seu carrinho está vazio</h3>
                 <p>Adicione produtos da loja para vê-los aqui.</p>
                 <button 
-                  className="btn-continuar" // Reutiliza a classe do botão "Continuar Comprando"
+                  className="btn-continuar"
                   onClick={irParaLoja}
                 >
                   Ver produtos
                 </button>
               </div>
             )
-            // ==================================================
-            // 👆 FIM DA MUDANÇA 👆
-            // ==================================================
           )}
 
           {produtos.map((produto) => (
@@ -408,16 +450,13 @@ const Carrinho = () => {
             <span>R$ {total}</span>
           </div>
 
-          {/* --- SPINNER DE CARREGAMENTO (JÁ INCLUÍDO) --- */}
           {reservaStatus.loading && (
             <div className="carrinho-loading-inline">
               <div className="loading-spinner-inline"></div>
               <span>Reservando produtos...</span>
             </div>
           )}
-          {/* --- FIM DO SPINNER --- */}
           
-          {reservaStatus.error && <p className="carrinho-aviso-erro">{reservaStatus.error}</p>}
           
           <button className="btn-continuar" onClick={irParaLoja}>
             Continuar comprando
@@ -435,6 +474,9 @@ const Carrinho = () => {
 
       <ProdutosSection />
       <Footer />
+      
+      <ToastContainer position="top-right" autoClose={3000} />
+      
     </div>
   );
 };

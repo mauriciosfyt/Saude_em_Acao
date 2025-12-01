@@ -14,38 +14,37 @@ const PerfilAdm = () => {
   const navigate = useNavigate();
   
   // --- 1. CARREGAMENTO INSTANTÂNEO DE DADOS DO USUÁRIO ---
-  // Inicializa o estado lendo direto do sessionStorage (se existir), sem esperar o useEffect
+  // Igual ao seu Perfil.jsx: Lê do storage IMEDIATAMENTE na criação do estado
   const [adminData, setAdminData] = useState(() => {
     return {
-      nome: sessionStorage.getItem('userName') || "",
-      email: sessionStorage.getItem('userEmail') || "",
-      perfil: sessionStorage.getItem('userPerfil') || "",
+      nome: sessionStorage.getItem('userName') || localStorage.getItem('userName') || "",
+      email: sessionStorage.getItem('userEmail') || localStorage.getItem('userEmail') || "",
+      perfil: sessionStorage.getItem('userPerfil') || localStorage.getItem('userPerfil') || "ADMIN",
     };
   });
 
-  // --- 2. CARREGAMENTO INSTANTÂNEO DOS CARDS (STATS) ---
-  // Essa função roda antes da tela aparecer. Se tiver cache, mostra na hora.
-  const getInitialStats = () => {
+  // --- 2. CARREGAMENTO INSTANTÂNEO DOS DADOS (GRÁFICOS) ---
+  // Lê do cache local instantaneamente para não mostrar zeros
+  const [stats, setStats] = useState(() => {
     try {
-      const cached = sessionStorage.getItem('dashboard_stats_cache');
+      const cached = localStorage.getItem('dashboard_stats_cache');
       if (cached) {
         return JSON.parse(cached);
       }
     } catch (e) {
       console.error("Erro ao ler cache:", e);
     }
-    // Estado inicial (Loading) se for o primeiro acesso absoluto
     return {
       produtosReservados: 0,
       produtosAtivos: 0,
       totalVendido: 0,
       pagamentoPendente: 0,
     };
-  };
+  });
 
-  const [stats, setStats] = useState(getInitialStats);
   const [profileImage, setProfileImage] = useState(perfilPhoto);
 
+  // Função helper de token (igual ao seu Perfil)
   const getDecodedToken = () => {
     try {
       let token = localStorage.getItem("token") || sessionStorage.getItem("token") || "";
@@ -70,28 +69,34 @@ const PerfilAdm = () => {
       return;
     }
 
-    // Se o perfil não veio do cache inicial, redireciona se não for admin
-    if (adminData.perfil && adminData.perfil !== "ADMIN") {
+    // Validação básica de permissão
+    const userRole = payload.perfil || payload.role || adminData.perfil;
+    if (userRole && userRole !== "ADMIN") {
       navigate("/nao-autorizado");
       return;
     }
 
     const loadDashboardData = async () => {
       try {
-        // --- A. ATUALIZAÇÃO DO PERFIL EM BACKGROUND ---
-        const perfilCompleto = await getMeuPerfil();
+        // --- BUSCA EM PARALELO (Velocidade Máxima) ---
+        const perfilPromise = getMeuPerfil();
+        const dadosPromise = Promise.all([getAllProdutos(), fetchReservas()]);
+
+        // 1. Processa Perfil e Imagem
+        const perfilCompleto = await perfilPromise;
         if (perfilCompleto) {
             const nome = perfilCompleto.nome || perfilCompleto.name || adminData.nome || "Administrador";
             const email = perfilCompleto.email || perfilCompleto.usuario?.email || adminData.email;
             const perfil = perfilCompleto.perfil || perfilCompleto.role || "ADMIN";
 
-            // Atualiza estado e Cache da Sessão
             setAdminData({ nome, email, perfil });
+            
+            // Atualiza Storage para a próxima vez ser rápida
             sessionStorage.setItem('userName', nome);
             sessionStorage.setItem('userEmail', email);
             sessionStorage.setItem('userPerfil', perfil);
 
-            // Imagem
+            // Tratamento de Imagem
             const possibleImage = perfilCompleto.foto || perfilCompleto.fotoUrl || perfilCompleto.imagem || perfilCompleto.imagemUrl || null;
             if (possibleImage) {
                 const baseServer = API_URL.replace(/\/api$/, '');
@@ -103,11 +108,8 @@ const PerfilAdm = () => {
             }
         }
 
-        // --- B. ATUALIZAÇÃO DOS CARDS (STATS) EM BACKGROUND ---
-        const [produtosData, reservasData] = await Promise.all([
-            getAllProdutos(),
-            fetchReservas()
-        ]);
+        // 2. Processa Estatísticas (Produtos e Reservas)
+        const [produtosData, reservasData] = await dadosPromise;
 
         let listaReservas = [];
         if (Array.isArray(reservasData)) {
@@ -118,7 +120,7 @@ const PerfilAdm = () => {
 
         const listaProdutos = Array.isArray(produtosData) ? produtosData : (produtosData.content || []);
 
-        // --- CÁLCULOS ---
+        // --- CÁLCULO OTIMIZADO (Single Loop) ---
         const parseValor = (val) => {
             if (!val) return 0;
             if (typeof val === 'number') return val;
@@ -126,54 +128,49 @@ const PerfilAdm = () => {
             return parseFloat(clean) || 0;
         };
 
-        // 1. Produtos Retirados (Status Finalizados)
-        const countRetirados = listaReservas.filter(r => {
+        let calcRetirados = 0;
+        let calcReservados = 0;
+        let calcSomaVendas = 0;
+
+        const statusRetirado = ['RETIRADO', 'CONCLUIDA', 'CONCLUÍDA', 'CONCLUIDO'];
+        const statusReservado = [
+            'APROVADA', 'APROVADO',
+            'CANCELADA', 'CANCELADO',
+            'RETIRADO', 
+            'CONCLUIDA', 'CONCLUÍDA', 'CONCLUIDO'
+        ];
+
+        listaReservas.forEach(r => {
             const s = r.status ? r.status.toUpperCase() : '';
-            return ['RETIRADO', 'CONCLUIDA', 'CONCLUÍDA', 'CONCLUIDO'].includes(s);
-        }).length;
-
-        // 2. Produtos Reservados (Histórico: Aprovado, Cancelado, Retirado)
-        const countReservados = listaReservas.filter(r => {
-            const s = r.status ? r.status.toUpperCase() : '';
-            return [
-                'APROVADA', 'APROVADO',
-                'CANCELADA', 'CANCELADO',
-                'RETIRADO', 
-                'CONCLUIDA', 'CONCLUÍDA', 'CONCLUIDO'
-            ].includes(s);
-        }).length;
-
-        // 3. TOTAL VENDIDO (Preço * Quantidade dos Concluídos)
-        const somaVendas = listaReservas
-            .filter(r => {
-                const s = r.status ? r.status.toUpperCase() : '';
-                return ['RETIRADO', 'CONCLUIDA', 'CONCLUÍDA', 'CONCLUIDO'].includes(s);
-            })
-            .reduce((acc, curr) => {
-                let totalDaReserva = parseValor(curr.valorTotal || curr.total);
-
+            
+            if (statusRetirado.includes(s)) {
+                calcRetirados++;
+                let totalDaReserva = parseValor(r.valorTotal || r.total);
                 if (!totalDaReserva) {
-                    const precoUnitario = parseValor(curr.preco || curr.produto?.preco || curr.valor || 0);
-                    const quantidade = parseValor(curr.quantidade || curr.qtd || curr.amount || 1);
+                    const precoUnitario = parseValor(r.preco || r.produto?.preco || r.valor || 0);
+                    const quantidade = parseValor(r.quantidade || r.qtd || r.amount || 1);
                     totalDaReserva = precoUnitario * quantidade;
                 }
-                
-                return acc + totalDaReserva;
-            }, 0);
+                calcSomaVendas += totalDaReserva;
+            }
 
-        // 4. Produtos Ativos
+            if (statusReservado.includes(s)) {
+                calcReservados++;
+            }
+        });
+
         const countAtivos = listaProdutos.length;
 
         const newStats = {
-            produtosReservados: countRetirados, 
+            produtosReservados: calcRetirados, 
             produtosAtivos: countAtivos,        
-            totalVendido: somaVendas,           
-            pagamentoPendente: countReservados  
+            totalVendido: calcSomaVendas,           
+            pagamentoPendente: calcReservados  
         };
 
-        // Atualiza a tela e SALVA NA SESSÃO para o próximo F5 ser instantâneo
+        // Atualiza estado e Cache
         setStats(newStats);
-        sessionStorage.setItem('dashboard_stats_cache', JSON.stringify(newStats));
+        localStorage.setItem('dashboard_stats_cache', JSON.stringify(newStats));
 
       } catch (err) {
         console.error('Erro ao carregar dashboard:', err);
@@ -181,7 +178,7 @@ const PerfilAdm = () => {
     };
 
     loadDashboardData();
-  }, [navigate, adminData.nome]); // Atualiza se mudar usuário
+  }, [navigate]); 
 
   return (
     <div>
@@ -196,7 +193,6 @@ const PerfilAdm = () => {
               className="perfil-foto"
               onError={() => setProfileImage(perfilPhoto)}
             />
-            {/* Dados lidos instantaneamente do adminData */}
             <h2>OLÁ, {adminData.nome ? adminData.nome.toUpperCase() : "..."}</h2>
             <p className="perfil-status">Ativo: {adminData.perfil || "..."}</p>
           </div>
