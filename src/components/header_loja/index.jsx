@@ -244,7 +244,7 @@ const Header = () => {
         <div className="nav-center">
           <Link to="/">Home</Link>
           <Link to="/Reservas">Reservas</Link>
-          <Link to="/CategoriaWhey">Whey Protein</Link>
+          <Link to="/CategoriaWhey">Whey</Link>
           <Link to="/CategoriaCreatina">Creatina</Link>
           <Link to="/CategoriaVitaminas">Vitaminas</Link>
           <Link to="/CategoriaCamisa">Camisetas</Link>

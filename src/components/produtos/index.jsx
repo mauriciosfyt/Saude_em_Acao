@@ -76,7 +76,14 @@ const ProdutosSection = () => {
 
     } catch (err) {
       console.error("Erro ao buscar produtos em destaque:", err);
-      setError(err.message || "Não foi possível carregar os produtos.");
+      // AQUI ESTÁ A MUDANÇA:
+      // Se o erro for "Failed to fetch", forçamos a mensagem amigável.
+      if (err.message === 'Failed to fetch') {
+        setError("Não foi possível listar os produtos");
+      } else {
+        // Mantém outras mensagens de erro ou usa o padrão
+        setError(err.message || "Não foi possível listar os produtos");
+      }
     } finally {
       setLoading(false);
     }
@@ -118,6 +125,7 @@ const ProdutosSection = () => {
       {error && (
         <div style={{ minHeight: '200px' }}>
           <div className="personal-error" style={{ padding: '20px', margin: '0 20px' }}>
+            {/* O JSX já coloca "Erro:", então o texto do estado completa a frase */}
             <strong>Erro:</strong> {error}
             <button 
               onClick={fetchProdutos}

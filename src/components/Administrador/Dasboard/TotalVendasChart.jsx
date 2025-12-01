@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from "react";
+﻿﻿import React, { useMemo, useState } from "react";
 import { PieChart, Pie, Cell, Sector, Tooltip, ResponsiveContainer } from "recharts";
 import "./TotalVendasChart.css";
 

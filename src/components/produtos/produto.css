@@ -163,9 +163,9 @@
   }
 
   .product-card {
-    width: 80vw;
+    width: 60vw;
     min-width: 0;
-    max-width: 99vw;
+    max-width: 70vw;
     padding: 0 0 18px 0;
   }
 

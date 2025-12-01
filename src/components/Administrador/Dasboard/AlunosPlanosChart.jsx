@@ -4,14 +4,33 @@ import { fetchAlunosPorPlanos } from '../../../services/dashboardService';
 import './AlunosPlanosChart.css';
 
 const AlunosPlanosChart = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Chave para salvar no cache
+  const CACHE_KEY = 'alunos_planos_data';
+
+  // 1. Inicializa o DATA buscando do cache primeiro (Carregamento Instantâneo)
+  const [data, setData] = useState(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      return cached ? JSON.parse(cached) : [];
+    } catch (error) {
+      console.error('Erro ao ler cache de alunos:', error);
+      return [];
+    }
+  });
+
+  // 2. Define LOADING como false se já tivermos dados em cache (para não piscar "Carregando...")
+  const [loading, setLoading] = useState(() => {
+    return !localStorage.getItem(CACHE_KEY);
+  });
+  
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const carregarDados = async () => {
       try {
-        setLoading(true);
+        // Se não tiver dados (primeira vez), mostra loading. Se tiver cache, roda em background.
+        if (data.length === 0) setLoading(true);
+        
         const alunosPorPlano = await fetchAlunosPorPlanos();
         
         // Transformar dados para o formato esperado pelo gráfico
@@ -22,23 +41,31 @@ const AlunosPlanosChart = () => {
         
         setData(dadosFormatados);
         setError(null);
+        
+        // Salva a versão atualizada no cache
+        localStorage.setItem(CACHE_KEY, JSON.stringify(dadosFormatados));
+
       } catch (err) {
         console.error('Erro ao carregar alunos por planos:', err);
         setError('Erro ao carregar dados dos alunos por planos');
         
         // Fallback para dados padrão em caso de erro
-        setData([
+        const fallbackData = [
           { name: 'Basico', alunos: 30 },
           { name: 'Essencial', alunos: 50 },
           { name: 'Gold', alunos: 15 }
-        ]);
+        ];
+        setData(fallbackData);
+        // Opcional: Salvar fallback no cache ou não, dependendo da preferência. 
+        // Aqui optamos por não sujar o cache com dados fake se a API falhar.
       } finally {
         setLoading(false);
       }
     };
 
     carregarDados();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Array vazio para executar apenas na montagem
 
   // Calcular ticks inteiros para o eixo Y com base no maior valor de 'alunos'
   const maxAlunos = useMemo(() => {

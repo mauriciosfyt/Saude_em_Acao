@@ -1,0 +1,32 @@
+/* --- ESTILIZAÇÃO DO TOAST DE EDIÇÃO (LARANJA) --- */
+
+/* Sobrescreve o container do Toast para o visual de Edição */
+.Toastify__toast.custom-edit-toast {
+  background: #fff !important;
+  color: #f57c00 !important; /* Laranja vibrante */
+  border: 2px solid #f57c00 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18) !important;
+  font-weight: bold !important;
+  font-size: 1rem !important;
+  padding: 16px 24px !important;
+  min-height: 60px !important;
+}
+
+/* Barra de progresso Laranja */
+/* Usaremos esta classe na prop 'progressClassName' */
+.custom-edit-progress-bar {
+  background: #f57c00 !important;
+  height: 4px !important;
+}
+
+/* Ajusta o ícone padrão para ser Laranja (apenas dentro do toast de edição) */
+.custom-edit-toast .Toastify__toast-icon svg {
+  fill: #f57c00 !important;
+}
+
+/* Cor do botão de fechar (apenas dentro do toast de edição) */
+.custom-edit-toast .Toastify__close-button {
+  color: #f57c00 !important;
+  opacity: 0.7;
+}

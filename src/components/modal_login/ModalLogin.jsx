@@ -42,13 +42,26 @@ export default function LoginModal({ onClose, onLogin, onRecover }) {
     setLoading(true);
     setError("");
     try {
-  const data = await solicitarToken(email, senha);
-  // Quando o login via API for bem-sucedido, enviamos o email
-  // ao componente pai para que ele abra o modal de verificação
-  // com o email já conhecido.
-  if (onLogin) onLogin(email);
+      const data = await solicitarToken(email, senha);
+      // Quando o login via API for bem-sucedido, enviamos o email
+      // ao componente pai para que ele abra o modal de verificação
+      // com o email já conhecido.
+      if (onLogin) onLogin(email);
     } catch (err) {
-        setError(err?.message || "Erro ao fazer login");
+        console.error("Erro no login:", err);
+        
+        // Verifica se é erro 500 (Servidor), erro de rede ou 'Failed to fetch'
+        if (
+            err?.response?.status === 500 || 
+            err?.message?.includes('500') || 
+            err?.message === 'Failed to fetch' || 
+            err?.message === 'Network Error'
+        ) {
+            setError("Erro ao conectar com o servidor");
+        } else {
+            // Mantém a mensagem original para outros erros (ex: senha incorreta)
+            setError(err?.message || "Erro ao fazer login");
+        }
     } finally {
         setLoading(false);
     }
