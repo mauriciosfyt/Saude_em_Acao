@@ -1,12 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { obterFavoritos, adicionarFavorito as adicionarFavoritoAPI, removerFavorito as removerFavoritoAPI } from '../Services/api';
 import { useAuth } from './AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const FavoritosContext = createContext();
 
 export const FavoritosProvider = ({ children }) => {
   const [favoritos, setFavoritos] = useState([]);
   const [loading, setLoading] = useState(false);
+  const FAVORITOS_STORAGE_KEY = '@app:favoritos_v1';
+  const [usingCache, setUsingCache] = useState(false);
   const { isAuthenticated, loading: authLoading } = useAuth();
 
   // Carregar favoritos da API quando o usuário estiver autenticado
@@ -19,6 +22,15 @@ export const FavoritosProvider = ({ children }) => {
     let cancelled = false; // Flag para cancelar se o componente desmontar
 
     const carregarFavoritos = async () => {
+      // Primeiro, pega favoritos do cache local (se houver)
+      const STORAGE_KEY = FAVORITOS_STORAGE_KEY;
+      let savedFromStorage = [];
+      try {
+        const raw = await AsyncStorage.getItem(STORAGE_KEY);
+        if (raw) savedFromStorage = JSON.parse(raw);
+      } catch (e) {
+        if (__DEV__) console.warn('Falha ao ler favoritos do AsyncStorage', e?.message || e);
+      }
       if (!isAuthenticated) {
         // Se não estiver autenticado, limpa os favoritos
         if (!cancelled) {
@@ -42,8 +54,11 @@ export const FavoritosProvider = ({ children }) => {
         if (cancelled) return; // Se foi cancelado, não atualiza o estado
         
         // A API pode retornar um array direto ou um objeto com propriedade
-        const favoritosData = Array.isArray(dados) 
-          ? dados 
+        // Se a API retornou um objeto de fallback ({fallback: true, favoritos: []})
+        const dadosReais = (dados && typeof dados === 'object' && dados.fallback) ? null : dados;
+
+        const favoritosData = Array.isArray(dadosReais)
+          ? dadosReais 
           : Array.isArray(dados?.favoritos) 
           ? dados.favoritos 
           : Array.isArray(dados?.data)
@@ -78,7 +93,22 @@ export const FavoritosProvider = ({ children }) => {
         }
         
         if (!cancelled) {
-          setFavoritos(favoritosFormatados);
+          // Se não vier nada da API (dadosReais === null ou array vazio) usamos cache local salvo
+          if ((!favoritosData || favoritosData.length === 0) && Array.isArray(savedFromStorage) && savedFromStorage.length > 0) {
+            if (__DEV__) console.log('Usando favoritos do cache local devido a falha na API');
+            setUsingCache(true);
+            setFavoritos(savedFromStorage);
+          } else {
+            setFavoritos(favoritosFormatados);
+            setUsingCache(false);
+            // Salva no AsyncStorage para fallback futuro
+            try {
+              AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(favoritosFormatados));
+            } catch (e) {
+              if (__DEV__) console.warn('Falha ao salvar favoritos no AsyncStorage:', e?.message || e);
+            }
+          }
+
         }
       } catch (error) {
         if (cancelled) return;
@@ -97,7 +127,7 @@ export const FavoritosProvider = ({ children }) => {
         } else if (__DEV__) {
           console.warn("Erro ao carregar favoritos (mantendo locais):", error?.message || error);
         }
-        // Não limpa os favoritos locais em caso de erro
+        // Não limpa os favoritos locais em caso de erro (mantemos o cache local)
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -125,7 +155,7 @@ export const FavoritosProvider = ({ children }) => {
 
       // Extrai o ID do produto - sempre usa o ID para salvar na API
       const produtoId = produto.id || produto.produtoId;
-      if (!produtoId) {
+          if (!produtoId) {
         if (__DEV__) {
           console.warn("Tentativa de adicionar favorito com produto sem ID:", produto);
         }
@@ -157,13 +187,27 @@ export const FavoritosProvider = ({ children }) => {
           img: produto.img || produto.imagem || produto.image || produto.imagemUrl,
         };
 
-        return [...prev, produtoFormatado];
+        const novo = [...prev, produtoFormatado];
+        // Persistir localmente (não bloquear a UI se falhar)
+        AsyncStorage.setItem(FAVORITOS_STORAGE_KEY, JSON.stringify(novo)).catch((e) => {
+          if (__DEV__) console.warn('Falha ao persistir favorito no AsyncStorage:', e?.message || e);
+        });
+        return novo;
       });
 
       // Se estiver autenticado, sincroniza com a API usando apenas o ID
       if (isAuthenticated) {
         // Executa em background sem bloquear - sempre usa apenas o ID para a API
-        adicionarFavoritoAPI(produtoId).catch((error) => {
+        adicionarFavoritoAPI(produtoId)
+          .then((res) => {
+            if (res && res.fallback) {
+              if (__DEV__) console.warn('API de adicionar favorito retornou fallback — favorito mantido localmente');
+              setUsingCache(true);
+            } else {
+              setUsingCache(false);
+            }
+          })
+          .catch((error) => {
           // Verifica se é erro 404 ou endpoint não encontrado
           const is404 = error?.response?.status === 404;
           const isNotFound = error?.message?.includes('No static resource') || 
@@ -205,10 +249,15 @@ export const FavoritosProvider = ({ children }) => {
           const pId = String(p.id || p.produtoId);
           return pId === produtoIdNormalizado;
         }) || null;
-        return prev.filter((p) => {
+        const novo = prev.filter((p) => {
           const pId = String(p.id || p.produtoId);
           return pId !== produtoIdNormalizado;
         });
+        // Persistir remoção local
+        AsyncStorage.setItem(FAVORITOS_STORAGE_KEY, JSON.stringify(novo)).catch((e) => {
+          if (__DEV__) console.warn('Falha ao persistir remoção de favorito no AsyncStorage:', e?.message || e);
+        });
+        return novo;
       });
 
       // Se não encontrou o produto, já foi removido ou não existe
@@ -224,7 +273,16 @@ export const FavoritosProvider = ({ children }) => {
       // local para uma experiência de usuário consistente. Erros de sync são logados
       // para diagnóstico, mas não afetam a lista visível.
       if (isAuthenticated) {
-        removerFavoritoAPI(produtoId).catch((error) => {
+        removerFavoritoAPI(produtoId)
+          .then((res) => {
+            if (res && res.fallback) {
+              if (__DEV__) console.warn('API de remover favorito retornou fallback — remoção mantida localmente');
+              setUsingCache(true);
+            } else {
+              setUsingCache(false);
+            }
+          })
+          .catch((error) => {
           if (__DEV__) {
             console.warn(
               "Falha ao sincronizar remoção de favorito com a API (remoção local mantida):",

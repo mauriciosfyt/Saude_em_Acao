@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -296,7 +297,6 @@ const Loja = ({ navigation }) => {
       </ScrollView>
       {/* Adiciona a nova barra de navegação fixa */}
       <BottomNavBar navigation={navigation} activeScreen={'Loja'} />
-    
     </View>
   );
 };

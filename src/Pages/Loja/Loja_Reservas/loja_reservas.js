@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
     StyleSheet,
@@ -234,7 +235,7 @@ const Reservas = ({ navigation }) => {
                 source={item.imagem} 
                 style={styles.cardImage} 
                 defaultSource={require('../../../../assets/icon.png')} 
-            /> 
+            />
             <View style={styles.cardInfo}>
                 {/* A cor é aplicada dinamicamente aqui */}
                 <Text style={[styles.cardStatus, { color: getStatusColor(item.status) }]}>

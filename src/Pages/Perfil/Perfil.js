@@ -31,6 +31,10 @@ const Perfil = ({ navigation }) => {
   const { isDark, colors, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const styles = useMemo(() => createStyles(isDark), [isDark]);
+  const IS_DEV = typeof __DEV__ !== 'undefined' && __DEV__;
+
+  // Estado específico para a foto de perfil
+  const [fotoPerfil, setFotoPerfil] = useState(null);
 
   // Dados do usuário
   const [dadosUsuario, setDadosUsuario] = useState({
@@ -63,6 +67,28 @@ const Perfil = ({ navigation }) => {
           objetivo: dados.objetivo || '',
           nivelAtividade: dados.nivelAtividade || 'Iniciante',
         });
+
+        // Lógica trazida do Web para encontrar a imagem de perfil
+        const possibleImage =
+            dados.fotoPerfil ||
+            dados.foto ||
+            dados.imagem ||
+            dados.img ||
+            dados.imageUrl ||
+            dados.avatar ||
+            dados.profilePicture ||
+            dados.photo ||
+            dados.urlFoto ||
+            dados.usuario?.foto ||
+            dados.user?.foto ||
+            dados.user?.avatar ||
+            null;
+
+        if (possibleImage) {
+            // Se a imagem for um caminho relativo, o componente Image pode precisar do domínio base.
+            // Assumindo que o backend retorna a URL ou que o componente Image tratará a URI.
+            setFotoPerfil(possibleImage);
+        }
         
         console.log('✅ Dados do perfil carregados com sucesso:', dados);
       } catch (error) {
@@ -298,9 +324,20 @@ const handleVoltar = () => {
             {/* Foto e Informações Básicas */}
             <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
+            {/* INÍCIO DA ALTERAÇÃO: Renderização Condicional da Foto */}
             <View style={styles.avatar}>
-              <Ionicons name="person" size={60} color={isDark ? "#FFFFFF" : "#405CBA"} />
+              {fotoPerfil ? (
+                <Image 
+                  source={{ uri: fotoPerfil }} 
+                  style={{ width: '100%', height: '100%', borderRadius: 100 }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Ionicons name="person" size={60} color={isDark ? "#FFFFFF" : "#405CBA"} />
+              )}
             </View>
+            {/* FIM DA ALTERAÇÃO */}
+            
             <TouchableOpacity style={styles.editAvatarButton}>
               <Ionicons name="camera" size={20} color="white" />
             </TouchableOpacity>
@@ -479,7 +516,7 @@ const handleVoltar = () => {
                   />
 
                   {/* 🔹 Botão de teste só aparece no modo DEV e quando o switch estiver ativo */}
-                  {__DEV__ && notificacoes && (
+                  {IS_DEV && notificacoes && (
                     <TouchableOpacity
                       style={{
                         marginLeft: 10,
@@ -521,7 +558,7 @@ const handleVoltar = () => {
     />
 
     {/* Botão de teste (DEV) */}
-    {__DEV__ && som && (
+    {IS_DEV && som && (
       <TestSoundButton soundFunction={playSuccessSound} label="Testar Som" />
     )}
   </View>

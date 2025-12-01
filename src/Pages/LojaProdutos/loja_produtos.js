@@ -96,8 +96,14 @@ const LojaProdutos = ({ navigation, route }) => {
 
     // useEffect para buscar dados (Modificado para incluir variações)
     useEffect(() => {
-        const { produtoId } = route.params;
+        // Proteção: route ou route.params pode ser undefined quando a tela for aberta pelo menu
+        const produtoId = route?.params?.produtoId ?? null;
         if (!produtoId) {
+            // Se a tela foi aberta sem produtoId (ex: via menu lateral), redirecionar para a home da loja
+            if (navigation && typeof navigation.navigate === 'function') {
+                navigation.navigate('Loja');
+                return;
+            }
             setError("Nenhum ID de produto fornecido.");
             setLoading(false);
             return;
@@ -139,7 +145,7 @@ const LojaProdutos = ({ navigation, route }) => {
             finally { setLoading(false); }
         };
         carregarProduto();
-    }, [route.params.produtoId]); 
+    }, [route?.params?.produtoId]); 
 
     // --- LÓGICA DOS BOTÕES (ARRUMADA) ---
 

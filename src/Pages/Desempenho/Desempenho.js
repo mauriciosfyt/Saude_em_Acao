@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState, useEffect } from 'react';
 import DesempenhoHeader from '../../Components/header_seta/header_seta';
 import {
@@ -79,9 +80,9 @@ const Desempenho = ({ navigation }) => {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.primary }]}>
       <StatusBar barStyle={'light-content'} backgroundColor={colors.primary} />
       <View style={[styles.topSection, { backgroundColor: colors.primary }]}>
-        <DesempenhoHeader navigation={navigation} paddingHorizontal={2} />
-        <Text paddingHorizontal={20} style={[styles.monthYearText, { color: colors.headerText }]}>{dadosDesempenho.mesAno} </Text>
-        <View paddingHorizontal={20} style={styles.progressContainer}>
+        <DesempenhoHeader navigation={navigation} />
+        <Text style={[styles.monthYearText, { color: colors.headerText, paddingHorizontal: 20 }]}>{dadosDesempenho.mesAno} </Text>
+        <View style={[styles.progressContainer, { paddingHorizontal: 20 }]}>
           <View style={[styles.progressBar, { backgroundColor: colors.headerText }]}>
             <View style={[styles.progressFill, { width: `${dadosDesempenho.progressoGeral}%` }]} />
           </View>
@@ -168,7 +169,7 @@ const Desempenho = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleNavegar("LojaProdutos")}
+              onPress={() => handleNavegar("Loja")}
             >
               <Ionicons name="cart-outline" size={24} color={isDark ? '#D3D8EB' : '#333333'} />
               <Text style={[styles.menuItemText, { color: isDark ? '#D3D8EB' : '#333333' }]}>Loja</Text>

@@ -187,7 +187,7 @@ const Plano = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleNavegar("LojaProdutos")}
+              onPress={() => handleNavegar("Loja")}
             >
               <Ionicons name="cart-outline" size={24} color={isDark ? '#fff' : colors.textSecondary} />
               <Text style={[styles.menuItemText, { color: isDark ? '#fff' : colors.textPrimary }]}>Loja</Text>

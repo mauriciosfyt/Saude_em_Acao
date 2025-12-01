@@ -364,6 +364,102 @@ export const enviarMensagemChat = async (chatId, texto, remetente) => {
   }
 };
 
+// Envia imagem para o chat (suporta uri local/file, data-uri (base64) e urls remotas)
+export const enviarImagemChat = async (chatId, uriOrData, remetente) => {
+  try {
+    if (!chatId) throw new Error('chatId é obrigatório para enviar imagens');
+    if (!uriOrData) throw new Error('uri/data da imagem é obrigatório');
+
+    // Remetente padrão
+    const usuario = remetente || 'usuario';
+
+    // Se receber uma data-uri (base64) — alguns backends aceitam receber via JSON
+    if (String(uriOrData).startsWith('data:image')) {
+      // inclue 'tipo' para deixar explícito que é imagem
+      const payload = { chatId: String(chatId), usuario, conteudo: String(uriOrData), tipo: 'image' };
+      // tentar endpoints que aceitam JSON com data-uri
+      const jsonCandidates = ['/api/chat/enviar', '/api/chat/enviar-imagem', `/api/chat/${chatId}/mensagem`];
+      for (const path of jsonCandidates) {
+        try {
+          const resp = await api.post(path, payload);
+          return resp.data;
+        } catch (err) {
+          if (__DEV__) console.debug('[enviarImagemChat] json attempt failed', path, err?.response?.status || err?.message);
+          continue;
+        }
+      }
+      // se nada funcionou, lance o erro original
+      throw new Error('Nenhum endpoint aceitou o data-uri como JSON');
+    }
+
+    // Se for uma URI remota (http/https) — tratamos como URL e tentamos enviar como mensagem normal
+    const isRemote = String(uriOrData).startsWith('http');
+    if (isRemote) {
+      // muitas APIs aceitam que a 'conteudo' seja uma URL de imagem
+      try {
+        const resp = await enviarMensagemChat(chatId, String(uriOrData), usuario);
+        return resp;
+      } catch (err) {
+        if (__DEV__) console.debug('[enviarImagemChat] fallback enviarMensagemChat para URL falhou', err?.message || err);
+      }
+    }
+
+    // Caso seja URI local (file://, content:// ou asset://) — montar FormData
+    const uri = String(uriOrData);
+    const filename = uri.split('/').pop().split('?')[0] || `photo_${Date.now()}.jpg`;
+    const ext = (filename.split('.').pop() || '').toLowerCase();
+    let mimeType = 'image/jpeg';
+    if (ext === 'png') mimeType = 'image/png';
+    else if (ext === 'gif') mimeType = 'image/gif';
+    else if (ext === 'webp') mimeType = 'image/webp';
+
+    // Paths candidatos para upload multipart
+    const candidates = [
+      '/api/chat/enviar-imagem',
+      '/api/chat/enviar',
+      `/api/chat/${chatId}/imagem`,
+      `/api/chat/${chatId}/upload`,
+      `/api/chat/${chatId}/mensagem`,
+    ];
+
+    // Tentamos chaves diferentes para o arquivo (algumas APIs esperam 'imagem', outras 'file')
+    const fileKeys = ['imagem', 'file', 'arquivo', 'image'];
+
+    // Não forçamos Content-Type — axios/setters cuidam do boundary em FormData.
+    for (const path of candidates) {
+      for (const key of fileKeys) {
+        try {
+          const formData = new FormData();
+          // campos úteis para a API identificar o chat / remetente
+          formData.append('chatId', String(chatId));
+          formData.append('usuario', usuario);
+          formData.append('tipo', 'image');
+          formData.append(key, { uri, name: filename, type: mimeType });
+
+          const resp = await api.post(path, formData);
+          if (resp?.data) return resp.data;
+        } catch (err) {
+          if (__DEV__) console.debug('[enviarImagemChat] multipart attempt failed', path, key, err?.response?.status || err?.message);
+          continue;
+        }
+      }
+    }
+
+    // Ultimate fallback: enviar uri como texto via enviarMensagemChat
+    try {
+      const fallback = await enviarMensagemChat(chatId, String(uriOrData), usuario);
+      return fallback;
+    } catch (err) {
+      if (__DEV__) console.warn('[enviarImagemChat] fallback enviarMensagemChat falhou', err?.message || err);
+    }
+
+    throw new Error('Falha ao enviar imagem: nenhum endpoint aceitou a imagem');
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
+
 // Apaga uma mensagem do chat no servidor
 export const apagarMensagemChat = async (chatId, mensagemId) => {
   try {
@@ -529,16 +625,69 @@ export const obterMeusTreinos = async () => {
  * Busca todos os favoritos do usuário logado
  */
 export const obterFavoritos = async () => {
-  try {
-    console.log("Chamando API: /api/favoritos");
-    const response = await api.get('/api/favoritos');
-    console.log("API /api/favoritos respondeu:", response.data);
+  // Strategy:
+  // 1) Try canonical endpoint /api/favoritos
+  // 2) If it fails (500/404), try known alternative paths used by other services
+  // 3) Retry a couple times on transient 5xx failures with backoff
+  // 4) If still failing, return [] (caller should use local cache) or rethrow for auth errors
+  const candidates = ['/api/favoritos', '/api/meus-favoritos', '/api/favoritos/minhas', '/api/me/favoritos'];
+
+  const tryRequest = async (path) => {
+    const response = await api.get(path);
     return response.data;
-  } catch (error) {
-    console.error("Erro ao buscar favoritos:", error);
-    if (error.response && error.response.data) throw error.response.data;
-    throw error;
+  };
+
+  const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
+  for (const path of candidates) {
+    let attempt = 0;
+    const maxAttempts = 3; // try up to 3 times on 5xx
+    while (attempt < maxAttempts) {
+      try {
+        if (__DEV__) console.log(`Tentando favorites -> ${path} (attempt ${attempt + 1})`);
+        const data = await tryRequest(path);
+        if (__DEV__) console.log(`API ${path} respondeu:`, data);
+        return data;
+      } catch (error) {
+        const status = error?.response?.status;
+        // If auth error or other client error, don't silently continue to other endpoints
+        if (status === 401 || status === 403) {
+          if (__DEV__) console.warn(`Auth issue when GET ${path} -> ${status}`);
+          // Propagate auth errors: caller might want to react (logout, show message)
+          if (error.response && error.response.data) throw error.response.data;
+          throw error;
+        }
+
+        if (status === 404) {
+          // No endpoint here - break attempts and try next candidate
+          if (__DEV__) console.log(`${path} retornou 404 — tentando próximo endpoint`);
+          break;
+        }
+
+        // For 5xx, retry with a small backoff
+        if (status >= 500 || !status) {
+          attempt += 1;
+          if (attempt < maxAttempts) {
+            const backoff = 250 * attempt; // 250ms, 500ms, ...
+            if (__DEV__) console.warn(`${path} erro ${status || 'network'}. Retentando em ${backoff}ms`);
+            await sleep(backoff);
+            continue;
+          }
+          // failed after retries — log and try next candidate
+          if (__DEV__) console.warn(`${path} falhou após ${maxAttempts} tentativas:`, error?.response?.data || error?.message || error);
+          break;
+        }
+
+        // Any other case, rethrow
+        if (error.response && error.response.data) throw error.response.data;
+        throw error;
+      }
+    }
   }
+
+  // Todas as tentativas falharam — retornar objeto de fallback para sinalizar o erro
+  if (__DEV__) console.warn('Todas as rotas de favoritos falharam — retornando fallback vazia para que o cliente use cache local');
+  return { fallback: true, favoritos: [] };
 };
 
 /**
@@ -556,7 +705,20 @@ export const adicionarFavorito = async (produtoId) => {
     }
     return response.data;
   } catch (error) {
-    // Não loga erro aqui - deixa o contexto tratar
+    // Tratamento mais resistente: para erros de autenticação, propaga para o consumidor
+    const status = error?.response?.status;
+    if (status === 401 || status === 403) {
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
+    }
+
+    // Para 5xx/404 ou falhas de rede retornamos objeto de fallback para o cliente manter dados locais
+    if (status === 404 || status >= 500 || !status) {
+      if (__DEV__) console.warn('Falha ao adicionar favorito na API — retornando fallback (erro não propagado):', status, error?.message || error);
+      return { success: false, fallback: true, error: error?.response?.data || error?.message || error };
+    }
+
+    // Outros casos (400 etc) mantemos o comportamento de lançar o erro para a UI tratar
     if (error.response && error.response.data) throw error.response.data;
     throw error;
   }
@@ -577,7 +739,18 @@ export const removerFavorito = async (produtoId) => {
     }
     return response.data;
   } catch (error) {
-    // Não loga erro aqui - deixa o contexto tratar
+    const status = error?.response?.status;
+    if (status === 401 || status === 403) {
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
+    }
+
+    // Para 5xx/404 ou falhas de rede não propagamos (mantemos remoção local)
+    if (status === 404 || status >= 500 || !status) {
+      if (__DEV__) console.warn('Falha ao remover favorito na API — retornando fallback (erro não propagado):', status, error?.message || error);
+      return { success: false, fallback: true, error: error?.response?.data || error?.message || error };
+    }
+
     if (error.response && error.response.data) throw error.response.data;
     throw error;
   }

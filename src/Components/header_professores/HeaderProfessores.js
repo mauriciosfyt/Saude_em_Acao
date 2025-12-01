@@ -95,7 +95,7 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleNavegar("LojaProdutos")}
+              onPress={() => handleNavegar("Loja")}
             >
               <Ionicons name="cart-outline" size={24} color={isDark ? '#D3D8EB' : '#333333'} />
               <Text style={[styles.menuItemText, { color: isDark ? '#D3D8EB' : '#333333' }]}>Loja</Text>

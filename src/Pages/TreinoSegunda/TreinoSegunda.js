@@ -219,7 +219,11 @@ const TreinoSexta = ({ navigation, route }) => {
         marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Segunda');
       }
 
-      navigation.navigate('MeuTreino');
+      if (navigation.reset) {
+        navigation.reset({ index: 1, routes: [{ name: 'Home' }, { name: 'MeuTreino' }] });
+      } else {
+        navigation.replace ? navigation.replace('MeuTreino') : navigation.navigate('MeuTreino');
+      }
     })();
   };
 
@@ -251,6 +255,7 @@ const TreinoSexta = ({ navigation, route }) => {
         mesAno={null}
         isDark={isDark}
         onPressMenu={handleAbrirMenu}
+        extraMarginTop={40}
       />
 
       <ScrollView

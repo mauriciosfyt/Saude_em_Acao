@@ -3,11 +3,44 @@ import { View, Text, TouchableOpacity, Modal, StyleSheet, Platform } from "react
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../context/ThemeContext";
 
-const DesempenhoHeader = ({ navigation, mesAno, isDark }) => {
+const DesempenhoHeader = ({ navigation, mesAno, isDark, extraMarginTop }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
     const { colors, isDark: themeIsDark } = useTheme();
 
   const handleVoltar = () => {
+    try {
+      // tenta obter a rota atual de forma confiável
+      const currentRoute = (navigation && navigation.getCurrentRoute && navigation.getCurrentRoute().name)
+        || (navigation?.getState && navigation.getState().routes?.[navigation.getState().index]?.name)
+        || null;
+
+      // Se estiver em uma tela de Treino, resetar a pilha para [Home, MeuTreino]
+      if (currentRoute && /^Treino/i.test(currentRoute)) {
+        if (navigation.reset) {
+          navigation.reset({ index: 1, routes: [{ name: 'Home' }, { name: 'MeuTreino' }] });
+        } else if (navigation.replace) {
+          navigation.replace('MeuTreino');
+        } else {
+          navigation.navigate && navigation.navigate('MeuTreino');
+        }
+        return;
+      }
+
+      // Se estiver em MeuTreino, resetar para [Home]
+      if (currentRoute === 'MeuTreino') {
+        if (navigation.reset) {
+          navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+        } else if (navigation.replace) {
+          navigation.replace('Home');
+        } else {
+          navigation.navigate && navigation.navigate('Home');
+        }
+        return;
+      }
+    } catch (err) {
+      // fallback para comportamento padrão
+    }
+
     if (navigation) navigation.goBack();
   };
 
@@ -48,7 +81,7 @@ const DesempenhoHeader = ({ navigation, mesAno, isDark }) => {
               { name: "home-outline", text: "Home", screen: "Home" },
               { name: "person-outline", text: "Meu Perfil", screen: "Perfil" },
               { name: "chatbubble-outline", text: "Chat", screen: "Chat" },
-              { name: "cart-outline", text: "Loja", screen: "LojaProdutos" },
+              { name: "cart-outline", text: "Loja", screen: "Loja" },
               { name: "heart-outline", text: "Favoritos", screen: "LojaFavoritos" },
               { name: "bookmark-outline", text: "Reservas", screen: "LojaReservas" },
               { name: "bar-chart-outline", text: "Desempenho", screen: "Desempenho" },
@@ -75,7 +108,7 @@ const DesempenhoHeader = ({ navigation, mesAno, isDark }) => {
         </TouchableOpacity>
       </Modal>
 
-      <View style={styles.header}>
+      <View style={[styles.header, { marginTop: typeof extraMarginTop === 'number' ? extraMarginTop : styles.header.marginTop }]}>
         {/* Só renderiza a seta se não estiver na Home */}
         {navigation?.getState?.()?.routeNames?.[navigation?.getState?.()?.index] !== 'Home' && (
           <TouchableOpacity style={styles.headerButton} onPress={handleVoltar}>

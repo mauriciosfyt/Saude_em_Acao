@@ -75,8 +75,8 @@ const MeuTreino = ({ navigation }) => {
             ][idx % 5];
 
             // se houver exerciciosPorDia, cria uma entrada por chave (dia)
-            if (t.exerciciosPorDia && typeof t.exerciciosPorDia === 'object' && Object.keys(t.exerciciosPorDia).length) {
-              const dayFullMap = {
+            // map de nomes de dias para normalização e reuso em múltiplas branches
+            const dayFullMap = {
                 'SEGUNDA': 'Segunda',
                 'TERCA': 'Terça',
                 'TERÇA': 'Terça',
@@ -85,9 +85,10 @@ const MeuTreino = ({ navigation }) => {
                 'SEXTA': 'Sexta',
                 'SABADO': 'Sábado',
                 'SÁBADO': 'Sábado'
-              };
+            };
 
-              Object.keys(t.exerciciosPorDia).forEach((k, kidx) => {
+            if (t.exerciciosPorDia && typeof t.exerciciosPorDia === 'object' && Object.keys(t.exerciciosPorDia).length) {
+                Object.keys(t.exerciciosPorDia).forEach((k, kidx) => {
                 const up = String(k).toUpperCase();
                 const diaLabel = dayFullMap[up] || (k[0].toUpperCase() + k.slice(1).toLowerCase());
                 expanded.push({
@@ -538,7 +539,7 @@ const MeuTreino = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleNavegar("LojaProdutos")}
+              onPress={() => handleNavegar("Loja")}
             >
               <Ionicons
                 name="cart-outline"

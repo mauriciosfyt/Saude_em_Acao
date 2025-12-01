@@ -107,7 +107,7 @@ const HeaderLoja = ({ navigation: navigationProp, searchText, setSearchText }) =
               <Ionicons name="chatbubble-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Chat</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('LojaProdutos')}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Loja')}>
               <Ionicons name="cart-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Loja</Text>
             </TouchableOpacity>

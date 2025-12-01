@@ -13,6 +13,8 @@ export const useTreinos = () => {
 export const TreinosProvider = ({ children }) => {
   const [treinosConcluidos, setTreinosConcluidos] = useState(new Set());
   const [treinosIncompletos, setTreinosIncompletos] = useState(new Set());
+  // Guarda progresso dos treinos por chave (pode ser treinoKey, data etc.)
+  const [progressoTreinosMap, setProgressoTreinosMap] = useState({});
 
   const marcarTreinoComoConcluido = (dia) => {
     console.log('DEBUG: treinosConcluidos antes:', Array.from(treinosConcluidos));
@@ -52,13 +54,31 @@ export const TreinosProvider = ({ children }) => {
     return treinosIncompletos.has(dia);
   };
 
+  // Salva o progresso para um treino específico (p. ex. lista de exercícios completados)
+  const salvarProgresso = (treinoKey, progresso) => {
+    try {
+      setProgressoTreinosMap(prev => ({ ...prev, [treinoKey]: progresso }));
+      console.log('DEBUG: progresso salvo para', treinoKey, progresso);
+    } catch (err) {
+      console.error('Erro ao salvar progresso:', err);
+    }
+  };
+
+  // Obtém o progresso salvo para uma chave de treino
+  const obterProgresso = (treinoKey) => {
+    return progressoTreinosMap ? progressoTreinosMap[treinoKey] : undefined;
+  };
+
   const value = {
     treinosConcluidos,
     treinosIncompletos,
+    progressoTreinos: progressoTreinosMap,
     marcarTreinoComoConcluido,
     marcarTreinoComoIncompleto,
     isTreinoConcluido,
     isTreinoIncompleto,
+    salvarProgresso,
+    obterProgresso,
   };
 
   return (

@@ -122,7 +122,7 @@ const Mensalidades = ({ navigation }) => {
                  </TouchableOpacity>
                  <TouchableOpacity
                    style={styles.menuItem}
-                   onPress={() => handleNavegar("LojaProdutos")}
+                   onPress={() => handleNavegar("Loja")}
                  >
                    <Ionicons name="cart-outline" size={24} color="#333" />
                   <Text style={[styles.menuItemText, isDark && { color: '#E5E7EB' }]}>Loja</Text>

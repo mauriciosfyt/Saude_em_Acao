@@ -201,7 +201,11 @@ const TreinoQuarta = ({ navigation, route }) => {
         marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Quarta');
       }
 
-      navigation.navigate('MeuTreino');
+      if (navigation.reset) {
+        navigation.reset({ index: 1, routes: [{ name: 'Home' }, { name: 'MeuTreino' }] });
+      } else {
+        navigation.replace ? navigation.replace('MeuTreino') : navigation.navigate('MeuTreino');
+      }
     })();
   };
 
@@ -223,7 +227,7 @@ const TreinoQuarta = ({ navigation, route }) => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.contentBg }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.primary} />
-      <HeaderSeta navigation={navigation} mesAno={null} isDark={isDark} onPressMenu={handleAbrirMenu} />
+      <HeaderSeta navigation={navigation} mesAno={null} isDark={isDark} onPressMenu={handleAbrirMenu} extraMarginTop={40} />
 
       <ScrollView
         style={[styles.content, { backgroundColor: theme.contentBg }]}

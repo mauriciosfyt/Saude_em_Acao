@@ -228,7 +228,11 @@ const TreinoQuinta = ({ navigation, route }) => {
         marcarTreinoComoIncompleto && marcarTreinoComoIncompleto('Quinta');
       }
 
-      navigation.navigate('MeuTreino');
+      if (navigation.reset) {
+        navigation.reset({ index: 1, routes: [{ name: 'Home' }, { name: 'MeuTreino' }] });
+      } else {
+        navigation.replace ? navigation.replace('MeuTreino') : navigation.navigate('MeuTreino');
+      }
     })();
   };
 
@@ -254,7 +258,7 @@ const TreinoQuinta = ({ navigation, route }) => {
       />
 
       {/* Header - passei iconColor para HeaderSeta para controlar cor da seta/menu */}
-      <HeaderSeta navigation={navigation} mesAno={null} isDark={isDark} iconColor={theme.iconColor} onPressMenu={handleAbrirMenu} />
+      <HeaderSeta navigation={navigation} mesAno={null} isDark={isDark} iconColor={theme.iconColor} onPressMenu={handleAbrirMenu} extraMarginTop={40} />
 
       {/* Conteúdo principal */}
       <ScrollView
