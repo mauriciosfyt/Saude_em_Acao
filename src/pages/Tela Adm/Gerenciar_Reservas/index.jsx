@@ -8,6 +8,12 @@ import { fetchReservas, fetchReservaStats, aprovarRetirada } from '../../../serv
 import { getProdutoById, updateProduto } from '../../../services/produtoService';
 import { fixImageUrl } from '../../../utils/image';
 
+// --- ALTERAÇÃO 1: Importações do Toastify e do seu CSS personalizado ---
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../../components/Mensagem/Sucesso.css'; 
+// -----------------------------------------------------------------------
+
 const formatarData = (dataString) => {
     if (!dataString) return 'Data indisponível';
     try {
@@ -172,6 +178,18 @@ const GerenciarReservas = () => {
 
             setReservas((prev) => prev.map((r) => (r.id === id ? { ...r, status: novoStatus } : r)));
 
+            // --- ALTERAÇÃO 2: Disparo do Toast de Sucesso usando sua classe CSS ---
+            toast.success(`Retirada de ${reservaAtual.produto} CONFIRMADA!`, {
+                className: "custom-success-toast",
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+            // ----------------------------------------------------------------------
+
         } catch (error) {
             console.error('Erro ao aprovar retirada:', error);
             alert('Erro ao marcar como retirado: ' + (error?.message || error));
@@ -309,6 +327,9 @@ const GerenciarReservas = () => {
                         )}
                     </div>
                 )}
+                
+                {/* --- ALTERAÇÃO 3: Componente ToastContainer para renderizar os alertas --- */}
+                <ToastContainer />
             </main>
         </div>
     );

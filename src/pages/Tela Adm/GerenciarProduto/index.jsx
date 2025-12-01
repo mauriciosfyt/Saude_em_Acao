@@ -5,6 +5,12 @@ import './GerenciarProduto.css';
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { getAllProdutos, deleteProduto } from '../../../services/produtoService';
 
+// --- IMPORTAÇÕES DO TOASTIFY ---
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../../components/Mensagem/Excluido.css';  // Estilo para sucesso (criação)
+// -------------------------------
+
 // ÍCONE DE BUSCA (igual ao do Personal)
 const SearchIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c757d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -42,6 +48,7 @@ const GerenciarProduto = () => {
     } catch (err) {
       console.error('Erro ao carregar produtos da API:', err);
       setError('Não foi possível carregar produtos.');
+      toast.error('Não foi possível carregar produtos.'); // Feedback visual extra
     } finally {
       setLoading(false);
     }
@@ -49,6 +56,29 @@ const GerenciarProduto = () => {
 
   useEffect(() => {
     fetchProdutos();
+
+    // --- VERIFICAÇÃO DE FEEDBACK DE OUTRAS TELAS ---
+    // Verifica se existe uma flag de sucesso vinda da tela de Adicionar
+    const showAdicionado = localStorage.getItem('showProdutoAdicionado');
+    if (showAdicionado) {
+      toast.success("Produto criado com sucesso!", {
+        className: "custom-success-toast",
+        progressClassName: "Toastify__progress-bar--success",
+        icon: true // Usa o ícone definido no CSS
+      });
+      // Limpa a flag para não mostrar novamente ao recarregar
+      localStorage.removeItem('showProdutoAdicionado');
+    }
+    
+    // Verifica se existe uma flag de edição (padrão mantido para consistência)
+    const showEditado = localStorage.getItem('showProdutoEditado');
+    if (showEditado) {
+       // Assumindo que você usará o mesmo padrão de toast ou um específico se tiver o CSS importado
+       // Por segurança, mantive apenas a lógica pronta. Se tiver o CSS Editado.css, importaria acima.
+       localStorage.removeItem('showProdutoEditado');
+    }
+    // -----------------------------------------------
+
   }, []);
 
   useEffect(() => {
@@ -66,18 +96,7 @@ const GerenciarProduto = () => {
     setProdutosFiltrados(resultado);
   }, [termoBusca, categoria, produtos]);
 
-  useEffect(() => {
-    const verificarToast = (chave, mensagem) => {
-      if (localStorage.getItem(chave) === 'true') {
-        setShowToast(true);
-        setToastMessage(mensagem);
-        localStorage.removeItem(chave);
-        setTimeout(() => setShowToast(false), 3000);
-      }
-    };
-    verificarToast('showProdutoAdicionado', 'Produto adicionado com sucesso!');
-    verificarToast('showProdutoEditado', 'Produto editado com sucesso!');
-  }, []);
+
 
   const handleEditClick = (produtoId) => {
     const produto = produtos.find(p => p.id === produtoId);
@@ -88,21 +107,40 @@ const GerenciarProduto = () => {
   };
 
   const handleDeleteClick = async (produtoId) => {
+    // Usando o confirm nativo conforme seu código original
     if (!window.confirm('Tem certeza que deseja excluir este produto?')) return;
+    
     setLoading(true);
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('authToken') || null;
       await deleteProduto(produtoId, token);
       const atualizados = produtos.filter((p) => p.id !== produtoId);
       setProdutos(atualizados);
-      setToastMessage('Produto excluído com sucesso!');
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      
+      // --- IMPLEMENTAÇÃO DO TOAST DE EXCLUSÃO ---
+      // Substituindo visualmente a lógica antiga pelo Toastify
+      
+      // Código antigo (mantido para referência/histórico):
+      // setToastMessage('Produto excluído com sucesso!');
+      // setShowToast(true);
+      // setTimeout(() => setShowToast(false), 3000);
+
+      toast.success('Excluído com sucesso!', {
+        className: "custom-delete-toast",
+        progressClassName: "custom-delete-progress-bar"
+      });
+      // ------------------------------------------
+
     } catch (err) {
       console.error('Erro ao excluir produto:', err);
-      setToastMessage('Erro ao excluir produto.');
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      
+      // Código antigo:
+      // setToastMessage('Erro ao excluir produto.');
+      // setShowToast(true);
+      // setTimeout(() => setShowToast(false), 3000);
+
+      toast.error('Erro ao excluir produto.');
+      
     } finally {
       setLoading(false);
     }
@@ -115,6 +153,8 @@ const GerenciarProduto = () => {
 
       <main className="produto-content-wrapper">
         
+        {/* Mantive sua renderização condicional antiga, mas como não chamamos mais
+            o setShowToast, ela não será ativada, dando lugar ao ToastContainer abaixo */}
         {showToast && (
           <div className="toast-notification">{toastMessage}</div>
         )}
@@ -218,6 +258,9 @@ const GerenciarProduto = () => {
         {/* =================================================================== */}
         {/* ================== ALTERAÇÃO DO LOADING TERMINA AQUI ================ */}
         {/* =================================================================== */}
+
+        {/* Componente container para renderizar os Toasts */}
+        <ToastContainer position="top-right" autoClose={3000} />
 
       </main>
     </div>

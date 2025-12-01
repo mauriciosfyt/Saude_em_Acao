@@ -4,6 +4,11 @@ import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getProfessorById, API_URL, updateProfessor, deleteProfessor } from '../../../services/usuarioService';
 
+// --- REACT TOASTIFY ---
+import { ToastContainer, toast } from 'react-toastify';
+import '../../../components/Mensagem/Editado.css'
+// --- FIM REACT TOASTIFY ---
+
 const PlusIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 5V19" stroke="#007bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -128,14 +133,14 @@ const EditarPersonal = () => {
       const maxSizeBytes = maxSizeMB * 1024 * 1024;
       
       if (file.size > maxSizeBytes) {
-        alert(`A imagem deve ter no máximo ${maxSizeMB}MB. Tamanho atual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        toast.warning(`A imagem deve ter no máximo ${maxSizeMB}MB. Tamanho atual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
         return;
       }
 
       // Validação de tipo
       const tiposAceitos = ['image/png', 'image/jpeg', 'image/webp'];
       if (!tiposAceitos.includes(file.type)) {
-        alert('Por favor, selecione uma imagem válida (PNG, JPEG ou WebP)');
+        toast.warning('Por favor, selecione uma imagem válida (PNG, JPEG ou WebP)');
         return;
       }
 
@@ -169,15 +174,26 @@ const EditarPersonal = () => {
     try {
       setIsDeleting(true);
       await deleteProfessor(id);
-      alert('Professor excluído com sucesso!');
-      navigate('/GerenciarPersonal');
+      
+      // Sucesso na exclusão (Mantive verde pois é uma ação conclusiva de sucesso)
+      toast.success('Excluído com sucesso!', {
+        className: 'custom-success-toast', // Reutilizando a classe verde definida no Sucesso.css
+        progressClassName: 'Toastify__progress-bar--success',
+        autoClose: 2000,
+      });
+
+      // Aguarda o toast antes de navegar
+      setTimeout(() => {
+        navigate('/GerenciarPersonal');
+      }, 2200);
+
     } catch (err) {
       console.error('Erro ao excluir professor:', err);
       const msg = err?.message || 'Falha ao excluir professor.';
-      alert(msg);
+      toast.error(msg);
+      setIsDeleting(false); // Só volta o estado se der erro, se der sucesso navega
     } finally {
-      setIsDeleting(false);
-      setShowDeleteModal(false);
+      // setShowDeleteModal(false); // Isso pode causar erro se o componente desmontar na navegação, mas ok
     }
   };
 
@@ -185,7 +201,7 @@ const EditarPersonal = () => {
     e.preventDefault();
     // Validação simples de senha (se preenchida)
     if (formData.senha && formData.senha !== formData.confirmarSenha) {
-      alert('As senhas não coincidem.');
+      toast.error('As senhas não coincidem.');
       return;
     }
 
@@ -214,15 +230,23 @@ const EditarPersonal = () => {
       // Chama a função do serviço que envia o PUT multipart/form-data
       await updateProfessor(id, dados);
 
-      // Sucesso
-      alert('Personal atualizado com sucesso.');
-      navigate('/GerenciarPersonal');
+      // Sucesso na Edição - COR LARANJA
+      toast.success('Atualizado com sucesso.', {
+        className: 'custom-edit-toast',          // Classe Laranja definida no CSS
+        progressClassName: 'custom-edit-progress-bar', // Barra Laranja
+        autoClose: 2000,
+      });
+
+      // Aguarda o toast antes de navegar
+      setTimeout(() => {
+        navigate('/GerenciarPersonal');
+      }, 2200);
+
     } catch (err) {
       console.error('Erro ao salvar personal:', err);
       const msg = err?.message || 'Falha ao salvar alterações.';
-      alert(msg);
-    } finally {
-      setIsSubmitting(false);
+      toast.error(msg);
+      setIsSubmitting(false); // Habilita o botão novamente em caso de erro
     }
   };
 
@@ -367,6 +391,9 @@ const EditarPersonal = () => {
             </form>
           </div>
         </div>
+        
+        {/* Container para renderizar os toasts */}
+        <ToastContainer />
       </main>
     </div>
   );

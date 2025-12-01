@@ -27,18 +27,27 @@
   flex-shrink: 0;
 }
 
+/* --- CORREÇÃO DA BOLA DE UPLOAD AQUI --- */
 .personal-image-placeholder {
   width: 180px;
   height: 180px;
   border-radius: 50%;
   background-color: #e9ecef;
-  /* --- ALTERAÇÃO: Borda azul restaurada --- */
   border: 3px solid #007bff; /* Borda azul original */
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  overflow: hidden; /* Importante: corta a imagem que passar do círculo */
+  position: relative; /* Garante posicionamento correto */
+}
+
+/* --- ESTILO DA IMAGEM DENTRO DA BOLA --- */
+.personal-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* A mágica: preenche o círculo sem distorcer */
+  display: block;
 }
 
 .personal-image-placeholder:hover {

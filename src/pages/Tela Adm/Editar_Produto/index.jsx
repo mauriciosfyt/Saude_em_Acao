@@ -3,6 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { updateProduto, getProdutoById } from '../../../services/produtoService';
 import { useAuth } from '../../../contexts/AuthContext';
 
+// --- IMPORTAÇÕES DO TOASTIFY ---
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../../components/Mensagem/Editado.css'; // Importação do estilo Laranja (Edição)
+// -------------------------------
+
 // Componentes Reutilizados
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import Modal from '../../../components/Administrador/AdicionarProduto/Modal';
@@ -59,7 +65,9 @@ const EditarProduto = () => {
     const carregarProduto = async () => {
       const produtoSalvo = localStorage.getItem('produtoParaEditar');
       if (!produtoSalvo) {
-        alert('Nenhum produto selecionado para edição.');
+        // Alerta visual substituído por Toast, mantendo lógica de redirecionamento
+        // alert('Nenhum produto selecionado para edição.');
+        toast.error('Nenhum produto selecionado para edição.');
         navigate('/GerenciarProduto');
         return;
       }
@@ -113,6 +121,7 @@ const EditarProduto = () => {
       } catch (error) {
         console.error('❌ Erro ao carregar produto:', error);
         setError('Erro ao carregar dados do produto: ' + error.message);
+        toast.error('Erro ao carregar dados do produto.');
       }
     };
 
@@ -141,7 +150,8 @@ const EditarProduto = () => {
   // Funções do Modal
   const abrirModalEstoque = () => {
     if (!dadosFormulario.categoria) {
-      alert('Por favor, selecione uma categoria primeiro.');
+      // alert('Por favor, selecione uma categoria primeiro.');
+      toast.warn('Por favor, selecione uma categoria primeiro.');
       return;
     }
     
@@ -201,7 +211,8 @@ const EditarProduto = () => {
       const categoriaInfo = getCategoriaAtual();
       
       if (!nome || !preco || !categoriaInfo) {
-        alert('Por favor, preencha todos os campos obrigatórios.');
+        // alert('Por favor, preencha todos os campos obrigatórios.');
+        toast.warn('Por favor, preencha todos os campos obrigatórios.');
         setLoading(false);
         return;
       }
@@ -216,7 +227,8 @@ const EditarProduto = () => {
       }
 
       if (totalEstoque <= 0) {
-        alert(`O estoque total deve ser maior que zero para a categoria ${categoriaInfo.rotulo}`);
+        // alert(`O estoque total deve ser maior que zero para a categoria ${categoriaInfo.rotulo}`);
+        toast.warn(`O estoque total deve ser maior que zero para a categoria ${categoriaInfo.rotulo}`);
         setLoading(false);
         return;
       }
@@ -261,20 +273,34 @@ const EditarProduto = () => {
           break;
       }
 
-
-
       await updateProduto(produtoId, formData);
 
-      console.log('✅ Produto editado com sucesso!');
+      console.log('Editado com sucesso!');
+
+      // --- IMPLEMENTAÇÃO DO TOAST DE EDIÇÃO ---
+      // Usamos as classes do seu arquivo Editado.css
+      toast.success("Produto editado com sucesso!", {
+        className: "custom-edit-toast",
+        progressClassName: "custom-edit-progress-bar",
+        autoClose: 2000 // Sincronizado com o delay abaixo
+      });
+
       localStorage.setItem('showProdutoEditado', 'true');
-      navigate('/GerenciarProduto');
+      
+      // Delay adicionado para permitir a leitura do Toast antes de sair da tela
+      setTimeout(() => {
+        navigate('/GerenciarProduto');
+      }, 2000);
 
     } catch (error) {
       console.error('❌ Erro ao editar produto:', error);
       setError(`Erro ao editar produto: ${error.message}`);
-      alert(`Ocorreu um erro ao editar o produto: ${error.message}`);
+      // alert(`Ocorreu um erro ao editar o produto: ${error.message}`);
+      toast.error(`Ocorreu um erro ao editar o produto: ${error.message}`);
     } finally {
-      setLoading(false);
+      // Nota: Não defino loading(false) aqui se for sucesso, pois a navegação vai ocorrer
+      // e queremos evitar que o usuário clique novamente no botão.
+      if (error) setLoading(false);
     }
   };
 
@@ -337,8 +363,6 @@ const EditarProduto = () => {
       <MenuAdm />
       <main className="editar-produto-container">
         <h1 className="editar-produto-main-title">Editar Produto</h1>
-
-        
 
         {error && (
           <div style={{ 
@@ -450,6 +474,10 @@ const EditarProduto = () => {
             </button>
           </div>
         </form>
+        
+        {/* Componente container para renderizar os Toasts de Edição */}
+        <ToastContainer position="top-right" />
+        
       </main>
 
       {/* Modal para estoque por variação */}

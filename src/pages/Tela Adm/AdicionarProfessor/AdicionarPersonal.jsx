@@ -7,6 +7,12 @@ import { useNavigate } from 'react-router-dom';
 import { createProfessor } from '../../../services/usuarioService'; // Importar a função da API
 // --- FIM ADIÇÕES ---
 
+// --- REACT TOASTIFY ---
+import { ToastContainer, toast } from 'react-toastify';
+
+import '../../../components/Mensagem/Sucesso.css'; // Importação do CSS personalizado do Toast
+// --- FIM REACT TOASTIFY ---
+
 const PlusIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 5V19" stroke="#007bff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -88,11 +94,11 @@ const AdicionarPersonal = () => {
 
     // Validações...
     if (!formData.nome || !formData.email || !formData.cpf || !formData.telefone || !formData.senha) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+      toast.warning('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
     if (formData.senha !== formData.confirmarSenha) {
-      alert('As senhas não coincidem.');
+      toast.error('As senhas não coincidem.');
       return;
     }
     // ...outras validações
@@ -119,13 +125,23 @@ const AdicionarPersonal = () => {
       // A função 'createProfessor' PRECISA ser atualizada (veja abaixo)
       await createProfessor(dadosFormulario);
 
-      alert('Personal criado com sucesso!');
+      // Usando o toast personalizado conforme Sucesso.css
+      toast.success('Personal criado com sucesso!', {
+        className: 'custom-success-toast',
+        progressClassName: 'Toastify__progress-bar--success',
+        autoClose: 2000,
+      });
+      
       localStorage.setItem('showPersonalAdicionado', 'true');
-      navigate('/GerenciarPersonal');
+      
+      // Pequeno delay para exibir o toast antes de navegar
+      setTimeout(() => {
+        navigate('/GerenciarPersonal');
+      }, 2200);
 
     } catch (error) {
       console.error('Erro ao criar o personal:', error);
-      alert(`Falha ao criar personal: ${error.message}`);
+      toast.error(`Falha ao criar personal: ${error.message}`);
     }
   };
   // --- FIM ALTERAÇÃO ---
@@ -263,6 +279,8 @@ const AdicionarPersonal = () => {
             </form>
           </div>
         </div>
+        {/* Componente ToastContainer necessário para renderizar as notificações */}
+        <ToastContainer />
       </main>
     </div>
   );

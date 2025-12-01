@@ -6,25 +6,29 @@ import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { FaSearch } from "react-icons/fa";
 import { setAuthToken } from '../../../services/api';
 
-// --- (MODIFICADO) Importa as funções de Ação corretas ---
+// Funções de Ação
 import { 
     fetchReservas, 
     fetchReservaStats, 
     aprovarReserva, 
     cancelarReserva 
 } from '../../../services/reservasService';
-// (Note que não importamos 'rejeitarReserva' porque não há um botão para isso)
 
-// --- (EXISTENTE) Importar o fixImageUrl ---
+// --- IMPORTAÇÕES DO TOASTIFY ---
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../../components/Mensagem/Sucesso.css'; // Estilo Verde (Aprovado)
+import '../../../components/Mensagem/Cancelado.css'; // Estilo Vermelho (Cancelado)
+// -------------------------------
+
+// Utils
 import { fixImageUrl } from '../../../utils/image';
 
-// --- (EXISTENTE) Função para formatar a data ---
 const formatarData = (dataString) => {
     if (!dataString) return 'Data indisponível';
     try {
         const data = new Date(dataString);
         if (isNaN(data.getTime())) return dataString;
-        // Retorna apenas a data (sem hora)
         return new Intl.DateTimeFormat('pt-BR', {
             day: '2-digit',
             month: '2-digit',
@@ -35,7 +39,6 @@ const formatarData = (dataString) => {
     }
 };
 
-
 const ReservasPendentes = () => {
     const [reservas, setReservas] = useState([]);
     const [termoBusca, setTermoBusca] = useState('');
@@ -45,22 +48,19 @@ const ReservasPendentes = () => {
     const [erro, setErro] = useState('');
     const [stats, setStats] = useState(null);
 
-    // --- (MODIFICADO) handleStatusChange agora usa as funções da API ---
-    // <-- MODIFICADO: Adicionado 'nomeProduto' como parâmetro
     const handleStatusChange = async (id, acao, nomeProduto) => {
-        // Pega a ação (APROVADO ou CANCELADA) e confirma
         const acaoNormalizada = acao.toUpperCase();
         
-        // <-- NOVO: Define o verbo (Aprovar/Cancelar) para a confirmação
+        // --- ALTERAÇÃO SOLICITADA: REMOÇÃO DA JANELA DE CONFIRMAÇÃO ---
+        // Comentei a verificação abaixo para que a ação seja direta.
+        /*
         const verboAcao = acaoNormalizada === 'APROVADO' ? 'APROVAR' : 'CANCELAR';
-
-        // <-- MODIFICADO: Mensagem de confirmação usa o nome do produto
         if (!window.confirm(`Tem certeza que deseja ${verboAcao} a reserva do produto "${nomeProduto}"?`)) {
-            return; // Usuário cancelou
+            return; 
         }
+        */
 
         try {
-            // 1. Chama a função de API correta basedo na 'acao'
             if (acaoNormalizada === 'APROVADO') {
                 await aprovarReserva(id);
             } else if (acaoNormalizada === 'CANCELADA') {
@@ -69,29 +69,37 @@ const ReservasPendentes = () => {
                 throw new Error(`Ação desconhecida: ${acaoNormalizada}`);
             }
 
-            // 2. Se a API funcionou, remove o item da lista (pois não está mais pendente)
+            // Remove o item da lista visualmente
             setReservas(prevReservas =>
                 prevReservas.filter(reserva => reserva.id !== id) 
             );
             
-            // 3. Atualiza os contadores de stats
+            // Atualiza stats em background
             fetchReservaStats().then(setStats); 
 
-            // <-- NOVO: Define o status (Aprovada/Cancelada) para o alerta de sucesso
-            const statusFinal = acaoNormalizada === 'APROVADO' ? 'APROVADA' : 'CANCELADA';
-
-            // <-- MODIFICADO: Mensagem de sucesso usa o nome do produto
-            alert(`A reserva do produto "${nomeProduto}" foi ${statusFinal} com sucesso!`);
+            // Exibe o Toast correspondente
+            if (acaoNormalizada === 'APROVADO') {
+                toast.success(`Produto ${nomeProduto} foi APROVADO!`, {
+                    className: "custom-success-toast", 
+                    progressClassName: "Toastify__progress-bar--success",
+                    icon: true
+                });
+            } else {
+                toast.error(`Produto ${nomeProduto} foi CANCELADO!`, {
+                    className: "custom-cancel-toast",
+                    progressClassName: "custom-cancel-progress-bar",
+                    icon: true
+                });
+            }
 
         } catch (erro) {
-            // 4. Se a API falhar, mostra o erro e NÃO muda nada na tela
-            console.error(`Erro ao ${acaoNormalizada} reserva ${id} (${nomeProduto}):`, erro);
-            // <-- MODIFICADO: Mensagem de falha também usa o nome
-            alert(`Falha ao ${verboAcao.toLowerCase()} a reserva para "${nomeProduto}": ${erro.message}`);
+            // Mantive apenas o erro no console caso algo crítico aconteça, mas removi logs desnecessários
+            console.error(`Erro na ação ${acaoNormalizada}:`, erro);
+            
+            toast.error(`Falha ao processar a reserva: ${erro.message}`);
         }
     };
 
-    // useEffect de filtragem (sem alteração)
     useEffect(() => {
         let filtradas = reservas.filter(reserva => reserva.status === 'Pendente');
         if (termoBusca) {
@@ -106,7 +114,6 @@ const ReservasPendentes = () => {
         setReservasFiltradas(filtradas);
     }, [termoBusca, categoria, reservas]); 
 
-    // useEffect de carregamento (sem alteração, mas importante)
     useEffect(() => {
         const carregar = async () => {
             setLoading(true);
@@ -122,13 +129,12 @@ const ReservasPendentes = () => {
 
                 const listaResp = await fetchReservas({ status: 'PENDENTE' });
                 
-                // --- DEBUG (Se data/imagem falharem, verifique o console F12) ---
-                console.log("LISTA A SER MAPEADA (lista):", JSON.stringify(listaResp?.content || listaResp, null, 2));
+                // --- ALTERAÇÃO: Console.log de debug removido ---
+                // console.log("LISTA A SER MAPEADA...", ...);
 
                 const lista = Array.isArray(listaResp?.content) ? listaResp.content : (Array.isArray(listaResp) ? listaResp : []);
 
                 const normalizado = lista.map((r) => {
-                    // (Ajuste estes campos se os nomes no console.log forem diferentes)
                     const produtoNome = r?.produto?.nome || r?.produtoNome || r?.nome || 'Produto';
                     const categoriaNome = r?.produto?.categoria || r?.categoria || '';
                     const imagemUrl = r?.produto?.img || r?.produto?.imagem || r?.img || r?.imagem || '';
@@ -160,6 +166,7 @@ const ReservasPendentes = () => {
             } catch (e) {
                 const msg = typeof e === 'string' ? e : (e?.message || 'Erro ao carregar reservas.');
                 setErro(msg);
+                toast.error("Erro ao carregar lista de reservas.");
             } finally {
                 setLoading(false);
             }
@@ -167,7 +174,6 @@ const ReservasPendentes = () => {
         carregar();
     }, []);
 
-    // JSX (com as correções de imagem/data e os novos botões)
     return (
         <div style={{ display: 'flex' }}>
             <MenuAdm />
@@ -207,21 +213,18 @@ const ReservasPendentes = () => {
 
                 <div className="reservas-pendente-list">
                     
-                    {/* ======================= MODIFICAÇÃO AQUI ======================= */}
                     {loading && (
-                      <div className="personal-loading"> {/* Classe do GerenciarPersonal */}
-                        <div className="loading-spinner"></div> {/* Spinner */}
+                      <div className="personal-loading">
+                        <div className="loading-spinner"></div>
                         Carregando reservas...
                       </div>
                     )}
                     
                     {!!erro && !loading && (
-                        <div className="personal-error" style={{ padding: '20px', textAlign: 'center' }}> {/* Estilo de erro similar */}
+                        <div className="personal-error" style={{ padding: '20px', textAlign: 'center' }}>
                             <strong>Erro:</strong> {erro}
                         </div>
                     )}
-                    {/* ================================================================ */}
-                    
                     
                     {!loading && !erro && reservasFiltradas.length > 0 ? (
                         reservasFiltradas.map(reserva => (
@@ -253,11 +256,8 @@ const ReservasPendentes = () => {
                                         Data: {formatarData(reserva.data)}
                                     </p>
 
-                                    {/* --- (MODIFICADO) Botões com os status corretos --- */}
                                     <div className="reservas-pendente-buttons">
-                                        {/* <-- MODIFICADO: Passando 'reserva.produto' */}
                                         <button className="btn-cancelar" onClick={() => handleStatusChange(reserva.id, 'CANCELADA', reserva.produto)}>CANCELAR</button>
-                                        {/* <-- MODIFICADO: Passando 'reserva.produto' */}
                                         <button className="btn-aprovar" onClick={() => handleStatusChange(reserva.id, 'APROVADO', reserva.produto)}>APROVAR</button>
                                     </div>
                                 </div>
@@ -267,6 +267,9 @@ const ReservasPendentes = () => {
                         !loading && !erro && <p className="reservas-pendente-nenhuma-reserva">Nenhuma reserva pendente encontrada.</p>
                     )}
                 </div>
+
+                <ToastContainer position="top-right" autoClose={3000} />
+
             </main>
         </div>
     );

@@ -5,6 +5,12 @@ import { Link } from 'react-router-dom';
 import { getAllProfessores, deleteProfessor } from '../../../services/usuarioService';
 import { useAuth } from '../../../contexts/AuthContext';
 
+// --- REACT TOASTIFY ---
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../../components/Mensagem/Excluido.css'; // Importação do CSS personalizado para Exclusão
+// --- FIM REACT TOASTIFY ---
+
 // Ícone de busca
 const SearchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -66,14 +72,23 @@ const GerenciarPersonal = () => {
 
   // Função para deletar personal
   const handleDeletePersonal = async (id, nome) => {
+    // Mantivemos o window.confirm para garantir a lógica de segurança
     if (window.confirm(`Tem certeza que deseja excluir o personal ${nome}?`)) {
       try {
         await deleteProfessor(id);
-        fetchProfessores();
-        alert('Personal excluído com sucesso!');
+        fetchProfessores(); // Atualiza a lista após excluir
+        
+        // --- ALTERAÇÃO: Toast de Exclusão (Verde) ---
+        toast.success('Excluído com sucesso!', {
+          className: 'custom-delete-toast',          // Classe definida em Excluido.css
+          progressClassName: 'custom-delete-progress-bar',
+          autoClose: 2000,
+        });
+        
       } catch (err) {
         console.error('Erro ao excluir personal:', err);
-        alert(`Erro ao excluir personal: ${err.message}`);
+        // Toast de erro
+        toast.error(`Erro ao excluir personal: ${err.message}`);
       }
     }
   };
@@ -186,6 +201,8 @@ const GerenciarPersonal = () => {
             </div>
           </>
         )}
+        {/* Componente ToastContainer para exibir as notificações */}
+        <ToastContainer />
       </main>
     </div>
   );

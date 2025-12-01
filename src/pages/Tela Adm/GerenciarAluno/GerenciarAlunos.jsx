@@ -6,6 +6,10 @@ import ModalGerenciarTreino from './ModalGerenciarTreino';
 import { getAllAlunos, deleteAluno, updateAluno } from '../../../services/usuarioService'; // Importar as funções da API
 import { useAuth } from '../../../contexts/AuthContext'; // Importar o contexto de auth
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../../components/Mensagem/Excluido.css';
+
 // Ícone de busca (mantido igual)
 const SearchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c757d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -13,8 +17,6 @@ const SearchIcon = () => (
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
 );
-
-
 
 const GerenciarAlunos = () => {
   const { user } = useAuth(); // Usar o contexto de autenticação
@@ -55,16 +57,20 @@ const GerenciarAlunos = () => {
 
   // Função para deletar aluno
   const handleDeleteAluno = async (id, nome) => {
-    if (window.confirm(`Tem certeza que deseja excluir o aluno ${nome}?`)) {
-      try {
-        await deleteAluno(id);
-        // Atualizar a lista após exclusão
-        fetchAlunos();
-        alert('Aluno excluído com sucesso!');
-      } catch (err) {
-        console.error('Erro ao excluir aluno:', err);
-        alert('Erro ao excluir aluno. Tente novamente.');
-      }
+    // Verificação de window.confirm removida
+    try {
+      await deleteAluno(id);
+      // Atualizar a lista após exclusão
+      fetchAlunos();
+      
+      toast.success('Aluno excluído com sucesso!', {
+        className: 'custom-delete-toast',
+        progressClassName: 'custom-delete-progress-bar',
+        autoClose: 2000,
+      });
+    } catch (err) {
+      console.error('Erro ao excluir aluno:', err);
+      alert('Erro ao excluir aluno. Tente novamente.');
     }
   };
 
@@ -217,6 +223,7 @@ const GerenciarAlunos = () => {
             </tbody>
           </table>
         )}
+        <ToastContainer />
       </main>
 
       <ModalGerenciarTreino 

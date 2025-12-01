@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './EditarAluno.css';
+import '../../../components/Mensagem/Editado.css'; // Importando o estilo Laranja específico da edição
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { getAlunoById, updateAluno, deleteAluno, API_URL } from '../../../services/usuarioService';
+
+// Imports necessários para o Toastify
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Ícones reutilizados
 const PlusIcon = () => (
@@ -125,7 +130,8 @@ const EditarAluno = () => {
           console.warn('Aluno no localStorage inválido');
         }
       } else if (!id) {
-        alert('Dados do aluno não encontrados.');
+        // Substituindo Alert por Toast
+        toast.error('Dados do aluno não encontrados.');
         navigate('/GerenciarAlunos');
       }
     }
@@ -153,12 +159,14 @@ const EditarAluno = () => {
     if (file) {
       const maxSizeMB = 5;
       if (file.size > maxSizeMB * 1024 * 1024) {
-        alert(`A imagem deve ter no máximo ${maxSizeMB}MB.`);
+        // Substituindo Alert por Toast
+        toast.warn(`A imagem deve ter no máximo ${maxSizeMB}MB.`);
         return;
       }
       const tiposAceitos = ['image/png', 'image/jpeg', 'image/webp'];
       if (!tiposAceitos.includes(file.type)) {
-        alert('Por favor, selecione uma imagem válida.');
+        // Substituindo Alert por Toast
+        toast.warn('Por favor, selecione uma imagem válida.');
         return;
       }
       const novaPreview = URL.createObjectURL(file);
@@ -178,19 +186,23 @@ const EditarAluno = () => {
     e.preventDefault();
 
     if (!formData.nome || !formData.email || !formData.cpf || !formData.telefone || !formData.plano) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+      // Substituindo Alert por Toast
+      toast.warn('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
     if (formData.plano === 'GOLD') {
-      if (!formData.idade || !formData.sexo || !formData.peso || !formData.altura || !formData.objetivo || !formData.nivelAtividade) {
-        alert('Para o plano GOLD, os campos: idade, sexo, peso, altura, objetivo e nível de atividade são obrigatórios.');
+      // Removida validação de !formData.sexo pois não é mais editável
+      if (!formData.idade || !formData.peso || !formData.altura || !formData.objetivo || !formData.nivelAtividade) {
+        // Substituindo Alert por Toast
+        toast.warn('Para o plano GOLD, os campos: idade, peso, altura, objetivo e nível de atividade são obrigatórios.');
         return;
       }
     }
 
     if (formData.senha && formData.senha !== formData.confirmarSenha) {
-      alert('As senhas não coincidem.');
+      // Substituindo Alert por Toast
+      toast.error('As senhas não coincidem.');
       return;
     }
 
@@ -207,7 +219,7 @@ const EditarAluno = () => {
 
       if (formData.plano === 'GOLD') {
         dados.append('idade', formData.idade);
-        dados.append('sexo', formData.sexo); 
+        // Removido o append do sexo para não enviar para a API
         dados.append('peso', formData.peso);
         dados.append('altura', formData.altura);
         dados.append('objetivo', formData.objetivo);
@@ -223,11 +235,22 @@ const EditarAluno = () => {
 
       await updateAluno(alvoId, dados);
 
-      alert('Aluno atualizado com sucesso.');
-      navigate('/GerenciarAlunos');
+      // Implementação Toastly para Sucesso na Edição (Laranja)
+      toast.success('Atualizado com sucesso.', {
+        className: 'custom-edit-toast', // Classe personalizada laranja
+        progressClassName: 'custom-edit-progress-bar', // Barra de progresso laranja
+        autoClose: 2000,
+      });
+
+      // Timeout para permitir visualização do toast antes de navegar
+      setTimeout(() => {
+        navigate('/GerenciarAlunos');
+      }, 2100);
+      
     } catch (err) {
       console.error('Erro ao salvar aluno:', err);
-      alert(err?.message || 'Falha ao salvar alterações.');
+      // Substituindo Alert por Toast
+      toast.error(err?.message || 'Falha ao salvar alterações.');
     } finally {
       setIsSubmitting(false);
     }
@@ -318,20 +341,7 @@ const EditarAluno = () => {
                     <input type="number" id="idade" name="idade" value={formData.idade} onChange={handleChange} placeholder="Ex: 25" required />
                   </div>
 
-                  <div className="editar-aluno-form-group">
-                    <label htmlFor="sexo">Sexo</label>
-                    <select 
-                      id="sexo" 
-                      name="sexo" 
-                      value={formData.sexo} 
-                      onChange={handleChange} 
-                      required
-                    >
-                      <option value="" disabled>Selecione</option>
-                      <option value="MASCULINO">Masculino</option>
-                      <option value="FEMININO">Feminino</option>
-                    </select>
-                  </div>
+                  {/* Campo de Sexo removido conforme solicitado */}
                   
                   <div className="editar-aluno-form-group">
                     <label htmlFor="peso">Peso (kg)</label>
@@ -471,6 +481,8 @@ const EditarAluno = () => {
             </form>
           </div>
         </div>
+        {/* Adicionando o Container do Toast ao final do layout */}
+        <ToastContainer />
       </main>
     </div>
   );

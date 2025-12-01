@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import './AdicionarAluno.css'; 
+import '../../../components/Mensagem/Sucesso.css'; // Importando seu CSS de sucesso personalizado
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { useNavigate } from 'react-router-dom';
 import { createAluno } from '../../../services/usuarioService'; 
+
+// Imports necessários para o Toastify
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const UserIcon = () => (
   <svg width="80" height="80" viewBox="0 0 24 24" fill="#333" xmlns="http://www.w3.org/2000/svg">
@@ -81,12 +86,12 @@ const AdicionarAluno = () => {
     e.preventDefault();
 
     if (!formData.nome || !formData.email || !formData.cpf || !formData.telefone || !formData.plano || !formData.senha) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+      toast.warn('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
     if (!imagemArquivo) {
-      alert('A foto de perfil é obrigatória.');
+      toast.error('A foto de perfil é obrigatória.');
       return;
     }
 
@@ -95,18 +100,18 @@ const AdicionarAluno = () => {
     if (planoExigeDadosExtras) {
       // Adicionada validação para o campo sexo
       if (!formData.idade || !formData.sexo || !formData.peso || !formData.altura || !formData.objetivo || !formData.nivelAtividade) {
-        alert('Para o plano GOLD, os campos: idade, sexo, peso, altura, objetivo e nível de atividade são obrigatórios.');
+        toast.warn('Para o plano GOLD, os campos: idade, sexo, peso, altura, objetivo e nível de atividade são obrigatórios.');
         return;
       }
     }
 
     if (formData.senha !== formData.confirmarSenha) {
-      alert('As senhas não coincidem.');
+      toast.error('As senhas não coincidem.');
       return;
     }
     
     if (formData.senha.length < 6) {
-      alert('A senha deve ter pelo menos 6 caracteres.');
+      toast.error('A senha deve ter pelo menos 6 caracteres.');
       return;
     }
 
@@ -130,13 +135,23 @@ const AdicionarAluno = () => {
 
     try {
       await createAluno(dadosFormulario);
-      alert('Aluno criado com sucesso!');
+      
+      // Implementação do Toast com sua classe personalizada
+      toast.success('Aluno criado com sucesso!', {
+        className: 'custom-success-toast',
+        autoClose: 2000, // Fecha automaticamente após 2 segundos
+      });
+
       localStorage.setItem('showAlunoAdicionado', 'true');
-      navigate('/GerenciarAlunos'); 
+      
+      // Pequeno delay para garantir que o usuário veja o toast antes de navegar
+      setTimeout(() => {
+        navigate('/GerenciarAlunos'); 
+      }, 2100);
 
     } catch (error) {
       console.error('Erro ao criar o aluno:', error);
-      alert(`Falha ao criar aluno: ${error.message}`);
+      toast.error(`Falha ao criar aluno: ${error.message}`);
     }
   };
 
@@ -352,6 +367,8 @@ const AdicionarAluno = () => {
             </form>
           </div>
         </div>
+        {/* Adicionando o Container do Toast ao final do layout */}
+        <ToastContainer />
       </main>
     </div>
   );
