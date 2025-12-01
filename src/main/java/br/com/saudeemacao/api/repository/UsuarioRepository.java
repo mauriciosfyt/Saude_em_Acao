@@ -29,4 +29,8 @@ public interface UsuarioRepository extends MongoRepository<Usuario, String> {
     Page<Usuario> findByPerfilAndNomeContainingIgnoreCase(EPerfil perfil, String nome, Pageable pageable);
 
     long countByPerfil(EPerfil perfil);
+
+    Page<Usuario> findByPerfilAndTreinosAtribuidosIsEmpty(EPerfil perfil, Pageable pageable);
+
+    Page<Usuario> findByPerfilAndTreinosAtribuidosIsNotEmpty(EPerfil perfil, Pageable pageable);
 }

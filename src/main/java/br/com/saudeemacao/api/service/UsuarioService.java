@@ -480,6 +480,8 @@ public class UsuarioService {
     }
 
     private UsuarioSaidaDTO toUsuarioSaidaDTO(Usuario usuario) {
+        boolean temTreino = usuario.getTreinosAtribuidos() != null && !usuario.getTreinosAtribuidos().isEmpty();
+
         return new UsuarioSaidaDTO(
                 usuario.getId(),
                 usuario.getNome(),
@@ -493,7 +495,8 @@ public class UsuarioService {
                 usuario.getPeso(),
                 usuario.getAltura(),
                 usuario.getObjetivo(),
-                usuario.getNivelAtividade()
+                usuario.getNivelAtividade(),
+                temTreino
         );
     }
 }

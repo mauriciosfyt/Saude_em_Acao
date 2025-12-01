@@ -18,6 +18,7 @@ public record UsuarioSaidaDTO(
         Integer peso,
         Double altura,
         String objetivo,
-        ENivelAtividade nivelAtividade
+        ENivelAtividade nivelAtividade,
+        boolean possuiTreino
 ) {
 }
