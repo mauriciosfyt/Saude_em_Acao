@@ -446,6 +446,15 @@ export default function AdicionarTreino() {
               dias.forEach((dia, index) => {
                 try {
                   if (treinoData.exercicios) {
+                    const normalizeForIndex = (container, idx) => { // Redundant but kept for safety in block
+                         if (!container) return [];
+                         if (Array.isArray(container)) {
+                             const val = container[idx];
+                             if (Array.isArray(val)) return val;
+                             return val ? [val] : [];
+                         }
+                         return [];
+                    };
                     const arr = normalizeForIndex(treinoData.exercicios, index);
                     if (arr && arr.length) {
                       exerciciosMap[dia] = arr.map((ex) => ({ id: nextId.current++, dbId: ex.id || null, ...ex }));
@@ -868,6 +877,7 @@ export default function AdicionarTreino() {
                   value={formData.responsavel}
                   onChange={(e) => setFormData(prev => ({ ...prev, responsavel: e.target.value }))}
                   placeholder="Nome do responsável"
+                  disabled
                 />
               </div>
             </div>

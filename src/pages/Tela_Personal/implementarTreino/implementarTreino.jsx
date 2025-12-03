@@ -140,8 +140,6 @@ export default function implementarTreino() {
     // Function to find image URL in various fields
 
   // exercises per day (object keyed by day name)
-  // Criando um treino novo: começar sem exercícios visíveis
-  // Ao editar/duplicar: o useEffect preencherá a lista a partir da API/state
   const [exerciciosPorDia, setExerciciosPorDia] = useState(() => {
     const map = {};
     dias.forEach((d) => {
@@ -409,7 +407,8 @@ export default function implementarTreino() {
                     series: (ex.series !== undefined && ex.series !== null) ? ex.series : 3,
                     repeticoes: (ex.repeticoes !== undefined && ex.repeticoes !== null) ? ex.repeticoes : 10,
                     carga: ex.carga || ex.peso || '',
-                    intervalo: ex.intervalo || ex.tempo || '',
+                    // --- REMOVIDO "00:" NA LEITURA (para exibir só MM:SS) ---
+                    intervalo: (ex.intervalo || ex.tempo || '').replace(/^00:/, ''),
                     obs: ex.observacao || ex.obs || '',
                     img: ex.img || ex.imagem || ex.imagemUrl || ex.foto || ex.fotoUrl || ex.image || ex.imageUrl || null
                   }));
@@ -600,34 +599,20 @@ export default function implementarTreino() {
   }, [treinoId, isEditMode]);
 
   // Normaliza o campo de intervalo para HH:mm:ss (reutilizável)
+  // --- ADAPTAÇÃO: Igual ao AdicionarTreino (MM:SS -> 00:MM:SS) ---
   const normalizarIntervalo = (valor) => {
     if (!valor) return null;
     const v = String(valor).trim();
-    if (/^\d+$/.test(v)) {
-      const totalSeg = parseInt(v, 10);
-      const horas = Math.floor(totalSeg / 3600);
-      const minutos = Math.floor((totalSeg % 3600) / 60);
-      const segundos = totalSeg % 60;
-      const pad = (n) => String(n).padStart(2, '0');
-      return `${pad(horas)}:${pad(minutos)}:${pad(segundos)}`;
-    }
+    
+    // Se for MM:SS, adiciona 00:
     if (/^\d{1,2}:\d{2}$/.test(v)) {
       return `00:${v}`;
     }
+    // Se já for HH:MM:SS, mantem
     if (/^\d{1,2}:\d{2}:\d{2}$/.test(v)) {
       return v;
     }
-    if (/^(\d+)m(in)?$/i.test(v)) {
-      const minutos = parseInt(v, 10);
-      const pad = (n) => String(n).padStart(2, '0');
-      return `00:${pad(minutos)}:00`;
-    }
-    if (/^(\d+)s(ec)?$/i.test(v)) {
-      const segundos = parseInt(v, 10);
-      const pad = (n) => String(n).padStart(2, '0');
-      return `00:00:${pad(segundos)}`;
-    }
-    return null;
+    return null; 
   };
 
   // Coleta dados dos exercícios como ARRAY (mantido para compatibilidade interna)
@@ -665,7 +650,9 @@ export default function implementarTreino() {
           series: ex.series !== undefined && ex.series !== null && ex.series !== '' ? parseInt(ex.series, 10) : 3,
           repeticoes: ex.repeticoes !== undefined && ex.repeticoes !== null && ex.repeticoes !== '' ? parseInt(ex.repeticoes, 10) : 10,
           carga: ex.carga || '',
-          observacao: ex.obs || ''
+          observacao: ex.obs || '',
+          // --- ALTERAÇÃO: Formata intervalo para HH:mm:ss antes de enviar ---
+          intervalo: normalizarIntervalo(ex.intervalo) || ''
         };
         if (imagemInfo && imagemInfo.file) obj.img = imagemInfo.file;
         return obj;
@@ -711,6 +698,34 @@ export default function implementarTreino() {
         setSaving(false);
         return;
       }
+
+      // --- VALIDAÇÃO DE SEGURANÇA PARA TEMPO (SEGUNDOS >= 60) ---
+      for (const dia of dias) {
+        const lista = exerciciosPorDia[dia] || [];
+        for (const ex of lista) {
+          if (!ex.intervalo) continue;
+
+          // 1. Bloqueia se for apenas números (ex: "90")
+          if (/^\d+$/.test(ex.intervalo)) {
+            alert(`Erro no exercício "${ex.nome}" (${dia}): O tempo "${ex.intervalo}" está em segundos. Por favor, digite em minutos e segundos (ex: 01:30).`);
+            setSaving(false);
+            return;
+          }
+
+          // 2. Bloqueia se os segundos forem >= 60 (ex: "00:60")
+          if (ex.intervalo.includes(':')) {
+             const parts = ex.intervalo.split(':');
+             // Pega a última parte (segundos) e converte para número
+             const seg = parseInt(parts[parts.length - 1], 10);
+             if (seg >= 60) {
+                alert(`Erro no exercício "${ex.nome}" (${dia}): O tempo "${ex.intervalo}" é inválido. Os segundos não podem ser 60 ou mais.`);
+                setSaving(false);
+                return;
+             }
+          }
+        }
+      }
+      // -----------------------------------------------------------
 
       // Montar payload `exerciciosPorDia` no formato esperado pela API
       const exerciciosPorDiaPayload = montarExerciciosPorDia();
@@ -793,6 +808,7 @@ export default function implementarTreino() {
                     value={formData.responsavel}
                     onChange={(e) => setFormData(prev => ({ ...prev, responsavel: e.target.value }))}
                     placeholder="Nome do responsável"
+                    disabled
                   />
                 </div>
               </div>
@@ -987,18 +1003,18 @@ export default function implementarTreino() {
 
                     <div className="adicionartreino-field-content adicionartreino-intervalo-col">
                       <label className="adicionartreino-mobile-label">Intervalo</label>
+                      {/* --- ALTERAÇÃO: Input tipo TEXTO para MM:SS (igual ao AdicionarTreino) --- */}
                       <input 
-                        type="time" 
-                        id="duracao" 
-                        name="duracao" 
-                        step="1" 
-                        min="00:00" 
-                        max="59:59" 
+                        type="text" 
+                        placeholder="MM:SS" 
+                        maxLength="5"
                         className="adicionartreino-tempo-intervalo"
                         value={item.intervalo || ''} 
-                        onChange={(e) => updateExerciseField(item.id, 'intervalo', e.target.value)}
-                        pattern="[0-5][0-9]:[0-5][0-9]"
-                        title="Formato: MM:SS"
+                        onChange={(e) => {
+                          // Filtra apenas números e dois pontos
+                          const val = e.target.value.replace(/[^0-9:]/g, '');
+                          updateExerciseField(item.id, 'intervalo', val);
+                        }}
                       />
                     </div>
 

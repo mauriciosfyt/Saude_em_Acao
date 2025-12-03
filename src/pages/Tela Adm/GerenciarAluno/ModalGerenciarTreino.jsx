@@ -2,6 +2,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import './ModalGerenciarTreino.css';
 import { getAllTreinos } from '../../../services/treinoService';
 import { patchAddTreinoToAluno } from '../../../services/usuarioService';
+import { toast } from 'react-toastify';
+import '../../../components/Mensagem/Sucesso.css'
+import '../../../components/Mensagem/Excluido.css'
 
 const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
   const [nameQuery, setNameQuery] = useState('');
@@ -205,26 +208,28 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
       try {
         setSaving(true);
         await patchAddTreinoToAluno(alunoIdFinal, selectedTreino.id ?? selectedId);
-        
-        // Atualizar o campo possuiTreino para true quando um treino é adicionado
-        try {
-          const { updateAluno } = await import('../../../services/usuarioService');
-          await updateAluno(alunoIdFinal, { possuiTreino: true });
-          console.log('✅ Campo possuiTreino atualizado para true');
-        } catch (err) {
-          console.warn('⚠️ Aviso: Campo possuiTreino não foi atualizado:', err.message);
-        }
-        
         // Opcional: informar o componente pai que houve escolha
         onChoose(selectedTreino, alunoIdFinal);
         // Limpar seleção após escolher
         setSelectedId(null);
         // Fechar o modal após escolher
         handleCloseModal();
-        alert('Treino associado ao aluno com sucesso.');
+        
+        toast.success('Treino associado ao aluno com sucesso.', {
+          className: 'custom-success-toast', 
+          icon: true, 
+          closeButton: true 
+        });
+
       } catch (err) {
         console.error('Erro ao associar treino ao aluno:', err);
-        alert('Erro ao associar treino ao aluno: ' + (err.message || err));
+        // IMPLEMENTAÇÃO DO TOAST DE ERRO
+        toast.error('Erro ao associar treino ao aluno: ' + (err.message || err), {
+          className: 'custom-error-toast',
+          progressClassName: 'custom-error-progress-bar',
+          icon: true,
+          closeButton: true
+        });
       } finally {
         setSaving(false);
       }
@@ -271,8 +276,12 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
         </div>
 
         <div className="modal-list">
+          {/* --- ALTERAÇÃO: ESTRUTURA DE LOADING COM SPINNER --- */}
           {loading && (
-            <div style={{ padding: '20px', textAlign: 'center' }}>Carregando treinos...</div>
+            <div className="modal-loading-container">
+              <div className="loading-spinner"></div>
+              Carregando treinos...
+            </div>
           )}
 
           {error && (

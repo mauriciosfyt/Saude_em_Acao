@@ -1,13 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './AdministrarTreino.css'; // O CSS atualizado
+import './AdministrarTreino.css'; 
 import MenuPersonal from '../../../components/MenuPersonal/MenuPersonal';
 import { getAllTreinos, deleteTreino, getTreinoById } from '../../../services/treinoService';
+
+// --- IMPORTAÇÕES DO TOASTIFY ---
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../../components/Mensagem/Excluido.css'; 
+
+// --- IMPORTAÇÃO DO MODAL DE CONFIRMAÇÃO E LOGO ---
+import ModalConfirmacao from '../../../components/ModalConfirmacao/ModalConfirmacao';
+import logoEmpresa from '../../../assets/logo.png'; // Importação do logo
 
 const AdministrarTreino = () => {
   const navigate = useNavigate();
   const [activeMenuItem, setActiveMenuItem] = useState('Ger/Treinos');
-  const [showModal, setShowModal] = useState(false);
+  
+  // Modais
+  const [showModal, setShowModal] = useState(false); // Modal de Ações (Editar/Remover)
+  const [showConfirmModal, setShowConfirmModal] = useState(false); // Modal de Confirmação de Exclusão
+  
   const [selectedTreino, setSelectedTreino] = useState(null);
   const [treinos, setTreinos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +57,6 @@ const AdministrarTreino = () => {
     carregarTreinos();
   }, []);
 
-  // Aplicar filtros com debounce
   useEffect(() => {
     const timer = setTimeout(() => {
       carregarTreinos();
@@ -63,7 +75,6 @@ const AdministrarTreino = () => {
 
   const closeModal = () => {
     setShowModal(false);
-    setSelectedTreino(null);
   };
 
   const handleAdicionarTreino = () => {
@@ -73,7 +84,8 @@ const AdministrarTreino = () => {
   const handleEditar = () => {
     if (selectedTreino) {
       navigate(`/ImplementarTreino?id=${selectedTreino.id}`);
-      closeModal();
+      setShowModal(false);
+      setSelectedTreino(null);
     }
   };
 
@@ -99,27 +111,52 @@ const AdministrarTreino = () => {
         delete treinoFallback.id;
         navigate('/ImplementarTreino', { state: { treinoData: treinoFallback } });
       }
-      closeModal();
+      setShowModal(false);
+      setSelectedTreino(null);
     } catch (err) {
       console.error('Erro ao duplicar treino:', err);
-      alert('Erro ao duplicar treino. Tente novamente.');
+      toast.error('Erro ao duplicar treino. Tente novamente.', {
+        className: 'custom-error-toast',
+      });
     }
   };
 
-  const handleRemover = async () => {
-    if (!selectedTreino || !window.confirm(`Tem certeza que deseja remover o treino "${selectedTreino.nome || selectedTreino.titulo}"?`)) {
-      return;
-    }
+  // Função chamada ao clicar em "Remover" no menu de ações
+  const handleSolicitarRemocao = () => {
+    setShowModal(false);
+    setShowConfirmModal(true);
+  };
+
+  // Função chamada ao clicar em "Sim, confirmar" no modal
+  const handleConfirmarExclusao = async () => {
+    if (!selectedTreino) return;
 
     try {
       await deleteTreino(selectedTreino.id);
-      alert('Treino removido com sucesso!');
-      closeModal();
+      
+      toast.success('Treino removido com sucesso!', {
+        className: 'custom-delete-toast',
+        progressClassName: 'custom-delete-progress-bar',
+        autoClose: 2000,
+      });
+
       carregarTreinos();
     } catch (err) {
       console.error('Erro ao remover treino:', err);
-      alert(err.message || 'Erro ao remover treino. Tente novamente.');
+      toast.error(err.message || 'Erro ao remover treino. Tente novamente.', {
+         className: 'custom-error-toast',
+         autoClose: 3000
+      });
+    } finally {
+      setShowConfirmModal(false);
+      setSelectedTreino(null);
     }
+  };
+
+  // Função para cancelar a exclusão
+  const handleCancelarExclusao = () => {
+    setShowConfirmModal(false);
+    setSelectedTreino(null);
   };
 
   const formatarTreinoParaExibicao = (treino) => {
@@ -151,6 +188,8 @@ const AdministrarTreino = () => {
 
   return (
     <div className="gerenciartreino-container-personal">
+      <ToastContainer position="top-right" hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+      
       <MenuPersonal activeItem={activeMenuItem} onItemClick={handleMenuClick} />
 
       <main className="gerenciartreino-main-content-personal">
@@ -199,9 +238,14 @@ const AdministrarTreino = () => {
             </div>
           </div>
 
+          {/* --- ALTERAÇÃO: Loading com Spinner Azul --- */}
           {loading && (
-            <div style={{ padding: '20px', textAlign: 'center' }}>Carregando treinos...</div>
+            <div className="personal-loading">
+              <div className="loading-spinner"></div>
+              Carregando treinos...
+            </div>
           )}
+          {/* ------------------------------------------- */}
 
           {error && (
             <div style={{ padding: '20px', textAlign: 'center', color: 'red' }}>
@@ -246,8 +290,9 @@ const AdministrarTreino = () => {
         </div>
       </main>
 
+      {/* --- Modal de Ações (Editar/Remover) --- */}
       {showModal && (
-        <div className="gerenciartreino-modal-overlay-personal" onClick={closeModal}>
+        <div className="gerenciartreino-modal-overlay-personal" onClick={() => { setShowModal(false); setSelectedTreino(null); }}>
           <div 
             className="gerenciartreino-modal-content-personal" 
             onClick={(e) => e.stopPropagation()}
@@ -257,15 +302,26 @@ const AdministrarTreino = () => {
             </div>
             <div className="gerenciartreino-modal-actions-personal">
               <button className="gerenciartreino-modal-btn-personal edit-btn-personal" onClick={handleEditar}>Editar</button>
-              <button className="gerenciartreino-modal-btn-personal remove-btn-personal" onClick={handleRemover}>Remover</button>
+              <button className="gerenciartreino-modal-btn-personal remove-btn-personal" onClick={handleSolicitarRemocao}>Remover</button>
             </div>
           </div>
         </div>
       )}
+
+      {/* --- Modal de Confirmação de Exclusão com Logo --- */}
+      <ModalConfirmacao
+        isOpen={showConfirmModal}
+        onClose={handleCancelarExclusao}
+        onConfirm={handleConfirmarExclusao}
+        title="Excluir Treino"
+        message={`Tem certeza que deseja excluir o treino "${selectedTreino?.nome || selectedTreino?.titulo || 'Selecionado'}"? Essa ação não pode ser desfeita.`}
+        confirmLabel="Sim, excluir"
+        cancelLabel="Cancelar"
+        logoSrc={logoEmpresa} // Logo adicionada aqui
+      />
 
     </div>
   );
 };
 
 export default AdministrarTreino;
-
