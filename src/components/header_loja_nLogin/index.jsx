@@ -45,7 +45,6 @@ const Header_nLogin = () => {
       document.getElementById(`code-input-${idx + 1}`)?.focus();
     }
   };
-
   // Chamado quando o ModalLogin chama `onLogin(email)`.
   // Recebe o email e abre o modal de código.
   const handleLogin = (emailParam) => {

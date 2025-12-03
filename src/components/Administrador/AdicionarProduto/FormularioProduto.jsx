@@ -1,7 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 // Componentes Reutilizados do formulário
-// Certifique-se de que os caminhos para Modal e ControleQuantidade estão corretos no seu projeto
 import Modal from '../../../components/Administrador/AdicionarProduto/Modal';
 import ControleQuantidade from '../../../components/Administrador/AdicionarProduto/ControleQuantidade';
 
@@ -45,6 +44,15 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
 
   const inputArquivoRef = useRef(null);
 
+  // Limpeza de memória da prévia de imagem (Correção de memory leak)
+  useEffect(() => {
+    return () => {
+      if (previaImagem) {
+        URL.revokeObjectURL(previaImagem);
+      }
+    };
+  }, [previaImagem]);
+
   // Helper para pegar dados da categoria atual
   const getCategoriaAtual = () => {
     return CATEGORIAS_PRODUTO.find(c => c.valor === dadosFormulario.categoria);
@@ -75,7 +83,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const { nome, preco, categoria } = dadosFormulario;
+    const { nome, preco, categoria, descricao } = dadosFormulario;
     const categoriaInfo = getCategoriaAtual();
     
     // Validação básica
@@ -85,10 +93,10 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
     }
 
     const formData = new FormData();
-    formData.append('nome', dadosFormulario.nome);
+    formData.append('nome', nome);
     formData.append('preco', parseFloat(preco.replace(',', '.')));
-    formData.append('categoria', dadosFormulario.categoria);
-    formData.append('descricao', dadosFormulario.descricao);
+    formData.append('categoria', categoria);
+    formData.append('descricao', descricao);
     formData.append('img', imagem);
 
     let totalEstoque = 0;
@@ -103,6 +111,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
             }
         }
         break;
+
       case 'sabor':
         for (const [sabor, quantidade] of Object.entries(estoquePorVariacao)) {
             if (quantidade > 0) {
@@ -111,10 +120,12 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
             }
         }
         break;
+
       case 'padrao':
         formData.append('estoquePadrao', estoquePadrao);
         totalEstoque = Number(estoquePadrao);
         break;
+
       default:
         alert('Tipo de estoque desconhecido para a categoria selecionada.');
         return;
@@ -126,8 +137,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
         return;
     }
 
-    // --- CORREÇÃO AQUI ---
-    // Adicionamos o total geral como 'quantidade' para garantir que a API receba o contador geral
+    // Adicionamos o total geral como 'quantidade'
     formData.append('quantidade', totalEstoque);
 
     onFormSubmit(formData);
@@ -259,7 +269,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
               </select>
             </div>
             
-            {/* Componente de Estoque Inserido Aqui */}
+            {/* Componente de Estoque */}
             {renderizarControleEstoque()}
 
             <div className="produto-form-group-vertical">

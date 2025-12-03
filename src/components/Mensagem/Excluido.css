@@ -31,3 +31,35 @@
   color: #16a34a !important;
   opacity: 0.7;
 }
+
+/* --- ESTILIZAÇÃO DO TOAST DE ERRO (Adicionar ao Excluido.css) --- */
+
+/* Container do Toast de Erro */
+.Toastify__toast.custom-error-toast {
+  background: #fff !important;
+  color: #dc2626 !important; /* Vermelho para erro */
+  border: 2px solid #dc2626 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18) !important;
+  font-weight: bold !important;
+  font-size: 1rem !important;
+  padding: 16px 24px !important;
+  min-height: 60px !important;
+}
+
+/* Barra de progresso */
+.custom-error-progress-bar {
+  background: #dc2626 !important;
+  height: 4px !important;
+}
+
+/* Ícone do Toast */
+.custom-error-toast .Toastify__toast-icon svg {
+  fill: #dc2626 !important;
+}
+
+/* Botão de fechar */
+.custom-error-toast .Toastify__close-button {
+  color: #dc2626 !important;
+  opacity: 0.7;
+}
