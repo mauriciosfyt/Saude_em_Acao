@@ -1,13 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+// Importações do Toastify e CSS
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../../components/Mensagem/Excluido.css'; // Seu arquivo de estilos para exclusão
+
 import './GerenciarTreino.css'; // O CSS atualizado
 import MenuAdm from './../../../components/MenuAdm/MenuAdm';
 import { getAllTreinos, deleteTreino, getTreinoById } from '../../../services/treinoService';
+
+// Importação do Modal e da Logo (Padrão Profissional)
+import ModalConfirmacao from '../../../components/ModalConfirmacao/ModalConfirmacao';
+import logoEmpresa from '../../../assets/logo.png'; // Caminho da logo conforme seu exemplo
 
 const GerenciarTreino = () => {
   const navigate = useNavigate();
   const [activeMenuItem, setActiveMenuItem] = useState('Ger/Treinos');
   const [showModal, setShowModal] = useState(false);
+  
+  // Estado para controlar o Modal de Confirmação
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const [selectedTreino, setSelectedTreino] = useState(null);
   const [treinos, setTreinos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -89,7 +102,6 @@ const GerenciarTreino = () => {
         const treinoDuplicado = {
           ...treinoOriginal,
           nome: `${treinoOriginal.nome || treinoOriginal.titulo} (Cópia)`,
-          // Normalizar responsável: expor tanto responsavelNome quanto responsavel (obj)
           responsavelNome: treinoOriginal.responsavelNome || treinoOriginal.responsavel?.nome || treinoOriginal.responsavel || '',
           responsavelId: treinoOriginal.responsavel?.id || treinoOriginal.responsavelId || null,
         };
@@ -97,33 +109,54 @@ const GerenciarTreino = () => {
 
         navigate('/AdicionarTreino', { state: { treinoData: treinoDuplicado } });
       } else {
-        // Fallback: tente normalizar o campo responsavel do selectedTreino também
+        // Fallback
         const responsavelNomeFallback = selectedTreino.responsavelNome || selectedTreino.responsavel?.nome || selectedTreino.responsavel || '';
         const treinoFallback = { ...selectedTreino, nome: `${selectedTreino.nome || selectedTreino.titulo} (Cópia)`, responsavelNome: responsavelNomeFallback };
-        delete treinoFallback.id; // garantir sem id
+        delete treinoFallback.id; 
         navigate('/AdicionarTreino', { state: { treinoData: treinoFallback } });
       }
       closeModal();
     } catch (err) {
       console.error('Erro ao duplicar treino:', err);
-      alert('Erro ao duplicar treino. Tente novamente.');
+      toast.error('Erro ao duplicar treino. Tente novamente.');
     }
   };
 
-  const handleRemover = async () => {
-    if (!selectedTreino || !window.confirm(`Tem certeza que deseja remover o treino "${selectedTreino.nome || selectedTreino.titulo}"?`)) {
-      return;
-    }
+  // 1. Função chamada ao clicar em "Remover" no menu de ações
+  const handleRemover = () => {
+    // Fecha o modal de ações (o menu com Editar/Remover)
+    setShowModal(false);
+    // Abre o modal de confirmação profissional
+    setShowDeleteModal(true);
+  };
+
+  // 2. Função que executa a exclusão de fato (chamada pelo ModalConfirmacao)
+  const confirmarExclusao = async () => {
+    if (!selectedTreino) return;
     
     try {
       await deleteTreino(selectedTreino.id);
-      alert('Treino removido com sucesso!');
-      closeModal();
+      
+      // Toastify usando suas classes do Excluido.css
+      toast.success('Excluído com sucesso!', {
+        className: 'custom-delete-toast',
+        progressClassName: 'custom-delete-progress-bar',
+        autoClose: 3000,
+      });
+
       carregarTreinos();
     } catch (err) {
       console.error('Erro ao remover treino:', err);
-      alert(err.message || 'Erro ao remover treino. Tente novamente.');
+      toast.error(err.message || 'Erro ao remover treino. Tente novamente.');
+    } finally {
+      setShowDeleteModal(false);
+      setSelectedTreino(null);
     }
+  };
+
+  const cancelarExclusao = () => {
+    setShowDeleteModal(false);
+    setSelectedTreino(null);
   };
 
   // Formatar dados do treino para exibição
@@ -134,11 +167,7 @@ const GerenciarTreino = () => {
     
     const tags = [];
     if (treino.tipoTreino || treino.tipo) tags.push(treino.tipoTreino || treino.tipo);
-    
-    // --- INÍCIO DA CORREÇÃO ---
-    // O valor da API é "MASCULINO" (maiúsculas)
     if (treino.sexo) tags.push(treino.sexo === 'MASCULINO' ? 'Masculino' : 'Feminino');
-    // --- FIM DA CORREÇÃO ---
     
     if (treino.idadeMin && treino.idadeMax) {
       tags.push(`De ${treino.idadeMin} a ${treino.idadeMax} anos`);
@@ -159,6 +188,9 @@ const GerenciarTreino = () => {
 
   return (
     <div className="gerenciartreino-container">
+      {/* ToastContainer para notificações */}
+      <ToastContainer position="top-right" hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+      
       <MenuAdm activeItem={activeMenuItem} onItemClick={handleMenuClick} />
       
       <main className="gerenciartreino-main-content">
@@ -208,7 +240,10 @@ const GerenciarTreino = () => {
           </div>
 
           {loading && (
-            <div style={{ padding: '20px', textAlign: 'center' }}>Carregando treinos...</div>
+            <div className="personal-loading">
+              <div className="loading-spinner"></div>
+              Carregando treinos...
+            </div>
           )}
 
           {error && (
@@ -254,6 +289,7 @@ const GerenciarTreino = () => {
         </div>
       </main>
 
+      {/* Modal de Ações (Menu flutuante) */}
       {showModal && (
         <div className="gerenciartreino-modal-overlay" onClick={closeModal}>
           <div 
@@ -270,6 +306,18 @@ const GerenciarTreino = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Confirmação Profissional com Logo */}
+      <ModalConfirmacao
+        isOpen={showDeleteModal}
+        onClose={cancelarExclusao}
+        onConfirm={confirmarExclusao}
+        title="Excluir Treino"
+        message={`Tem certeza que deseja remover o treino "${selectedTreino?.nome || selectedTreino?.titulo}"?`}
+        logoSrc={logoEmpresa} // Adicionada a logo aqui
+        confirmLabel="Sim, excluir"
+        cancelLabel="Cancelar"
+      />
 
     </div>
   );

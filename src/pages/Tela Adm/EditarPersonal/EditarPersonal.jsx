@@ -231,7 +231,7 @@ const EditarPersonal = () => {
       await updateProfessor(id, dados);
 
       // Sucesso na Edição - COR LARANJA
-      toast.success('Atualizado com sucesso.', {
+      toast.success('Atualizado com sucesso!', {
         className: 'custom-edit-toast',          // Classe Laranja definida no CSS
         progressClassName: 'custom-edit-progress-bar', // Barra Laranja
         autoClose: 2000,

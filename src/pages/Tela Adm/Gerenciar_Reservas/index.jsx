@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './GerenciarReservas.css';
 
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
@@ -8,11 +8,16 @@ import { fetchReservas, fetchReservaStats, aprovarRetirada } from '../../../serv
 import { getProdutoById, updateProduto } from '../../../services/produtoService';
 import { fixImageUrl } from '../../../utils/image';
 
-// --- ALTERAÇÃO 1: Importações do Toastify e do seu CSS personalizado ---
+// --- IMPORTAÇÕES DO TOASTIFY ---
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../../components/Mensagem/Sucesso.css'; 
-// -----------------------------------------------------------------------
+// -------------------------------
+
+// --- IMPORTAÇÃO DO MODAL E LOGO ---
+import ModalConfirmacao from '../../../components/ModalConfirmacao/ModalConfirmacao'; 
+import logoEmpresa from '../../../assets/logo.png'; // Ajuste o caminho se necessário
+// -----------------------------------------
 
 const formatarData = (dataString) => {
     if (!dataString) return 'Data indisponível';
@@ -38,76 +43,85 @@ const GerenciarReservas = () => {
     const [statusFilter, setStatusFilter] = useState('APROVADA'); 
     const [processingId, setProcessingId] = useState(null);
 
-    useEffect(() => {
-        const carregarReservas = async () => {
-            setLoading(true);
-            setErro('');
-            try {
-                const token = sessionStorage.getItem('token');
-                if (token) setAuthToken(token);
+    // --- NOVOS STATES PARA O MODAL ---
+    const [modalAberto, setModalAberto] = useState(false);
+    const [reservaParaRetirar, setReservaParaRetirar] = useState(null);
+    // ---------------------------------
 
-                const statsResp = await fetchReservaStats();
-                setStats(statsResp);
+    // --- 1. REFATORAÇÃO: carregarReservas movido para useCallback ---
+    // Isso permite chamar a função manualmente para dar refresh na tela
+    const carregarReservas = useCallback(async () => {
+        setLoading(true);
+        setErro('');
+        try {
+            const token = sessionStorage.getItem('token');
+            if (token) setAuthToken(token);
 
-                const listaResp = await fetchReservas({});
-                const lista = Array.isArray(listaResp?.content) ? listaResp.content : Array.isArray(listaResp) ? listaResp : [];
+            const statsResp = await fetchReservaStats();
+            setStats(statsResp);
 
-                const normalizado = lista.map((r) => {
-                    const produtoObj = r?.produto || {};
-                    const produtoId = produtoObj.id || r.produtoId || null;
-                    const produtoNome = produtoObj.nome || r.produtoNome || 'Produto';
-                    
-                    const usuarioObj = r?.usuario || {};
-                    const cliente = usuarioObj.nome || r.cliente || 'Cliente';
-                    const email = usuarioObj.email || r.email || '';
-                    const telefone = usuarioObj.telefone || r.telefone || '';
-                    
-                    const quantidadeNum = r?.quantidade || 1;
-                    const quantidade = `${quantidadeNum}X`;
-                    
-                    const tamanho = r?.tamanho || 'N/A';
-                    const sabor = r?.sabor || 'N/A';
+            const listaResp = await fetchReservas({});
+            const lista = Array.isArray(listaResp?.content) ? listaResp.content : Array.isArray(listaResp) ? listaResp : [];
 
-                    const preco = r?.precoUnitario || r?.preco || '';
-                    const data = r?.dataSolicitacao || r?.data || r?.criadoEm || r?.createdAt || new Date().toISOString();
-                    const status = (r?.status || '').toUpperCase();
+            const normalizado = lista.map((r) => {
+                const produtoObj = r?.produto || {};
+                const produtoId = produtoObj.id || r.produtoId || null;
+                const produtoNome = produtoObj.nome || r.produtoNome || 'Produto';
+                
+                const usuarioObj = r?.usuario || {};
+                const cliente = usuarioObj.nome || r.cliente || 'Cliente';
+                const email = usuarioObj.email || r.email || '';
+                const telefone = usuarioObj.telefone || r.telefone || '';
+                
+                const quantidadeNum = r?.quantidade || 1;
+                const quantidade = `${quantidadeNum}X`;
+                
+                const tamanho = r?.tamanho || 'N/A';
+                const sabor = r?.sabor || 'N/A';
 
-                    return {
-                        id: r?.id || Math.random().toString(36).slice(2),
-                        produtoId,
-                        nome: cliente,
-                        produto: produtoNome,
-                        categoria: r.categoria || produtoObj.categoria || '',
-                        quantidade,
-                        quantidadeNum,
-                        tamanho,
-                        sabor,
-                        preco: typeof preco === 'number' ? preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : String(preco || ''),
-                        data,
-                        email,
-                        telefone,
-                        imagem: produtoObj.img || produtoObj.imagem || r.img || r.imagem || '',
-                        status,
-                    };
-                });
+                const preco = r?.precoUnitario || r?.preco || '';
+                const data = r?.dataSolicitacao || r?.data || r?.criadoEm || r?.createdAt || new Date().toISOString();
+                const status = (r?.status || '').toUpperCase();
 
-                const filtradas = normalizado.filter(r =>
-                    ['APROVADA', 'CANCELADA', 'CONCLUIDA', 'RETIRADO'].includes(r.status)
-                );
+                return {
+                    id: r?.id || Math.random().toString(36).slice(2),
+                    produtoId,
+                    nome: cliente,
+                    produto: produtoNome,
+                    categoria: r.categoria || produtoObj.categoria || '',
+                    quantidade,
+                    quantidadeNum,
+                    tamanho,
+                    sabor,
+                    preco: typeof preco === 'number' ? preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : String(preco || ''),
+                    data,
+                    email,
+                    telefone,
+                    imagem: produtoObj.img || produtoObj.imagem || r.img || r.imagem || '',
+                    status,
+                };
+            });
 
-                const time = (d) => { const t = new Date(d).getTime(); return isNaN(t) ? 0 : t; };
-                const ordenadas = filtradas.sort((a, b) => time(b.data) - time(a.data));
+            const filtradas = normalizado.filter(r =>
+                ['APROVADA', 'CANCELADA', 'CONCLUIDA', 'RETIRADO'].includes(r.status)
+            );
 
-                setReservas(ordenadas);
-            } catch (e) {
-                const msg = e?.message || 'Erro ao carregar reservas.';
-                setErro(msg);
-            } finally {
-                setLoading(false);
-            }
-        };
-        carregarReservas();
+            const time = (d) => { const t = new Date(d).getTime(); return isNaN(t) ? 0 : t; };
+            const ordenadas = filtradas.sort((a, b) => time(b.data) - time(a.data));
+
+            setReservas(ordenadas);
+        } catch (e) {
+            const msg = e?.message || 'Erro ao carregar reservas.';
+            setErro(msg);
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    // useEffect chama a função criada acima
+    useEffect(() => {
+        carregarReservas();
+    }, [carregarReservas]);
 
     const filteredReservas = reservas
         .filter((r) => {
@@ -122,79 +136,75 @@ const GerenciarReservas = () => {
             r.produto.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-    // --- FUNÇÃO CORRIGIDA PARA USAR FORMDATA ---
-    const handleMarcarRetirado = async (id) => {
-        const reservaAtual = reservas.find(r => r.id === id);
-        if (!reservaAtual) return;
+    // --- FUNÇÕES DO MODAL ---
+    const abrirModalRetirada = (reserva) => {
+        setReservaParaRetirar(reserva);
+        setModalAberto(true);
+    };
 
-        if (!window.confirm(`Confirmar retirada de "${reservaAtual.produto}"?\nO estoque será reduzido em ${reservaAtual.quantidadeNum} unidade(s).`)) return;
+    const fecharModal = () => {
+        setModalAberto(false);
+        setReservaParaRetirar(null);
+    };
+
+    // --- LÓGICA DE CONFIRMAÇÃO COM REFRESH E REDIRECIONAMENTO ---
+    const confirmarAcaoRetirada = async () => {
+        if (!reservaParaRetirar) return;
         
+        const id = reservaParaRetirar.id;
+        
+        setModalAberto(false);
         setProcessingId(id);
 
         try {
             // 1. Atualiza Status da Reserva
-            const resp = await aprovarRetirada(id);
+            await aprovarRetirada(id);
             
-            // 2. Atualiza Estoque do Produto
-            if (reservaAtual.produtoId) {
+            // 2. Atualiza Estoque do Produto (sua lógica original mantida)
+            if (reservaParaRetirar.produtoId) {
                 try {
-                    const produtoDados = await getProdutoById(reservaAtual.produtoId);
+                    const produtoDados = await getProdutoById(reservaParaRetirar.produtoId);
                     
                     const estoqueAtual = parseInt(produtoDados.quantidade || produtoDados.estoque || 0);
-                    const qtdRetirada = parseInt(reservaAtual.quantidadeNum || 1);
+                    const qtdRetirada = parseInt(reservaParaRetirar.quantidadeNum || 1);
                     let novoEstoque = estoqueAtual - qtdRetirada;
                     if (novoEstoque < 0) novoEstoque = 0;
 
-                    // --- CORREÇÃO: Criar FormData ao invés de JSON ---
-                    // Como o backend rejeita JSON, empacotamos os dados como se fosse um formulário
                     const formData = new FormData();
                     formData.append('nome', produtoDados.nome || '');
                     formData.append('preco', produtoDados.preco || 0);
                     formData.append('categoria', produtoDados.categoria || '');
                     formData.append('descricao', produtoDados.descricao || '');
-                    formData.append('quantidade', novoEstoque); // Novo estoque
-                    // formData.append('estoque', novoEstoque); // Descomente se seu backend usar 'estoque' e não 'quantidade'
+                    formData.append('quantidade', novoEstoque); 
                     
-                    // IMPORTANTE: Não enviamos o campo 'img' se não houver nova imagem, 
-                    // pois enviar string (URL) onde espera arquivo pode quebrar.
-                    
-                    await updateProduto(reservaAtual.produtoId, formData);
-                    console.log(`Estoque atualizado via FormData: ${estoqueAtual} -> ${novoEstoque}`);
+                    await updateProduto(reservaParaRetirar.produtoId, formData);
+                    console.log(`Estoque atualizado: ${estoqueAtual} -> ${novoEstoque}`);
 
                 } catch (stockError) {
                     console.error("Erro ao atualizar estoque:", stockError);
-                    // Exibe mensagem amigável sem travar o fluxo
-                    alert(`A reserva foi marcada como concluída, mas houve um erro ao atualizar o estoque: ${stockError.message}`);
                 }
-            } else {
-                console.warn("ID do produto não encontrado na reserva.");
             }
 
-            // 3. Atualiza Interface
-            const statusDaApi = (resp?.status || '').toUpperCase();
-            const novoStatus = (statusDaApi === 'RETIRADO' || statusDaApi === 'CONCLUIDA') 
-                               ? statusDaApi 
-                               : 'CONCLUIDA';
-
-            setReservas((prev) => prev.map((r) => (r.id === id ? { ...r, status: novoStatus } : r)));
-
-            // --- ALTERAÇÃO 2: Disparo do Toast de Sucesso usando sua classe CSS ---
-            toast.success(`Retirada de ${reservaAtual.produto} CONFIRMADA!`, {
+            // 3. Feedback visual
+            toast.success(`Retirada de ${reservaParaRetirar.produto} CONFIRMADA!`, {
                 className: "custom-success-toast",
                 position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
+                autoClose: 2000, // Tempo um pouco menor para ser ágil
             });
-            // ----------------------------------------------------------------------
+
+            // --- 4. AQUI ESTÁ A MÁGICA ---
+            // Primeiro: Muda a aba para "Retirado" (que usa o filtro CONCLUIDA)
+            setStatusFilter('CONCLUIDA');
+            
+            // Segundo: Força o refresh dos dados do servidor para garantir que o item apareça lá
+            await carregarReservas();
 
         } catch (error) {
             console.error('Erro ao aprovar retirada:', error);
             alert('Erro ao marcar como retirado: ' + (error?.message || error));
         } finally {
             setProcessingId(null);
+            setReservaParaRetirar(null);
         }
     };
 
@@ -309,7 +319,7 @@ const GerenciarReservas = () => {
                                         {reserva.status === 'APROVADA' ? (
                                             <button
                                                 className="retirado-btn"
-                                                onClick={() => handleMarcarRetirado(reserva.id)}
+                                                onClick={() => abrirModalRetirada(reserva)}
                                                 disabled={processingId === reserva.id}
                                             >
                                                 {processingId === reserva.id ? 'Processando...' : 'Retirado'}
@@ -328,8 +338,26 @@ const GerenciarReservas = () => {
                     </div>
                 )}
                 
-                {/* --- ALTERAÇÃO 3: Componente ToastContainer para renderizar os alertas --- */}
                 <ToastContainer />
+
+                {/* --- COMPONENTE MODAL DE CONFIRMAÇÃO --- */}
+                <ModalConfirmacao
+                    isOpen={modalAberto}
+                    onClose={fecharModal}
+                    onConfirm={confirmarAcaoRetirada}
+                    title="Confirmar Retirada"
+                    message={reservaParaRetirar ? (
+                        <>
+                            Confirmar retirada de <strong>{reservaParaRetirar.produto}</strong>?<br/>
+                            O estoque será reduzido em {reservaParaRetirar.quantidadeNum} unidade(s).
+                        </>
+                    ) : ''}
+                    logoSrc={logoEmpresa}
+                    confirmLabel="Sim, confirmar"
+                    cancelLabel="Cancelar"
+                />
+                {/* --------------------------------------- */}
+
             </main>
         </div>
     );

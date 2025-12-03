@@ -279,7 +279,7 @@ const EditarProduto = () => {
 
       // --- IMPLEMENTAÇÃO DO TOAST DE EDIÇÃO ---
       // Usamos as classes do seu arquivo Editado.css
-      toast.success("Produto editado com sucesso!", {
+      toast.success("Atualizado com sucesso!", {
         className: "custom-edit-toast",
         progressClassName: "custom-edit-progress-bar",
         autoClose: 2000 // Sincronizado com o delay abaixo

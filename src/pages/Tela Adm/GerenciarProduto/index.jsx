@@ -8,8 +8,13 @@ import { getAllProdutos, deleteProduto } from '../../../services/produtoService'
 // --- IMPORTAÇÕES DO TOASTIFY ---
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import '../../../components/Mensagem/Excluido.css';  // Estilo para sucesso (criação)
+import '../../../components/Mensagem/Excluido.css'; // Estilo para sucesso (criação)
 // -------------------------------
+
+// --- NOVO: IMPORTAÇÃO DO COMPONENTE MODAL E LOGO ---
+import ModalConfirmacao from '../../../components/ModalConfirmacao/ModalConfirmacao';
+import logoEmpresa from '../../../assets/logo.png'; // <--- Verifique se o caminho da imagem está correto
+// ---------------------------------------------------
 
 // ÍCONE DE BUSCA (igual ao do Personal)
 const SearchIcon = () => (
@@ -29,6 +34,11 @@ const GerenciarProduto = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // --- NOVO: ESTADOS PARA CONTROLE DO MODAL ---
+  const [modalAberto, setModalAberto] = useState(false);
+  const [idParaExcluir, setIdParaExcluir] = useState(null);
+  // --------------------------------------------
 
   const fetchProdutos = async () => {
     setLoading(true);
@@ -58,23 +68,18 @@ const GerenciarProduto = () => {
     fetchProdutos();
 
     // --- VERIFICAÇÃO DE FEEDBACK DE OUTRAS TELAS ---
-    // Verifica se existe uma flag de sucesso vinda da tela de Adicionar
     const showAdicionado = localStorage.getItem('showProdutoAdicionado');
     if (showAdicionado) {
       toast.success("Produto criado com sucesso!", {
         className: "custom-success-toast",
         progressClassName: "Toastify__progress-bar--success",
-        icon: true // Usa o ícone definido no CSS
+        icon: true 
       });
-      // Limpa a flag para não mostrar novamente ao recarregar
       localStorage.removeItem('showProdutoAdicionado');
     }
     
-    // Verifica se existe uma flag de edição (padrão mantido para consistência)
     const showEditado = localStorage.getItem('showProdutoEditado');
     if (showEditado) {
-       // Assumindo que você usará o mesmo padrão de toast ou um específico se tiver o CSS importado
-       // Por segurança, mantive apenas a lógica pronta. Se tiver o CSS Editado.css, importaria acima.
        localStorage.removeItem('showProdutoEditado');
     }
     // -----------------------------------------------
@@ -96,8 +101,6 @@ const GerenciarProduto = () => {
     setProdutosFiltrados(resultado);
   }, [termoBusca, categoria, produtos]);
 
-
-
   const handleEditClick = (produtoId) => {
     const produto = produtos.find(p => p.id === produtoId);
     if (produto) {
@@ -106,46 +109,51 @@ const GerenciarProduto = () => {
     }
   };
 
-  const handleDeleteClick = async (produtoId) => {
-    // Usando o confirm nativo conforme seu código original
-    if (!window.confirm('Tem certeza que deseja excluir este produto?')) return;
+  // --- LÓGICA REFORMULADA PARA USAR O MODAL ---
+  
+  // 1. Apenas abre o modal (substitui o window.confirm)
+  const handleDeleteClick = (produtoId) => {
+    setIdParaExcluir(produtoId);
+    setModalAberto(true);
+  };
+
+  // 2. Fecha o modal sem fazer nada
+  const cancelarExclusao = () => {
+    setModalAberto(false);
+    setIdParaExcluir(null);
+  };
+
+  // 3. Executa a exclusão (Sua lógica original movida para cá)
+  const confirmarExclusao = async () => {
+    if (!idParaExcluir) return;
+
+    setModalAberto(false); // Fecha o modal visualmente
+    setLoading(true);      // Usa seu loading original
     
-    setLoading(true);
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('authToken') || null;
-      await deleteProduto(produtoId, token);
-      const atualizados = produtos.filter((p) => p.id !== produtoId);
+      await deleteProduto(idParaExcluir, token);
+      
+      const atualizados = produtos.filter((p) => p.id !== idParaExcluir);
       setProdutos(atualizados);
       
-      // --- IMPLEMENTAÇÃO DO TOAST DE EXCLUSÃO ---
-      // Substituindo visualmente a lógica antiga pelo Toastify
-      
-      // Código antigo (mantido para referência/histórico):
-      // setToastMessage('Produto excluído com sucesso!');
-      // setShowToast(true);
-      // setTimeout(() => setShowToast(false), 3000);
-
+      // --- IMPLEMENTAÇÃO DO TOAST DE EXCLUSÃO (Sua lógica original mantida) ---
       toast.success('Excluído com sucesso!', {
         className: "custom-delete-toast",
         progressClassName: "custom-delete-progress-bar"
       });
-      // ------------------------------------------
+      // ------------------------------------------------------------------------
 
     } catch (err) {
       console.error('Erro ao excluir produto:', err);
-      
-      // Código antigo:
-      // setToastMessage('Erro ao excluir produto.');
-      // setShowToast(true);
-      // setTimeout(() => setShowToast(false), 3000);
-
       toast.error('Erro ao excluir produto.');
       
     } finally {
       setLoading(false);
+      setIdParaExcluir(null);
     }
   };
-
+  // ---------------------------------------------
 
   return (
     <div style={{ display: 'flex' }}>
@@ -153,8 +161,6 @@ const GerenciarProduto = () => {
 
       <main className="produto-content-wrapper">
         
-        {/* Mantive sua renderização condicional antiga, mas como não chamamos mais
-            o setShowToast, ela não será ativada, dando lugar ao ToastContainer abaixo */}
         {showToast && (
           <div className="toast-notification">{toastMessage}</div>
         )}
@@ -162,7 +168,6 @@ const GerenciarProduto = () => {
         <div className="produto-header">
           <h1 className="produto-title">Produtos</h1>
           <div className="produto-filters">
-            {/* ## AQUI ESTÁ A ALTERAÇÃO ## */}
             <div className="produto-search-container">
               <SearchIcon />
               <input
@@ -190,24 +195,19 @@ const GerenciarProduto = () => {
           </Link>
         </div>
 
-        {/* =================================================================== */}
-        {/* ================ ALTERAÇÃO DO LOADING COMEÇA AQUI ================= */}
-        {/* =================================================================== */}
-
-        {/* Estados de loading e erro (Estilo do GerenciarPersonal) */}
         {loading && (
-          <div className="personal-loading"> {/* Classe do GerenciarPersonal */}
-            <div className="loading-spinner"></div> {/* Spinner */}
+          <div className="personal-loading">
+            <div className="loading-spinner"></div>
             Carregando produtos...
           </div>
         )}
         
         {error && (
-          <div className="personal-error" style={{ padding: '20px', textAlign: 'center' }}> {/* Estilo de erro similar */}
+          <div className="personal-error" style={{ padding: '20px', textAlign: 'center' }}>
             <strong>Erro:</strong> {error}
             <button 
               onClick={fetchProdutos}
-              className="retry-button" // (Você precisaria estilizar esta classe)
+              className="retry-button"
               style={{ display: 'block', margin: '10px auto' }}
             >
               Tentar Novamente
@@ -215,7 +215,6 @@ const GerenciarProduto = () => {
           </div>
         )}
 
-        {/* Tabela só aparece se não estiver carregando e não houver erro */}
         {!loading && !error && (
           <table className="produto-table">
             <thead className="produto-thead">
@@ -244,6 +243,7 @@ const GerenciarProduto = () => {
                     <td>{produto.estoque === 0 ? (<span className="produto-sem-estoque-label">Sem estoque</span>) : produto.estoque}</td>
                     <td>
                       <a href="#" onClick={(e) => { e.preventDefault(); handleEditClick(produto.id); }} className="produto-action-link-edit">Editar</a>
+                      {/* Note que o handleDeleteClick aqui agora abre o modal em vez do confirm */}
                       <a href="#" onClick={(e) => { e.preventDefault(); handleDeleteClick(produto.id); }} className="produto-action-link-delete">Excluir</a>
                     </td>
                   </tr>
@@ -255,12 +255,20 @@ const GerenciarProduto = () => {
           </table>
         )}
 
-        {/* =================================================================== */}
-        {/* ================== ALTERAÇÃO DO LOADING TERMINA AQUI ================ */}
-        {/* =================================================================== */}
-
-        {/* Componente container para renderizar os Toasts */}
         <ToastContainer position="top-right" autoClose={3000} />
+
+        {/* --- INSERÇÃO DO COMPONENTE REUTILIZÁVEL --- */}
+        <ModalConfirmacao
+          isOpen={modalAberto}
+          onClose={cancelarExclusao}
+          onConfirm={confirmarExclusao}
+          title="Confirmar Exclusão"
+          message="Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita."
+          logoSrc={logoEmpresa}
+          confirmLabel="Sim, Excluir"
+          cancelLabel="Cancelar"
+        />
+        {/* ------------------------------------------- */}
 
       </main>
     </div>

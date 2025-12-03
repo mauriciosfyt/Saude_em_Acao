@@ -236,7 +236,7 @@ const EditarAluno = () => {
       await updateAluno(alvoId, dados);
 
       // Implementação Toastly para Sucesso na Edição (Laranja)
-      toast.success('Atualizado com sucesso.', {
+      toast.success('Atualizado com sucesso!', {
         className: 'custom-edit-toast', // Classe personalizada laranja
         progressClassName: 'custom-edit-progress-bar', // Barra de progresso laranja
         autoClose: 2000,

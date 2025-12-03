@@ -2,6 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import MenuAdm from './../../../components/MenuAdm/MenuAdm';
 import './AdicionarTreino.css';
+// Importação do Toastify e do seu CSS personalizado
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../../components/Mensagem/Sucesso.css'; 
+import '../../../components/Mensagem/Editado.css'; // Importação do CSS laranja
+
 import baixo from '../../../assets/icones/down-arrow.svg';
 import cima from '../../../assets/icones/up-arrow.svg';
 import { createTreino, updateTreino, getTreinoById } from '../../../services/treinoService';
@@ -247,13 +253,13 @@ export default function AdicionarTreino() {
     if (file) {
       // Validar se é uma imagem
       if (!file.type.startsWith('image/')) {
-        alert('Por favor, selecione uma imagem válida');
+        toast.error('Por favor, selecione uma imagem válida');
         return;
       }
 
       // Validar tamanho (máx 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('A imagem não pode ter mais de 5MB');
+        toast.error('A imagem não pode ter mais de 5MB');
         return;
       }
 
@@ -487,7 +493,14 @@ export default function AdicionarTreino() {
           }
         } catch (error) {
           console.error('Erro ao carregar treino:', error);
-          alert('Erro ao carregar dados do treino. ' + (error.message || ''));
+          // --- MENSAGEM AMIGÁVEL AO CARREGAR ---
+          let errorMsg = 'Erro ao carregar dados do treino.';
+          if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('Network Error'))) {
+             errorMsg = 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.';
+          } else if (error.message) {
+             errorMsg += ' ' + error.message;
+          }
+          toast.error(errorMsg);
         } finally {
           setLoading(false);
         }
@@ -692,13 +705,13 @@ export default function AdicionarTreino() {
       setSaving(true);
 
       if (!formData.nome.trim()) {
-        alert('Por favor, preencha o nome do treino.');
+        toast.warning('Por favor, preencha o nome do treino.');
         setSaving(false);
         return;
       }
 
       if (!formData.tipoTreino.trim()) {
-        alert('Por favor, preencha o tipo de treino.');
+        toast.warning('Por favor, preencha o tipo de treino.');
         setSaving(false);
         return;
       }
@@ -707,13 +720,13 @@ export default function AdicionarTreino() {
       const idadeMaxima = parseInt(formData.idadeMax, 10);
 
       if (isNaN(idadeMinima) || idadeMinima <= 0) {
-        alert('Por favor, preencha uma idade mínima válida.');
+        toast.warning('Por favor, preencha uma idade mínima válida.');
         setSaving(false);
         return;
       }
 
       if (isNaN(idadeMaxima) || idadeMaxima <= 0) {
-        alert('Por favor, preencha uma idade máxima válida.');
+        toast.warning('Por favor, preencha uma idade máxima válida.');
         setSaving(false);
         return;
       }
@@ -726,7 +739,7 @@ export default function AdicionarTreino() {
 
           // 1. Bloqueia se for apenas números (ex: "90")
           if (/^\d+$/.test(ex.intervalo)) {
-            alert(`Erro no exercício "${ex.nome}" (${dia}): O tempo "${ex.intervalo}" está em segundos. Por favor, digite em minutos e segundos (ex: 01:30).`);
+            toast.warning(`Erro no exercício "${ex.nome}" (${dia}): O tempo "${ex.intervalo}" está em segundos. Por favor, digite em minutos e segundos (ex: 01:30).`);
             setSaving(false);
             return;
           }
@@ -737,7 +750,7 @@ export default function AdicionarTreino() {
              // Pega a última parte (segundos) e converte para número
              const seg = parseInt(parts[parts.length - 1], 10);
              if (seg >= 60) {
-                alert(`Erro no exercício "${ex.nome}" (${dia}): O tempo "${ex.intervalo}" é inválido. Os segundos não podem ser 60 ou mais.`);
+                toast.warning(`Erro no exercício "${ex.nome}" (${dia}): O tempo "${ex.intervalo}" é inválido. Os segundos não podem ser 60 ou mais.`);
                 setSaving(false);
                 return;
              }
@@ -765,25 +778,50 @@ export default function AdicionarTreino() {
 
       if (isEditMode) {
         await updateTreino(treinoId, dadosTreino);
-        alert('Treino atualizado com sucesso!');
+        // Usa a classe customizada no toast de edição (laranja)
+        // E força a classe da barra de progresso (para não ficar verde padrão do success)
+        toast.success('Atualizado com sucesso!', {
+          className: 'custom-edit-toast',          // Corpo laranja
+          progressClassName: 'custom-edit-progress-bar', // Barra laranja
+          autoClose: 2000,
+        });
       } else {
         await createTreino(dadosTreino);
-        alert('Treino criado com sucesso!');
+        // Usa a classe customizada no toast de sucesso (verde)
+        toast.success('Treino criado com sucesso!', {
+          className: 'custom-success-toast',
+          autoClose: 2000,
+        });
       }
 
-      navigate('/GerenciarTreino');
+      // Pequeno delay para o usuário ver o toast antes de mudar de tela
+      setTimeout(() => {
+        navigate('/GerenciarTreino');
+      }, 2100);
+
     } catch (error) {
       console.error('Erro ao salvar treino:', error);
-      alert(error.message || 'Erro ao salvar treino. Tente novamente.');
+      
+      // --- MENSAGEM AMIGÁVEL AO SALVAR ---
+      let errorMsg = 'Erro ao salvar treino.';
+      if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('Network Error'))) {
+         errorMsg = 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.';
+      } else if (error.message) {
+         errorMsg = error.message;
+      } else {
+         errorMsg += ' Tente novamente.';
+      }
+      toast.error(errorMsg);
+      
     } finally {
       setSaving(false);
     }
   };
 
   const handleCancelar = () => {
-    if (window.confirm('Tem certeza que deseja cancelar? As alterações não salvas serão perdidas.')) {
-      navigate('/GerenciarTreino');
-    }
+    // --- REMOVIDA A CONFIRMAÇÃO (window.confirm) CONFORME SOLICITADO ---
+    // A navegação agora ocorre imediatamente
+    navigate('/GerenciarTreino');
   };
 
   if (loading) {
@@ -791,7 +829,11 @@ export default function AdicionarTreino() {
       <div className="adicionartreino-page">
         <MenuAdm />
         <main className="adicionartreino-main-content">
-          <div style={{ padding: '40px', textAlign: 'center' }}>Carregando...</div>
+          {/* Loading padrão azul (estilo Reservas) */}
+          <div className="personal-loading">
+            <div className="loading-spinner"></div>
+            Carregando...
+          </div>
         </main>
       </div>
     );
@@ -799,6 +841,8 @@ export default function AdicionarTreino() {
 
   return (
     <div className="adicionartreino-page">
+      {/* ToastContainer adicionado para renderizar as notificações */}
+      <ToastContainer position="top-right" hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       <MenuAdm />
       <main className="adicionartreino-main-content">
         <div className="adicionartreino-form-wrapper">

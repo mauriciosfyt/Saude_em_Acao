@@ -11,6 +11,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import '../../../components/Mensagem/Excluido.css'; // Importação do CSS personalizado para Exclusão
 // --- FIM REACT TOASTIFY ---
 
+// --- IMPORTAÇÃO DO MODAL E LOGO (NOVO) ---
+import ModalConfirmacao from '../../../components/ModalConfirmacao/ModalConfirmacao';
+import logoEmpresa from '../../../assets/logo.png'; // Caminho padronizado conforme seus outros arquivos
+// -----------------------------------------
+
 // Ícone de busca
 const SearchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -25,6 +30,11 @@ const GerenciarPersonal = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // --- NOVOS STATES PARA O MODAL DE EXCLUSÃO ---
+  const [modalExclusaoOpen, setModalExclusaoOpen] = useState(false);
+  const [personalParaExcluir, setPersonalParaExcluir] = useState(null);
+  // ---------------------------------------------
 
   // Buscar professores da API
   const fetchProfessores = async () => {
@@ -70,28 +80,47 @@ const GerenciarPersonal = () => {
     fetchProfessores();
   }, []);
 
-  // Função para deletar personal
-  const handleDeletePersonal = async (id, nome) => {
-    // Mantivemos o window.confirm para garantir a lógica de segurança
-    if (window.confirm(`Tem certeza que deseja excluir o personal ${nome}?`)) {
-      try {
-        await deleteProfessor(id);
-        fetchProfessores(); // Atualiza a lista após excluir
-        
-        // --- ALTERAÇÃO: Toast de Exclusão (Verde) ---
-        toast.success('Excluído com sucesso!', {
-          className: 'custom-delete-toast',          // Classe definida em Excluido.css
-          progressClassName: 'custom-delete-progress-bar',
-          autoClose: 2000,
-        });
-        
-      } catch (err) {
-        console.error('Erro ao excluir personal:', err);
-        // Toast de erro
-        toast.error(`Erro ao excluir personal: ${err.message}`);
-      }
+  // --- LÓGICA REFATORADA PARA O MODAL ---
+
+  // 1. Apenas abre o modal e guarda quem será excluído
+  const abrirModalExclusao = (personal) => {
+    setPersonalParaExcluir(personal);
+    setModalExclusaoOpen(true);
+  };
+
+  // 2. Fecha o modal e limpa a seleção
+  const fecharModalExclusao = () => {
+    setModalExclusaoOpen(false);
+    setPersonalParaExcluir(null);
+  };
+
+  // 3. Executa a lógica de exclusão (chamada pelo botão Confirmar do modal)
+  const confirmarExclusaoReal = async () => {
+    if (!personalParaExcluir) return;
+
+    // Fecha o modal visualmente antes de processar
+    setModalExclusaoOpen(false);
+
+    try {
+      await deleteProfessor(personalParaExcluir.id);
+      fetchProfessores(); // Atualiza a lista após excluir
+      
+      // Toast de Sucesso (mantendo sua configuração original)
+      toast.success('Excluído com sucesso!', {
+        className: 'custom-delete-toast',
+        progressClassName: 'custom-delete-progress-bar',
+        autoClose: 2000,
+      });
+      
+    } catch (err) {
+      console.error('Erro ao excluir personal:', err);
+      // Toast de erro
+      toast.error(`Erro ao excluir personal: ${err.message}`);
+    } finally {
+      setPersonalParaExcluir(null);
     }
   };
+  // -------------------------------------
 
   // Filtrar personais baseado na busca
   const filteredPersonais = professores.filter(personal =>
@@ -112,7 +141,7 @@ const GerenciarPersonal = () => {
             <input 
               className="personal-search-input" 
               type="text" 
-              placeholder="Pesquisar nome  do personal"
+              placeholder="Pesquisar nome do personal"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -178,9 +207,11 @@ const GerenciarPersonal = () => {
                         >
                           Editar
                         </Link>
+                        
+                        {/* BOTÃO EXCLUIR ALTERADO PARA ABRIR O MODAL */}
                         <button 
                           className="personal-action-link-delete"
-                          onClick={() => handleDeletePersonal(personal.id, personal.nome)}
+                          onClick={() => abrirModalExclusao(personal)}
                         >
                           Excluir
                         </button>
@@ -203,6 +234,24 @@ const GerenciarPersonal = () => {
         )}
         {/* Componente ToastContainer para exibir as notificações */}
         <ToastContainer />
+
+        {/* --- MODAL DE EXCLUSÃO (NOVO) --- */}
+        <ModalConfirmacao
+          isOpen={modalExclusaoOpen}
+          onClose={fecharModalExclusao}
+          onConfirm={confirmarExclusaoReal}
+          title="Excluir Personal"
+          message={
+            personalParaExcluir 
+              ? `Tem certeza que deseja excluir o personal ${personalParaExcluir.nome}?` 
+              : 'Tem certeza?'
+          }
+          logoSrc={logoEmpresa}
+          confirmLabel="Sim, Excluir"
+          cancelLabel="Cancelar"
+        />
+        {/* -------------------------------- */}
+
       </main>
     </div>
   );

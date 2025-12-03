@@ -3,12 +3,17 @@ import './GerenciarAlunos.css';
 import MenuAdm from '../../../components/MenuAdm/MenuAdm';
 import { Link } from 'react-router-dom';
 import ModalGerenciarTreino from './ModalGerenciarTreino';
-import { getAllAlunos, deleteAluno, updateAluno } from '../../../services/usuarioService'; // Importar as funções da API
-import { useAuth } from '../../../contexts/AuthContext'; // Importar o contexto de auth
+import { getAllAlunos, deleteAluno, updateAluno } from '../../../services/usuarioService'; 
+import { useAuth } from '../../../contexts/AuthContext'; 
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../../components/Mensagem/Excluido.css';
+
+// --- IMPORTAÇÃO DO MODAL E LOGO (NOVO) ---
+import ModalConfirmacao from '../../../components/ModalConfirmacao/ModalConfirmacao';
+import logoEmpresa from '../../../assets/logo.png'; // Verifique se o caminho está correto para seus assets
+// -----------------------------------------
 
 // Ícone de busca (mantido igual)
 const SearchIcon = () => (
@@ -19,17 +24,20 @@ const SearchIcon = () => (
 );
 
 const GerenciarAlunos = () => {
-  const { user } = useAuth(); // Usar o contexto de autenticação
+  const { user } = useAuth(); 
   const [alunos, setAlunos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   
+  // States do Modal de Treino (mantidos)
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAluno, setSelectedAluno] = useState(null);
-  // Removido selectedTreinos: agora usamos apenas os dados do backend
 
-  
+  // --- NOVOS STATES PARA O MODAL DE EXCLUSÃO ---
+  const [modalExclusaoOpen, setModalExclusaoOpen] = useState(false);
+  const [alunoParaExcluir, setAlunoParaExcluir] = useState(null);
+  // ---------------------------------------------
 
   // Buscar alunos da API
   const fetchAlunos = async () => {
@@ -40,8 +48,6 @@ const GerenciarAlunos = () => {
       const alunosData = await getAllAlunos();
       console.log(' Dados recebidos:', alunosData);
       setAlunos(alunosData);
-
-      // Não usamos mais localStorage para exibir treinos
     } catch (err) {
       console.error(' Erro ao carregar alunos:', err);
       setError('Erro ao carregar lista de alunos. Verifique sua conexão e permissões.');
@@ -52,18 +58,36 @@ const GerenciarAlunos = () => {
 
   useEffect(() => {
     fetchAlunos();
-    // Não carrega mais treinos do localStorage
   }, []);
 
-  // Função para deletar aluno
-  const handleDeleteAluno = async (id, nome) => {
-    // Verificação de window.confirm removida
+  // --- LÓGICA DE EXCLUSÃO REFATORADA ---
+
+  // 1. Apenas abre o modal e salva quem será excluído
+  const abrirModalExclusao = (aluno) => {
+    setAlunoParaExcluir(aluno);
+    setModalExclusaoOpen(true);
+  };
+
+  // 2. Fecha o modal sem fazer nada
+  const fecharModalExclusao = () => {
+    setModalExclusaoOpen(false);
+    setAlunoParaExcluir(null);
+  };
+
+  // 3. Executa a exclusão real (Sua lógica original movida para cá)
+  const confirmarExclusaoReal = async () => {
+    if (!alunoParaExcluir) return;
+
+    // Fecha o modal visualmente
+    setModalExclusaoOpen(false);
+
     try {
-      await deleteAluno(id);
+      await deleteAluno(alunoParaExcluir.id);
+      
       // Atualizar a lista após exclusão
       fetchAlunos();
       
-      toast.success('Aluno excluído com sucesso!', {
+      toast.success('Excluído com sucesso!', {
         className: 'custom-delete-toast',
         progressClassName: 'custom-delete-progress-bar',
         autoClose: 2000,
@@ -71,8 +95,11 @@ const GerenciarAlunos = () => {
     } catch (err) {
       console.error('Erro ao excluir aluno:', err);
       alert('Erro ao excluir aluno. Tente novamente.');
+    } finally {
+      setAlunoParaExcluir(null); // Limpa o estado
     }
   };
+  // -------------------------------------
 
   const handleOpenModal = (aluno) => {
     setSelectedAluno(aluno);
@@ -85,21 +112,17 @@ const GerenciarAlunos = () => {
   };
 
   const handleChooseTreino = async (treino, alunoIdParam) => {
-    // Recebe (treino, alunoId) vindo do modal
     const alunoIdFinal = alunoIdParam || (selectedAluno?.id && String(selectedAluno.id));
     if (!alunoIdFinal) {
       alert('ID do aluno não encontrado. Tente novamente.');
       return;
     }
 
-    // Persistir no backend usando updateAluno
     try {
-      // Envia treinoId como FormData para evitar erro de Content-Type
       const formData = new FormData();
       formData.append('treinoId', treino.id);
       await updateAluno(alunoIdFinal, formData);
       console.log('Treino associado ao aluno via API com sucesso');
-      // Atualiza lista de alunos para refletir associação
       await fetchAlunos();
     } catch (err) {
       console.warn('Falha ao salvar associação de treino no servidor.', err);
@@ -109,7 +132,6 @@ const GerenciarAlunos = () => {
     setSelectedAluno(null);
   };
 
-  // Filtrar alunos baseado na busca
   const filteredAlunos = alunos.filter(aluno =>
     aluno.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     aluno.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -123,13 +145,12 @@ const GerenciarAlunos = () => {
         <div className="alunos-header">
           <h1 className="alunos-title">Alunos</h1>
           
-          {/* Barra de pesquisa */}
           <div className="alunos-search-container">
             <SearchIcon />
             <input 
               className="alunos-search-input" 
               type="text" 
-              placeholder="Pesquisar nome  do aluno"
+              placeholder="Pesquisar nome do aluno"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -140,10 +161,9 @@ const GerenciarAlunos = () => {
           </Link>
         </div>
 
-        {/* Estados de loading e erro - MODIFICADO */}
         {loading && (
-          <div className="personal-loading"> {/* Classe usada para corresponder ao estilo do GerenciarPersonal */}
-            <div className="loading-spinner"></div> {/* Classe usada para o spinner */}
+          <div className="personal-loading">
+            <div className="loading-spinner"></div>
             Carregando alunos...
           </div>
         )}
@@ -169,7 +189,6 @@ const GerenciarAlunos = () => {
                 </tr>
               ) : (
                 filteredAlunos.map(aluno => {
-                  // Extrai treino do backend
                   const treino = aluno.treino || aluno.treinoAtual || aluno.assignedTreino || (Array.isArray(aluno.treinos) ? aluno.treinos[0] : null);
                   return (
                     <tr key={aluno.id}>
@@ -202,15 +221,16 @@ const GerenciarAlunos = () => {
                         >
                           Editar
                         </Link>
+                        
+                        {/* BOTÃO EXCLUIR ALTERADO PARA ABRIR O MODAL */}
                         <button 
                           className="alunos-action-link-delete"
-                          onClick={() => handleDeleteAluno(aluno.id, aluno.nome)}
+                          onClick={() => abrirModalExclusao(aluno)}
                           style={{ 
                             background: 'none', 
                             border: 'none', 
                             color: '#dc3545', 
                             cursor: 'pointer',
-                            textDecoration: 'underline'
                           }}
                         >
                           Excluir
@@ -224,6 +244,24 @@ const GerenciarAlunos = () => {
           </table>
         )}
         <ToastContainer />
+
+        {/* --- INSERÇÃO DO MODAL DE EXCLUSÃO --- */}
+        <ModalConfirmacao
+          isOpen={modalExclusaoOpen}
+          onClose={fecharModalExclusao}
+          onConfirm={confirmarExclusaoReal}
+          title="Excluir Aluno"
+          message={
+            alunoParaExcluir 
+              ? `Tem certeza que deseja excluir o aluno(a) ${alunoParaExcluir.nome}? Esta ação é irreversível.` 
+              : 'Tem certeza?'
+          }
+          logoSrc={logoEmpresa}
+          confirmLabel="Sim, Excluir"
+          cancelLabel="Cancelar"
+        />
+        {/* ------------------------------------- */}
+
       </main>
 
       <ModalGerenciarTreino 
