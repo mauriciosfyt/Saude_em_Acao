@@ -155,3 +155,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* bolinha verde simples - indicador de treino atribuído */
+.treino-dot-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background: #2ecc71;
+  border-radius: 50%;
+  margin-left: 12px;
+  vertical-align: middle;
+}

@@ -87,7 +87,7 @@ const GerenciarAlunos = () => {
       // Atualizar a lista após exclusão
       fetchAlunos();
       
-      toast.success('Excluído com sucesso!', {
+      toast.success('Aluno excluído com sucesso!', {
         className: 'custom-delete-toast',
         progressClassName: 'custom-delete-progress-bar',
         autoClose: 2000,
@@ -205,11 +205,12 @@ const GerenciarAlunos = () => {
                             >
                               Gerenciar
                             </button>
-                            {treino && (
-                              <div className="treino-chosen" title={`Treino escolhido: ${treino.titulo || treino.nome || 'Treino atribuído'}`}>
-                                <span className="treino-dot" aria-hidden="true" />
-                                <span className="treino-title">{treino.titulo || treino.nome || 'Treino atribuído'}</span>
-                              </div>
+                            {aluno.possuiTreino && (
+                              <span 
+                                className="treino-dot-indicator" 
+                                title="Aluno possui treino atribuído"
+                                aria-label="Treino atribuído"
+                              />
                             )}
                           </>
                         ) : null}

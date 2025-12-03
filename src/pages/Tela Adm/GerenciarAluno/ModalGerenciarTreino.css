@@ -225,33 +225,4 @@
 /* make sure inner content respects the rounded corners */
 .modal-card * { box-sizing: border-box; }
 
-/* --- SPINNER LOADING --- */
-.modal-loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center; /* Centraliza verticalmente */
-  height: 100%;            /* Ocupa a altura disponível do pai (.modal-list) */
-  min-height: 300px;       /* Garante uma altura visual confortável para centralizar */
-  width: 100%;             /* Ocupa a largura total */
-  gap: 15px;
-  color: #666;
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-.loading-spinner {
-  width: 45px;
-  height: 45px;
-  border: 4px solid #e2e8f0;    /* Fundo do anel (cinza claro) */
-  border-top: 4px solid #f97316; /* Cor de destaque (Laranja/Tema) */
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 
