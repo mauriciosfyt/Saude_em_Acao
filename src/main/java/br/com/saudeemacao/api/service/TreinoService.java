@@ -1,10 +1,6 @@
 package br.com.saudeemacao.api.service;
 
-import br.com.saudeemacao.api.dto.ExercicioDTO;
-import br.com.saudeemacao.api.dto.ResponsavelDTO;
-import br.com.saudeemacao.api.dto.TreinoDTO;
-import br.com.saudeemacao.api.dto.TreinoMetricasDTO;
-import br.com.saudeemacao.api.dto.TreinoResponseDTO;
+import br.com.saudeemacao.api.dto.*;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
 import br.com.saudeemacao.api.model.EnumTreino.EDiaDaSemana;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
@@ -302,14 +298,30 @@ public class TreinoService {
         }
     }
 
-    public List<HistoricoTreino> buscarDesempenhoSemanal(UserDetails userDetails) {
+    public List<DesempenhoSemanalDTO> buscarDesempenhoSemanal(UserDetails userDetails) {
         Usuario aluno = getUsuarioAutenticado(userDetails);
 
         LocalDateTime hoje = LocalDateTime.now();
         LocalDateTime inicioDaSemana = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate().atStartOfDay();
         LocalDateTime fimDaSemana = hoje.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).toLocalDate().atTime(23, 59, 59);
 
-        return historicoTreinoRepository.findByAlunoIdAndDataRealizacaoBetween(aluno.getId(), inicioDaSemana, fimDaSemana);
+        List<HistoricoTreino> historicos = historicoTreinoRepository.findByAlunoIdAndDataRealizacaoBetween(aluno.getId(), inicioDaSemana, fimDaSemana);
+
+        Set<EDiaDaSemana> diasConcluidos = historicos.stream()
+                .map(HistoricoTreino::getDiaDaSemanaConcluido)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<DesempenhoSemanalDTO> desempenho = new ArrayList<>();
+
+        for (EDiaDaSemana dia : EDiaDaSemana.values()) {
+            boolean realizado = diasConcluidos.contains(dia);
+            desempenho.add(new DesempenhoSemanalDTO(dia, realizado));
+        }
+
+        desempenho.sort(Comparator.comparing(DesempenhoSemanalDTO::getDia));
+
+        return desempenho;
     }
 
     public TreinoMetricasDTO getMetricasDeTreino(UserDetails userDetails) {

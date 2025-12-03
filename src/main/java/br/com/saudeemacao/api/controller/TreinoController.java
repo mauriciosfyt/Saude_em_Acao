@@ -1,9 +1,6 @@
 package br.com.saudeemacao.api.controller;
 
-import br.com.saudeemacao.api.dto.TreinoDTO;
-import br.com.saudeemacao.api.dto.TreinoMetricasDTO;
-import br.com.saudeemacao.api.dto.TreinoRealizadoDTO;
-import br.com.saudeemacao.api.dto.TreinoResponseDTO; // Importado
+import br.com.saudeemacao.api.dto.*;
 import br.com.saudeemacao.api.model.HistoricoTreino;
 import br.com.saudeemacao.api.model.Treino;
 import br.com.saudeemacao.api.service.TreinoService;
@@ -93,9 +90,9 @@ public class TreinoController {
 
     @GetMapping("/desempenho-semanal")
     @PreAuthorize("hasRole('ALUNO')")
-    public ResponseEntity<List<HistoricoTreino>> getDesempenhoSemanal(
+    public ResponseEntity<List<DesempenhoSemanalDTO>> getDesempenhoSemanal(
             @AuthenticationPrincipal UserDetails userDetails) {
-        List<HistoricoTreino> desempenho = treinoService.buscarDesempenhoSemanal(userDetails);
+        List<DesempenhoSemanalDTO> desempenho = treinoService.buscarDesempenhoSemanal(userDetails);
         return ResponseEntity.ok(desempenho);
     }
 
