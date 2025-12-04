@@ -155,6 +155,7 @@ const createStyles = (isDark) => {
       width: 18,
       height: 18,
     },
+    
   
     cardsContainer: {
       flex: 1,
