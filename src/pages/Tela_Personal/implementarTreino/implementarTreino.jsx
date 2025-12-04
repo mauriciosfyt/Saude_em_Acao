@@ -254,7 +254,8 @@ export default function implementarTreino() {
       if (!file.type.startsWith('image/')) {
         toast.error('Por favor, selecione uma imagem válida', {
           className: 'custom-error-toast',
-          progressClassName: 'custom-error-progress-bar'
+          progressClassName: 'custom-error-progress-bar',
+          autoClose: 2000
         });
         return;
       }
@@ -263,7 +264,8 @@ export default function implementarTreino() {
       if (file.size > 5 * 1024 * 1024) {
         toast.error('A imagem não pode ter mais de 5MB', {
           className: 'custom-error-toast',
-          progressClassName: 'custom-error-progress-bar'
+          progressClassName: 'custom-error-progress-bar',
+          autoClose: 2000
         });
         return;
       }
@@ -500,7 +502,8 @@ export default function implementarTreino() {
             console.error('Erro ao carregar treino:', error);
             toast.error('Erro ao carregar dados do treino. ' + (error.message || ''), {
               className: 'custom-error-toast',
-              progressClassName: 'custom-error-progress-bar'
+              progressClassName: 'custom-error-progress-bar',
+              autoClose: 2000
             });
           } finally {
             setLoading(false);
@@ -689,7 +692,8 @@ export default function implementarTreino() {
       if (!formData.nome.trim()) {
         toast.error('Por favor, preencha o nome do treino.', {
           className: 'custom-error-toast',
-          progressClassName: 'custom-error-progress-bar'
+          progressClassName: 'custom-error-progress-bar',
+          autoClose: 2000
         });
         setSaving(false);
         return;
@@ -698,7 +702,8 @@ export default function implementarTreino() {
       if (!formData.tipoTreino.trim()) {
         toast.error('Por favor, preencha o tipo de treino.', {
           className: 'custom-error-toast',
-          progressClassName: 'custom-error-progress-bar'
+          progressClassName: 'custom-error-progress-bar',
+          autoClose: 2000
         });
         setSaving(false);
         return;
@@ -711,7 +716,8 @@ export default function implementarTreino() {
       if (isNaN(idadeMinima) || idadeMinima <= 0) {
         toast.error('Por favor, preencha uma idade mínima válida.', {
           className: 'custom-error-toast',
-          progressClassName: 'custom-error-progress-bar'
+          progressClassName: 'custom-error-progress-bar',
+          autoClose: 2000
         });
         setSaving(false);
         return;
@@ -720,7 +726,8 @@ export default function implementarTreino() {
       if (isNaN(idadeMaxima) || idadeMaxima <= 0) {
         toast.error('Por favor, preencha uma idade máxima válida.', {
           className: 'custom-error-toast',
-          progressClassName: 'custom-error-progress-bar'
+          progressClassName: 'custom-error-progress-bar',
+          autoClose: 2000
         });
         setSaving(false);
         return;
@@ -739,7 +746,8 @@ export default function implementarTreino() {
              if (!isNaN(numeroCarga) && numeroCarga < 0) {
                 toast.error(`Erro no exercício "${ex.nome}" (${dia}): A carga não pode ser negativa.`, {
                   className: 'custom-error-toast',
-                  progressClassName: 'custom-error-progress-bar'
+                  progressClassName: 'custom-error-progress-bar',
+                  autoClose: 2000
                 });
                 setSaving(false);
                 return;
@@ -752,7 +760,8 @@ export default function implementarTreino() {
           if (/^\d+$/.test(ex.intervalo)) {
             toast.error(`Erro no exercício "${ex.nome}" (${dia}): O tempo "${ex.intervalo}" está em segundos. Por favor, digite em minutos e segundos (ex: 01:30).`, {
               className: 'custom-error-toast',
-              progressClassName: 'custom-error-progress-bar'
+              progressClassName: 'custom-error-progress-bar',
+              autoClose: 2000
             });
             setSaving(false);
             return;
@@ -766,7 +775,8 @@ export default function implementarTreino() {
              if (seg >= 60) {
                 toast.error(`Erro no exercício "${ex.nome}" (${dia}): O tempo "${ex.intervalo}" é inválido. Os segundos não podem ser 60 ou mais.`, {
                   className: 'custom-error-toast',
-                  progressClassName: 'custom-error-progress-bar'
+                  progressClassName: 'custom-error-progress-bar',
+                  autoClose: 2000
                 });
                 setSaving(false);
                 return;
@@ -797,12 +807,15 @@ export default function implementarTreino() {
         await updateTreino(treinoId, dadosTreino);
         toast.success('Treino atualizado com sucesso!', {
           className: 'custom-edit-toast',
-          progressClassName: 'custom-edit-progress-bar'
+          progressClassName: 'custom-edit-progress-bar',
+          autoClose: 2000
         });
       } else {
         await createTreino(dadosTreino);
         toast.success('Treino criado com sucesso!', {
-          className: 'custom-success-toast'
+          className: 'custom-success-toast',
+          progressClassName: 'custom-success-progress-bar',
+          autoClose: 2000
         });
       }
       
@@ -811,7 +824,8 @@ export default function implementarTreino() {
       console.error('Erro ao salvar treino:', error);
       toast.error(error.message || 'Erro ao salvar treino. Tente novamente.', {
         className: 'custom-error-toast',
-        progressClassName: 'custom-error-progress-bar'
+        progressClassName: 'custom-error-progress-bar',
+        autoClose: 2000
       });
     } finally {
       setSaving(false);
