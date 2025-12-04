@@ -22,7 +22,6 @@ import { useAuth } from '../../context/AuthContext';
 import {
   obterHistoricoChat,
   enviarMensagemChat,
-  enviarImagemChat,
   setAuthToken,
   apagarMensagemChat,
   apagarHistoricoChat,
@@ -259,16 +258,27 @@ const Chat = ({ navigation, route }) => {
     // tipagem simples: date | image | text
     let type = raw?.type ?? 'text';
     if (!type) type = 'text';
+    
+    // ✅ Verifica se há campos de imagem mesmo que o tipo não seja 'image'
+    const hasImageFields = !!(raw?.imagemUrl || raw?.imageUrl || raw?.url || raw?.image || raw?.arquivo || raw?.fileUrl || raw?.file || raw?.path);
+    
     const lower = String(conteudo).toLowerCase();
     if (!type || type === 'text') {
       // Detect common image URI formats: http(s) to images, data URIs, file:// (local), content:// (Android), or paths with image extensions
-      const isHttpImage = lower.startsWith('http') && (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.includes('image'));
+      const isHttpImage = lower.startsWith('http') && (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.includes('image') || lower.includes('/image') || lower.includes('upload'));
       const isDataImage = lower.startsWith('data:image');
       const isFileImage = lower.startsWith('file:') || lower.startsWith('content:');
       const hasImageExt = /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(raw?.conteudo || raw?.text || '');
-      if (isHttpImage || isDataImage || isFileImage || hasImageExt) {
+      
+      // ✅ Se tiver campos de imagem OU detectar formato de imagem, é imagem
+      if (hasImageFields || isHttpImage || isDataImage || isFileImage || hasImageExt) {
         type = 'image';
       }
+    }
+    
+    // ✅ Se o tipo já for 'image' ou tiver campos de imagem, força tipo image
+    if (type === 'image' || hasImageFields) {
+      type = 'image';
     }
 
     // determinar remetente
@@ -291,11 +301,48 @@ const Chat = ({ navigation, route }) => {
       isFromStaff = false;
     }
 
+    // ✅ Para imagens, tenta extrair a URL de várias propriedades possíveis
+    let imageUrl = undefined;
+    if (type === 'image') {
+      imageUrl = 
+        raw?.imagemUrl ||
+        raw?.imageUrl ||
+        raw?.url ||
+        raw?.conteudo ||
+        raw?.image ||
+        raw?.arquivo ||
+        raw?.fileUrl ||
+        raw?.file ||
+        raw?.path ||
+        raw?.imagem ||
+        raw?.foto ||
+        raw?.picture ||
+        conteudo;
+      
+      // ✅ Se a URL for relativa, constrói a URL completa
+      if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('file://') && !imageUrl.startsWith('content://') && !imageUrl.startsWith('data:')) {
+        // Se começar com /, adiciona o domínio da API
+        if (imageUrl.startsWith('/')) {
+          imageUrl = `http://23.22.153.89${imageUrl}`;
+        } else {
+          // Caso contrário, adiciona o caminho base da API
+          imageUrl = `http://23.22.153.89/${imageUrl}`;
+        }
+      }
+      
+      console.log('[normalizeMessage] Imagem detectada:', {
+        type: type,
+        imageUrl: imageUrl,
+        rawKeys: Object.keys(raw || {}),
+        hasImageFields: hasImageFields,
+      });
+    }
+
     return {
       id: String(id),
       type,
       text: conteudo || '',
-      image: type === 'image' ? conteudo : undefined,
+      image: imageUrl,
       createdAt,
       sender,
       isFromStaff,
@@ -311,6 +358,13 @@ const Chat = ({ navigation, route }) => {
       if (token) setAuthToken(token);
 
       const data = await obterHistoricoChat(chatId);
+      
+      console.log('[loadHistory] Dados recebidos do servidor:', {
+        dataType: typeof data,
+        isArray: Array.isArray(data),
+        keys: data && typeof data === 'object' ? Object.keys(data) : [],
+        sampleItem: Array.isArray(data) && data.length > 0 ? data[0] : (data?.mensagens?.[0] || data?.messages?.[0]),
+      });
 
       // A API pode retornar várias formas: array direto ou objeto com propriedade
       let items = [];
@@ -320,14 +374,30 @@ const Chat = ({ navigation, route }) => {
       else if (Array.isArray(data?.historico)) items = data.historico;
       else if (Array.isArray(data?.items)) items = data.items;
 
+      console.log('[loadHistory] Items extraídos:', {
+        count: items.length,
+        firstItem: items[0],
+        itemsWithImage: items.filter(item => item.type === 'image' || item.imagemUrl || item.imageUrl || item.url),
+      });
+
       if (!items || items.length === 0) {
         // fallback: usar mocks para facilitar o desenvolvimento
         setMensagens(MOCK_MESSAGES);
       } else {
         const normalized = items.map(normalizeMessage).filter(Boolean);
         
+        console.log('[loadHistory] Mensagens normalizadas:', {
+          total: normalized.length,
+          images: normalized.filter(m => m.type === 'image'),
+          imageUrls: normalized.filter(m => m.type === 'image').map(m => m.image),
+        });
+        
+        // ✅ Manter sender de acordo com quem enviou (não forçar para 'other')
+        // normalizeMessage já detecta corretamente via isMessageFromUser
+        const withCorrectSender = normalized; // Manter como está
+        
         // Ordenar mensagens por data: mais antigas primeiro, mais recentes por último
-        const sorted = normalized.sort((a, b) => {
+        const sorted = withCorrectSender.sort((a, b) => {
           const dateA = a.createdAt ? new Date(a.createdAt).getTime() : (a.raw?.timestamp || 0);
           const dateB = b.createdAt ? new Date(b.createdAt).getTime() : (b.raw?.timestamp || 0);
           
@@ -385,12 +455,31 @@ const Chat = ({ navigation, route }) => {
     // (ADMIN/PERSONAL) devem aparecer em azul (colors.primary) para alunos (viewerIsStaff === false).
     const shouldShowStaffBlue = !fromMe && isStaffMessage && !viewerIsStaff;
 
-    const bubbleStyle = [
-      styles.textBubble,
-      { backgroundColor: fromMe || shouldShowStaffBlue ? colors.primary : colors.surface },
-    ];
-
-    if (item.type === 'image' && item.image) {
+    // ✅ Detecta se é imagem (apenas pelo tipo)
+    const isImage = item.type === 'image';
+    
+    if (isImage) {
+      // ✅ Prioriza: image > raw.localUri > raw.originalUri > raw.serverUrl
+      const imageUri = item.image || 
+                       item.raw?.localUri || 
+                       item.raw?.originalUri || 
+                       item.raw?.serverUrl || 
+                       '';
+      
+      console.log('[renderItem] Renderizando imagem:', {
+        id: item.id,
+        type: item.type,
+        imageUri: imageUri,
+        hasImage: !!item.image,
+        hasLocalUri: !!item.raw?.localUri,
+        hasOriginalUri: !!item.raw?.originalUri,
+        hasServerUrl: !!item.raw?.serverUrl,
+      });
+      
+      if (!imageUri) {
+        console.error('[renderItem] ❌ Nenhuma URI de imagem encontrada para item:', item.id);
+      }
+      
       return (
         <TouchableOpacity
           onLongPress={() => (fromMe || canSend) && handleApagarMensagem(item)}
@@ -398,16 +487,109 @@ const Chat = ({ navigation, route }) => {
           style={rowStyle}
           key={item.id}
         >
-          <View style={[styles.imageBubble, { backgroundColor: fromMe || shouldShowStaffBlue ? colors.primary : colors.surface }]}> 
-            <Image source={{ uri: item.image }} style={styles.messageImage} resizeMode="cover" />
-            {item.uploading && (
-              <View style={styles.imageOverlay}>
-                <ActivityIndicator size="small" color="#fff" />
+          <View 
+            style={[
+              styles.imageBubble, 
+              { 
+                backgroundColor: fromMe || shouldShowStaffBlue ? colors.primary : colors.surface,
+                width: 250,
+                height: 200,
+              }
+            ]}
+          > 
+            {imageUri ? (
+              <>
+                <Image 
+                  source={{ uri: imageUri }} 
+                  style={[
+                    styles.messageImage,
+                    {
+                      width: '100%',
+                      height: '100%',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                    }
+                  ]} 
+                  resizeMode="cover"
+                  onError={(error) => {
+                    console.error('[renderItem] ❌ Erro ao carregar imagem:', {
+                      uri: imageUri,
+                      error: error.nativeEvent?.error || error,
+                      itemId: item.id,
+                      errorDetails: error.nativeEvent,
+                      hasLocalUri: !!item.raw?.localUri,
+                      localUri: item.raw?.localUri,
+                    });
+                    
+                    // Se a URI atual não for a local e houver uma local, tenta usar ela
+                    if (item.raw?.localUri && imageUri !== item.raw.localUri) {
+                      console.log('[renderItem] Tentando usar URI local como fallback:', item.raw.localUri);
+                    }
+                  }}
+                  onLoad={(e) => {
+                    const { width, height } = e.nativeEvent.source;
+                    console.log('[renderItem] ✅ Imagem carregada com sucesso:', {
+                      uri: imageUri,
+                      dimensions: { width, height },
+                    });
+                  }}
+                  onLoadStart={() => {
+                    console.log('[renderItem] 🔄 Iniciando carregamento da imagem:', imageUri);
+                  }}
+                  onLoadEnd={() => {
+                    console.log('[renderItem] ✅ Carregamento finalizado:', imageUri);
+                  }}
+                />
+                {/* Placeholder enquanto carrega */}
+                {item.uploading && (
+                  <View style={[
+                    styles.messageImage,
+                    {
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      backgroundColor: 'rgba(0,0,0,0.3)',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }
+                  ]}>
+                    <ActivityIndicator size="large" color="#fff" />
+                  </View>
+                )}
+              </>
+            ) : (
+              <View style={[
+                styles.messageImage, 
+                { 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  backgroundColor: colors.surface,
+                  width: '100%',
+                  height: '100%',
+                }
+              ]}>
+                <Icon name="image-off" size={48} color={colors.textSecondary} />
+                <Text style={{ color: colors.textSecondary, marginTop: 8, fontSize: 12 }}>Imagem não disponível</Text>
               </View>
             )}
+            {/* Overlay de upload - só aparece se estiver enviando */}
+            {item.uploading && !imageUri && (
+              <View style={styles.imageOverlay}>
+                <ActivityIndicator size="small" color="#fff" />
+                <Text style={{ color: '#fff', marginTop: 8, fontSize: 12 }}>Enviando...</Text>
+              </View>
+            )}
+            {/* Overlay de erro - só aparece se houver erro */}
             {item.uploadError && (
-              <TouchableOpacity style={styles.imageOverlay} onPress={() => handleEnviarImagem(item.raw?.localUri || item.image)}>
+              <TouchableOpacity 
+                style={styles.imageOverlay} 
+                onPress={() => handleEnviarImagem(item.raw?.localUri || item.image || item.text)}
+              >
                 <Icon name="alert-circle" size={36} color="#ff5252" />
+                <Text style={{ color: '#fff', marginTop: 8, fontSize: 12 }}>Erro ao enviar</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -422,7 +604,10 @@ const Chat = ({ navigation, route }) => {
         style={rowStyle}
         key={String(item.id)}
       >
-        <View style={bubbleStyle}>
+        <View style={[
+          styles.textBubble,
+          { backgroundColor: fromMe || shouldShowStaffBlue ? colors.primary : colors.surface },
+        ]}>
           <Text style={{ color: fromMe || shouldShowStaffBlue ? '#fff' : colors.textPrimary }}>{item.text}</Text>
         </View>
       </TouchableOpacity>
@@ -442,7 +627,7 @@ const Chat = ({ navigation, route }) => {
       const usuarioNome = user?.email || user?.nome || 'Usuário';
       const resp = await enviarMensagemChat(chatId, texto, usuarioNome);
 
-      // A resposta pode variar => normalizar
+      // Normaliza resposta
       const nova = resp?.message || resp?.mensagem || resp || { id: Date.now(), conteudo: texto };
       let normalized = normalizeMessage(nova);
       if (!normalized) {
@@ -456,21 +641,12 @@ const Chat = ({ navigation, route }) => {
         };
       }
 
-      // Garantir que a mensagem enviada localmente aparece como 'me' (cor do bubble)
       normalized.sender = 'me';
 
-      // Adiciona a nova mensagem no final (embaixo)
-      setMensagens((prev) => {
-        const updated = [...prev, normalized];
-        // Garante ordenação após adicionar (mais antigas primeiro, mais recentes por último)
-        return updated.sort((a, b) => {
-          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : (a.raw?.timestamp || 0);
-          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : (b.raw?.timestamp || 0);
-          return dateA - dateB; // Ordem crescente: antigas primeiro
-        });
-      });
+      // ✅ Apenas adiciona no final (sem reordenar)
+      setMensagens((prev) => [...prev, normalized]);
 
-      // Scroll para o final após adicionar a mensagem (novas mensagens ficam embaixo)
+      // Scroll para o fim
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 150);
@@ -489,86 +665,316 @@ const Chat = ({ navigation, route }) => {
       return;
     }
     if (!uri) return;
+
     // Cria mensagem local do tipo 'image' para mostrar imediatamente no chat
+    // ✅ IMPORTANTE: Garante que a URI local seja sempre preservada
+    const now = new Date();
     const localMsg = {
       id: String(Date.now()),
       type: 'image',
-      image: uri,
-      text: '',
+      image: uri, // URI local - sempre mantida como fallback
+      text: '', // ✅ TEXTO VAZIO para imagens
       sender: 'me',
-      createdAt: new Date().toISOString(),
-      raw: { localUri: uri },
+      createdAt: now.toISOString(),
+      raw: { localUri: uri, originalUri: uri, timestamp: now.getTime() },
+      uploading: true,
     };
-
-    // adiciona mensagem local com estado de upload
+    
+    console.log('[handleEnviarImagem] Mensagem local criada:', {
+      id: localMsg.id,
+      type: localMsg.type,
+      image: localMsg.image,
+      uri: uri,
+      createdAt: localMsg.createdAt,
+      timestamp: localMsg.raw.timestamp,
+    });
+    
     setMensagens((prev) => {
-      const updated = [...prev, { ...localMsg, uploading: true }];
-      return updated.sort((a, b) => {
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : (a.raw?.timestamp || 0);
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : (b.raw?.timestamp || 0);
-        return dateA - dateB;
-      });
+      const updated = [...prev, localMsg];
+      // ✅ Apenas adiciona no final (sem reordenar)
+      return updated;
     });
 
-    // Scroll para o fim para mostrar a imagem
+    // Scroll para o fim
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 150);
 
-    // Enviar para API em background: dependendo da API, pode precisar de upload multipart
-    // Aqui enviamos a URI como fallback (a API deve tratar upload se suportado)
     try {
+      const token = await SecureStore.getItemAsync('token');
       const usuarioNome = user?.email || user?.nome || 'Usuário';
-      // Tenta enviar como upload multipart (se a API suportar)
-      const resp = await enviarImagemChat(chatId, uri, usuarioNome);
+      
+      // ✅ Tenta obter o ID do usuário de várias formas possíveis
+      const usuarioId = 
+        user?.id || 
+        user?.usuarioId || 
+        user?._id || 
+        user?.userId ||
+        user?.claims?.id ||
+        user?.claims?.usuarioId ||
+        user?.claims?.sub ||
+        user?.claims?.userId ||
+        user?.email || // Fallback: usa email se não tiver ID
+        usuarioNome; // Último fallback: usa o nome
+      
+      console.log('[handleEnviarImagem] User object:', {
+        hasUser: !!user,
+        userKeys: user ? Object.keys(user) : [],
+        userId: user?.id,
+        usuarioId: user?.usuarioId,
+        email: user?.email,
+        claims: user?.claims,
+        finalUsuarioId: usuarioId,
+      });
+      
+      if (!usuarioId) {
+        throw new Error('ID do usuário não encontrado. Faça login novamente.');
+      }
+      
+      const url = `http://23.22.153.89/api/chat/enviar-imagem`;
 
-      // normaliza resposta do servidor para atualizar a mensagem local
-      const servidorMsg = resp?.message || resp?.mensagem || resp || null;
+      // 🔹 Corrige a URI (Android e iOS)
+      let fileUri = uri;
+      if (Platform.OS === 'android' && !uri.startsWith('file://') && !uri.startsWith('content://')) {
+        fileUri = 'file://' + uri;
+      }
+
+      // 🔹 Cria o FormData corretamente - arquivo PRIMEIRO
+      const formData = new FormData();
+      
+      // ✅ Adiciona o arquivo primeiro (alguns servidores exigem isso)
+      formData.append('file', {
+        uri: fileUri,
+        name: `foto_${Date.now()}.jpg`,
+        type: 'image/jpeg',
+      });
+      
+      // ✅ Depois adiciona os outros campos - garantindo que sejam strings
+      formData.append('usuarioId', String(usuarioId));
+      formData.append('chatId', String(chatId));
+      formData.append('legenda', '');
+
+      // ⚠️ IMPORTANTE: não adicione manualmente Content-Type
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+
+      const text = await response.text();
+      let parsed;
+      try {
+        parsed = text ? JSON.parse(text) : null;
+      } catch {
+        parsed = text;
+      }
+
+      if (!response.ok) {
+        console.error('Upload falhou ->', {
+          status: response.status,
+          statusText: response.statusText,
+          parsed: parsed,
+          text: text,
+        });
+        
+        // Extrai mensagem de erro mais detalhada
+        let errorMsg = `Erro ${response.status}: `;
+        if (parsed?.message) {
+          errorMsg += parsed.message;
+        } else if (parsed?.error) {
+          errorMsg += parsed.error;
+        } else if (parsed?.parsed) {
+          errorMsg += parsed.parsed;
+        } else if (typeof parsed === 'string') {
+          errorMsg += parsed;
+        } else if (text) {
+          errorMsg += text;
+        } else {
+          errorMsg += 'Falha no upload de imagem';
+        }
+        
+        throw new Error(errorMsg);
+      }
+
+      // Atualiza mensagem local
+      console.log('[handleEnviarImagem] Resposta completa do servidor:', parsed);
+      
+      const servidorMsg = parsed?.mensagem || parsed?.message || parsed?.data || parsed || null;
+      
       if (servidorMsg) {
-        const normalized = normalizeMessage(servidorMsg) || {
-          id: String(Date.now()),
-          type: 'image',
-          image: typeof servidorMsg === 'string' ? servidorMsg : (servidorMsg.conteudo || servidorMsg.image || servidorMsg.url),
-          text: servidorMsg.conteudo || servidorMsg.text || '',
-          sender: 'me',
-          createdAt: servidorMsg.createdAt || new Date().toISOString(),
-          raw: servidorMsg,
-        };
-
-        // substitui a mensagem local (procurando pelo id localMsg.id)
-        setMensagens((prev) => prev.map((m) => (m.id === localMsg.id ? normalized : m)));
+        // ✅ Extrai a URL da imagem de várias formas possíveis
+        let imageUrl = null;
+        if (typeof servidorMsg === 'string') {
+          imageUrl = servidorMsg;
+        } else {
+          imageUrl = 
+            servidorMsg.imagemUrl ||
+            servidorMsg.imageUrl ||
+            servidorMsg.url ||
+            servidorMsg.conteudo ||
+            servidorMsg.image ||
+            servidorMsg.arquivo ||
+            servidorMsg.fileUrl ||
+            servidorMsg.file ||
+            servidorMsg.path;
+        }
+        
+        // ✅ Se a URL for relativa, constrói a URL completa
+        if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('file://') && !imageUrl.startsWith('content://') && !imageUrl.startsWith('data:')) {
+          // Se começar com /, adiciona o domínio da API
+          if (imageUrl.startsWith('/')) {
+            imageUrl = `http://23.22.153.89${imageUrl}`;
+          } else {
+            // Caso contrário, adiciona o caminho base da API
+            imageUrl = `http://23.22.153.89/${imageUrl}`;
+          }
+        }
+        
+        console.log('[handleEnviarImagem] URL da imagem extraída:', imageUrl);
+        
+        // ✅ Usa a URL do servidor ou mantém a URI local
+        const finalImageUrl = imageUrl || uri;
+        
+        // Normaliza a mensagem primeiro
+        let normalized = normalizeMessage(servidorMsg);
+        
+        // Se não normalizou ou não tem imagem, cria manualmente
+        if (!normalized || !normalized.image) {
+          normalized = {
+            id: String(servidorMsg.id || servidorMsg._id || Date.now()),
+            type: 'image',
+            image: finalImageUrl,
+            text: '', // ✅ SEMPRE texto vazio para imagens
+            sender: 'me',
+            createdAt: servidorMsg.createdAt || servidorMsg.data || new Date().toISOString(),
+            raw: servidorMsg,
+          };
+        }
+        
+        // ✅ FORÇA o tipo 'image' e a URL correta (sobrescreve qualquer coisa da normalização)
+        normalized.type = 'image';
+        
+        // ✅ FORÇA sender = 'me' (imagem deve aparecer no lado direito até a página ser recarregada)
+        normalized.sender = 'me';
+        
+        // ✅ LIMPA o texto para mensagens de imagem (não deve mostrar URL)
+        normalized.text = '';
+        
+        // ✅ PRESERVA o createdAt original da mensagem local para manter a ordem
+        if (localMsg.createdAt) {
+          normalized.createdAt = localMsg.createdAt;
+        }
+        
+        // ✅ PRIORIDADE: Se tiver URL do servidor, usa ela; senão mantém URI local
+        // SEMPRE preserva a URI local no raw para fallback
+        if (imageUrl) {
+          normalized.image = imageUrl;
+          // Preserva a URI local no raw para fallback e adiciona timestamp
+          normalized.raw = { 
+            ...normalized.raw, 
+            localUri: uri, 
+            originalUri: uri,
+            serverUrl: imageUrl,
+            timestamp: localMsg.raw?.timestamp || new Date(normalized.createdAt).getTime(),
+          };
+        } else {
+          // Se não tiver URL do servidor, mantém a URI local
+          normalized.image = uri;
+          normalized.raw = { 
+            ...normalized.raw, 
+            localUri: uri,
+            originalUri: uri,
+            timestamp: localMsg.raw?.timestamp || new Date(normalized.createdAt).getTime(),
+          };
+        }
+        
+        // ✅ GARANTE que sempre tenha uma URI válida
+        if (!normalized.image) {
+          normalized.image = uri;
+          console.warn('[handleEnviarImagem] Nenhuma URI encontrada, usando URI local:', uri);
+        }
+        
+        console.log('[handleEnviarImagem] Mensagem normalizada final:', {
+          id: normalized.id,
+          type: normalized.type,
+          image: normalized.image,
+          text: normalized.text,
+          sender: normalized.sender,
+          hasServerUrl: !!imageUrl,
+          hasLocalUri: !!uri,
+        });
+        
+        setMensagens((prev) => {
+          const updated = prev.map((m) => {
+            if (m.id === localMsg.id) {
+              return normalized;
+            }
+            return m;
+          });
+          // ✅ Sem reordenação - apenas atualiza a mensagem local
+          return updated;
+        });
+        
+        // Scroll para o final após atualizar
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 150);
       } else {
-        // se não retornou um objeto esperado, apenas remove o flag de uploading
-        setMensagens((prev) => prev.map((m) => (m.id === localMsg.id ? { ...m, uploading: false } : m)));
+        console.warn('[handleEnviarImagem] Servidor não retornou mensagem, mantendo URI local');
+        // Se o servidor não retornou nada, mantém a imagem local mas remove o estado de upload
+        setMensagens((prev) => {
+          const updated = prev.map((m) => {
+            if (m.id === localMsg.id) {
+              return {
+                ...m,
+                uploading: false,
+                image: uri, // Mantém a URI local
+                text: '', // ✅ SEMPRE texto vazio para imagens
+                type: 'image', // Força tipo image
+                raw: { 
+                  ...m.raw, 
+                  localUri: uri,
+                  originalUri: uri,
+                  timestamp: localMsg.raw?.timestamp || new Date(m.createdAt).getTime(),
+                },
+              };
+            }
+            return m;
+          });
+          // ✅ Sem reordenação - apenas atualiza
+          return updated;
+        });
+        
+        // Scroll para o final após atualizar
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 150);
       }
     } catch (e) {
       console.error('Erro ao enviar imagem para API:', e);
-      // fallback: tenta enviar como texto/uri
-      try {
-        const usuarioNome = user?.email || user?.nome || 'Usuário';
-        const resp = await enviarMensagemChat(chatId, uri, usuarioNome);
-        const servidorMsg = resp?.message || resp?.mensagem || resp || null;
-        if (servidorMsg) {
-          const normalized = normalizeMessage(servidorMsg) || {
-            id: String(Date.now()),
-            type: 'image',
-            image: typeof servidorMsg === 'string' ? servidorMsg : (servidorMsg.conteudo || servidorMsg.image || servidorMsg.url),
-            text: servidorMsg.conteudo || servidorMsg.text || '',
-            sender: 'me',
-            createdAt: servidorMsg.createdAt || new Date().toISOString(),
-            raw: servidorMsg,
-          };
-          setMensagens((prev) => prev.map((m) => (m.id === localMsg.id ? normalized : m)));
-        } else {
-          setMensagens((prev) => prev.map((m) => (m.id === localMsg.id ? { ...m, uploading: false } : m)));
-        }
-      } catch (err) {
-        if (__DEV__) console.warn('[handleEnviarImagem] fallback enviarMensagemChat falhou', err?.message || err);
-        // marca erro na mensagem local para permitir retry manual
-        setMensagens((prev) => prev.map((m) => (m.id === localMsg.id ? { ...m, uploading: false, uploadError: true } : m)));
+      console.error('Detalhes do erro:', {
+        message: e?.message,
+        stack: e?.stack,
+        name: e?.name,
+      });
+      
+      // Extrai mensagem de erro mais detalhada
+      let errorMessage = 'Falha ao enviar imagem.';
+      if (e?.message) {
+        errorMessage = e.message;
+      } else if (typeof e === 'string') {
+        errorMessage = e;
       }
+      
+      Alert.alert('Erro', errorMessage);
+      setMensagens((prev) => {
+        const updated = prev.map((m) =>
+          m.id === localMsg.id ? { ...m, uploading: false, uploadError: true } : m
+        );
+        // ✅ Sem reordenação - apenas atualiza
+        return updated;
+      });
     }
-    return;
   };
 
   const handleLimparMensagens = async () => {
@@ -726,12 +1132,26 @@ const styles = StyleSheet.create({
   messageList: { flex: 1, paddingHorizontal: 10 },
   messageListContent: { paddingBottom: 16 },
   chatBody: { flex: 1 },
-  messageRow: { marginVertical: 5, maxWidth: '80%' },
+  messageRow: { marginVertical: 8, maxWidth: '85%', paddingHorizontal: 4 },
   senderRow: { alignSelf: 'flex-start' },
   receiverRow: { alignSelf: 'flex-end' },
   textBubble: { paddingHorizontal: 15, paddingVertical: 10, borderRadius: 20 },
-  imageBubble: { borderRadius: 20, overflow: 'hidden', maxWidth: 250, maxHeight: 300 },
-  messageImage: { width: '100%', height: 200, borderRadius: 20 },
+  imageBubble: { 
+    borderRadius: 20, 
+    overflow: 'hidden', 
+    maxWidth: 250, 
+    maxHeight: 300,
+    minWidth: 200,
+    minHeight: 200,
+  },
+  messageImage: { 
+    width: '100%', 
+    height: 200, 
+    borderRadius: 20,
+    minWidth: 200,
+    minHeight: 200,
+    backgroundColor: 'transparent',
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
