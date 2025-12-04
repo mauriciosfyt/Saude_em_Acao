@@ -14,7 +14,16 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import createStyles from '../../Styles/DesempenhoStyles';
-import { obterDesempenhoSemanal } from '../../Services/api';
+import {
+  obterDesempenhoSemanal,
+  obterMeusTreinos,
+  obterDesempenhoMesAtual,
+  obterHistoricoTreinosRealizados,
+  obterTotalTreinosPlanejados,
+  setAuthToken,
+} from '../../Services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTreinos } from '../../context/TreinosContext';
 
 const Desempenho = ({ navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
@@ -27,115 +36,335 @@ const Desempenho = ({ navigation }) => {
     treinosTotal: 0,
     ultimoTreino: '',
   });
+  const [diasMes, setDiasMes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const { obterUltimasRealizacoes, obterTotalDiasComTreinoRealizado, obterDiasComTreinoRealizado } = useTreinos();
+
+  // Função para atualizar o calendário baseado em dias realizados
+  const atualizarCalendarioComDiasRealizados = (datasPlanejadasSet) => {
+    try {
+      const diasRegistrados = obterDiasComTreinoRealizado?.() || [];
+      const mesAtual = new Date().getMonth();
+      const anoAtual = new Date().getFullYear();
+      
+      const diasRegistradosNoMes = diasRegistrados.filter((ds) => {
+        const dt = new Date(ds);
+        return dt.getMonth() === mesAtual && dt.getFullYear() === anoAtual;
+      });
+
+      const lastDay = new Date(anoAtual, mesAtual + 1, 0).getDate();
+      const realizedSet = new Set(diasRegistradosNoMes);
+      const diasMesLocal = [];
+
+      for (let d = 1; d <= lastDay; d++) {
+        const dt = new Date(anoAtual, mesAtual, d);
+        const key = dt.toISOString().split('T')[0];
+        const planned = datasPlanejadasSet && datasPlanejadasSet.size > 0 ? datasPlanejadasSet.has(key) : false;
+        const done = realizedSet.has(key);
+        diasMesLocal.push({ date: key, day: d, planned, done });
+      }
+      
+      setDiasMes(diasMesLocal);
+    } catch (err) {
+      console.error('[Desempenho] Erro ao atualizar calendário:', err);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
-    
+
+    // Gera um Set com strings YYYY-MM-DD das datas planejadas no mês atual
+    const gerarDatasPlanejadasNoMes = (meusTreinosDataLocal) => {
+      const treinosArray = Array.isArray(meusTreinosDataLocal)
+        ? meusTreinosDataLocal
+        : meusTreinosDataLocal?.treinos || meusTreinosDataLocal?.dias || meusTreinosDataLocal?.items || [];
+
+      const resultado = new Set();
+      if (!treinosArray || treinosArray.length === 0) return resultado;
+
+      const hoje = new Date();
+      const mesAtual = hoje.getMonth();
+      const anoAtual = hoje.getFullYear();
+
+      const diaMap = {
+        'domingo': 0, 'domingo-feira': 0,
+        'segunda': 1, 'segunda-feira': 1,
+        'terca': 2, 'terça': 2, 'terca-feira': 2, 'terça-feira': 2,
+        'quarta': 3, 'quarta-feira': 3,
+        'quinta': 4, 'quinta-feira': 4,
+        'sexta': 5, 'sexta-feira': 5,
+        'sabado': 6, 'sábado': 6, 'sabado-feira': 6
+      };
+
+      const adicionarSeMesAtual = (dt) => {
+        if (!dt || isNaN(dt.getTime())) return;
+        if (dt.getMonth() === mesAtual && dt.getFullYear() === anoAtual) resultado.add(dt.toISOString().split('T')[0]);
+      };
+
+      treinosArray.forEach((treino) => {
+        // datas explícitas
+        const datas = treino.datas || treino.dates || treino.agenda;
+        if (Array.isArray(datas) && datas.length > 0) {
+          datas.forEach(ds => adicionarSeMesAtual(new Date(ds)));
+          return;
+        }
+
+        // exerciciosPorDia
+        if (treino.exerciciosPorDia && typeof treino.exerciciosPorDia === 'object') {
+          const weekdayIndices = new Set();
+          Object.keys(treino.exerciciosPorDia).forEach(k => {
+            const lk = String(k).toLowerCase();
+            if (diaMap[lk] !== undefined) weekdayIndices.add(diaMap[lk]);
+          });
+          if (weekdayIndices.size > 0) {
+            for (let d = 1; d <= 31; d++) {
+              const dt = new Date(anoAtual, mesAtual, d);
+              if (dt.getMonth() !== mesAtual) break;
+              if (weekdayIndices.has(dt.getDay())) resultado.add(dt.toISOString().split('T')[0]);
+            }
+            return;
+          }
+        }
+
+        // dias array
+        const possibleDias = treino.dias || treino.diasSemana || treino.weekdays;
+        if (Array.isArray(possibleDias) && possibleDias.length > 0) {
+          const weekdayIndices = new Set();
+          possibleDias.forEach(item => {
+            if (typeof item === 'number') weekdayIndices.add(((item % 7) + 7) % 7);
+            else if (typeof item === 'string') {
+              const lk = item.toLowerCase();
+              if (diaMap[lk] !== undefined) weekdayIndices.add(diaMap[lk]);
+            }
+          });
+          if (weekdayIndices.size > 0) {
+            for (let d = 1; d <= 31; d++) {
+              const dt = new Date(anoAtual, mesAtual, d);
+              if (dt.getMonth() !== mesAtual) break;
+              if (weekdayIndices.has(dt.getDay())) resultado.add(dt.toISOString().split('T')[0]);
+            }
+            return;
+          }
+        }
+
+        // dia único
+        if (treino.dia) {
+          const d = treino.dia;
+          let idx = null;
+          if (typeof d === 'number') idx = ((d % 7) + 7) % 7;
+          else if (typeof d === 'string') {
+            const lk = d.toLowerCase();
+            if (diaMap[lk] !== undefined) idx = diaMap[lk];
+          }
+          if (idx !== null) {
+            for (let dia = 1; dia <= 31; dia++) {
+              const dt = new Date(anoAtual, mesAtual, dia);
+              if (dt.getMonth() !== mesAtual) break;
+              if (dt.getDay() === idx) resultado.add(dt.toISOString().split('T')[0]);
+            }
+            return;
+          }
+        }
+
+        // fallback: não adiciona
+      });
+
+      return resultado;
+    };
     const carregarDesempenho = async () => {
       try {
         console.log('📊 [Desempenho] Buscando dados de desempenho...');
-        const dados = await obterDesempenhoSemanal();
-        if (!mounted) return;
 
-        console.log('📊 [Desempenho] Dados recebidos da API:', dados);
+        let treinosRealizadosAPI = 0;
+        let totalTreinosAPI = 0;
+        let ultimaTreinoDataAPI = '';
+        let diasMesAPI = [];
 
-        // A API retorna um objeto com estatísticas
-        // Formato: { treinosRealizadosMesAtual, dataUltimoTreino, totalTreinosCompletos, diasAtivosConsecutivos }
-        if (typeof dados === 'object' && dados !== null) {
-          // Processar dataUltimoTreino
-          let ultimoTreino = '';
-          if (dados.dataUltimoTreino) {
-            try {
-              const dataFormatada = new Date(dados.dataUltimoTreino);
-              if (!isNaN(dataFormatada.getTime())) {
-                ultimoTreino = dataFormatada.toLocaleDateString('pt-BR', { 
-                  day: '2-digit', 
-                  month: '2-digit', 
-                  year: 'numeric' 
-                });
+        // 🔐 Garantir que o token esteja configurado antes da API
+        try {
+          const token = await AsyncStorage.getItem('token');
+          if (token) {
+            setAuthToken(token);
+            console.log('🔐 [Desempenho] Token configurado.');
+          } else {
+            console.warn('⚠️ [Desempenho] Nenhum token encontrado.');
+          }
+        } catch (eToken) {
+          console.warn('⚠️ [Desempenho] Falha ao obter token do storage:', eToken?.message);
+        }
+
+        // 🔍 Buscar desempenho na API
+        try {
+          const desempenhoAPI = await obterDesempenhoMesAtual();
+          console.log('📲 [Desempenho] Retorno bruto da API:', desempenhoAPI);
+          console.log('📲 [Desempenho] API.treinosRealizados:', desempenhoAPI?.treinosRealizados);
+          console.log('📲 [Desempenho] API.treinosTotal:', desempenhoAPI?.treinosTotal);
+          console.log('📲 [Desempenho] API.dataUltimoTreino:', desempenhoAPI?.dataUltimoTreino);
+
+          if (desempenhoAPI) {
+            treinosRealizadosAPI =
+              desempenhoAPI.treinosRealizados ||
+              desempenhoAPI.treinos_realizados ||
+              0;
+            totalTreinosAPI =
+              desempenhoAPI.treinosTotal || desempenhoAPI.treinos_total || 0;
+
+            const ultimaData =
+              desempenhoAPI.dataUltimoTreino ||
+              desempenhoAPI.ultimoTreino ||
+              desempenhoAPI.ultimo_treino;
+            if (ultimaData) {
+              // Se a API já retornou no formato DD/MM/YYYY, use direto
+              const brDateMatch = String(ultimaData).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+              if (brDateMatch) {
+                ultimaTreinoDataAPI = String(ultimaData);
+                console.log('📅 [Desempenho] Data BR recebida da API:', ultimaTreinoDataAPI);
               } else {
-                ultimoTreino = String(dados.dataUltimoTreino);
+                // fallback: tentar criar Date a partir de ISO ou outros formatos
+                const d = new Date(ultimaData);
+                if (!isNaN(d.getTime())) {
+                  ultimaTreinoDataAPI = d.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                  });
+                  console.log('📅 [Desempenho] Data formatada via Date:', ultimaTreinoDataAPI);
+                }
+              }
+            }
+
+            const exList =
+              desempenhoAPI.exercicios ||
+              desempenhoAPI.exerciciosFinalizados ||
+              desempenhoAPI.exercicios_finalizados ||
+              [];
+            if (Array.isArray(exList)) {
+              setExercisesFinalizadosAPI(exList);
+              console.log('✅ [Desempenho] Exercícios da API:', exList.length);
+            }
+
+            const diasList =
+              desempenhoAPI.dias ||
+              desempenhoAPI.diasMes ||
+              desempenhoAPI.dias_mes ||
+              [];
+            if (Array.isArray(diasList)) {
+              diasMesAPI = diasList;
+              setDiasMes(diasMesAPI);
+              console.log('✅ [Desempenho] Dias do mês da API:', diasMesAPI.length);
+            }
+
+            console.log('✅ [Desempenho] Dados da API extraídos com sucesso.');
+          }
+        } catch (apiErr) {
+          console.warn('⚠️ [Desempenho] Erro ao buscar dados da API:', apiErr?.message);
+        }
+
+        // 🔁 Gerar fallback com dados locais
+        let totalTreinosDisponiveis = totalTreinosAPI;
+        let datasPlanejadasSet = new Set();
+        try {
+          const meusTreinosData = await obterMeusTreinos();
+          if (meusTreinosData) {
+            datasPlanejadasSet = gerarDatasPlanejadasNoMes(meusTreinosData);
+            totalTreinosDisponiveis = datasPlanejadasSet.size || totalTreinosDisponiveis;
+          }
+        } catch (err) {
+          console.warn('⚠️ [Desempenho] Erro ao buscar meus treinos:', err?.message);
+        }
+
+        // Se a API já trouxe dias do mês, marcar quais desses dias são planejados
+        if (Array.isArray(diasMesAPI) && diasMesAPI.length > 0) {
+          try {
+            const mappedWithPlanned = diasMesAPI.map(d => {
+              const dateStr = d.date || d.data || (d.raw && d.raw.dataRealizacao) || null;
+              const dayNum = dateStr ? new Date(dateStr).getDate() : (d.day || 0);
+              const isoDate = dateStr && dateStr.includes('-') ? dateStr.split('T')[0] : (dateStr ? (() => {
+                // if date is in DD/MM/YYYY, convert
+                if (dateStr.includes('/')) {
+                  const parts = dateStr.split('/');
+                  if (parts.length >= 3) return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                }
+                return dateStr;
+              })() : dateStr);
+              const planned = isoDate ? datasPlanejadasSet.has(isoDate) : false;
+              return { date: isoDate || dateStr, day: dayNum, planned, done: !!d.realizado, raw: d.raw || d };
+            });
+            setDiasMes(mappedWithPlanned);
+            console.log('📅 [Desempenho] Atualizou diasMes com flag planned (API days):', mappedWithPlanned.length);
+          } catch (e) {
+            console.warn('⚠️ [Desempenho] Falha ao marcar planned nos dias da API:', e?.message || e);
+          }
+        }
+
+        // 🔢 Calcular progresso
+        const diasRegistrados = obterDiasComTreinoRealizado?.() || [];
+        const mesAtual = new Date().getMonth();
+        const anoAtual = new Date().getFullYear();
+        const diasRegistradosNoMes = diasRegistrados.filter((ds) => {
+          const dt = new Date(ds);
+          return dt.getMonth() === mesAtual && dt.getFullYear() === anoAtual;
+        });
+
+        // 📅 Construir diasMes se não veio da API
+        if (!Array.isArray(diasMesAPI) || diasMesAPI.length === 0) {
+          atualizarCalendarioComDiasRealizados(datasPlanejadasSet);
+        }
+
+        // 📅 Obter data do último treino realizado (se não veio da API, usar local)
+        let ultimaTreinoData = ultimaTreinoDataAPI;
+        if (!ultimaTreinoData) {
+          // Tentar obter do contexto local
+          const ultimasRealizacoes = obterUltimasRealizacoes ? obterUltimasRealizacoes() : [];
+          if (ultimasRealizacoes.length > 0) {
+            const mais_recente = ultimasRealizacoes[0];
+            try {
+              const dataFormatada = new Date(mais_recente.data);
+              if (!isNaN(dataFormatada.getTime())) {
+                ultimaTreinoData = dataFormatada.toLocaleDateString('pt-BR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric'
+                });
               }
             } catch (err) {
-              ultimoTreino = String(dados.dataUltimoTreino || '');
+              console.warn('⚠️ [Desempenho] Erro ao formatar data local:', err);
             }
           }
-          
-          // Calcular progresso geral (se tiver totalTreinosCompletos)
-          const treinosRealizados = dados.treinosRealizadosMesAtual || dados.treinosRealizados || 0;
-          const treinosTotal = dados.totalTreinosCompletos || dados.treinosTotal || treinosRealizados || 0;
-          const progressoGeral = treinosTotal > 0 ? Math.round((treinosRealizados / treinosTotal) * 100) : 0;
-          
-          setDadosDesempenho({
-            mesAno: new Date().toLocaleString('pt-BR', { month: 'long', year: 'numeric' }),
-            progressoGeral,
-            treinosRealizados,
-            treinosTotal,
-            ultimoTreino: ultimoTreino || dados.ultimoTreino || dados.ultimo || '',
-          });
-          
-          console.log('✅ [Desempenho] Dados processados:', {
-            treinosRealizados,
-            treinosTotal,
-            progressoGeral,
-            ultimoTreino,
-            diasAtivosConsecutivos: dados.diasAtivosConsecutivos || 0,
-          });
-        } else if (Array.isArray(dados)) {
-          // Fallback: se retornar array (compatibilidade)
-          const treinosRealizados = dados.length;
-          const treinosTotal = dados.reduce((acc, cur) => acc + (cur.total || 1), 0);
-          
-          let ultimoTreino = '';
-          if (dados.length > 0) {
-            const dadosOrdenados = [...dados].sort((a, b) => {
-              const dataA = new Date(a.data || a.dataRealizacao || a.createdAt || a.date || a.dataRealizado || 0);
-              const dataB = new Date(b.data || b.dataRealizacao || b.createdAt || b.date || b.dataRealizado || 0);
-              return dataB.getTime() - dataA.getTime();
-            });
-            
-            const ultimo = dadosOrdenados[0];
-            const dataUltimo = ultimo?.data || ultimo?.dataRealizacao || ultimo?.createdAt || ultimo?.date || ultimo?.dataRealizado;
-            if (dataUltimo) {
-              try {
-                const dataFormatada = new Date(dataUltimo);
-                ultimoTreino = dataFormatada.toLocaleDateString('pt-BR', { 
-                  day: '2-digit', 
-                  month: '2-digit', 
-                  year: 'numeric' 
-                });
-              } catch (err) {
-                ultimoTreino = dataUltimo;
-              }
-            }
-          }
-          
-          setDadosDesempenho({
-            mesAno: new Date().toLocaleString('pt-BR', { month: 'long', year: 'numeric' }),
-            progressoGeral: treinosTotal ? Math.round((treinosRealizados / treinosTotal) * 100) : 0,
-            treinosRealizados,
-            treinosTotal: treinosTotal || treinosRealizados || 0,
-            ultimoTreino: ultimoTreino || '',
-          });
-        } else {
-          console.warn('⚠️ [Desempenho] Formato de dados desconhecido:', typeof dados);
-          setDadosDesempenho({
-            mesAno: new Date().toLocaleString('pt-BR', { month: 'long', year: 'numeric' }),
-            progressoGeral: 0,
-            treinosRealizados: 0,
-            treinosTotal: 0,
-            ultimoTreino: '',
-          });
         }
-      } catch (error) {
-        console.error('❌ [Desempenho] Erro ao buscar desempenho semanal:', error);
+
+        // Preferir dados da API se disponíveis; senão usar fallback local
+        // Preferir o número de treinos planejados do calendário (datasPlanejadasSet)
+        // pois representa quantos treinos a conta tem no mês (ex: 23)
+        const totalPlanejados = (datasPlanejadasSet && datasPlanejadasSet.size > 0)
+          ? datasPlanejadasSet.size
+          : (totalTreinosAPI > 0 ? totalTreinosAPI : totalTreinosDisponiveis);
+        const realizados = treinosRealizadosAPI > 0 ? treinosRealizadosAPI : diasRegistradosNoMes.length;
+        const progressoGeral =
+          totalPlanejados > 0
+            ? Math.round((realizados / totalPlanejados) * 100)
+            : 0;
+
         setDadosDesempenho({
-          mesAno: new Date().toLocaleString('pt-BR', { month: 'long', year: 'numeric' }),
-          progressoGeral: 0,
-          treinosRealizados: 0,
-          treinosTotal: 0,
-          ultimoTreino: '',
+          mesAno: new Date().toLocaleString('pt-BR', {
+            month: 'long',
+            year: 'numeric',
+          }),
+          progressoGeral,
+          treinosRealizados: realizados,
+          treinosTotal: totalPlanejados,
+          ultimoTreino: ultimaTreinoData || '',
         });
+
+        console.log('✅ [Desempenho] Dados processados:', {
+          realizados,
+          totalPlanejados,
+          progressoGeral,
+          fonte: (datasPlanejadasSet && datasPlanejadasSet.size > 0) ? 'Calendario' : (totalTreinosAPI > 0 ? 'API' : 'Local')
+        });
+      } catch (error) {
+        console.error('❌ [Desempenho] Erro ao buscar desempenho:', error);
       }
     };
 
@@ -151,7 +380,67 @@ const Desempenho = ({ navigation }) => {
       mounted = false;
       unsubscribe();
     };
-  }, [navigation]);
+  }, [navigation, obterUltimasRealizacoes, obterTotalDiasComTreinoRealizado, obterDiasComTreinoRealizado]);
+
+  // ✅ Monitorar mudanças nos dias realizados e atualizar calendário em tempo real
+  useEffect(() => {
+    try {
+      const diasRegistrados = obterDiasComTreinoRealizado?.() || [];
+      const mesAtual = new Date().getMonth();
+      const anoAtual = new Date().getFullYear();
+      
+      if (diasRegistrados.length > 0) {
+        console.log('📊 [Desempenho] Dias realizados mudaram, atualizando calendário:', diasRegistrados.length);
+        
+        // Obter o conjunto de datas planejadas usando a função auxiliar
+        const gerarDatasPlanejadasNoMes = (meusTreinosDataLocal) => {
+          const treinosArray = Array.isArray(meusTreinosDataLocal)
+            ? meusTreinosDataLocal
+            : meusTreinosDataLocal?.treinos || meusTreinosDataLocal?.dias || meusTreinosDataLocal?.items || [];
+
+          const resultado = new Set();
+          if (!treinosArray || treinosArray.length === 0) return resultado;
+
+          const diaMap = {
+            'domingo': 0, 'segunda': 1, 'terca': 2, 'terça': 2, 'quarta': 3,
+            'quinta': 4, 'sexta': 5, 'sabado': 6, 'sábado': 6,
+          };
+
+          treinosArray.forEach((treino) => {
+            const possibleDias = treino.dias || treino.diasSemana || treino.weekdays || [];
+            if (Array.isArray(possibleDias) && possibleDias.length > 0) {
+              const weekdayIndices = new Set();
+              possibleDias.forEach(item => {
+                if (typeof item === 'number') weekdayIndices.add(((item % 7) + 7) % 7);
+                else if (typeof item === 'string') {
+                  const lk = item.toLowerCase();
+                  if (diaMap[lk] !== undefined) weekdayIndices.add(diaMap[lk]);
+                }
+              });
+              if (weekdayIndices.size > 0) {
+                for (let d = 1; d <= 31; d++) {
+                  const dt = new Date(anoAtual, mesAtual, d);
+                  if (dt.getMonth() !== mesAtual) break;
+                  if (weekdayIndices.has(dt.getDay())) resultado.add(dt.toISOString().split('T')[0]);
+                }
+              }
+            }
+          });
+          return resultado;
+        };
+
+        obterMeusTreinos().then(meusTreinosData => {
+          const datasPlanejadasSet = meusTreinosData ? gerarDatasPlanejadasNoMes(meusTreinosData) : new Set();
+          atualizarCalendarioComDiasRealizados(datasPlanejadasSet);
+        }).catch(err => {
+          console.warn('⚠️ [Desempenho] Erro ao carregar meus treinos no monitoramento:', err);
+          atualizarCalendarioComDiasRealizados(new Set());
+        });
+      }
+    } catch (err) {
+      console.error('❌ [Desempenho] Erro no useEffect de monitoramento:', err);
+    }
+  }, [obterDiasComTreinoRealizado]);
 
   const handleAbrirMenu = () => setMenuVisivel(true);
   const handleFecharMenu = () => setMenuVisivel(false);
@@ -216,6 +505,7 @@ const Desempenho = ({ navigation }) => {
             </View>
           </View>
         </View>
+        {/* Últimos exercícios removidos por privacidade */}
       </View>
 
       {/* Menu lateral/modal — adaptado para ficar igual ao HeaderProfessores */}
@@ -280,15 +570,6 @@ const Desempenho = ({ navigation }) => {
             >
               <Ionicons name="bar-chart-outline" size={24} color={isDark ? '#D3D8EB' : '#333333'} />
               <Text style={[styles.menuItemText, { color: isDark ? '#D3D8EB' : '#333333' }]}>Desempenho</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleNavegar("Inicial")}
-            >
-              <Ionicons name="log-out-outline" size={24} color="#dc3545" />
-              <Text style={[styles.menuItemText, { color: "#dc3545" }]}>
-                Sair
-              </Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
