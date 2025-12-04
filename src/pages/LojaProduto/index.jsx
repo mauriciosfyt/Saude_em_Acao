@@ -64,7 +64,7 @@ const LojaProduto = () => {
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
         position: "top-right",
-        autoClose: 4000, // Tempo ajustado para leitura
+        autoClose: 2000, // Tempo ajustado para leitura
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,

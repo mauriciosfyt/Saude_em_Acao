@@ -28,6 +28,50 @@ const CATEGORIAS_PRODUTO = [
 
 const CART_STORAGE_KEY = 'carrinhoDeCompras';
 
+// --- COMPONENTE DO MODAL EXTRAÍDO (Correção do Reload) ---
+const ModalSelecaoVariacao = ({ 
+  produto, 
+  variacaoSelecionada, 
+  setVariacaoSelecionada, 
+  onConfirm, 
+  onCancel 
+}) => {
+  if (!produto) return null;
+  
+  const { nome, categoriaInfo, img } = produto;
+
+  return (
+    <div className="modalcarrinho-overlay">
+      <div className="modalcarrinho-content">
+        <img 
+          src={fixImageUrl(img)}
+          alt={nome} 
+          className="modalcarrinho-imagem"
+        />
+        <h3>Selecione uma opção para:</h3>
+        <h4>{nome}</h4>
+        <div className="modalcarrinho-form-group">
+          <label htmlFor="variacao">{categoriaInfo.tipoEstoque === 'tamanho' ? 'Tamanho' : 'Sabor'}:</label>
+          <select
+            id="variacao"
+            value={variacaoSelecionada}
+            onChange={(e) => setVariacaoSelecionada(e.target.value)}
+          >
+            {categoriaInfo.itens.map(item => (
+              <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
+        </div>
+        <div className="modalcarrinho-buttons">
+          <button className="modalcarrinho-btn-cancelar" onClick={onCancel}>Cancelar</button>
+          <button className="modalcarrinho-btn-confirmar" onClick={onConfirm}>Confirmar</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+// ---------------------------------------------------------
+
 const Carrinho = () => {
   const navigate = useNavigate(); 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -181,7 +225,7 @@ const Carrinho = () => {
     fecharModalVariacao();
   };
 
-  // --- 5. FUNÇÃO DE RESERVA (ATUALIZADA) ---
+  // --- 5. FUNÇÃO DE RESERVA (ATUALIZADA COM O SEU PEDIDO) ---
   const handleReservarProdutos = async () => {
     const produtosParaReservar = produtos.filter(p => p.selecionado);
     if (produtosParaReservar.length === 0) return;
@@ -194,8 +238,17 @@ const Carrinho = () => {
         throw new Error(`O produto "${produtoInvalido.nome}" está em um formato antigo. Remova-o e adicione-o novamente.`);
       }
 
-      // Mapeamos os produtos para promessas, mas interceptamos erros individuais para saber QUEM falhou
-      const promessasDeReserva = produtosParaReservar.map(async (p) => {
+      // Validação Extra: Não enviar se houver quantidade zerada
+      const produtoSemQuantidade = produtosParaReservar.find(p => p.quantidade <= 0);
+      if (produtoSemQuantidade) {
+        throw new Error(`O produto "${produtoSemQuantidade.nome}" tem quantidade inválida.`);
+      }
+
+      console.log("Enviando reservas sequencialmente...");
+
+      const idsReservadosTemp = [];
+
+      for (const p of produtosParaReservar) {
         const payload = {
           produtoId: p.id,
           quantidade: p.quantidade,
@@ -209,22 +262,20 @@ const Carrinho = () => {
         }
 
         try {
-          // Tenta reservar este produto específico
-          return await createReserva(payload);
+          // Tenta reservar UM por UM.
+          await createReserva(payload);
+          idsReservadosTemp.push(`${p.id}-${p.variacaoValor}`);
         } catch (apiErr) {
-          // Se falhar, lança um objeto com o contexto do produto + o erro original
+          // Lança erro customizado para parar o loop INTEIRO
           throw { isCustom: true, produto: p, error: apiErr };
         }
-      });
-
-      console.log("Enviando reservas...");
-      await Promise.all(promessasDeReserva);
+      }
 
       setReservaStatus({ loading: false, error: null });
 
-      const idsReservados = new Set(produtosParaReservar.map(p => `${p.id}-${p.variacaoValor}`));
+      const idsReservadosSet = new Set(idsReservadosTemp);
       setProdutos(prevProdutos => 
-        prevProdutos.filter(p => !idsReservados.has(`${p.id}-${p.variacaoValor}`))
+        prevProdutos.filter(p => !idsReservadosSet.has(`${p.id}-${p.variacaoValor}`))
       );
       
       toast.success('Produtos reservados com sucesso!', {
@@ -245,9 +296,16 @@ const Carrinho = () => {
       // Verifica se é o nosso erro "enriquecido" com os dados do produto
       if (err.isCustom) {
         produtoNome = err.produto.nome;
+        
+        // --- ADIÇÃO SOLICITADA: Incluir Tamanho/Sabor no nome para o erro ---
+        if (err.produto.variacaoValor) {
+          const tipo = err.produto.variacaoTipo === 'tamanho' ? 'Tamanho' : 'Sabor';
+          produtoNome = `${produtoNome} (${tipo}: ${err.produto.variacaoValor})`;
+        }
+        // -------------------------------------------------------------------
+
         rawMsg = err.error.message || JSON.stringify(err.error);
         
-        // Tenta extrair mensagem limpa se for JSON
         try {
           const erroJson = JSON.parse(rawMsg);
           if (erroJson.categoriaProduto) rawMsg = erroJson.categoriaProduto;
@@ -256,7 +314,7 @@ const Carrinho = () => {
         } catch (e) { /* não é json, segue a vida */ }
 
       } else {
-        // Erro genérico (ex: validação inicial ou erro de rede geral)
+        // Erro genérico
         rawMsg = err.message || 'Falha ao reservar um ou mais produtos.';
       }
 
@@ -267,14 +325,11 @@ const Carrinho = () => {
         const qtdDisponivel = parseInt(match[1], 10);
         
         if (qtdDisponivel === 0) {
-          // CASO 1: Indisponível total
-          displayMsg = `O produto ${produtoNome} está indisponível.`;
+          displayMsg = `O produto ${produtoNome} está indisponível. Remova-o para continuar.`;
         } else {
-          // CASO 2: Disponível parcial
           displayMsg = `Estoque insuficiente para ${produtoNome}. Apenas ${qtdDisponivel} disponível(is).`;
         }
       } else {
-        // Fallback: Se não achar o padrão "Disponível: X", mostra o erro com o nome (se tiver) ou só o erro
         if (produtoNome) {
            displayMsg = `Erro em ${produtoNome}: ${rawMsg}`;
         } else {
@@ -335,42 +390,6 @@ const Carrinho = () => {
 
   // --- 6. RENDERIZAÇÃO (JSX) ---
 
-  const ModalSelecaoVariacao = () => {
-    if (!produtoParaSelecionar) return null;
-    
-    const { nome, categoriaInfo, img } = produtoParaSelecionar;
-
-    return (
-      <div className="modalcarrinho-overlay">
-        <div className="modalcarrinho-content">
-          <img 
-            src={fixImageUrl(img)}
-            alt={nome} 
-            className="modalcarrinho-imagem"
-          />
-          <h3>Selecione uma opção para:</h3>
-          <h4>{nome}</h4>
-          <div className="modalcarrinho-form-group">
-            <label htmlFor="variacao">{categoriaInfo.tipoEstoque === 'tamanho' ? 'Tamanho' : 'Sabor'}:</label>
-            <select
-              id="variacao"
-              value={variacaoSelecionada}
-              onChange={(e) => setVariacaoSelecionada(e.target.value)}
-            >
-              {categoriaInfo.itens.map(item => (
-                <option key={item} value={item}>{item}</option>
-              ))}
-            </select>
-          </div>
-          <div className="modalcarrinho-buttons">
-            <button className="modalcarrinho-btn-cancelar" onClick={fecharModalVariacao}>Cancelar</button>
-            <button className="modalcarrinho-btn-confirmar" onClick={handleConfirmarVariacao}>Confirmar</button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   useEffect(() => {
     const perfil = sessionStorage.getItem('userPerfil');
     if (perfil !== 'ALUNO') {
@@ -381,7 +400,15 @@ const Carrinho = () => {
 
   return (
     <div className="carrinho-background">
-      <ModalSelecaoVariacao />
+      {/* Componente extraído para evitar reloads no DOM */}
+      <ModalSelecaoVariacao 
+        produto={produtoParaSelecionar}
+        variacaoSelecionada={variacaoSelecionada}
+        setVariacaoSelecionada={setVariacaoSelecionada}
+        onConfirm={handleConfirmarVariacao}
+        onCancel={fecharModalVariacao}
+      />
+      
       <Header />
 
       <div className="container-carrinho">
