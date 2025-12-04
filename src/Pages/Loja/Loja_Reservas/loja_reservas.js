@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
     StyleSheet,
@@ -17,6 +16,7 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import HeaderLoja from '../../../Components/HeaderLoja';
 import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
+import { COLORS, SPACING, FONTS, BORDERS } from '../../../constants/constants'
 
 // --- 1. IMPORTAR API E CONTEXTO ---
 import { obterMinhasReservas } from '../../../Services/api'; 
@@ -181,9 +181,14 @@ const Reservas = ({ navigation }) => {
                         img: img, 
                         imagem: img ? { uri: img } : require('../../../../assets/icon.png'), 
                         status: statusTratado,
-                        dataString: dataFormatada, 
+                        dataString: dataFormatada,
+                        dataOrdenacao: dataApi ? new Date(dataApi) : new Date(0), // Campo auxiliar para ordenação
                     };
                 });
+
+                // --- ORDENAÇÃO ADICIONADA: DO MAIS ATUAL PARA O MENOS ATUAL ---
+                reservasFormatadas.sort((a, b) => b.dataOrdenacao - a.dataOrdenacao);
+                // -------------------------------------------------------------
 
                 const reservasAgrupadas = reservasFormatadas.reduce((acc, item) => {
                     const data = item.dataString;
@@ -281,7 +286,7 @@ const Reservas = ({ navigation }) => {
             <SafeAreaView style={styles.safeArea}>
                 <HeaderLoja navigation={navigation} searchText={searchText} setSearchText={setSearchText} />
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 70 }}>
-                    <ActivityIndicator size="large" color={theme.colors.primaryButton} />
+                    <ActivityIndicator size="large" color={COLORS.primary || '#007bff'} />
                     <Text style={{ marginTop: 10, color: theme.colors.textSecondary }}>Buscando suas reservas...</Text>
                 </View>
                 <BottomNavBar navigation={navigation} activeScreen="LojaReservas" />
