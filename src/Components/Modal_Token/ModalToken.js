@@ -30,6 +30,8 @@ const ModalToken = ({ visible, onClose, onValidate, email }) => {
   const [loading, setLoading] = useState(false);
   const [codeInputs, setCodeInputs] = useState(['', '', '', '', '']);
   const inputRefs = useRef([]); // Estava React.useRef
+  const [errorMessage, setErrorMessage] = useState('');
+  const shakeAnim = useRef(new Animated.Value(0)).current;
 
   // Animação (mantida 100%)
   const animatedValue = useRef(new Animated.Value(0)).current; // Estava React.useRef
@@ -64,12 +66,46 @@ const ModalToken = ({ visible, onClose, onValidate, email }) => {
   // Lógica de input (mantida 100%)
   const handleCodeInput = (index, value) => {
     const newInputs = [...codeInputs];
-    newInputs[index] = value.replace(/[^a-zA-Z0-9]/g, '').slice(-1).toUpperCase();
-    setCodeInputs(newInputs);
-    setToken(newInputs.join(''));
+    const cleanedValue = value.replace(/[^a-zA-Z0-9]/g, '').slice(-1).toUpperCase();
+    // Atualiza apenas quando há um caractere válido
+    if (cleanedValue) {
+      newInputs[index] = cleanedValue;
+      setCodeInputs(newInputs);
+      // limpar aviso de erro quando o usuário começa a digitar novamente
+      if (errorMessage) {
+        setErrorMessage('');
+      }
+      shakeAnim.setValue(0);
+      setToken(newInputs.join(''));
 
-    if (value && index < 4 && inputRefs.current[index + 1]) {
-      inputRefs.current[index + 1].focus();
+      // Vai para o próximo campo automaticamente
+      if (index < 4 && inputRefs.current[index + 1]) {
+        inputRefs.current[index + 1].focus();
+      }
+    } else {
+      // Quando o valor fica vazio, não forçamos alterações aqui — o onKeyPress (Backspace)
+      // lida com o foco e limpeza do campo anterior em dispositivos que suportam.
+      const newEmpty = [...codeInputs];
+      newEmpty[index] = '';
+      setCodeInputs(newEmpty);
+      setToken(newEmpty.join(''));
+    }
+  };
+
+  // Detecta Backspace para mover o foco e limpar o campo anterior
+  const handleKeyPress = (index, e) => {
+    const key = e.nativeEvent && e.nativeEvent.key;
+    if (key === 'Backspace') {
+      const newInputs = [...codeInputs];
+      // Se campo atual já está vazio, apaga o anterior e foca nele
+      if (newInputs[index] === '' && index > 0) {
+        newInputs[index - 1] = '';
+        setCodeInputs(newInputs);
+        setToken(newInputs.join(''));
+        if (inputRefs.current[index - 1]) {
+          inputRefs.current[index - 1].focus();
+        }
+      }
     }
   };
 
@@ -100,7 +136,24 @@ const ModalToken = ({ visible, onClose, onValidate, email }) => {
     } catch (error) {
       console.error('Erro ao validar token:', error);
       const message = error.message || "Código inválido ou expirado.";
-      Alert.alert('Erro na Validação', message);
+      // Marcar erro (será usado para borda vermelha e shake)
+      setErrorMessage(message);
+      // animação de shake
+      Animated.sequence([
+        Animated.timing(shakeAnim, { toValue: 8, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -8, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 6, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -6, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
+      ]).start();
+      // Limpa os campos para permitir nova tentativa imediata
+      setCodeInputs(['', '', '', '', '']);
+      setToken('');
+      if (inputRefs.current[0]) inputRefs.current[0].focus();
+      // Esconder a mensagem automaticamente após 3 segundos
+      setTimeout(() => {
+        setErrorMessage('');
+      }, 3000);
     } finally {
       setLoading(false);
     }
@@ -190,34 +243,51 @@ const ModalToken = ({ visible, onClose, onValidate, email }) => {
 
             {/* Code Inputs */}
             <View style={styles.codeInputsContainer}>
-              {codeInputs.map((value, index) => (
-                <TextInput
-                  key={index}
-                  ref={(ref) => (inputRefs.current[index] = ref)}
-                  style={[
-                    styles.codeInput,
-                    {
-                      backgroundColor: isDark ? '#2C2C2C' : '#F0F0F0',
-                      color: textColor,
-                      borderColor: value ? buttonBgColor : isDark ? '#4A4A4A' : '#E0E0E0',
-                    },
-                  ]}
-                  maxLength={1}
-                  keyboardType="default"
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                  value={value}
-                  onChangeText={(text) => handleCodeInput(index, text)}
-                  editable={!loading}
-                  placeholderTextColor={secondaryTextColor}
-                />
-              ))}
+              {codeInputs.map((value, index) => {
+                const borderColor = errorMessage ? '#e74c3c' : (value ? buttonBgColor : (isDark ? '#4A4A4A' : '#E0E0E0'));
+                const borderWidth = errorMessage ? 2 : 0;
+                return (
+                  <Animated.View
+                    key={index}
+                    style={[
+                      styles.codeInputWrapper,
+                      {
+                        borderColor,
+                        borderWidth,
+                        transform: [{ translateX: shakeAnim }],
+                      },
+                    ]}
+                  >
+                    <TextInput
+                      ref={(ref) => (inputRefs.current[index] = ref)}
+                      style={[
+                        styles.codeInput,
+                        {
+                          backgroundColor: isDark ? '#2C2C2C' : '#F0F0F0',
+                          color: textColor,
+                        },
+                      ]}
+                      maxLength={1}
+                      keyboardType="default"
+                      autoCapitalize="characters"
+                      autoCorrect={false}
+                      value={value}
+                      onChangeText={(text) => handleCodeInput(index, text)}
+                      onKeyPress={(e) => handleKeyPress(index, e)}
+                      editable={!loading}
+                      placeholderTextColor={secondaryTextColor}
+                    />
+                  </Animated.View>
+                );
+              })}
             </View>
 
             {/* Description */}
             <Text style={[styles.description, { color: secondaryTextColor, marginTop: 16 }]}>
               Digite o código que acabamos de enviar no seu email
             </Text>
+
+            {/* Aviso de texto removido conforme solicitado; mantemos apenas borda vermelha + shake */}
 
             {/* Validate Button */}
             <TouchableOpacity
@@ -235,6 +305,8 @@ const ModalToken = ({ visible, onClose, onValidate, email }) => {
                 {loading ? 'Validando...' : 'validar'}
               </Text>
             </TouchableOpacity>
+
+            {/* Botão 'Limpar' removido conforme solicitado */}
 
             {/* Expiration Info */}
             <Text style={[styles.expirationText, { color: secondaryTextColor }]}>
@@ -270,6 +342,16 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     marginBottom: 16,
+  },
+  errorMessage: {
+    color: '#e74c3c',
+    backgroundColor: 'rgba(231,76,60,0.06)',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    textAlign: 'center',
+    fontSize: 13,
+    fontWeight: '600',
   },
   headerLogo: {
     width: 80,
@@ -322,7 +404,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
-    gap: 12,
+    gap: 6,
   },
   codeInput: {
     width: 50,
@@ -332,6 +414,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  codeInputWrapper: {
+    width: 52,
+    height: 52,
+    borderRadius: 12,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   description: {
     fontSize: 12,
@@ -351,6 +441,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'uppercase',
   },
+  // estilos do botão Limpar removidos
   expirationText: {
     fontSize: 11,
     textAlign: 'center',

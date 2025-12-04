@@ -10,6 +10,7 @@ import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
 
 // APIs
 import { obterProdutoPorId } from '../../../Services/api'; 
+import api from '../../../Services/api';
 import { useCart } from '../../../context/CartContext'; 
 import { useFavoritos } from '../../../context/FavoritosContext';
 
@@ -114,15 +115,28 @@ const LojaProdutos = ({ navigation, route }) => {
 
                 const data = await obterProdutoPorId(produtoId);
                 
+                // Normaliza o campo de imagem (várias APIs usam nomes diferentes)
+                const rawImg = data.imagemUrl || data.img || data.imagem || data.image || data.url || data.foto || data.path || null;
+                let imagemUrlFinal = rawImg;
+                try {
+                    const base = api?.defaults?.baseURL || '';
+                    if (imagemUrlFinal && !String(imagemUrlFinal).startsWith('http')) {
+                        const sep = String(imagemUrlFinal).startsWith('/') ? '' : '/';
+                        imagemUrlFinal = `${base}${sep}${imagemUrlFinal}`;
+                    }
+                } catch (e) {
+                    console.warn('Erro ao normalizar URL da imagem:', e);
+                }
+
                 const produtoFormatado = {
                     ...data,
                     // Guardamos os dados brutos para o carrinho
                     nome: data.nome,
-                    preco: data.preco, 
-                    imagemUrl: data.imagemUrl, 
+                    preco: data.preco,
+                    imagemUrl: imagemUrlFinal,
                     categoria: data.categoria, // <-- IMPORTANTE PARA VARIAÇÃO
                     // Formatamos para exibição
-                    imagem: { uri: data.imagemUrl }, 
+                    imagem: { uri: imagemUrlFinal },
                     precoFormatado: `R$ ${data.preco ? data.preco.toFixed(2).replace('.', ',') : '0,00'}`
                 };
                 
