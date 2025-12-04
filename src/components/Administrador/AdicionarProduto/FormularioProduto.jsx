@@ -1,5 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+// Imports do Toastify e Estilos Customizados
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../Mensagem/Excluido.css'; // Importação das classes customizadas
+
 // Componentes Reutilizados do formulário
 import Modal from '../../../components/Administrador/AdicionarProduto/Modal';
 import ControleQuantidade from '../../../components/Administrador/AdicionarProduto/ControleQuantidade';
@@ -88,7 +93,16 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
     
     // Validação básica
     if (!nome || !preco || !categoriaInfo || !imagem) {
-      alert('Por favor, preencha todos os campos obrigatórios e selecione uma imagem.');
+      toast.error('Por favor, preencha todos os campos obrigatórios e selecione uma imagem.', {
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       return;
     }
 
@@ -127,13 +141,23 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
         break;
 
       default:
-        alert('Tipo de estoque desconhecido para a categoria selecionada.');
+        toast.error('Tipo de estoque desconhecido para a categoria selecionada.', {
+            className: "custom-error-toast",
+            progressClassName: "custom-error-progress-bar",
+            position: "top-right",
+            autoClose: 5000,
+        });
         return;
     }
 
     // Validação de quantidade mínima
     if (totalEstoque <= 0) {
-        alert(`A quantidade total em estoque para a categoria '${categoriaInfo.rotulo}' deve ser maior que zero.`);
+        toast.error(`A quantidade total em estoque para a categoria '${categoriaInfo.rotulo}' deve ser maior que zero.`, {
+            className: "custom-error-toast",
+            progressClassName: "custom-error-progress-bar",
+            position: "top-right",
+            autoClose: 5000,
+        });
         return;
     }
 
@@ -146,7 +170,12 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
   // Funções do Modal
   const abrirModalEstoque = () => {
     if (!dadosFormulario.categoria) {
-      alert('Por favor, selecione uma categoria primeiro.');
+      toast.error('Por favor, selecione uma categoria primeiro.', {
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+        position: "top-right",
+        autoClose: 5000,
+      });
       return;
     }
     setEstoqueTemporario(estoquePorVariacao);
@@ -208,6 +237,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
 
   return (
     <>
+      <ToastContainer />
       <form onSubmit={handleSubmit}>
         <div className="produto-form-layout">
           {/* Coluna da Esquerda: Imagem */}

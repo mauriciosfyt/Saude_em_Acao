@@ -1,7 +1,7 @@
 import React from "react";
 
 const defaultStyle = {
-  color: "#d9534f", // vermelho padrão (bootstrap danger)
+  color: "red", // vermelho padrão (bootstrap danger)
   marginTop: 8,
   fontSize: "0.9rem",
   textAlign: "center",
