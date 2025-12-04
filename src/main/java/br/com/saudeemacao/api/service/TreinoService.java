@@ -18,10 +18,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
+import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -409,5 +407,69 @@ public class TreinoService {
                 responsavelDTO,
                 treino.getExerciciosPorDia()
         );
+    }
+
+    public HistoricoAnualDTO buscarHistoricoDeExerciciosAnual(Integer ano, UserDetails userDetails) {
+        Usuario aluno = getUsuarioAutenticado(userDetails);
+
+        int anoReferencia = (ano != null) ? ano : LocalDate.now().getYear();
+
+        LocalDateTime inicioAno = LocalDateTime.of(anoReferencia, 1, 1, 0, 0);
+        LocalDateTime fimAno = LocalDateTime.of(anoReferencia, 12, 31, 23, 59, 59);
+
+        List<HistoricoTreino> historicos = historicoTreinoRepository.findByAlunoIdAndDataRealizacaoBetween(
+                aluno.getId(), inicioAno, fimAno
+        );
+
+        List<ExercicioRealizadoDetalheDTO> detalhes = new ArrayList<>();
+
+        for (HistoricoTreino historico : historicos) {
+            Treino treino = historico.getTreino();
+            EDiaDaSemana diaRealizado = historico.getDiaDaSemanaConcluido();
+
+            if (treino != null && treino.getExerciciosPorDia() != null &&
+                    treino.getExerciciosPorDia().containsKey(diaRealizado)) {
+
+                List<Exercicio> exerciciosDoDia = treino.getExerciciosPorDia().get(diaRealizado);
+
+                if (exerciciosDoDia != null) {
+                    for (Exercicio ex : exerciciosDoDia) {
+                        detalhes.add(ExercicioRealizadoDetalheDTO.builder()
+                                .dataRealizacao(historico.getDataRealizacao())
+                                .nomeTreino(treino.getNome())
+                                .diaDaSemana(diaRealizado.name())
+                                .nomeExercicio(ex.getNome())
+                                .series(ex.getSeries())
+                                .repeticoes(ex.getRepeticoes())
+                                .carga(ex.getCarga())
+                                .build());
+                    }
+                }
+            }
+        }
+
+        detalhes.sort(Comparator.comparing(ExercicioRealizadoDetalheDTO::getDataRealizacao).reversed());
+
+        Map<Integer, Long> contagemPorMes = detalhes.stream()
+                .collect(Collectors.groupingBy(
+                        d -> d.getDataRealizacao().getMonthValue(),
+                        Collectors.counting()
+                ));
+
+        List<ResumoMensalDTO> resumoMensal = new ArrayList<>();
+
+        for (int i = 1; i <= 12; i++) {
+            String nomeMes = Month.of(i).getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
+            nomeMes = nomeMes.substring(0, 1).toUpperCase() + nomeMes.substring(1);
+
+            resumoMensal.add(new ResumoMensalDTO(nomeMes, contagemPorMes.getOrDefault(i, 0L)));
+        }
+
+        return HistoricoAnualDTO.builder()
+                .ano(anoReferencia)
+                .totalExerciciosNoAno(detalhes.size())
+                .resumoMensal(resumoMensal)
+                .historicoDetalhado(detalhes)
+                .build();
     }
 }

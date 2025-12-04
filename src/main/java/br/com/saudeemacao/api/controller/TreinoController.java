@@ -103,4 +103,15 @@ public class TreinoController {
         TreinoMetricasDTO metricas = treinoService.getMetricasDeTreino(userDetails);
         return ResponseEntity.ok(metricas);
     }
+
+    @GetMapping("/historico-anual-exercicios")
+    @PreAuthorize("hasRole('ALUNO')")
+    public ResponseEntity<HistoricoAnualDTO> getHistoricoAnualExercicios(
+            @RequestParam(required = false) Integer ano,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        HistoricoAnualDTO historico = treinoService.buscarHistoricoDeExerciciosAnual(ano, userDetails);
+        return ResponseEntity.ok(historico);
+    }
+
 }

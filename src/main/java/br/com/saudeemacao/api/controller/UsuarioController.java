@@ -34,14 +34,12 @@ public class UsuarioController {
 
     @GetMapping("/aluno")
     public ResponseEntity<List<UsuarioSaidaDTO>> listarAlunos(
-            @RequestParam(defaultValue = "0") int pag,
-            @RequestParam(defaultValue = "10") int qtd,
             @RequestParam(required = false) String nome) {
-        PageRequest pageRequest = PageRequest.of(pag, qtd);
+
         if (nome != null && !nome.isBlank()) {
-            return ResponseEntity.ok(usuarioService.buscarPorPerfilENome(EPerfil.ALUNO, nome, pageRequest));
+            return ResponseEntity.ok(usuarioService.buscarPorPerfilENome(EPerfil.ALUNO, nome));
         }
-        return ResponseEntity.ok(usuarioService.buscarPorPerfil(EPerfil.ALUNO, pageRequest));
+        return ResponseEntity.ok(usuarioService.buscarPorPerfil(EPerfil.ALUNO));
     }
 
     @GetMapping("/aluno/{id}")
@@ -82,14 +80,12 @@ public class UsuarioController {
     @GetMapping("/professor")
     @PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR') or @usuarioService.isUsuarioGold(authentication.principal.username)")
     public ResponseEntity<List<UsuarioSaidaDTO>> listarProfessores(
-            @RequestParam(defaultValue = "0") int pag,
-            @RequestParam(defaultValue = "10") int qtd,
             @RequestParam(required = false) String nome) {
-        PageRequest pageRequest = PageRequest.of(pag, qtd);
+
         if (nome != null && !nome.isBlank()) {
-            return ResponseEntity.ok(usuarioService.buscarPorPerfilENome(EPerfil.PROFESSOR, nome, pageRequest));
+            return ResponseEntity.ok(usuarioService.buscarPorPerfilENome(EPerfil.PROFESSOR, nome));
         }
-        return ResponseEntity.ok(usuarioService.buscarPorPerfil(EPerfil.PROFESSOR, pageRequest));
+        return ResponseEntity.ok(usuarioService.buscarPorPerfil(EPerfil.PROFESSOR));
     }
 
     @GetMapping("/professor/{id}")
@@ -131,10 +127,8 @@ public class UsuarioController {
     }
 
     @GetMapping("/admin")
-    public ResponseEntity<List<UsuarioSaidaDTO>> listarAdmins(
-            @RequestParam(defaultValue = "0") int pag,
-            @RequestParam(defaultValue = "10") int qtd) {
-        return ResponseEntity.ok(usuarioService.buscarPorPerfil(EPerfil.ADMIN, PageRequest.of(pag, qtd)));
+    public ResponseEntity<List<UsuarioSaidaDTO>> listarAdmins() {
+        return ResponseEntity.ok(usuarioService.buscarPorPerfil(EPerfil.ADMIN));
     }
 
     @PutMapping("/admin/{id}")

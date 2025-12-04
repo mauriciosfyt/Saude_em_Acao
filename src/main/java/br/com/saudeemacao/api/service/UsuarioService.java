@@ -57,8 +57,6 @@ public class UsuarioService {
         usuario.setPerfil(EPerfil.ALUNO);
         usuario.setPlano(dto.getPlano());
 
-        // Se o sexo for fornecido (opcionalmente para o plano Básico), ele será salvo.
-        // Se não, ficará nulo, o que está correto.
         if (dto.getSexo() != null) {
             usuario.setSexo(dto.getSexo());
         }
@@ -79,12 +77,10 @@ public class UsuarioService {
     }
 
     private void validarECarregarDadosPlanoGold(AlunoCreateDTO dto, Usuario usuario) {
-        // >> ALTERAÇÃO: Adicionada a validação do campo 'sexo' aqui.
         if (dto.getSexo() == null || dto.getIdade() == null || dto.getPeso() == null || dto.getAltura() == null ||
                 dto.getObjetivo() == null || dto.getObjetivo().isBlank() || dto.getNivelAtividade() == null) {
             throw new IllegalArgumentException("Para o plano Gold, os campos: sexo, idade, peso, altura, objetivo e nível de atividade são obrigatórios.");
         }
-        // Os campos são definidos no objeto 'usuario' apenas se o plano for Gold
         usuario.setSexo(dto.getSexo());
         usuario.setIdade(dto.getIdade());
         usuario.setPeso(dto.getPeso());
@@ -93,8 +89,6 @@ public class UsuarioService {
         usuario.setNivelAtividade(dto.getNivelAtividade());
     }
 
-    // (O restante da classe permanece exatamente o mesmo, pois a lógica de atribuição de treino
-    // já lida corretamente com as validações baseadas nos campos existentes do aluno)
 
     public void atribuirTreinoParaAluno(String alunoId, String treinoId, UserDetails userDetails) {
         Usuario aluno = repo.findById(alunoId)
@@ -273,16 +267,18 @@ public class UsuarioService {
         return repo.save(usuarioExistente);
     }
 
-    public List<UsuarioSaidaDTO> buscarPorPerfil(EPerfil perfil, PageRequest pageable) {
-        Page<Usuario> usuariosPage = repo.findByPerfil(perfil, pageable);
-        return usuariosPage.getContent().stream()
+    public List<UsuarioSaidaDTO> buscarPorPerfil(EPerfil perfil) {
+        List<Usuario> usuarios = repo.findByPerfil(perfil);
+
+        return usuarios.stream()
                 .map(this::toUsuarioSaidaDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<UsuarioSaidaDTO> buscarPorPerfilENome(EPerfil perfil, String nome, PageRequest pageable) {
-        Page<Usuario> usuariosPage = repo.findByPerfilAndNomeContainingIgnoreCase(perfil, nome, pageable);
-        return usuariosPage.getContent().stream()
+    public List<UsuarioSaidaDTO> buscarPorPerfilENome(EPerfil perfil, String nome) {
+        List<Usuario> usuarios = repo.findByPerfilAndNomeContainingIgnoreCase(perfil, nome);
+
+        return usuarios.stream()
                 .map(this::toUsuarioSaidaDTO)
                 .collect(Collectors.toList());
     }
