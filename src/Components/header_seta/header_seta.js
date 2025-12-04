@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Platform } from "react-native";
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Platform, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 
 const DesempenhoHeader = ({ navigation, mesAno, isDark, extraMarginTop }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
-    const { colors, isDark: themeIsDark } = useTheme();
+  const { colors, isDark: themeIsDark } = useTheme();
+  const { logout } = useAuth();
 
   const handleVoltar = () => {
     try {
@@ -50,6 +52,35 @@ const DesempenhoHeader = ({ navigation, mesAno, isDark, extraMarginTop }) => {
   const handleNavegar = (nomeDaTela) => {
     handleFecharMenu();
     navigation.navigate(nomeDaTela);
+  };
+
+  const handleSairConta = () => {
+    Alert.alert(
+      'Sair da Conta',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Logout cancelado'),
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          onPress: async () => {
+            try {
+              handleFecharMenu();
+              await logout();
+              navigation.navigate('Inicial');
+              console.log('✅ Logout realizado com sucesso');
+            } catch (error) {
+              console.error('❌ Erro ao fazer logout:', error);
+              Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
   };
 
   // Use cores do ThemeContext para o menu acompanhar o tema
@@ -99,7 +130,7 @@ const DesempenhoHeader = ({ navigation, mesAno, isDark, extraMarginTop }) => {
             ))}
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleNavegar("Inicial")}
+              onPress={handleSairConta}
             >
               <Ionicons name="log-out-outline" size={24} color="#dc3545" />
               <Text style={[styles.menuItemText, { color: "#dc3545" }]}>Sair</Text>

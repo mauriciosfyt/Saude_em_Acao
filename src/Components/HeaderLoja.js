@@ -8,9 +8,11 @@ import {
   TextInput,
   Modal,
   Platform,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../context/AuthContext';
 
 const platformShadow = ({
   shadowColor = '#000',
@@ -47,6 +49,7 @@ const platformShadow = ({
 
 const HeaderLoja = ({ navigation: navigationProp, searchText, setSearchText }) => {
   const navigation = navigationProp || useNavigation();
+  const { logout } = useAuth();
   const [menuVisivel, setMenuVisivel] = useState(false);
 
   const handleAbrirMenu = () => setMenuVisivel(true);
@@ -54,6 +57,35 @@ const HeaderLoja = ({ navigation: navigationProp, searchText, setSearchText }) =
   const handleNavegar = (nomeDaTela) => {
     handleFecharMenu();
     if (navigation && nomeDaTela) navigation.navigate(nomeDaTela);
+  };
+
+  const handleSairConta = () => {
+    Alert.alert(
+      'Sair da Conta',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Logout cancelado'),
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          onPress: async () => {
+            try {
+              handleFecharMenu();
+              await logout();
+              navigation.navigate('Inicial');
+              console.log('✅ Logout realizado com sucesso');
+            } catch (error) {
+              console.error('❌ Erro ao fazer logout:', error);
+              Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
   };
 
   return (
@@ -123,7 +155,7 @@ const HeaderLoja = ({ navigation: navigationProp, searchText, setSearchText }) =
               <Ionicons name="bar-chart-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Desempenho</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => handleNavegar('Inicial')}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleSairConta}>
               <Ionicons name="log-out-outline" size={24} color="#dc3545" />
               <Text style={[styles.menuItemText, {color: '#dc3545'}]}>Sair</Text>
             </TouchableOpacity>

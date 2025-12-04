@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, Modal, StyleSheet, Platform } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Modal, StyleSheet, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 const platformShadow = ({
   shadowColor = '#000',
@@ -39,6 +40,7 @@ const platformShadow = ({
 const HeaderProfessores = ({ title, onBackPress, navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
   const { isDark } = useTheme();
+  const { logout } = useAuth();
 
   const handleAbrirMenu = () => {
     setMenuVisivel(true);
@@ -48,12 +50,40 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
     setMenuVisivel(false);
   };
 
-
   const handleNavegar = (nomeDaTela) => {
     handleFecharMenu();
     if (navigation) {
       navigation.navigate(nomeDaTela);
     }
+  };
+
+  const handleSairConta = () => {
+    Alert.alert(
+      'Sair da Conta',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Logout cancelado'),
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          onPress: async () => {
+            try {
+              handleFecharMenu();
+              await logout();
+              navigation.navigate('Inicial');
+              console.log('✅ Logout realizado com sucesso');
+            } catch (error) {
+              console.error('❌ Erro ao fazer logout:', error);
+              Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
   };
 
   return (
@@ -123,7 +153,7 @@ const HeaderProfessores = ({ title, onBackPress, navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleNavegar("Inicial")}
+              onPress={handleSairConta}
             >
               <Ionicons name="log-out-outline" size={24} color="#dc3545" />
               <Text style={[styles.menuItemText, { color: "#dc3545" }]}>
