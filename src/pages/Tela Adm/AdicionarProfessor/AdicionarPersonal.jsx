@@ -11,6 +11,7 @@ import { createProfessor } from '../../../services/usuarioService'; // Importar 
 import { ToastContainer, toast } from 'react-toastify';
 
 import '../../../components/Mensagem/Sucesso.css'; // Importação do CSS personalizado do Toast
+import '../../../components/Mensagem/Excluido.css'; // Seu CSS customizado para mensagens
 // --- FIM REACT TOASTIFY ---
 
 const PlusIcon = () => (
@@ -98,7 +99,11 @@ const AdicionarPersonal = () => {
       return;
     }
     if (formData.senha !== formData.confirmarSenha) {
-      toast.error('As senhas não coincidem.');
+      toast.error('As senhas não coincidem.',{
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
       return;
     }
     // ...outras validações
@@ -141,7 +146,11 @@ const AdicionarPersonal = () => {
 
     } catch (error) {
       console.error('Erro ao criar o personal:', error);
-      toast.error(`Falha ao criar personal: ${error.message}`);
+      toast.error(`Falha ao criar personal: ${error.message}`,{
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
     }
   };
   // --- FIM ALTERAÇÃO ---

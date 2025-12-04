@@ -146,7 +146,11 @@ const GerenciarProduto = () => {
 
     } catch (err) {
       console.error('Erro ao excluir produto:', err);
-      toast.error('Erro ao excluir produto.');
+      toast.error('Erro ao excluir produto.', {
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
       
     } finally {
       setLoading(false);

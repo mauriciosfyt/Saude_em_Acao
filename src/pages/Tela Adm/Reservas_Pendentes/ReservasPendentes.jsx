@@ -19,6 +19,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../../components/Mensagem/Sucesso.css'; // Estilo Verde (Aprovado)
 import '../../../components/Mensagem/Cancelado.css'; // Estilo Vermelho (Cancelado)
+import '../../../components/Mensagem/Excluido.css'; // Seu CSS customizado para mensagens
 // -------------------------------
 
 // Utils
@@ -96,7 +97,11 @@ const ReservasPendentes = () => {
             // Mantive apenas o erro no console caso algo crítico aconteça, mas removi logs desnecessários
             console.error(`Erro na ação ${acaoNormalizada}:`, erro);
             
-            toast.error(`Falha ao processar a reserva: ${erro.message}`);
+            toast.error(`Falha ao processar a reserva: ${erro.message}`, {
+                autoClose: 5000,
+                className: "custom-error-toast",
+                progressClassName: "custom-error-progress-bar",
+            });
         }
     };
 
@@ -166,7 +171,11 @@ const ReservasPendentes = () => {
             } catch (e) {
                 const msg = typeof e === 'string' ? e : (e?.message || 'Erro ao carregar reservas.');
                 setErro(msg);
-                toast.error("Erro ao carregar lista de reservas.");
+                toast.error("Erro ao carregar lista de reservas." ,{
+                    autoClose: 5000,
+                    className: "custom-error-toast",
+                    progressClassName: "custom-error-progress-bar",
+                });
             } finally {
                 setLoading(false);
             }

@@ -115,7 +115,11 @@ const GerenciarPersonal = () => {
     } catch (err) {
       console.error('Erro ao excluir personal:', err);
       // Toast de erro
-      toast.error(`Erro ao excluir personal: ${err.message}`);
+      toast.error(`Erro ao excluir personal: ${err.message}`, {
+        autoClose: 5000,
+        className: 'custom-error-toast',
+        progressClassName: 'custom-error-progress-bar',
+      });
     } finally {
       setPersonalParaExcluir(null);
     }

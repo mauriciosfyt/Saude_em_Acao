@@ -2,7 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import './ModalGerenciarTreino.css';
 import { getAllTreinos } from '../../../services/treinoService';
 import { patchAddTreinoToAluno } from '../../../services/usuarioService';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify'; // Removendo ToastContainer daqui
+import 'react-toastify/dist/ReactToastify.css'; // ADICIONADO CSS padrão
 import '../../../components/Mensagem/Sucesso.css'
 import '../../../components/Mensagem/Excluido.css'
 
@@ -150,7 +151,13 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
     });
     
     if (!selectedId) {
-      alert('Por favor, selecione um treino antes de escolher.');
+    
+      toast.warn('Por favor, selecione um treino antes de escolher.', {
+        className: 'custom-error-toast',
+        progressClassName: 'custom-error-progress-bar',
+        icon: true,
+        closeButton: true
+      });
       return;
     }
     
@@ -180,7 +187,13 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
         selectedId,
         treinosLength: treinos.length
       });
-      alert('Erro: Aluno não encontrado. Por favor, feche o modal e tente novamente.');
+  
+      toast.error('Erro: Aluno não encontrado. Por favor, feche o modal e tente novamente.', {
+        className: 'custom-error-toast',
+        progressClassName: 'custom-error-progress-bar',
+        icon: true,
+        closeButton: true
+      });
       return;
     }
     
@@ -200,9 +213,15 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
     
     if (!selectedTreino) {
       console.error('Treino não encontrado:', { selectedId, treinos });
-      alert('Erro: Treino selecionado não encontrado. Tente novamente.');
+      toast.error('Erro: Treino selecionado não encontrado. Tente novamente.', {
+        className: 'custom-error-toast',
+        progressClassName: 'custom-error-progress-bar',
+        icon: true,
+        closeButton: true
+      });
       return;
     }
+    
     // Chamar API PATCH para associar treino ao aluno
     (async () => {
       try {
@@ -216,14 +235,14 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
         handleCloseModal();
         
         toast.success('Treino associado ao aluno com sucesso.', {
-          className: 'custom-success-toast', 
+          className: 'custom-success-toast',
+          progressClassName: 'custom-success-progress-bar', 
           icon: true, 
           closeButton: true 
         });
 
       } catch (err) {
         console.error('Erro ao associar treino ao aluno:', err);
-        // IMPLEMENTAÇÃO DO TOAST DE ERRO
         toast.error('Erro ao associar treino ao aluno: ' + (err.message || err), {
           className: 'custom-error-toast',
           progressClassName: 'custom-error-progress-bar',
@@ -315,29 +334,29 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
             };
             
             return (
-            <div 
-              className={`modal-item-card ${isSelected ? 'radio-selected' : ''}`} 
-              key={treino.id}
-              onClick={handleCardClick}
-            >
-              <div className="modal-item-row">
-                <input 
-                  type="radio" 
-                  name="treino-select" 
-                  checked={isSelected} 
-                  onChange={handleRadioChange}
-                  onClick={handleRadioChange}
-                />
-                <div className="modal-item-content">
-                  <div className="modal-item-title">{treino.titulo}</div>
-                  <div className="modal-item-tags">
-                    {(treino.tags || []).map((tag, i) => (
-                      <span className="modal-tag" key={i}>{tag}</span>
-                    ))}
+              <div 
+                className={`modal-item-card ${isSelected ? 'radio-selected' : ''}`} 
+                key={treino.id}
+                onClick={handleCardClick}
+              >
+                <div className="modal-item-row">
+                  <input 
+                    type="radio" 
+                    name="treino-select" 
+                    checked={isSelected} 
+                    onChange={handleRadioChange}
+                    onClick={handleRadioChange}
+                  />
+                  <div className="modal-item-content">
+                    <div className="modal-item-title">{treino.titulo}</div>
+                    <div className="modal-item-tags">
+                      {(treino.tags || []).map((tag, i) => (
+                        <span className="modal-tag" key={i}>{tag}</span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             );
           })}
         </div>
@@ -349,6 +368,21 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
           </button>
         </div>
       </div>
+      
+      {/* REMOVIDO: O ToastContainer foi movido para o componente pai (GerenciarAlunos) */}
+      {/* <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      /> 
+      */}
     </div>
   );
 };

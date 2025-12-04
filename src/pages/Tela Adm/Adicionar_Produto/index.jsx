@@ -7,6 +7,7 @@ import { useAuth } from '../../../contexts/AuthContext'; // Importar contexto de
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../../components/Mensagem/Sucesso.css'; // Importação do seu arquivo de estilo
+import '../../../components/Mensagem/Excluido.css'; // Seu CSS customizado para mensagens
 // -------------------------------
 
 // Componentes
@@ -46,9 +47,12 @@ const AdicionarProduto = () => {
     } catch (error) {
       console.error('❌ Erro ao criar produto:', error);
       
-      // Toast de erro para feedback visual (substituindo o alert visualmente)
-      // alert(`Ocorreu um erro ao criar o produto: ${error.message}`);
-      toast.error(`Ocorreu um erro ao criar o produto: ${error.message}`);
+
+      toast.error(`Ocorreu um erro ao criar o produto: ${error.message}`, {
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
     }
   };
 
@@ -69,7 +73,7 @@ const AdicionarProduto = () => {
           onCancel={handleCancelar}
         />
 
-        {/* Componente necessário para renderizar os alertas */}
+    
         <ToastContainer position="top-right" />
 
       </main>

@@ -8,6 +8,7 @@ import { getAlunoById, updateAluno, deleteAluno, API_URL } from '../../../servic
 // Imports necessários para o Toastify
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../../../components/Mensagem/Excluido.css'; // Seu CSS customizado para mensagens
 
 // Ícones reutilizados
 const PlusIcon = () => (
@@ -130,8 +131,12 @@ const EditarAluno = () => {
           console.warn('Aluno no localStorage inválido');
         }
       } else if (!id) {
-        // Substituindo Alert por Toast
-        toast.error('Dados do aluno não encontrados.');
+
+        toast.error('Dados do aluno não encontrados.' ,{
+          autoClose: 5000,
+          className: "custom-error-toast",
+          progressClassName: "custom-error-progress-bar",
+        });
         navigate('/GerenciarAlunos');
       }
     }
@@ -159,13 +164,11 @@ const EditarAluno = () => {
     if (file) {
       const maxSizeMB = 5;
       if (file.size > maxSizeMB * 1024 * 1024) {
-        // Substituindo Alert por Toast
         toast.warn(`A imagem deve ter no máximo ${maxSizeMB}MB.`);
         return;
       }
       const tiposAceitos = ['image/png', 'image/jpeg', 'image/webp'];
       if (!tiposAceitos.includes(file.type)) {
-        // Substituindo Alert por Toast
         toast.warn('Por favor, selecione uma imagem válida.');
         return;
       }
@@ -186,7 +189,6 @@ const EditarAluno = () => {
     e.preventDefault();
 
     if (!formData.nome || !formData.email || !formData.cpf || !formData.telefone || !formData.plano) {
-      // Substituindo Alert por Toast
       toast.warn('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
@@ -194,15 +196,18 @@ const EditarAluno = () => {
     if (formData.plano === 'GOLD') {
       // Removida validação de !formData.sexo pois não é mais editável
       if (!formData.idade || !formData.peso || !formData.altura || !formData.objetivo || !formData.nivelAtividade) {
-        // Substituindo Alert por Toast
+
         toast.warn('Para o plano GOLD, os campos: idade, peso, altura, objetivo e nível de atividade são obrigatórios.');
         return;
       }
     }
 
     if (formData.senha && formData.senha !== formData.confirmarSenha) {
-      // Substituindo Alert por Toast
-      toast.error('As senhas não coincidem.');
+      toast.error('As senhas não coincidem.', {
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
       return;
     }
 
@@ -249,8 +254,11 @@ const EditarAluno = () => {
       
     } catch (err) {
       console.error('Erro ao salvar aluno:', err);
-      // Substituindo Alert por Toast
-      toast.error(err?.message || 'Falha ao salvar alterações.');
+      toast.error(err?.message || 'Falha ao salvar alterações.', {  
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
     } finally {
       setIsSubmitting(false);
     }

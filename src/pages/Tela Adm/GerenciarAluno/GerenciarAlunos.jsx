@@ -94,12 +94,16 @@ const GerenciarAlunos = () => {
       });
     } catch (err) {
       console.error('Erro ao excluir aluno:', err);
-      alert('Erro ao excluir aluno. Tente novamente.');
+      toast.error('Erro ao excluir aluno. Tente novamente.', {
+        className: 'custom-error-toast',
+        progressClassName: 'custom-error-progress-bar',
+        autoClose: 5000,
+      });
     } finally {
       setAlunoParaExcluir(null); // Limpa o estado
     }
   };
-  // -------------------------------------
+
 
   const handleOpenModal = (aluno) => {
     setSelectedAluno(aluno);
@@ -114,7 +118,12 @@ const GerenciarAlunos = () => {
   const handleChooseTreino = async (treino, alunoIdParam) => {
     const alunoIdFinal = alunoIdParam || (selectedAluno?.id && String(selectedAluno.id));
     if (!alunoIdFinal) {
-      alert('ID do aluno não encontrado. Tente novamente.');
+ 
+      toast.error('ID do aluno não encontrado. Tente novamente.', {
+        className: 'custom-error-toast',
+        progressClassName: 'custom-error-progress-bar',
+        autoClose: 5000,
+      });
       return;
     }
 
@@ -126,7 +135,11 @@ const GerenciarAlunos = () => {
       await fetchAlunos();
     } catch (err) {
       console.warn('Falha ao salvar associação de treino no servidor.', err);
-      alert('Erro ao associar treino no servidor. Tente novamente.');
+      toast.error('Erro ao associar treino no servidor. Tente novamente.', {
+        className: 'custom-error-toast',
+        progressClassName: 'custom-error-progress-bar',
+        autoClose: 5000,
+      });
     }
     setModalOpen(false);
     setSelectedAluno(null);

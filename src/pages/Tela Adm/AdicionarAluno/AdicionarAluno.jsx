@@ -8,6 +8,7 @@ import { createAluno } from '../../../services/usuarioService';
 // Imports necessários para o Toastify
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../../../components/Mensagem/Excluido.css'; // Seu CSS customizado para mensagens
 
 const UserIcon = () => (
   <svg width="80" height="80" viewBox="0 0 24 24" fill="#333" xmlns="http://www.w3.org/2000/svg">
@@ -91,7 +92,11 @@ const AdicionarAluno = () => {
     }
 
     if (!imagemArquivo) {
-      toast.error('A foto de perfil é obrigatória.');
+      toast.error('A foto de perfil é obrigatória.', {
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
       return;
     }
 
@@ -106,12 +111,20 @@ const AdicionarAluno = () => {
     }
 
     if (formData.senha !== formData.confirmarSenha) {
-      toast.error('As senhas não coincidem.');
+      toast.error('As senhas não coincidem.',{
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
       return;
     }
     
     if (formData.senha.length < 6) {
-      toast.error('A senha deve ter pelo menos 6 caracteres.');
+      toast.error('A senha deve ter pelo menos 6 caracteres.',{
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
       return;
     }
 
@@ -151,7 +164,11 @@ const AdicionarAluno = () => {
 
     } catch (error) {
       console.error('Erro ao criar o aluno:', error);
-      toast.error(`Falha ao criar aluno: ${error.message}`);
+      toast.error(`Falha ao criar aluno: ${error.message}`,{
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
     }
   };
 

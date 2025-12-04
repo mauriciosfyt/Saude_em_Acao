@@ -118,7 +118,11 @@ const GerenciarTreino = () => {
       closeModal();
     } catch (err) {
       console.error('Erro ao duplicar treino:', err);
-      toast.error('Erro ao duplicar treino. Tente novamente.');
+      toast.error('Erro ao duplicar treino. Tente novamente.', {
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
     }
   };
 
@@ -147,7 +151,11 @@ const GerenciarTreino = () => {
       carregarTreinos();
     } catch (err) {
       console.error('Erro ao remover treino:', err);
-      toast.error(err.message || 'Erro ao remover treino. Tente novamente.');
+      toast.error(err.message || 'Erro ao remover treino. Tente novamente.', {
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
     } finally {
       setShowDeleteModal(false);
       setSelectedTreino(null);

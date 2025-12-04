@@ -7,6 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../../components/Mensagem/Sucesso.css'; 
 import '../../../components/Mensagem/Editado.css'; // Importação do CSS laranja
+import '../../../components/Mensagem/Excluido.css'; // Seu CSS customizado para mensagens
 
 import baixo from '../../../assets/icones/down-arrow.svg';
 import cima from '../../../assets/icones/up-arrow.svg';
@@ -253,13 +254,21 @@ export default function AdicionarTreino() {
     if (file) {
       // Validar se é uma imagem
       if (!file.type.startsWith('image/')) {
-        toast.error('Por favor, selecione uma imagem válida');
+        toast.error('Por favor, selecione uma imagem válida', {
+          autoClose: 5000,
+          className: "custom-error-toast",
+          progressClassName: "custom-error-progress-bar",
+        });
         return;
       }
 
       // Validar tamanho (máx 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('A imagem não pode ter mais de 5MB');
+        toast.error('A imagem não pode ter mais de 5MB', {
+          autoClose: 5000,
+          className: "custom-error-toast",
+          progressClassName: "custom-error-progress-bar",
+        });
         return;
       }
 
@@ -509,7 +518,11 @@ export default function AdicionarTreino() {
           } else if (error.message) {
              errorMsg += ' ' + error.message;
           }
-          toast.error(errorMsg);
+          toast.error(errorMsg, {
+            autoClose: 5000,
+            className: "custom-error-toast",
+            progressClassName: "custom-error-progress-bar",
+          });
         } finally {
           setLoading(false);
         }
@@ -820,7 +833,11 @@ export default function AdicionarTreino() {
       } else {
          errorMsg += ' Tente novamente.';
       }
-      toast.error(errorMsg);
+      toast.error(errorMsg, {
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
       
     } finally {
       setSaving(false);

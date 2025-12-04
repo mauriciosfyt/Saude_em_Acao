@@ -7,6 +7,7 @@ import { getProfessorById, API_URL, updateProfessor, deleteProfessor } from '../
 // --- REACT TOASTIFY ---
 import { ToastContainer, toast } from 'react-toastify';
 import '../../../components/Mensagem/Editado.css'
+import '../../../components/Mensagem/Excluido.css'; // Seu CSS customizado para mensagens
 // --- FIM REACT TOASTIFY ---
 
 const PlusIcon = () => (
@@ -190,7 +191,11 @@ const EditarPersonal = () => {
     } catch (err) {
       console.error('Erro ao excluir professor:', err);
       const msg = err?.message || 'Falha ao excluir professor.';
-      toast.error(msg);
+      toast.error(msg,{
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
       setIsDeleting(false); // Só volta o estado se der erro, se der sucesso navega
     } finally {
       // setShowDeleteModal(false); // Isso pode causar erro se o componente desmontar na navegação, mas ok
@@ -201,7 +206,11 @@ const EditarPersonal = () => {
     e.preventDefault();
     // Validação simples de senha (se preenchida)
     if (formData.senha && formData.senha !== formData.confirmarSenha) {
-      toast.error('As senhas não coincidem.');
+      toast.error('As senhas não coincidem.', {  
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
       return;
     }
 
@@ -245,7 +254,11 @@ const EditarPersonal = () => {
     } catch (err) {
       console.error('Erro ao salvar personal:', err);
       const msg = err?.message || 'Falha ao salvar alterações.';
-      toast.error(msg);
+      toast.error(msg), {  
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      };
       setIsSubmitting(false); // Habilita o botão novamente em caso de erro
     }
   };

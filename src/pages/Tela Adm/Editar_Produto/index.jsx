@@ -7,6 +7,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../../components/Mensagem/Editado.css'; // Importação do estilo Laranja (Edição)
+import '../../../components/Mensagem/Excluido.css'; // Seu CSS customizado para mensagens
 // -------------------------------
 
 // Componentes Reutilizados
@@ -65,9 +66,12 @@ const EditarProduto = () => {
     const carregarProduto = async () => {
       const produtoSalvo = localStorage.getItem('produtoParaEditar');
       if (!produtoSalvo) {
-        // Alerta visual substituído por Toast, mantendo lógica de redirecionamento
-        // alert('Nenhum produto selecionado para edição.');
-        toast.error('Nenhum produto selecionado para edição.');
+
+        toast.error('Nenhum produto selecionado para edição.', {
+          autoClose: 5000,
+          className: "custom-error-toast",
+          progressClassName: "custom-error-progress-bar",
+        });
         navigate('/GerenciarProduto');
         return;
       }
@@ -121,7 +125,11 @@ const EditarProduto = () => {
       } catch (error) {
         console.error('❌ Erro ao carregar produto:', error);
         setError('Erro ao carregar dados do produto: ' + error.message);
-        toast.error('Erro ao carregar dados do produto.');
+        toast.error('Erro ao carregar dados do produto.' ,{
+          autoClose: 5000,
+          className: "custom-error-toast",
+          progressClassName: "custom-error-progress-bar",
+        });
       }
     };
 
@@ -150,7 +158,7 @@ const EditarProduto = () => {
   // Funções do Modal
   const abrirModalEstoque = () => {
     if (!dadosFormulario.categoria) {
-      // alert('Por favor, selecione uma categoria primeiro.');
+
       toast.warn('Por favor, selecione uma categoria primeiro.');
       return;
     }
@@ -211,7 +219,7 @@ const EditarProduto = () => {
       const categoriaInfo = getCategoriaAtual();
       
       if (!nome || !preco || !categoriaInfo) {
-        // alert('Por favor, preencha todos os campos obrigatórios.');
+
         toast.warn('Por favor, preencha todos os campos obrigatórios.');
         setLoading(false);
         return;
@@ -227,7 +235,6 @@ const EditarProduto = () => {
       }
 
       if (totalEstoque <= 0) {
-        // alert(`O estoque total deve ser maior que zero para a categoria ${categoriaInfo.rotulo}`);
         toast.warn(`O estoque total deve ser maior que zero para a categoria ${categoriaInfo.rotulo}`);
         setLoading(false);
         return;
@@ -295,8 +302,12 @@ const EditarProduto = () => {
     } catch (error) {
       console.error('❌ Erro ao editar produto:', error);
       setError(`Erro ao editar produto: ${error.message}`);
-      // alert(`Ocorreu um erro ao editar o produto: ${error.message}`);
-      toast.error(`Ocorreu um erro ao editar o produto: ${error.message}`);
+     
+      toast.error(`Ocorreu um erro ao editar o produto: ${error.message}`, {
+        autoClose: 5000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
     } finally {
       // Nota: Não defino loading(false) aqui se for sucesso, pois a navegação vai ocorrer
       // e queremos evitar que o usuário clique novamente no botão.
