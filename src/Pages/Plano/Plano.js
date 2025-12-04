@@ -18,7 +18,7 @@ const Plano = ({ navigation }) => {
     beneficios: [],
   });
   const { colors, isDark } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const styles = useMemo(() => createStyles(isDark), [isDark]);
 
   // Carregar dados do perfil do usuário
@@ -37,7 +37,7 @@ const Plano = ({ navigation }) => {
           dataRenovacao: dados.dataRenovacao || hoje.toLocaleDateString('pt-BR'),
           dataVencimento: dados.dataVencimento || vencimento.toLocaleDateString('pt-BR'),
           inicioAcademia: dados.dataCadastro || hoje.toLocaleDateString('pt-BR'),
-          duracao: dados.duracao || '2 meses',
+          duracao: dados.duracao || '1 meses',
           beneficios: dados.beneficios || ['Funcional', 'Musculação', 'Pilates', 'Treino personalizado'],
         });
         
@@ -58,6 +58,35 @@ const Plano = ({ navigation }) => {
   const handleNavegar = (nomeDaTela) => {
     handleFecharMenu();
     if (navigation) navigation.navigate(nomeDaTela);
+  };
+
+  const handleSairConta = () => {
+    Alert.alert(
+      'Sair da Conta',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Logout cancelado'),
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          onPress: async () => {
+            try {
+              handleFecharMenu();
+              await logout();
+              navigation.navigate('Inicial');
+              console.log('✅ Logout realizado com sucesso');
+            } catch (error) {
+              console.error('❌ Erro ao fazer logout:', error);
+              Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
   };
 
   const menuBg = isDark ? "#2c2c2c" : "#FFFFFF";
@@ -215,7 +244,7 @@ const Plano = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleNavegar("Inicial")}
+              onPress={handleSairConta}
             >
               <Ionicons name="log-out-outline" size={24} color={logoutColor} />
               <Text style={[styles.menuItemText, { color: logoutColor }]}>

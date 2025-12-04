@@ -179,11 +179,7 @@ const MeuTreino = ({ navigation }) => {
         try { Alert.alert('Sessão expirada','Sua sessão expirou ou você não tem permissão. Faça login novamente.',[{ text: 'OK', onPress: async () => { try { await logout(); } catch (e) { console.warn('Erro ao chamar logout:', e); } navigation.navigate('Inicial'); }, },], { cancelable: false }); } catch (e) { console.warn('Erro ao mostrar alerta de 403', e); }
       }
       setTreinos([
-        { id: 1, dia: 'Segunda-Feira', grupos: '• Peito • Tríceps', imagem: require('../../../assets/banner_whey.png') },
-        { id: 2, dia: 'Terça-Feira', grupos: '• Costas • Bíceps', imagem: require('../../../assets/banner_creatina.png') },
-        { id: 3, dia: 'Quarta-Feira', grupos: '• Perna completo', imagem: require('../../../assets/banner_vitaminas.png') },
-        { id: 4, dia: 'Quinta-Feira', grupos: '• Cardio • Ombro', imagem: require('../../../assets/banner_roupas.jpg') },
-        { id: 5, dia: 'Sexta-Feira', grupos: '• Abdômen • Costas', imagem: require('../../../assets/banner_camisas.png') },
+        
       ]);
     } finally { setCarregandoTreinos(false); }
   };
@@ -307,6 +303,35 @@ const MeuTreino = ({ navigation }) => {
     navigation.navigate(nomeDaTela);
   };
 
+  const handleSairConta = () => {
+    Alert.alert(
+      'Sair da Conta',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Logout cancelado'),
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          onPress: async () => {
+            try {
+              handleFecharMenu();
+              await logout();
+              navigation.navigate('Inicial');
+              console.log('✅ Logout realizado com sucesso');
+            } catch (error) {
+              console.error('❌ Erro ao fazer logout:', error);
+              Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: "#405CBA" }]}>
       <StatusBar
@@ -338,47 +363,68 @@ const MeuTreino = ({ navigation }) => {
 
       {/* Lista de Treinos */}
       <ScrollView style={styles.content}>
-        {treinos.map((treino) => (
-          <View key={treino.id} style={styles.treinoCard}>
-            <Image source={treino.imagem} style={styles.treinoImage} />
-            <View style={styles.treinoInfo}>
-              <Text style={[styles.treinoDia, { color: colors.textPrimary }]}>
-                {String(treino.dia)}
-              </Text>
-            </View>
-            {(() => {
-              const diaNorm = normalizarDia(treino.dia);
-              const isConcluido = desempenhoMap[diaNorm] === 'concluido';
-              const isIncompleto = false; // não armazenamos estado 'incompleto' localmente
-              return (
-                <TouchableOpacity
-                  style={[
-                    styles.iniciarButton,
-                    isConcluido && styles.concluidoButton,
-                    // sem estilo para 'incompleto'
-                  ]}
-                  onPress={() => !isConcluido && handleIniciarTreino(treino)}
-                  disabled={isConcluido}
-                >
-                  <Text
+        {treinos && treinos.length > 0 ? (
+          treinos.map((treino) => (
+            <View key={treino.id} style={styles.treinoCard}>
+              <Image source={treino.imagem} style={styles.treinoImage} />
+              <View style={styles.treinoInfo}>
+                <Text style={[styles.treinoDia, { color: colors.textPrimary }]}>
+                  {String(treino.dia)}
+                </Text>
+              </View>
+              {(() => {
+                const diaNorm = normalizarDia(treino.dia);
+                const isConcluido = desempenhoMap[diaNorm] === 'concluido';
+                const isIncompleto = false; // não armazenamos estado 'incompleto' localmente
+                return (
+                  <TouchableOpacity
                     style={[
-                      styles.iniciarButtonText,
-                      isConcluido && styles.concluidoButtonText,
+                      styles.iniciarButton,
+                      isConcluido && styles.concluidoButton,
                       // sem estilo para 'incompleto'
                     ]}
+                    onPress={() => !isConcluido && handleIniciarTreino(treino)}
+                    disabled={isConcluido}
                   >
-                    {isConcluido ? "Concluído" : "Iniciar"}
-                  </Text>
-                  <Ionicons
-                    name={isConcluido ? "checkmark-circle" : "arrow-forward"}
-                    size={16}
-                    color="white"
-                  />
-                </TouchableOpacity>
-              );
-            })()}
+                    <Text
+                      style={[
+                        styles.iniciarButtonText,
+                        isConcluido && styles.concluidoButtonText,
+                        // sem estilo para 'incompleto'
+                      ]}
+                    >
+                      {isConcluido ? "Concluído" : "Iniciar"}
+                    </Text>
+                    <Ionicons
+                      name={isConcluido ? "checkmark-circle" : "arrow-forward"}
+                      size={16}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                );
+              })()}
+            </View>
+          ))
+        ) : (
+          <View style={styles.semTreinoContainer}>
+            <Ionicons name="alert-circle-outline" size={64} color={colors.primary} style={{ marginBottom: 16 }} />
+            <Text style={[styles.semTreinoTitulo, { color: colors.textPrimary }]}>
+              Nenhum Treino Disponível
+            </Text>
+            <Text style={[styles.semTreinoDescricao, { color: colors.textSecondary }]}>
+              Você ainda não possui um treino personalizado. Fale com um dos nossos personais instrutores para criar um treino adaptado às suas necessidades!
+            </Text>
+            <TouchableOpacity 
+              style={styles.contatarPersonalButton}
+              onPress={() => handleNavegar("Professores")}
+            >
+              <Ionicons name="chatbubble-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
+              <Text style={styles.contatarPersonalButtonText}>
+                Conversar com Personal
+              </Text>
+            </TouchableOpacity>
           </View>
-        ))}
+        )}
       </ScrollView>
 
       {/* Modal do Menu */}
@@ -535,7 +581,7 @@ const MeuTreino = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleNavegar("Inicial")}
+              onPress={handleSairConta}
             >
               <Ionicons name="log-out-outline" size={24} color="#dc3545" />
               <Text style={[styles.menuItemText, { color: "#dc3545" }]}>

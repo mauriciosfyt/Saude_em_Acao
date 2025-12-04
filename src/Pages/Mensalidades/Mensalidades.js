@@ -10,8 +10,10 @@ import {
   StatusBar,
   Modal,
   Platform,
+  Alert,
 } from "react-native";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 // Usaremos Ionicons para manter a consistência com a tela Desempenho
 import { Ionicons } from "@expo/vector-icons";
 
@@ -50,6 +52,7 @@ const platformShadow = ({
 
 const Mensalidades = ({ navigation }) => {
   const { colors, isDark } = useTheme();
+  const { logout } = useAuth();
   const [menuVisivel, setMenuVisivel] = useState(false);
 
   // Funções de controle do menu e navegação
@@ -70,6 +73,35 @@ const Mensalidades = ({ navigation }) => {
   const handleNavegar = (nomeDaTela) => {
     handleFecharMenu();
     if (navigation) navigation.navigate(nomeDaTela);
+  };
+
+  const handleSairConta = () => {
+    Alert.alert(
+      'Sair da Conta',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Logout cancelado'),
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          onPress: async () => {
+            try {
+              handleFecharMenu();
+              await logout();
+              navigation.navigate('Inicial');
+              console.log('✅ Logout realizado com sucesso');
+            } catch (error) {
+              console.error('❌ Erro ao fazer logout:', error);
+              Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
   };
 
   return (
@@ -143,7 +175,7 @@ const Mensalidades = ({ navigation }) => {
                  </TouchableOpacity>
                  <TouchableOpacity
                    style={styles.menuItem}
-                   onPress={() => handleNavegar("Inicial")}
+                   onPress={handleSairConta}
                  >
                    <Ionicons name="log-out-outline" size={24} color="#dc3545" />
                    <Text style={[styles.menuItemText, { color: "#dc3545" }]}>
