@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Modal, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 // Componente renomeado para HeaderChat
 const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
   const [menuVisivel, setMenuVisivel] = useState(false);
   const { colors, isDark } = useTheme();
+  const { logout } = useAuth();
 
   const handleAbrirMenu = () => setMenuVisivel(true);
   const handleFecharMenu = () => setMenuVisivel(false);
-
 
   // A navegação para telas normais
   const navegarParaTela = (nomeDaTela) => {
@@ -18,6 +19,35 @@ const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
     if (navigation) {
       navigation.navigate(nomeDaTela);
     }
+  };
+
+  // Handler para logout com confirmação
+  const handleSair = () => {
+    Alert.alert(
+      'Sair da Conta',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Logout cancelado'),
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          onPress: async () => {
+            try {
+              handleFecharMenu();
+              await logout();
+              navigation.navigate('Inicial');
+            } catch (error) {
+              console.error('Erro ao fazer logout:', error);
+              Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
   };
 
   return (
@@ -65,7 +95,7 @@ const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
               <Ionicons name="bar-chart-outline" size={24} color={isDark ? '#FFFFFF' : '#333'} />
               <Text style={[styles.menuItemText, { color: isDark ? '#FFFFFF' : '#333' }]}>Desempenho</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navegarParaTela("Inicial")}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleSair}>
               <Ionicons name="log-out-outline" size={24} color="#E24B4B" />
               <Text style={[styles.menuItemText, { color: "#E24B4B" }]}>Sair</Text>
             </TouchableOpacity>
