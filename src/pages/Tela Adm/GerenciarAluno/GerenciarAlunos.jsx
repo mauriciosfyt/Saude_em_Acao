@@ -97,7 +97,7 @@ const GerenciarAlunos = () => {
       toast.error('Erro ao excluir aluno. Tente novamente.', {
         className: 'custom-error-toast',
         progressClassName: 'custom-error-progress-bar',
-        autoClose: 5000,
+        autoClose: 2000,
       });
     } finally {
       setAlunoParaExcluir(null); // Limpa o estado
@@ -122,7 +122,7 @@ const GerenciarAlunos = () => {
       toast.error('ID do aluno não encontrado. Tente novamente.', {
         className: 'custom-error-toast',
         progressClassName: 'custom-error-progress-bar',
-        autoClose: 5000,
+        autoClose: 2000,
       });
       return;
     }
@@ -138,7 +138,7 @@ const GerenciarAlunos = () => {
       toast.error('Erro ao associar treino no servidor. Tente novamente.', {
         className: 'custom-error-toast',
         progressClassName: 'custom-error-progress-bar',
-        autoClose: 5000,
+        autoClose: 2000,
       });
     }
     setModalOpen(false);

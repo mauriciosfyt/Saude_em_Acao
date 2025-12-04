@@ -133,7 +133,7 @@ const EditarAluno = () => {
       } else if (!id) {
 
         toast.error('Dados do aluno não encontrados.' ,{
-          autoClose: 5000,
+          autoClose: 2000,
           className: "custom-error-toast",
           progressClassName: "custom-error-progress-bar",
         });
@@ -204,7 +204,7 @@ const EditarAluno = () => {
 
     if (formData.senha && formData.senha !== formData.confirmarSenha) {
       toast.error('As senhas não coincidem.', {
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });
@@ -255,7 +255,7 @@ const EditarAluno = () => {
     } catch (err) {
       console.error('Erro ao salvar aluno:', err);
       toast.error(err?.message || 'Falha ao salvar alterações.', {  
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });

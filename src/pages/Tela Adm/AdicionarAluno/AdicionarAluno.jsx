@@ -93,7 +93,7 @@ const AdicionarAluno = () => {
 
     if (!imagemArquivo) {
       toast.error('A foto de perfil é obrigatória.', {
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });
@@ -112,7 +112,7 @@ const AdicionarAluno = () => {
 
     if (formData.senha !== formData.confirmarSenha) {
       toast.error('As senhas não coincidem.',{
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });
@@ -121,7 +121,7 @@ const AdicionarAluno = () => {
     
     if (formData.senha.length < 6) {
       toast.error('A senha deve ter pelo menos 6 caracteres.',{
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });
@@ -165,7 +165,7 @@ const AdicionarAluno = () => {
     } catch (error) {
       console.error('Erro ao criar o aluno:', error);
       toast.error(`Falha ao criar aluno: ${error.message}`,{
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });

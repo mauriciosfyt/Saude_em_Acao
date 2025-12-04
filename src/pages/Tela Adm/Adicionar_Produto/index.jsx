@@ -49,7 +49,7 @@ const AdicionarProduto = () => {
       
 
       toast.error(`Ocorreu um erro ao criar o produto: ${error.message}`, {
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });

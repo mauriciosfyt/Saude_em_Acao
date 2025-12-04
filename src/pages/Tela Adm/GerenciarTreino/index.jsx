@@ -119,7 +119,7 @@ const GerenciarTreino = () => {
     } catch (err) {
       console.error('Erro ao duplicar treino:', err);
       toast.error('Erro ao duplicar treino. Tente novamente.', {
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });
@@ -145,14 +145,14 @@ const GerenciarTreino = () => {
       toast.success('Excluído com sucesso!', {
         className: 'custom-delete-toast',
         progressClassName: 'custom-delete-progress-bar',
-        autoClose: 3000,
+        autoClose: 2000,
       });
 
       carregarTreinos();
     } catch (err) {
       console.error('Erro ao remover treino:', err);
       toast.error(err.message || 'Erro ao remover treino. Tente novamente.', {
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });

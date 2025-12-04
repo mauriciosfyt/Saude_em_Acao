@@ -83,13 +83,15 @@ const ReservasPendentes = () => {
                 toast.success(`Produto ${nomeProduto} foi APROVADO!`, {
                     className: "custom-success-toast", 
                     progressClassName: "Toastify__progress-bar--success",
-                    icon: true
+                    icon: true,
+                    autoClose: 2000
                 });
             } else {
                 toast.error(`Produto ${nomeProduto} foi CANCELADO!`, {
                     className: "custom-cancel-toast",
                     progressClassName: "custom-cancel-progress-bar",
-                    icon: true
+                    icon: true,
+                    autoClose: 2000
                 });
             }
 
@@ -98,7 +100,7 @@ const ReservasPendentes = () => {
             console.error(`Erro na ação ${acaoNormalizada}:`, erro);
             
             toast.error(`Falha ao processar a reserva: ${erro.message}`, {
-                autoClose: 5000,
+                autoClose: 2000,
                 className: "custom-error-toast",
                 progressClassName: "custom-error-progress-bar",
             });
@@ -172,7 +174,7 @@ const ReservasPendentes = () => {
                 const msg = typeof e === 'string' ? e : (e?.message || 'Erro ao carregar reservas.');
                 setErro(msg);
                 toast.error("Erro ao carregar lista de reservas." ,{
-                    autoClose: 5000,
+                    autoClose: 2000,
                     className: "custom-error-toast",
                     progressClassName: "custom-error-progress-bar",
                 });

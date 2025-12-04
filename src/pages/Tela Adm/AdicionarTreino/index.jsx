@@ -255,7 +255,7 @@ export default function AdicionarTreino() {
       // Validar se é uma imagem
       if (!file.type.startsWith('image/')) {
         toast.error('Por favor, selecione uma imagem válida', {
-          autoClose: 5000,
+          autoClose: 2000,
           className: "custom-error-toast",
           progressClassName: "custom-error-progress-bar",
         });
@@ -265,7 +265,7 @@ export default function AdicionarTreino() {
       // Validar tamanho (máx 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('A imagem não pode ter mais de 5MB', {
-          autoClose: 5000,
+          autoClose: 2000,
           className: "custom-error-toast",
           progressClassName: "custom-error-progress-bar",
         });
@@ -519,7 +519,7 @@ export default function AdicionarTreino() {
              errorMsg += ' ' + error.message;
           }
           toast.error(errorMsg, {
-            autoClose: 5000,
+            autoClose: 2000,
             className: "custom-error-toast",
             progressClassName: "custom-error-progress-bar",
           });
@@ -834,7 +834,7 @@ export default function AdicionarTreino() {
          errorMsg += ' Tente novamente.';
       }
       toast.error(errorMsg, {
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });

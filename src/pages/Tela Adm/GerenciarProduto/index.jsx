@@ -58,7 +58,11 @@ const GerenciarProduto = () => {
     } catch (err) {
       console.error('Erro ao carregar produtos da API:', err);
       setError('Não foi possível carregar produtos.');
-      toast.error('Não foi possível carregar produtos.'); // Feedback visual extra
+      toast.error('Não foi possível carregar produtos.', {
+        autoClose: 2000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      }); // Feedback visual extra
     } finally {
       setLoading(false);
     }
@@ -73,7 +77,8 @@ const GerenciarProduto = () => {
       toast.success("Produto criado com sucesso!", {
         className: "custom-success-toast",
         progressClassName: "Toastify__progress-bar--success",
-        icon: true 
+        icon: true ,
+        autoClose: 2000
       });
       localStorage.removeItem('showProdutoAdicionado');
     }
@@ -140,14 +145,15 @@ const GerenciarProduto = () => {
       // --- IMPLEMENTAÇÃO DO TOAST DE EXCLUSÃO (Sua lógica original mantida) ---
       toast.success('Excluído com sucesso!', {
         className: "custom-delete-toast",
-        progressClassName: "custom-delete-progress-bar"
+        progressClassName: "custom-delete-progress-bar",
+        autoClose: 2000
       });
       // ------------------------------------------------------------------------
 
     } catch (err) {
       console.error('Erro ao excluir produto:', err);
       toast.error('Erro ao excluir produto.', {
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });

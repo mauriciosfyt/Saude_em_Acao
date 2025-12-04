@@ -192,7 +192,8 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
         className: 'custom-error-toast',
         progressClassName: 'custom-error-progress-bar',
         icon: true,
-        closeButton: true
+        closeButton: true,
+        autoClose: 2000
       });
       return;
     }
@@ -217,7 +218,8 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
         className: 'custom-error-toast',
         progressClassName: 'custom-error-progress-bar',
         icon: true,
-        closeButton: true
+        closeButton: true,
+        autoClose: 2000
       });
       return;
     }
@@ -238,7 +240,8 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
           className: 'custom-success-toast',
           progressClassName: 'custom-success-progress-bar', 
           icon: true, 
-          closeButton: true 
+          closeButton: true,
+          autoClose: 2000 
         });
 
       } catch (err) {
@@ -247,7 +250,8 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
           className: 'custom-error-toast',
           progressClassName: 'custom-error-progress-bar',
           icon: true,
-          closeButton: true
+          closeButton: true,
+          autoClose: 2000
         });
       } finally {
         setSaving(false);

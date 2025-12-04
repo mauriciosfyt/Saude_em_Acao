@@ -100,7 +100,7 @@ const AdicionarPersonal = () => {
     }
     if (formData.senha !== formData.confirmarSenha) {
       toast.error('As senhas não coincidem.',{
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });
@@ -147,7 +147,7 @@ const AdicionarPersonal = () => {
     } catch (error) {
       console.error('Erro ao criar o personal:', error);
       toast.error(`Falha ao criar personal: ${error.message}`,{
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });

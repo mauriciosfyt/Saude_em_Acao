@@ -68,7 +68,7 @@ const EditarProduto = () => {
       if (!produtoSalvo) {
 
         toast.error('Nenhum produto selecionado para edição.', {
-          autoClose: 5000,
+          autoClose: 2000,
           className: "custom-error-toast",
           progressClassName: "custom-error-progress-bar",
         });
@@ -126,7 +126,7 @@ const EditarProduto = () => {
         console.error('❌ Erro ao carregar produto:', error);
         setError('Erro ao carregar dados do produto: ' + error.message);
         toast.error('Erro ao carregar dados do produto.' ,{
-          autoClose: 5000,
+          autoClose: 2000,
           className: "custom-error-toast",
           progressClassName: "custom-error-progress-bar",
         });
@@ -304,7 +304,7 @@ const EditarProduto = () => {
       setError(`Erro ao editar produto: ${error.message}`);
      
       toast.error(`Ocorreu um erro ao editar o produto: ${error.message}`, {
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });

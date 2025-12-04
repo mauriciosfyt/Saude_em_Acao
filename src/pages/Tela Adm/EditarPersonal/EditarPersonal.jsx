@@ -192,7 +192,7 @@ const EditarPersonal = () => {
       console.error('Erro ao excluir professor:', err);
       const msg = err?.message || 'Falha ao excluir professor.';
       toast.error(msg,{
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });
@@ -207,7 +207,7 @@ const EditarPersonal = () => {
     // Validação simples de senha (se preenchida)
     if (formData.senha && formData.senha !== formData.confirmarSenha) {
       toast.error('As senhas não coincidem.', {  
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       });
@@ -255,7 +255,7 @@ const EditarPersonal = () => {
       console.error('Erro ao salvar personal:', err);
       const msg = err?.message || 'Falha ao salvar alterações.';
       toast.error(msg), {  
-        autoClose: 5000,
+        autoClose: 2000,
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
       };
