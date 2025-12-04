@@ -125,7 +125,7 @@ const LojaProdutos = ({ navigation, route }) => {
                         imagemUrlFinal = `${base}${sep}${imagemUrlFinal}`;
                     }
                 } catch (e) {
-                    console.warn('Erro ao normalizar URL da imagem:', e);
+                    // ignore image normalization errors
                 }
 
                 const produtoFormatado = {
@@ -149,7 +149,6 @@ const LojaProdutos = ({ navigation, route }) => {
                 }
 
             } catch (err) { 
-                console.error("Erro ao buscar produto por ID:", err);
                 setError(err.message || "Não foi possível carregar o produto.");
             } 
             finally { setLoading(false); }
@@ -256,7 +255,7 @@ const LojaProdutos = ({ navigation, route }) => {
                                         adicionarFavorito(produto);
                                     }
                                 } catch (e) {
-                                    console.error('Erro ao alternar favorito:', e);
+                                    // erro ao alternar favorito (ignorado)
                                 }
                             }}
                         >

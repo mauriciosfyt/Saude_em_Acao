@@ -67,7 +67,7 @@ const Desempenho = ({ navigation }) => {
       
       setDiasMes(diasMesLocal);
     } catch (err) {
-      console.error('[Desempenho] Erro ao atualizar calendário:', err);
+      // erro ao atualizar calendário (ignorado para não poluir logs)
     }
   };
 
@@ -174,7 +174,6 @@ const Desempenho = ({ navigation }) => {
     };
     const carregarDesempenho = async () => {
       try {
-        console.log('📊 [Desempenho] Buscando dados de desempenho...');
 
         let treinosRealizadosAPI = 0;
         let totalTreinosAPI = 0;
@@ -186,21 +185,15 @@ const Desempenho = ({ navigation }) => {
           const token = await AsyncStorage.getItem('token');
           if (token) {
             setAuthToken(token);
-            console.log('🔐 [Desempenho] Token configurado.');
-          } else {
-            console.warn('⚠️ [Desempenho] Nenhum token encontrado.');
           }
         } catch (eToken) {
-          console.warn('⚠️ [Desempenho] Falha ao obter token do storage:', eToken?.message);
+          // falha ao obter token do storage
         }
 
         // 🔍 Buscar desempenho na API
         try {
           const desempenhoAPI = await obterDesempenhoMesAtual();
-          console.log('📲 [Desempenho] Retorno bruto da API:', desempenhoAPI);
-          console.log('📲 [Desempenho] API.treinosRealizados:', desempenhoAPI?.treinosRealizados);
-          console.log('📲 [Desempenho] API.treinosTotal:', desempenhoAPI?.treinosTotal);
-          console.log('📲 [Desempenho] API.dataUltimoTreino:', desempenhoAPI?.dataUltimoTreino);
+          // dados da API recebidos
 
           if (desempenhoAPI) {
             treinosRealizadosAPI =
@@ -217,9 +210,8 @@ const Desempenho = ({ navigation }) => {
             if (ultimaData) {
               // Se a API já retornou no formato DD/MM/YYYY, use direto
               const brDateMatch = String(ultimaData).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-              if (brDateMatch) {
+                  if (brDateMatch) {
                 ultimaTreinoDataAPI = String(ultimaData);
-                console.log('📅 [Desempenho] Data BR recebida da API:', ultimaTreinoDataAPI);
               } else {
                 // fallback: tentar criar Date a partir de ISO ou outros formatos
                 const d = new Date(ultimaData);
@@ -229,7 +221,7 @@ const Desempenho = ({ navigation }) => {
                     month: '2-digit',
                     year: 'numeric',
                   });
-                  console.log('📅 [Desempenho] Data formatada via Date:', ultimaTreinoDataAPI);
+                  // Date formatted via Date object
                 }
               }
             }
@@ -239,9 +231,8 @@ const Desempenho = ({ navigation }) => {
               desempenhoAPI.exerciciosFinalizados ||
               desempenhoAPI.exercicios_finalizados ||
               [];
-            if (Array.isArray(exList)) {
+                  if (Array.isArray(exList)) {
               setExercisesFinalizadosAPI(exList);
-              console.log('✅ [Desempenho] Exercícios da API:', exList.length);
             }
 
             const diasList =
@@ -252,13 +243,10 @@ const Desempenho = ({ navigation }) => {
             if (Array.isArray(diasList)) {
               diasMesAPI = diasList;
               setDiasMes(diasMesAPI);
-              console.log('✅ [Desempenho] Dias do mês da API:', diasMesAPI.length);
             }
-
-            console.log('✅ [Desempenho] Dados da API extraídos com sucesso.');
           }
         } catch (apiErr) {
-          console.warn('⚠️ [Desempenho] Erro ao buscar dados da API:', apiErr?.message);
+          // erro ao buscar dados da API
         }
 
         // 🔁 Gerar fallback com dados locais
@@ -271,7 +259,7 @@ const Desempenho = ({ navigation }) => {
             totalTreinosDisponiveis = datasPlanejadasSet.size || totalTreinosDisponiveis;
           }
         } catch (err) {
-          console.warn('⚠️ [Desempenho] Erro ao buscar meus treinos:', err?.message);
+          // erro ao buscar meus treinos
         }
 
         // Se a API já trouxe dias do mês, marcar quais desses dias são planejados
@@ -292,9 +280,8 @@ const Desempenho = ({ navigation }) => {
               return { date: isoDate || dateStr, day: dayNum, planned, done: !!d.realizado, raw: d.raw || d };
             });
             setDiasMes(mappedWithPlanned);
-            console.log('📅 [Desempenho] Atualizou diasMes com flag planned (API days):', mappedWithPlanned.length);
           } catch (e) {
-            console.warn('⚠️ [Desempenho] Falha ao marcar planned nos dias da API:', e?.message || e);
+            // falha ao marcar planned nos dias da API
           }
         }
 
@@ -329,7 +316,7 @@ const Desempenho = ({ navigation }) => {
                 });
               }
             } catch (err) {
-              console.warn('⚠️ [Desempenho] Erro ao formatar data local:', err);
+              // Error formatting local date
             }
           }
         }
@@ -357,14 +344,9 @@ const Desempenho = ({ navigation }) => {
           ultimoTreino: ultimaTreinoData || '',
         });
 
-        console.log('✅ [Desempenho] Dados processados:', {
-          realizados,
-          totalPlanejados,
-          progressoGeral,
-          fonte: (datasPlanejadasSet && datasPlanejadasSet.size > 0) ? 'Calendario' : (totalTreinosAPI > 0 ? 'API' : 'Local')
-        });
+        // dados processados com sucesso
       } catch (error) {
-        console.error('❌ [Desempenho] Erro ao buscar desempenho:', error);
+        // erro ao buscar desempenho
       }
     };
 
@@ -372,7 +354,6 @@ const Desempenho = ({ navigation }) => {
 
     // Recarregar quando voltar para a tela (quando o usuário finalizar um treino)
     const unsubscribe = navigation.addListener('focus', () => {
-      console.log('🔄 [Desempenho] Tela recebeu foco, recarregando dados...');
       carregarDesempenho();
     });
 
@@ -390,7 +371,6 @@ const Desempenho = ({ navigation }) => {
       const anoAtual = new Date().getFullYear();
       
       if (diasRegistrados.length > 0) {
-        console.log('📊 [Desempenho] Dias realizados mudaram, atualizando calendário:', diasRegistrados.length);
         
         // Obter o conjunto de datas planejadas usando a função auxiliar
         const gerarDatasPlanejadasNoMes = (meusTreinosDataLocal) => {
@@ -433,12 +413,11 @@ const Desempenho = ({ navigation }) => {
           const datasPlanejadasSet = meusTreinosData ? gerarDatasPlanejadasNoMes(meusTreinosData) : new Set();
           atualizarCalendarioComDiasRealizados(datasPlanejadasSet);
         }).catch(err => {
-          console.warn('⚠️ [Desempenho] Erro ao carregar meus treinos no monitoramento:', err);
           atualizarCalendarioComDiasRealizados(new Set());
         });
       }
     } catch (err) {
-      console.error('❌ [Desempenho] Erro no useEffect de monitoramento:', err);
+      // erro no useEffect de monitoramento
     }
   }, [obterDiasComTreinoRealizado]);
 

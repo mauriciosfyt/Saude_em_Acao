@@ -194,15 +194,12 @@ export const obterDesempenhoSemanal = async () => {
 
   let lastErr = null;
   for (const path of candidatos) {
-    try {
-      if (__DEV__) console.log('[API] tentando obter desempenho semanal em', path);
+      try {
       const resp = await api.get(path);
-      if (__DEV__) console.log('[API] desempenho semanal recebeu:', resp.data);
       return resp.data;
     } catch (err) {
       lastErr = err;
       const status = err?.response?.status;
-      if (__DEV__) console.warn(`[API] tentativa ${path} falhou`, status || err.message || err);
       // Se for erro de autenticação, propagar imediatamente
       if (status === 401 || status === 403) {
         if (err.response && err.response.data) throw err.response.data;
@@ -226,14 +223,11 @@ export const obterHistoricoAnualExercicios = async (ano) => {
   try {
     const config = {};
     if (ano !== undefined && ano !== null) config.params = { ano };
-    console.log('📅 [API] Chamando GET /api/treinos/historico-anual-exercicios com params:', config.params);
     const response = await api.get('/api/treinos/historico-anual-exercicios', config);
-    console.log('📅 [API] Resposta recebida:', response.data);
-    console.log('📅 [API] response.data.resumoMensal:', response.data?.resumoMensal);
+    
     return response.data;
   } catch (error) {
-    console.error('❌ [API] Erro na chamada GET /api/treinos/historico-anual-exercicios:', error);
-    // Propagar mensagens de erro do servidor quando possível
+    // Erro ao obter histórico anual — propagar para o chamador
     if (error.response && error.response.data) throw error.response.data;
     throw error;
   }
@@ -247,14 +241,10 @@ export const obterDesempenhoMesAtual = async (ano) => {
     const mesAtual = mesIndex + 1; // 1-12
     const anoBusca = ano || hoje.getFullYear();
 
-    console.log('[API] obterDesempenhoMesAtual - buscando mês', mesAtual, 'de', anoBusca);
-
     // Obter histórico anual e normalizar
     const resp = await obterHistoricoAnualExercicios(anoBusca);
-    console.log('[API] resp bruta:', JSON.stringify(resp, null, 2));
 
     if (!resp) {
-      console.warn('[API] resp é null/undefined');
       return { dias: [], treinosRealizados: 0, treinosTotal: 0, dataUltimoTreino: null, itensBrutos: null };
     }
 
@@ -262,8 +252,7 @@ export const obterDesempenhoMesAtual = async (ano) => {
     const resumoMensal = resp?.resumoMensal || [];
     const historicoDetalhado = resp?.historicoDetalhado || [];
 
-    console.log('[API] resumoMensal.length:', resumoMensal.length);
-    console.log('[API] historicoDetalhado.length:', historicoDetalhado.length);
+    
 
     // Encontrar o mês atual no resumoMensal
     const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
@@ -271,9 +260,7 @@ export const obterDesempenhoMesAtual = async (ano) => {
     const mesNome = meses[mesIndex];
     const resumoMes = resumoMensal.find(r => r.mes === mesNome);
 
-    console.log('[API] mês procurado:', mesNome, 'encontrado:', !!resumoMes);
     if (resumoMes) {
-      console.log('[API] resumoMes:', JSON.stringify(resumoMes, null, 2));
     }
 
     // Contar treinos realizados no mês atual a partir do historicoDetalhado
@@ -297,21 +284,19 @@ export const obterDesempenhoMesAtual = async (ano) => {
           return true;
         }
         return false;
-      } catch (e) {
-        console.warn('[API] erro ao processar dataRealizacao:', h.dataRealizacao, e);
+        } catch (e) {
         return false;
       }
     });
 
     const treinosRealizados = diasComTreino.size; // número de dias com treino
     
-    console.log('[API] dias com treino:', treinosRealizados);
-    console.log('[API] treinos realizados encontrados:', treinosRealizadosList.length);
+    
 
     // Total planejado: usar totalExercicios do mês ou fallback para historicoDetalhado.length
     let treinosTotal = resumoMes?.totalExercicios || treinosRealizadosList.length || 0;
     
-    console.log('[API] treinosTotal:', treinosTotal);
+    
 
     // Data do último treino realizado - ordenar por data decrescente
     let dataUltimoTreino = null;
@@ -345,7 +330,7 @@ export const obterDesempenhoMesAtual = async (ano) => {
       const dataParte = dataComHora ? dataComHora.split(' ')[0] : null; // "04/12/2025"
       dataUltimoTreino = dataParte;
 
-      console.log('[API] último treino data (BR):', dataUltimoTreino);
+      
     }
 
     // Criar array de dias normalizados para o calendário
@@ -361,8 +346,7 @@ export const obterDesempenhoMesAtual = async (ano) => {
       };
     });
 
-    console.log('[API] dias normalizados:', dias.length);
-
+    
     const result = {
       dias: dias,
       treinosRealizados: treinosRealizados,
@@ -370,13 +354,9 @@ export const obterDesempenhoMesAtual = async (ano) => {
       dataUltimoTreino: dataUltimoTreino,
       itensBrutos: resp,
     };
-    
-    console.log('[API] obterDesempenhoMesAtual resultado final:', JSON.stringify(result, null, 2));
-    
     return result;
   } catch (error) {
-    console.error('[API] obterDesempenhoMesAtual falhou com erro:', error);
-    console.error('[API] stack:', error?.stack);
+    
     return { dias: [], treinosRealizados: 0, treinosTotal: 0, dataUltimoTreino: null, itensBrutos: null };
   }
 };
@@ -408,13 +388,6 @@ export const registrarTreinoRealizado = async (treinoId, payload = {}) => {
     
     for (const url of urlsParaTentar) {
       try {
-        if (__DEV__) {
-          console.log('📤 [API] Tentando registrar treino:', {
-            url: `${API_BASE_URL}${url}`,
-            treinoId: id,
-            payload: payloadFormatado,
-          });
-        }
         
         // Se a URL não tem ID, adicionar ao payload
         const finalPayload = url.includes('/realizar') && !url.includes(`/${id}/`) 
@@ -423,9 +396,7 @@ export const registrarTreinoRealizado = async (treinoId, payload = {}) => {
         
         const response = await api.post(url, finalPayload);
         
-        if (__DEV__) {
-          console.log('✅ [API] Treino registrado com sucesso:', response.data);
-        }
+        
         
         return response.data;
       } catch (err) {
@@ -435,9 +406,7 @@ export const registrarTreinoRealizado = async (treinoId, payload = {}) => {
         if (status && status !== 404 && status !== 500) {
           throw err;
         }
-        if (__DEV__) {
-          console.log(`⚠️ [API] Tentativa falhou em ${url}, status: ${status || 'N/A'}`);
-        }
+        
         continue;
       }
     }
@@ -446,25 +415,7 @@ export const registrarTreinoRealizado = async (treinoId, payload = {}) => {
     throw lastError || new Error('Falha ao registrar treino: nenhum endpoint funcionou');
     
   } catch (error) {
-    if (__DEV__) {
-      const errorInfo = {
-        treinoId,
-        url: error.config?.url ? `${API_BASE_URL}${error.config.url}` : 'N/A',
-        method: error.config?.method || 'N/A',
-        status: error.response?.status || 'N/A',
-        statusText: error.response?.statusText || 'N/A',
-        data: error.response?.data || error.message,
-        message: error.message,
-        code: error.code,
-      };
-      console.error('❌ [API] Erro ao registrar treino:', errorInfo);
-      
-      // Se for erro 404 ou 500, pode ser que o endpoint não exista
-      if (error.response?.status === 404 || error.response?.status === 500) {
-        console.warn('⚠️ [API] Endpoint não encontrado ou erro no servidor. Verifique se a rota está correta na API.');
-        console.warn('💡 [API] Dica: Verifique se o endpoint POST /api/treinos/{id}/realizar está configurado no backend.');
-      }
-    }
+    
     
     // Se o erro vier do servidor, retornar a mensagem do servidor
     if (error.response && error.response.data) {
@@ -614,8 +565,7 @@ export const enviarMensagemChat = async (chatId, texto, remetente) => {
       const resp = await api.post(preferencial, payload);
       return resp.data;
     } catch (err) {
-      if (__DEV__) console.warn('[enviarMensagemChat] tentativa preferencial falhou', preferencial, err?.response?.status || err?.message);
-      // continuar para tentativas alternativas
+      // tentativa preferencial falhou — continuar para tentativas alternativas
     }
 
     // Endpoints alternativos (compatibilidade com outras implementações)
@@ -630,7 +580,6 @@ export const enviarMensagemChat = async (chatId, texto, remetente) => {
         const response = await api.post(path, payload);
         return response.data;
       } catch (err) {
-        if (__DEV__) console.debug(`[enviarMensagemChat] tentativa falhou em ${path}`, err?.response?.status || err?.message);
         continue;
       }
     }
@@ -662,7 +611,6 @@ export const enviarImagemChat = async (chatId, uriOrData, remetente) => {
           const resp = await api.post(path, payload);
           return resp.data;
         } catch (err) {
-          if (__DEV__) console.debug('[enviarImagemChat] json attempt failed', path, err?.response?.status || err?.message);
           continue;
         }
       }
@@ -678,7 +626,7 @@ export const enviarImagemChat = async (chatId, uriOrData, remetente) => {
         const resp = await enviarMensagemChat(chatId, String(uriOrData), usuario);
         return resp;
       } catch (err) {
-        if (__DEV__) console.debug('[enviarImagemChat] fallback enviarMensagemChat para URL falhou', err?.message || err);
+        // fallback enviarMensagemChat falhou — continuar
       }
     }
 
@@ -717,7 +665,6 @@ export const enviarImagemChat = async (chatId, uriOrData, remetente) => {
           const resp = await api.post(path, formData);
           if (resp?.data) return resp.data;
         } catch (err) {
-          if (__DEV__) console.debug('[enviarImagemChat] multipart attempt failed', path, key, err?.response?.status || err?.message);
           continue;
         }
       }
@@ -728,7 +675,7 @@ export const enviarImagemChat = async (chatId, uriOrData, remetente) => {
       const fallback = await enviarMensagemChat(chatId, String(uriOrData), usuario);
       return fallback;
     } catch (err) {
-      if (__DEV__) console.warn('[enviarImagemChat] fallback enviarMensagemChat falhou', err?.message || err);
+      // fallback também falhou
     }
 
     throw new Error('Falha ao enviar imagem: nenhum endpoint aceitou a imagem');
@@ -749,7 +696,7 @@ export const apagarMensagemChat = async (chatId, mensagemId) => {
       const resp = await api.delete(preferencial);
       return resp.data;
     } catch (err) {
-      if (__DEV__) console.warn('[apagarMensagemChat] tentativa preferencial falhou', preferencial, err?.response?.status || err?.message);
+      // tentativa preferencial falhou — continuar
     }
 
     // Endpoints prováveis alternativos
@@ -764,7 +711,6 @@ export const apagarMensagemChat = async (chatId, mensagemId) => {
         const response = await api.delete(path);
         return response.data;
       } catch (err) {
-        if (__DEV__) console.debug('[apagarMensagemChat] falha em', path, err?.response?.status || err?.message);
         continue;
       }
     }
@@ -774,7 +720,7 @@ export const apagarMensagemChat = async (chatId, mensagemId) => {
       const resp = await api.post(`/api/chat/${chatId}/mensagem/apagar`, { id: mensagemId });
       return resp.data;
     } catch (err) {
-      if (__DEV__) console.warn('[apagarMensagemChat] fallback POST falhou', err?.message || err);
+      // fallback POST falhou — continuar
     }
 
     throw new Error('Falha ao apagar mensagem: endpoint não disponível');
@@ -829,7 +775,6 @@ export const apagarHistoricoChat = async (chatId) => {
 
       if (!items.length) {
         // nada para apagar
-        if (__DEV__) console.log('[apagarHistoricoChat] nenhum item no histórico para deletar');
         return { success: true, deleted: 0 };
       }
 
@@ -847,14 +792,12 @@ export const apagarHistoricoChat = async (chatId) => {
       const failed = results.filter(r => r.status === 'error');
 
       if (failed.length > 0) {
-        if (__DEV__) console.warn('[apagarHistoricoChat] algumas mensagens não puderam ser deletadas:', failed);
         return { success: false, deleted: ok, failed };
       }
 
       // todas removidas
       return { success: true, deleted: ok };
     } catch (err) {
-      if (__DEV__) console.error('[apagarHistoricoChat] fallback por item falhou', err?.message || err);
       throw new Error('Falha ao apagar histórico do chat: endpoint não disponível');
     }
   } catch (error) {
@@ -869,12 +812,10 @@ export const apagarHistoricoChat = async (chatId) => {
 export const obterMinhasReservas = async () => {
   try {
     // O endpoint é /api/reservas/minhas, baseado no seu 'reservasService.js' da web
-    console.log("Chamando API: /api/reservas/minhas");
     const response = await api.get('/api/reservas/minhas'); 
-    console.log("API /api/reservas/minhas respondeu:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Erro ao buscar 'minhas reservas':", error);
+    // Erro ao buscar 'minhas reservas' — propagar
     // Lança o erro para a tela (loja_reservas.js) poder tratar
     if (error.response && error.response.data) throw error.response.data;
     throw error; // Lança o erro de rede (ex: Network Error)
@@ -884,12 +825,10 @@ export const obterMinhasReservas = async () => {
 // Buscar os treinos atribuídos ao usuário (dias da semana com treino)
 export const obterMeusTreinos = async () => {
   try {
-    console.log("Chamando API: /api/meus-treinos");
     const response = await api.get('/api/meus-treinos');
-    console.log("API /api/meus-treinos respondeu:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Erro ao buscar meus treinos:", error);
+    // Erro ao buscar meus treinos — propagar
     if (error.response && error.response.data) throw error.response.data;
     throw error;
   }
@@ -922,15 +861,12 @@ export const obterFavoritos = async () => {
     const maxAttempts = 3; // try up to 3 times on 5xx
     while (attempt < maxAttempts) {
       try {
-        if (__DEV__) console.log(`Tentando favorites -> ${path} (attempt ${attempt + 1})`);
         const data = await tryRequest(path);
-        if (__DEV__) console.log(`API ${path} respondeu:`, data);
         return data;
       } catch (error) {
         const status = error?.response?.status;
         // If auth error or other client error, don't silently continue to other endpoints
         if (status === 401 || status === 403) {
-          if (__DEV__) console.warn(`Auth issue when GET ${path} -> ${status}`);
           // Propagate auth errors: caller might want to react (logout, show message)
           if (error.response && error.response.data) throw error.response.data;
           throw error;
@@ -938,7 +874,6 @@ export const obterFavoritos = async () => {
 
         if (status === 404) {
           // No endpoint here - break attempts and try next candidate
-          if (__DEV__) console.log(`${path} retornou 404 — tentando próximo endpoint`);
           break;
         }
 
@@ -947,12 +882,10 @@ export const obterFavoritos = async () => {
           attempt += 1;
           if (attempt < maxAttempts) {
             const backoff = 250 * attempt; // 250ms, 500ms, ...
-            if (__DEV__) console.warn(`${path} erro ${status || 'network'}. Retentando em ${backoff}ms`);
             await sleep(backoff);
             continue;
           }
-          // failed after retries — log and try next candidate
-          if (__DEV__) console.warn(`${path} falhou após ${maxAttempts} tentativas:`, error?.response?.data || error?.message || error);
+          // failed after retries — try next candidate
           break;
         }
 
@@ -964,7 +897,6 @@ export const obterFavoritos = async () => {
   }
 
   // Todas as tentativas falharam — retornar objeto de fallback para sinalizar o erro
-  if (__DEV__) console.warn('Todas as rotas de favoritos falharam — retornando fallback vazia para que o cliente use cache local');
   return { fallback: true, favoritos: [] };
 };
 
@@ -974,13 +906,7 @@ export const obterFavoritos = async () => {
  */
 export const adicionarFavorito = async (produtoId) => {
   try {
-    if (__DEV__) {
-      console.log("Chamando API: POST /api/favoritos", { produtoId });
-    }
     const response = await api.post('/api/favoritos', { produtoId });
-    if (__DEV__) {
-      console.log("API POST /api/favoritos respondeu:", response.data);
-    }
     return response.data;
   } catch (error) {
     // Tratamento mais resistente: para erros de autenticação, propaga para o consumidor
@@ -992,7 +918,6 @@ export const adicionarFavorito = async (produtoId) => {
 
     // Para 5xx/404 ou falhas de rede retornamos objeto de fallback para o cliente manter dados locais
     if (status === 404 || status >= 500 || !status) {
-      if (__DEV__) console.warn('Falha ao adicionar favorito na API — retornando fallback (erro não propagado):', status, error?.message || error);
       return { success: false, fallback: true, error: error?.response?.data || error?.message || error };
     }
 
@@ -1008,13 +933,7 @@ export const adicionarFavorito = async (produtoId) => {
  */
 export const removerFavorito = async (produtoId) => {
   try {
-    if (__DEV__) {
-      console.log("Chamando API: DELETE /api/favoritos/" + produtoId);
-    }
     const response = await api.delete(`/api/favoritos/${produtoId}`);
-    if (__DEV__) {
-      console.log("API DELETE /api/favoritos respondeu:", response.data);
-    }
     return response.data;
   } catch (error) {
     const status = error?.response?.status;
@@ -1025,7 +944,6 @@ export const removerFavorito = async (produtoId) => {
 
     // Para 5xx/404 ou falhas de rede não propagamos (mantemos remoção local)
     if (status === 404 || status >= 500 || !status) {
-      if (__DEV__) console.warn('Falha ao remover favorito na API — retornando fallback (erro não propagado):', status, error?.message || error);
       return { success: false, fallback: true, error: error?.response?.data || error?.message || error };
     }
 

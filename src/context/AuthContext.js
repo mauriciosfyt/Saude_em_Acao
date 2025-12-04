@@ -35,7 +35,7 @@ function parseJwtSafe(token) {
 
     return JSON.parse(decoded);
   } catch (err) {
-    if (__DEV__) console.warn('parseJwtSafe failed', err?.message || err);
+    // parseJwtSafe failed - error message logged in development
     return null;
   }
 }
@@ -58,28 +58,25 @@ export const AuthProvider = ({ children }) => {
     // Função async para verificar o token salvo no SecureStore
     const bootstrapAuth = async () => {
       try {
-        console.log('🔍 Verificando autenticação (Mobile)...');
-        // MUDANÇA: Lendo do SecureStore
+        // Checking authentication (Mobile)
+        // Reading from SecureStore
         const token = await SecureStore.getItemAsync('token');
         const email = await SecureStore.getItemAsync('userEmail');
 
-        console.log('📦 Estado do SecureStore:', {
-          tokenExists: !!token,
-          emailExists: !!email,
-        });
+        // SecureStore state checked - token and email existence logged
 
         if (token) {
           // Sua validação de JWT (ótima prática!)
           const isValidJWT = /^[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*$/.test(token);
           
           if (!isValidJWT) {
-            console.warn('⚠️ Token encontrado mas formato inválido');
+            // Token found but format invalid
             setIsAuthenticated(false);
             setUser(null);
             return;
           }
 
-          console.log('✅ Token JWT válido encontrado');
+          // Valid JWT token found
           
           // ADIÇÃO CRÍTICA: Configurar o token no Axios assim que o app carregar
           setAuthToken(token);
@@ -92,12 +89,12 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(true);
           setUser({ token, email: email || 'no-email', claims, role });
         } else {
-          console.log('❌ Nenhum token JWT encontrado');
+          // No JWT token found
           setIsAuthenticated(false);
           setUser(null);
         }
       } catch (error) {
-        console.error('❌ Erro ao restaurar autenticação:', error);
+        // Error restoring authentication
         setIsAuthenticated(false);
         setUser(null);
       } finally {
@@ -116,7 +113,7 @@ export const AuthProvider = ({ children }) => {
 
   // MUDANÇA: A função 'login' agora precisa ser 'async'
   const login = async (userData) => {
-    console.log("🔐 Iniciando login com dados:", userData);
+    // Starting login with user data
 
     try {
       // Lógica para extrair o token (igual à sua, está ótima)
@@ -125,17 +122,17 @@ export const AuthProvider = ({ children }) => {
         : userData?.token || userData?.accessToken || userData?.jwt || userData?.tokenJwt;
 
       if (!token) {
-        console.error("⚠️ Nenhum token JWT encontrado em userData:", userData);
+        // No JWT token found in userData
         return;
       }
 
       const isValidJWT = /^[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*$/.test(token);
       if (!isValidJWT) {
-        console.error("⚠️ Token fornecido não tem formato JWT válido");
+        // Provided token does not have valid JWT format
         return;
       }
 
-      console.log("✅ Token JWT válido detectado");
+      // Valid JWT token detected
 
       const email = userData.email || null; // Pegar o email se vier
 
@@ -157,14 +154,10 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setUser(fullUser);
 
-      console.log("✅ Login concluído com sucesso:", { 
-        isAuthenticated: true, 
-        hasToken: true,
-        hasEmail: !!email
-      });
+      // Login completed successfully - authentication, token and email logged
 
     } catch (error) {
-      console.error("❌ Erro durante o login:", error);
+      // Error during login
       setIsAuthenticated(false);
       setUser(null);
     }
@@ -180,12 +173,12 @@ export const AuthProvider = ({ children }) => {
       await SecureStore.deleteItemAsync('token'); 
       await SecureStore.deleteItemAsync('userEmail');
       
-      // ADIÇÃO CRÍTICA: Limpa o token da instância do Axios
+      // Critical: Clear token from Axios instance
       setAuthToken(null);
 
-      console.log('Logout realizado - dados removidos do SecureStore');
+      // Logout completed - data removed from SecureStore
     } catch (error) {
-      console.error('Erro ao remover dados do SecureStore:', error);
+      // Error removing data from SecureStore
     }
   };
 

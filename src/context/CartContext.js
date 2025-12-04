@@ -60,20 +60,20 @@ export const CartProvider = ({ children }) => {
                         await AsyncStorage.setItem(userCartKey, JSON.stringify(combinedCart));
                         await AsyncStorage.removeItem(GUEST_CART_KEY); 
                         setCartItems(combinedCart);
-                        console.log('[CartContext] Carrinho de convidado migrado para usuário.');
+                        // carrinho migrado para usuário
                     } else {
                         // Sem carrinho de convidado, apenas carrega o do usuário
                         setCartItems(userCart);
-                        console.log(`[CartContext] Carrinho carregado de ${userCartKey}`);
+                        // carrinho do usuário carregado
                     }
                 } else {
                     // Convidado: Apenas carrega o carrinho de convidado
                     const guestJSON = await AsyncStorage.getItem(GUEST_CART_KEY);
                     setCartItems(guestJSON ? JSON.parse(guestJSON) : []);
-                    console.log('[CartContext] Carrinho carregado de @SenaMobile:cart:guest');
+                    // carrinho de convidado carregado
                 }
             } catch (e) {
-                console.error("Erro ao carregar/migrar carrinho:", e);
+                // erro ao carregar/migrar carrinho
                 setCartItems([]); // Começa vazio se der erro
             } finally {
                 setStorageKey(key); // Define a chave que será usada para salvar
@@ -86,10 +86,10 @@ export const CartProvider = ({ children }) => {
 
     // Efeito para SALVAR o carrinho no AsyncStorage sempre que ele mudar
     useEffect(() => {
-        if (!loading) {
-            console.log(`[CartContext] Salvando carrinho em ${storageKey}`);
+            if (!loading) {
+            // salvar carrinho em storageKey
             AsyncStorage.setItem(storageKey, JSON.stringify(cartItems))
-                .catch(e => console.error("[CartContext] Erro ao salvar carrinho:", e));
+                .catch(() => {});
         }
     }, [cartItems, storageKey, loading]); 
 
@@ -98,11 +98,7 @@ export const CartProvider = ({ children }) => {
     // --- ESTA É A FUNÇÃO CORRIGIDA ---
     // ---
     const adicionarAoCarrinho = (produto, variationValue) => {
-        console.log("[CartContext] Tentando adicionar:", { 
-            nome: produto.nome, 
-            categoria: produto.categoria, 
-            variacao: variationValue 
-        });
+        // adicionando ao carrinho
 
         // Verifica se o item já existe (mesmo ID de produto E mesma variação)
         const itemJaExiste = cartItems.find(
@@ -111,7 +107,7 @@ export const CartProvider = ({ children }) => {
 
         if (itemJaExiste) {
             // Se existe, apenas incrementa a quantidade
-            console.log("[CartContext] Item já existe. Incrementando quantidade.");
+            // item já existe — incrementando quantidade
             setCartItems(prevItems =>
                 prevItems.map(item =>
                     item.cartItemId === itemJaExiste.cartItemId
@@ -121,7 +117,7 @@ export const CartProvider = ({ children }) => {
             );
         } else {
             // Se é novo, cria o objeto completo
-            console.log("[CartContext] Item novo. Adicionando ao carrinho.");
+            // item novo — adicionando ao carrinho
             
             // --- CORREÇÃO APLICADA AQUI ---
             // Removemos o 'uuidv4()' e usamos um ID simples

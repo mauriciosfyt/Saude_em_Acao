@@ -84,21 +84,19 @@ const Mensalidades = ({ navigation }) => {
       [
         {
           text: 'Cancelar',
-          onPress: () => console.log('Logout cancelado'),
+          onPress: () => {},
           style: 'cancel',
         },
         {
           text: 'Sair',
           onPress: async () => {
-            try {
-              handleFecharMenu();
-              await logout();
-              navigation.navigate('Inicial');
-              console.log('✅ Logout realizado com sucesso');
-            } catch (error) {
-              console.error('❌ Erro ao fazer logout:', error);
-              Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
-            }
+              try {
+                handleFecharMenu();
+                await logout();
+                navigation.navigate('Inicial');
+              } catch (error) {
+                Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
+              }
           },
           style: 'destructive',
         },

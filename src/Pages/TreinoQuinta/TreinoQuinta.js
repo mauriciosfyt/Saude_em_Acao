@@ -9,6 +9,7 @@ import {
   Image,
   StatusBar,
   Modal,
+  Vibration,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import HeaderSeta from '../../Components/header_seta/header_seta';
@@ -222,7 +223,6 @@ const TreinoQuinta = ({ navigation, route }) => {
         const match = treinoId.match(/^(\d+)/);
         if (match) {
           treinoId = match[1];
-          console.log('🔧 [TreinoQuinta] ID extraído de string composta:', treinoId);
         }
       }
       
@@ -234,29 +234,33 @@ const TreinoQuinta = ({ navigation, route }) => {
       
       // Salvar localmente (progresso parcial)
       try {
-        // treinoKey deve ser string para salvarProgresso, mas treinoId pode ser número para API
         const treinoKey = String(treinoId || 'Quinta');
         salvarProgresso(treinoKey, selecionados);
       } catch (err) {
-        console.error('Erro ao salvar progresso localmente:', err);
+        // falha ao salvar progresso localmente — ignorar
       }
 
       // Registrar treino na API se tiver treinoId
       if (treinoId) {
         try {
-          console.log('📤 [TreinoQuinta] Registrando treino na API:', treinoId);
           const payload = {
             exercicios: selecionados,
             parcial: exerciciosConcluidos < totalExercicios,
           };
           await registrarTreinoRealizado(treinoId, payload);
-          console.log('✅ [TreinoQuinta] Treino registrado com sucesso na API');
+          // Executar vibração quando treino é concluído
+          if (exerciciosConcluidos === totalExercicios) {
+            try {
+              Vibration.vibrate([0, 200, 100, 200]);
+            } catch (vibError) {
+              // vibrate não disponível — ignorar
+            }
+          }
         } catch (error) {
-          console.error('❌ [TreinoQuinta] Erro ao registrar treino na API:', error);
-          // Não bloquear o fluxo se a API falhar
+          // falha ao registrar — não bloquear fluxo
         }
       } else {
-        console.warn('⚠️ [TreinoQuinta] TreinoId não disponível, não foi possível registrar na API');
+        // treinoId não disponível — nada a registrar remotamente
       }
 
       if (exerciciosConcluidos === totalExercicios) {

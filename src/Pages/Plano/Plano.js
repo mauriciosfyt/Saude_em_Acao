@@ -41,10 +41,8 @@ const Plano = ({ navigation }) => {
           beneficios: dados.beneficios || ['Funcional', 'Musculação', 'Pilates', 'Treino personalizado'],
         });
         
-        console.log('✅ Dados do plano carregados:', dados);
       } catch (error) {
-        console.error('❌ Erro ao carregar dados do plano:', error);
-        // Mantém dados padrão em caso de erro
+        // Erro ao carregar dados do plano — manter dados padrão
       } finally {
         setCarregando(false);
       }
@@ -67,21 +65,19 @@ const Plano = ({ navigation }) => {
       [
         {
           text: 'Cancelar',
-          onPress: () => console.log('Logout cancelado'),
+          onPress: () => {},
           style: 'cancel',
         },
         {
           text: 'Sair',
           onPress: async () => {
-            try {
-              handleFecharMenu();
-              await logout();
-              navigation.navigate('Inicial');
-              console.log('✅ Logout realizado com sucesso');
-            } catch (error) {
-              console.error('❌ Erro ao fazer logout:', error);
-              Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
-            }
+              try {
+                handleFecharMenu();
+                await logout();
+                navigation.navigate('Inicial');
+              } catch (error) {
+                Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
+              }
           },
           style: 'destructive',
         },

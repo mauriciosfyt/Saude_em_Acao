@@ -9,6 +9,7 @@ import {
   StatusBar,
   Alert,
   Image,
+  Vibration,
   useFocusEffect,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -130,7 +131,6 @@ const MeuTreino = ({ navigation }) => {
         try {
           const desempenho = await obterDesempenhoSemanal();
           const items = Array.isArray(desempenho) ? desempenho : (desempenho?.items || desempenho?.treinos || []);
-          if (__DEV__) console.log('[API] desempenho semanal raw:', JSON.stringify(items));
 
           const novoMapa = {};
           items.forEach((it) => {
@@ -159,7 +159,7 @@ const MeuTreino = ({ navigation }) => {
           });
 
           if (mountedRef.current) setDesempenhoMap(novoMapa);
-        } catch (errDes) { if (__DEV__) console.warn('Erro ao obter desempenho semanal:', errDes); }
+          } catch (errDes) { /* Erro ao obter desempenho semanal — ignorar */ }
       } else {
         // fallback local (sem dados da API)
         setTreinos([
@@ -173,10 +173,10 @@ const MeuTreino = ({ navigation }) => {
         ]);
       }
     } catch (error) {
-      try { const errMsg = error?.message || (typeof error === 'string' ? error : JSON.stringify(error)); console.error('Erro ao carregar treinos:', errMsg); } catch (e) { console.error('Erro ao carregar treinos: (erro não serializável)'); }
+      try { const errMsg = error?.message || (typeof error === 'string' ? error : JSON.stringify(error)); /* Erro ao carregar treinos: */ } catch (e) { /* Erro ao carregar treinos (não serializável) */ }
       const is403 = (error && (error.response?.status === 403 || error.status === 403)) || (typeof error === 'string' && error.includes('403')) || (error?.message && String(error.message).includes('403'));
       if (is403) {
-        try { Alert.alert('Sessão expirada','Sua sessão expirou ou você não tem permissão. Faça login novamente.',[{ text: 'OK', onPress: async () => { try { await logout(); } catch (e) { console.warn('Erro ao chamar logout:', e); } navigation.navigate('Inicial'); }, },], { cancelable: false }); } catch (e) { console.warn('Erro ao mostrar alerta de 403', e); }
+        try { Alert.alert('Sessão expirada','Sua sessão expirou ou você não tem permissão. Faça login novamente.',[{ text: 'OK', onPress: async () => { try { await logout(); } catch (e) { /* Erro ao chamar logout */ } navigation.navigate('Inicial'); }, },], { cancelable: false }); } catch (e) { /* Erro ao mostrar alerta de 403 */ }
       }
       setTreinos([
         
@@ -277,7 +277,7 @@ const MeuTreino = ({ navigation }) => {
     // Tenta extrair exercícios e id do treino (quando vindo de exerciciosPorDia)
     // Usa treinoId se disponível (ID real da API), senão tenta id
     const treinoId = treino.treinoId || treino.id || treino._id || null;
-    const routeParams = treino.exercicios ? { exercicios: treino.exercicios, treinoId } : { treinoId };
+    const routeParams = treino.exercicios ? { exercicios: treino.exercicios, treinoId, executarVibracaoTreino } : { treinoId, executarVibracaoTreino };
     
     if (diaQuarta === "Segunda") {
       navigation.navigate("TreinoSegunda", routeParams);
@@ -296,6 +296,23 @@ const MeuTreino = ({ navigation }) => {
     setModalConcluido({ visivel: false, dia: "" });
   };
 
+  // Função para fazer vibração quando treino é concluído
+  const executarVibracaoTreino = () => {
+    try {
+      // Padrão: vibração curta (200ms) seguida de pausa (100ms) e outra vibração (200ms)
+      Vibration.vibrate([0, 200, 100, 200]);
+    } catch (error) {
+      // Vibração não disponível — ignorar
+    }
+  };
+
+  // Executar vibração quando o modal de conclusão aparece
+  useEffect(() => {
+    if (modalConcluido.visivel) {
+      executarVibracaoTreino();
+    }
+  }, [modalConcluido.visivel]);
+
   const handleAbrirMenu = () => setMenuVisivel(true);
   const handleFecharMenu = () => setMenuVisivel(false);
   const handleNavegar = (nomeDaTela) => {
@@ -310,7 +327,7 @@ const MeuTreino = ({ navigation }) => {
       [
         {
           text: 'Cancelar',
-          onPress: () => console.log('Logout cancelado'),
+          onPress: () => {},
           style: 'cancel',
         },
         {
@@ -320,9 +337,7 @@ const MeuTreino = ({ navigation }) => {
               handleFecharMenu();
               await logout();
               navigation.navigate('Inicial');
-              console.log('✅ Logout realizado com sucesso');
             } catch (error) {
-              console.error('❌ Erro ao fazer logout:', error);
               Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
             }
           },

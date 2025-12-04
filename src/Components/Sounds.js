@@ -18,8 +18,7 @@ try {
   }
 } catch (e) {
   // If expo-audio isn't available (shouldn't happen after install), log and set audioSource to none.
-  if (__DEV__) console.warn('[Sounds] expo-audio not available:', e?.message || e);
-  audioSource = 'none';
+  if (__DEV__) console.debug('[Sounds] audio implementation:', audioSource);  audioSource = 'none';
 }
 // Informativo: qual implementação foi selecionada (útil para depuração)
   try {

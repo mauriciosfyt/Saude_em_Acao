@@ -1,9 +1,10 @@
-import { scheduleNotification } from '../../Components/Notifications';
 import React, { useMemo, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Vibration } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
-import { playSuccessSound, TestSoundButton, setSoundEnabled } from '../../Components/Sounds';
+import { setSoundEnabled, playClickSound } from '../../Components/Sounds';
 import { useAuth } from '../../context/AuthContext';
-import { deleteAdminAccount, obterMeuPerfil, obterDesempenhoSemanal, obterHistoricoAnualExercicios } from '../../Services/api';
+import { obterMeuPerfil, obterDesempenhoSemanal, obterHistoricoAnualExercicios } from '../../Services/api';
 
 import {
   View,
@@ -25,7 +26,6 @@ import createStyles from '../../Styles/PerfilStyles';
 const Perfil = ({ navigation }) => {
   const [configModalVisible, setConfigModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [notificacoes, setNotificacoes] = useState(false);
   const [som, setSom] = useState(false);
   const [vibracao, setVibracao] = useState(false);
   const [carregando, setCarregando] = useState(true);
@@ -56,7 +56,18 @@ const Perfil = ({ navigation }) => {
   const [loadingStats, setLoadingStats] = useState(true);
 
   // Carregar dados do perfil quando o componente monta
+  // Carregar preferências de som e vibração ao montar
   useEffect(() => {
+    const carregarPreferencias = async () => {
+      try {
+        const somSalvo = await AsyncStorage.getItem('perfil_som');
+        const vibracaoSalva = await AsyncStorage.getItem('perfil_vibracao');
+        if (somSalvo !== null) setSom(somSalvo === 'true');
+        if (vibracaoSalva !== null) setVibracao(vibracaoSalva === 'true');
+      } catch (e) {}
+    };
+    carregarPreferencias();
+
     const carregarPerfil = async () => {
       try {
         setCarregando(true);
@@ -95,9 +106,9 @@ const Perfil = ({ navigation }) => {
             setFotoPerfil(possibleImage);
         }
         
-        console.log('✅ Dados do perfil carregados com sucesso:', dados);
+        
       } catch (error) {
-        console.error('❌ Erro ao carregar perfil:', error);
+        
         // Mantém os dados mockados em caso de erro
       } finally {
         setCarregando(false);
@@ -110,7 +121,7 @@ const Perfil = ({ navigation }) => {
       try {
         setLoadingStats(true);
         const resp = await obterDesempenhoSemanal();
-        console.log('📊 [Perfil] obterDesempenhoSemanal:', resp);
+        
 
         let treinos = 0;
         let dias = 0;
@@ -149,9 +160,9 @@ const Perfil = ({ navigation }) => {
         }
 
         setStats({ treinosCompletos: treinos, diasAtivos: dias });
-        console.log('📊 [Perfil] stats calculadas:', { treinos, dias });
+        
       } catch (err) {
-        console.error('❌ [Perfil] erro ao buscar estatísticas:', err);
+        
       } finally {
         setLoadingStats(false);
       }
@@ -214,6 +225,32 @@ const handleVoltar = () => {
     setConfigModalVisible(true);
   };
 
+  // Persistir preferências ao alterar
+
+  const handleSomChange = async (v) => {
+    setSom(v);
+    setSoundEnabled(v);
+    try {
+      await AsyncStorage.setItem('perfil_som', v ? 'true' : 'false');
+    } catch (e) {}
+    if (v && typeof playClickSound === 'function') {
+      playClickSound(); // Toca um som ao ativar
+    }
+  };
+
+  const handleVibracaoChange = async (v) => {
+    setVibracao(v);
+    try {
+      await AsyncStorage.setItem('perfil_vibracao', v ? 'true' : 'false');
+    } catch (e) {}
+    if (v) {
+      Vibration.vibrate(200); // Vibra por 200ms ao ativar
+      if (som && typeof playClickSound === 'function') {
+        playClickSound(); // Se som também estiver ativo, toca o som
+      }
+    }
+  };
+
   const handleFecharConfig = () => {
     setConfigModalVisible(false);
   };
@@ -225,7 +262,7 @@ const handleVoltar = () => {
       [
         {
           text: 'Cancelar',
-          onPress: () => console.log('Logout cancelado'),
+          onPress: () => {},
           style: 'cancel',
         },
         {
@@ -235,9 +272,9 @@ const handleVoltar = () => {
               setConfigModalVisible(false);
               await logout();
               navigation.navigate('Inicial');
-              console.log('✅ Logout realizado com sucesso');
+              
             } catch (error) {
-              console.error('❌ Erro ao fazer logout:', error);
+              
               Alert.alert('Erro', 'Erro ao sair da conta. Tente novamente.');
             }
           },
@@ -247,68 +284,6 @@ const handleVoltar = () => {
     );
   };
 
-  const handleExcluirConta = () => {
-    Alert.alert(
-      'Excluir Conta',
-      'Tem certeza que deseja excluir sua conta? Esta ação é irreversível.',
-      [
-        {
-          text: 'Cancelar',
-          onPress: () => console.log('Exclusão cancelada'),
-          style: 'cancel',
-        },
-        {
-          text: 'Excluir',
-          onPress: async () => {
-            try {
-              if (!user || !user.email) {
-                Alert.alert('Erro', 'Informações de usuário não encontradas');
-                return;
-              }
-
-              // Extrai o ID do email ou usa outro identificador disponível
-              // Se você tiver um user ID armazenado no context, use-o
-              const adminId = user.email; // ou user.id se tiver
-
-              await deleteAdminAccount(adminId);
-              
-              Alert.alert(
-                'Sucesso',
-                'Sua conta foi excluída com sucesso.',
-                [
-                  {
-                    text: 'OK',
-                    onPress: async () => {
-                      setConfigModalVisible(false);
-                      await logout();
-                      navigation.navigate('Inicial');
-                    },
-                  },
-                ]
-              );
-            } catch (error) {
-              console.error('Erro ao excluir conta:', error);
-              Alert.alert(
-                'Erro',
-                error.message || 'Erro ao excluir a conta. Tente novamente.'
-              );
-            }
-          },
-          style: 'destructive',
-        },
-      ]
-    );
-  };
-
-  const handlePrivacidade = () => {
-    // Lógica para configurações de privacidade
-    console.log('Configurações de privacidade');
-  };
-
-  const handleSobre = () => {
-    // Lógica para informações sobre o app
-    console.log('Sobre o app');
-  };
 
   const renderEditField = (label, value, key, placeholder, keyboardType = 'default') => (
     <View style={styles.editFieldContainer}>
@@ -556,54 +531,7 @@ const handleVoltar = () => {
 
             {/* Lista de Configurações */}
             <ScrollView style={styles.configList}>
-              {/* Notificações */}
-              <View style={styles.configItem}>
-                <View style={styles.configItemLeft}>
-                  <Ionicons name="notifications-outline" size={24} color="#4A69BD" />
-                  <Text style={styles.configItemText}>Notificações</Text>
-                </View>
-
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Switch
-                    value={notificacoes}
-                    onValueChange={async (value) => {
-                      setNotificacoes(value);
-
-                      // Solicita permissão e registra token quando ativar notificações
-                      if (value) {
-                        try {
-                          await registerForPushNotificationsAsync();
-                        } catch (error) {
-                          console.log('Erro ao registrar notificações:', error);
-                        }
-                      }
-                    }}
-                    trackColor={{ false: '#e5e7eb', true: '#4A69BD' }}
-                    thumbColor={notificacoes ? '#ffffff' : '#f3f4f6'}
-                  />
-
-                  {/* 🔹 Botão de teste só aparece no modo DEV e quando o switch estiver ativo */}
-                  {IS_DEV && notificacoes && (
-                    <TouchableOpacity
-                      style={{
-                        marginLeft: 10,
-                        padding: 6,
-                        backgroundColor: '#dbeafe',
-                        borderRadius: 6,
-                      }}
-                      onPress={async () => {
-                        try {
-                          await scheduleNotification();
-                        } catch (error) {
-                          console.log('Erro ao disparar notificação:', error);
-                        }
-                      }}
-                    >
-                      <Ionicons name="notifications" size={22} color="#4A69BD" />
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
+              {/* Notificações removidas */}
 
 
 
@@ -619,15 +547,12 @@ const handleVoltar = () => {
   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
     <Switch
       value={som}
-      onValueChange={(v) => { setSom(v); setSoundEnabled(v); }}
+      onValueChange={handleSomChange}
       trackColor={{ false: '#e5e7eb', true: '#4A69BD' }}
       thumbColor={som ? '#ffffff' : '#f3f4f6'}
     />
 
-    {/* Botão de teste (DEV) */}
-    {IS_DEV && som && (
-      <TestSoundButton soundFunction={playSuccessSound} label="Testar Som" />
-    )}
+    {/* (Removido) Botão de teste de som no modal de configurações */}
   </View>
 </View>
 
@@ -640,7 +565,7 @@ const handleVoltar = () => {
                 </View>
                 <Switch
                   value={vibracao}
-                  onValueChange={setVibracao}
+                  onValueChange={handleVibracaoChange}
                   trackColor={{ false: '#e5e7eb', true: '#4A69BD' }}
                   thumbColor={vibracao ? '#ffffff' : '#f3f4f6'}
                 />
@@ -660,23 +585,7 @@ const handleVoltar = () => {
                 />
               </View>
 
-              {/* Privacidade */}
-              <TouchableOpacity style={styles.configItem} onPress={handlePrivacidade}>
-                <View style={styles.configItemLeft}>
-                  <Ionicons name="shield-outline" size={24} color="#4A69BD" />
-                  <Text style={styles.configItemText}>Privacidade</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-              </TouchableOpacity>
-
-              {/* Sobre */}
-              <TouchableOpacity style={styles.configItem} onPress={handleSobre}>
-                <View style={styles.configItemLeft}>
-                  <Ionicons name="information-circle-outline" size={24} color="#4A69BD" />
-                  <Text style={styles.configItemText}>Sobre</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-              </TouchableOpacity>
+              {/* Privacidade e Sobre removidos */}
 
               {/* Divisor */}
               <View style={styles.configDivider} />
@@ -689,13 +598,7 @@ const handleVoltar = () => {
                 </View>
               </TouchableOpacity>
 
-              {/* Excluir Conta */}
-              <TouchableOpacity style={styles.configItem} onPress={handleExcluirConta}>
-                <View style={styles.configItemLeft}>
-                  <Ionicons name="trash-outline" size={24} color="#ef4444" />
-                  <Text style={[styles.configItemText, styles.dangerText]}>Excluir Conta</Text>
-                </View>
-              </TouchableOpacity>
+              {/* Excluir Conta removida */}
             </ScrollView>
           </View>
         </View>

@@ -182,9 +182,6 @@ const Favoritos = ({ navigation }) => {
                             // Sucesso - o item já foi removido do estado local
                         } catch (error) {
                             // Se ainda assim houver erro, mostra mensagem
-                            if (__DEV__) {
-                                console.error("Erro ao remover favorito:", error);
-                            }
                             Alert.alert(
                                 'Aviso',
                                 'O favorito foi removido localmente. Pode haver um problema de conexão com o servidor.',

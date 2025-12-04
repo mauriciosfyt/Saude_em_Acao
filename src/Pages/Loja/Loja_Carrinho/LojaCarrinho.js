@@ -32,8 +32,7 @@ const getVariacaoDTO = (item) => {
     const categoriaInfo = CATEGORIAS_PRODUTO.find(c => c.valor === item.categoria); 
     
     if (!categoriaInfo) {
-        console.warn(`Categoria não encontrada para: ${item.productName}. Variação não será enviada.`);
-        return dto; 
+      return dto; 
     }
     if (categoriaInfo.tipoEstoque === 'tamanho') {
         dto.tamanho = item.variationValue;
@@ -118,7 +117,6 @@ const LojaCarrinho = ({ navigation }) => {
     setIsSubmitting(true);
     
     try {
-      console.log("Enviando reservas sequencialmente (Lógica Web)...");
 
       // Loop sequencial: Tenta reservar UM POR UM.
       // Se um falhar (ex: sem estoque), o loop para e cai no catch,
@@ -164,7 +162,6 @@ const LojaCarrinho = ({ navigation }) => {
       navigation.navigate('LojaReservas');
 
     } catch (err) {
-      console.error("Erro no processo de reserva:", err);
       
       let displayMsg = "";
       let produtoNome = "";

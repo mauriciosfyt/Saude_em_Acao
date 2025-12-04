@@ -139,7 +139,7 @@ const LojaProdutos = ({ navigation, route }) => {
                 }
 
             } catch (err) { 
-                console.error("Erro ao buscar produto por ID:", err);
+                // Erro ao buscar produto por ID — propagar mensagem para UI
                 setError(err.message || "Não foi possível carregar o produto.");
             } 
             finally { setLoading(false); }

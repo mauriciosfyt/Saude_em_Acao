@@ -41,7 +41,6 @@ const LojaCategoria = ({ navigation }) => {
 
       } catch (err) {
         setError(err.message || 'Erro ao buscar produtos. Tente novamente.');
-        console.error("Erro ao buscar produtos:", err);
       } finally {
         setLoading(false);
       }

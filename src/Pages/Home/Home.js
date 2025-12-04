@@ -105,8 +105,7 @@ const AnalyticsCard = ({ onPress, colors, dadosDesempenho, loading, historicoAnu
 		return validarENormalizar(dadosDesempenho);
 	}, [dadosDesempenho]);
 
-	console.log('🔁 [AnalyticsCard] validação:', { dadosValidos, validReasons, treinosArrayNormalized });
-
+	// validação realizada
   // Processar dados para o gráfico de ÁREA (esquerda) - agora usando treinosArrayNormalized (memoizado)
   const processarDadosArea = useMemo(() => {
      const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
@@ -131,14 +130,13 @@ const AnalyticsCard = ({ onPress, colors, dadosDesempenho, loading, historicoAnu
           const inMonth = dataTreino.getMonth() === mesAtual && dataTreino.getFullYear() === anoAtual;
           if (inMonth && diaSemanaTreino === (i + 1)) {
             treinosEstedia++;
-            console.log(`✅ [AnalyticsCard] treino ${idx} => ${dataTreino.toISOString()} (diaSemana=${diaSemanaTreino}) entra em ${diaNome}`);
           } else {
             if (inMonth) {
-              console.log(`ℹ️ [AnalyticsCard] treino ${idx} => ${dataTreino.toISOString()} (diaSemana=${diaSemanaTreino}) não entra em ${diaNome}`);
+              // treino não entra no dia
             }
           }
         } catch (err) {
-          console.log('❌ [AnalyticsCard] erro parse data:', err);
+          // erro ao fazer parse da data (ignorado)
         }
       });
 
@@ -146,7 +144,7 @@ const AnalyticsCard = ({ onPress, colors, dadosDesempenho, loading, historicoAnu
       dadosArea.push({ dia: diaNome, treinos: acumulado, valor: acumulado });
     }
 
-    console.log('📈 [AnalyticsCard] dadosArea gerados:', dadosArea);
+    // dados da área gerados
     return dadosArea;
   }, [treinosArrayNormalized]);
  
@@ -188,7 +186,7 @@ const AnalyticsCard = ({ onPress, colors, dadosDesempenho, loading, historicoAnu
         }
       });
       
-      console.log('📊 [AnalyticsCard] dadosBarras gerados da API (desempenhoSemanal array):', dadosBarras);
+      // dados de barras gerados da API
       return dadosBarras;
     }
 
@@ -243,7 +241,7 @@ const AnalyticsCard = ({ onPress, colors, dadosDesempenho, loading, historicoAnu
        });
      }
  
-    console.log('📊 [AnalyticsCard] dadosBarras gerados (fallback):', dadosBarras);
+    // dados de barras gerados (fallback)
     return dadosBarras;
   }, [treinosArrayNormalized, desempenhoSemanal]);
  
@@ -267,18 +265,7 @@ const AnalyticsCard = ({ onPress, colors, dadosDesempenho, loading, historicoAnu
 
   const totalTreinosMes = calcularTotalTreinosMes();
 
-  // If component receives anual data via props, it will be passed as dadosDesempenho (object) from Home
-  // But we'll also allow separate prop `historicoAnual` if caller provides it. For now keep logic in Home.
-  
-  // Debug: Verificar dados
-  console.log('🔍 [AnalyticsCard] dadosDesempenho:', dadosDesempenho);
-  console.log('🔍 [AnalyticsCard] historicoAnual:', historicoAnual);
-  console.log('🔍 [AnalyticsCard] loading:', loading, 'loadingHistorico:', loadingHistorico);
-  console.log('🔍 [AnalyticsCard] totalTreinosMes:', totalTreinosMes);
-  console.log('🔍 [AnalyticsCard] dataUltimoTreino:', dadosDesempenho?.dataUltimoTreino);
-  if (dadosDesempenho?.dataUltimoTreino) {
-    console.log('🔍 [AnalyticsCard] Dia da semana do treino:', new Date(dadosDesempenho.dataUltimoTreino).getDay());
-  }
+  // dados de desempenho verificados
 
   // Calcular valores do eixo Y: 0, 1, 2, 3, 4, 5... baseado na contagem real de treinos
   // Determinar o intervalo apropriado baseado no total de treinos do mês
@@ -738,18 +725,16 @@ const Home = ({ navigation }) => {
     const carregarDesempenho = async () => {
       try {
         setLoadingDesempenho(true);
-        console.log('📊 [Home] Buscando dados de desempenho...');
+        // buscando dados de desempenho
         const dados = await obterDesempenhoSemanal();
         if (!mounted) return;
-
-        console.log('📊 [Home] Dados recebidos da API:', dados);
 
         // Verificar se a API retornou dados estruturados por dia da semana (ARRAY de { dia, realizado })
         // Formato esperado: [{ dia: "SEGUNDA", realizado: true }, ...]
         if (Array.isArray(dados) && dados.length > 0) {
           // Verificar se primeiro elemento tem propriedade 'dia'
           if (dados[0] && ('dia' in dados[0] || 'realizado' in dados[0])) {
-            console.log('📊 [Home] Dados de desempenho semanal (array) detectados');
+            // dados de desempenho semanal (array) detectados
             setDesempenhoSemanal(dados);
           }
         }
@@ -761,7 +746,7 @@ const Home = ({ navigation }) => {
           const temDiasSemana = diasSemana.some(dia => dia in dados);
           
           if (temDiasSemana) {
-            console.log('📊 [Home] Dados estruturados por dia da semana (objeto) detectados');
+            // dados estruturados por dia da semana (objeto) detectados
             setDesempenhoSemanal(dados);
           }
         }
@@ -776,18 +761,13 @@ const Home = ({ navigation }) => {
             // Se tiver array de treinos, usar
             if (Array.isArray(dados.treinos) || Array.isArray(dados.items) || Array.isArray(dados.data) || Array.isArray(dados.registros)) {
               const treinosArray = dados.treinos || dados.items || dados.data || dados.registros;
-              console.log('📊 [Home] Treinos processados (array):', treinosArray.length, treinosArray);
+              // treinos processados (array)
               setDadosDesempenho(treinosArray);
             } else if (Array.isArray(dados)) {
-              // Se for array direto (e não é desempenho semanal)
-              console.log('📊 [Home] Treinos processados (array direto):', dados.length, dados);
+              // treinos processados (array direto)
               setDadosDesempenho(dados);
             } else {
-              // Se for objeto com estatísticas, salvar o objeto completo
-              console.log('📊 [Home] Dados recebidos como objeto de estatísticas:', dados);
-              console.log('📊 [Home] Treinos realizados no mês:', dados.treinosRealizadosMesAtual || 0);
-              console.log('📊 [Home] Data último treino:', dados.dataUltimoTreino);
-              // Salvar o objeto completo para usar no gráfico
+              // dados recebidos como objeto de estatísticas
               setDadosDesempenho(dados);
             }
           }
@@ -795,7 +775,7 @@ const Home = ({ navigation }) => {
           setDadosDesempenho(null);
         }
       } catch (error) {
-        console.error('❌ [Home] Erro ao buscar desempenho semanal:', error);
+        // erro ao buscar desempenho semanal
         setDadosDesempenho([]);
       } finally {
         if (mounted) {
@@ -812,13 +792,12 @@ const Home = ({ navigation }) => {
       try {
         setLoadingHistorico(true);
         const anoBusca = ano || new Date().getFullYear();
-        console.log('📅 [Home] Buscando histórico anual de exercícios para', anoBusca);
+        // buscando histórico anual de exercícios
         const resp = await obterHistoricoAnualExercicios(anoBusca);
-        console.log('📅 [Home] histórico anual recebido:', resp);
-        console.log('📅 [Home] historicoAnual.resumoMensal:', resp?.resumoMensal);
+        // histórico anual recebido
         setHistoricoAnual(resp);
       } catch (err) {
-        console.error('❌ [Home] Erro ao buscar histórico anual:', err);
+        // erro ao buscar histórico anual
         setHistoricoAnual(null);
       } finally {
         setLoadingHistorico(false);
@@ -829,7 +808,7 @@ const Home = ({ navigation }) => {
 
     // Recarregar quando voltar para a tela (quando o usuário finalizar um treino)
     const unsubscribe = navigation.addListener('focus', () => {
-      console.log('🔄 [Home] Tela ganhou foco, recarregando dados...');
+      // tela ganhou foco, recarregando dados
       carregarDesempenho();
       carregarHistoricoAnual();
     });

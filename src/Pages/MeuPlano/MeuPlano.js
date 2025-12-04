@@ -25,9 +25,8 @@ const TelaPlanos = ({ navigation }) => {
         setCarregando(true);
         const dados = await obterDesempenhoSemanal();
         setTreinos(Array.isArray(dados) ? dados : dados.treinos || []);
-        console.log('✅ Treinos carregados:', dados);
-      } catch (error) {
-        console.error('❌ Erro ao carregar treinos:', error);
+        } catch (error) {
+        // Erro ao carregar treinos — usar fallback
         setTreinos([]);
       } finally {
         setCarregando(false);
@@ -39,8 +38,7 @@ const TelaPlanos = ({ navigation }) => {
   const onBack = () => navigation && navigation.goBack();
 
   const onVisualizarTreino = (treino) => {
-    console.log('Visualizando treino:', treino);
-    // Aqui você pode navegar para uma tela de detalhes do treino se necessário
+    // Visualizar treino — navegar se necessário
   };
 
   const renderTreino = (treino) => {

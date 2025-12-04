@@ -70,7 +70,6 @@ const Loja = ({ navigation }) => {
         setError(null);
 
         // 1. Buscamos TODOS os produtos, SEM filtros (para evitar o erro 'isEnum()')
-        console.log("Buscando todos os produtos (sem filtro)...");
         const todosProdutosData = await obterProdutos(); 
 
         // 2. Formatamos os dados da API para bater com o que seu JSX espera
@@ -91,7 +90,7 @@ const Loja = ({ navigation }) => {
         setVerticalProducts(produtosFormatados.slice(5, 10));
 
       } catch (err) {
-        console.error("Erro ao carregar dados da loja:", err);
+        // Erro ao carregar dados da loja — propagar mensagem
         setError(err.message || "Não foi possível carregar os produtos.");
       } finally {
         setLoading(false);
@@ -131,7 +130,7 @@ const Loja = ({ navigation }) => {
               adicionarFavorito({ id: item.id, nome: item.name, preco: item.price, img: item.image });
             }
           } catch (e) {
-            console.error('Erro ao alternar favorito (home):', e);
+            // Erro ao alternar favorito (home) — ignorar
           }
         }}
       >

@@ -27,11 +27,11 @@ const HeaderChat = ({ chatTitle, onBackPress, navigation }) => {
       'Sair da Conta',
       'Tem certeza que deseja sair da sua conta?',
       [
-        {
-          text: 'Cancelar',
-          onPress: () => console.log('Logout cancelado'),
-          style: 'cancel',
-        },
+          {
+            text: 'Cancelar',
+            onPress: () => {},
+            style: 'cancel',
+          },
         {
           text: 'Sair',
           onPress: async () => {

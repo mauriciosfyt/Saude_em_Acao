@@ -63,7 +63,6 @@ export const ThemeProvider = ({ children }) => {
         setIsDark(systemIsDark);
       }
     } catch (error) {
-      console.error('Erro ao carregar preferência de tema:', error);
       setIsDark(systemIsDark);
     }
   };
@@ -73,7 +72,7 @@ export const ThemeProvider = ({ children }) => {
     try {
       await AsyncStorage.setItem('themePreference', darkMode ? 'dark' : 'light');
     } catch (error) {
-      console.error('Erro ao salvar preferência de tema:', error);
+      // ignore save errors
     }
   };
 

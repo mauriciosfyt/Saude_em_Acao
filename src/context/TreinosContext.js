@@ -21,10 +21,8 @@ export const TreinosProvider = ({ children }) => {
   const [diasComTreinoRealizado, setDiasComTreinoRealizado] = useState(new Set());
 
   const marcarTreinoComoConcluido = (dia) => {
-    console.log('DEBUG: treinosConcluidos antes:', Array.from(treinosConcluidos));
     setTreinosConcluidos(prev => {
       const novoSet = new Set([...prev, dia]);
-      console.log('DEBUG: treinosConcluidos depois:', Array.from(novoSet));
       return novoSet;
     });
     // Remove do set de incompletos se estiver lá
@@ -36,10 +34,8 @@ export const TreinosProvider = ({ children }) => {
   };
 
   const marcarTreinoComoIncompleto = (dia) => {
-    console.log('DEBUG: marcando treino como incompleto:', dia);
     setTreinosIncompletos(prev => {
       const novoSet = new Set([...prev, dia]);
-      console.log('DEBUG: treinosIncompletos depois:', Array.from(novoSet));
       return novoSet;
     });
     // Remove do set de concluídos se estiver lá
@@ -62,9 +58,8 @@ export const TreinosProvider = ({ children }) => {
   const salvarProgresso = (treinoKey, progresso) => {
     try {
       setProgressoTreinosMap(prev => ({ ...prev, [treinoKey]: progresso }));
-      console.log('DEBUG: progresso salvo para', treinoKey, progresso);
     } catch (err) {
-      console.error('Erro ao salvar progresso:', err);
+      // ignore save errors to avoid breaking UI flow
     }
   };
 
@@ -133,9 +128,9 @@ export const TreinosProvider = ({ children }) => {
       if (registro.treinoKey) {
         setProgressoTreinosMap(prev => ({ ...prev, [registro.treinoKey]: registro.exercicios }));
       }
-      console.log('✅ [TreinosContext] Realização registrada:', { diaFormatado, exercicios: nomes });
+      // realização registrada localmente
     } catch (err) {
-      console.error('❌ [TreinosContext] Erro ao registrar realização:', err);
+      // ignorando erro local de registro para não interromper o fluxo
     }
   };
 

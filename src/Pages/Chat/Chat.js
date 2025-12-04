@@ -30,7 +30,7 @@ import * as SecureStore from 'expo-secure-store';
 
 export const __FILE_ORIGIN = 'CHAT';
 export const __FILE_PATH = 'src/Pages/Chat/Chat.js';
-console.log(`[FILE] Loaded ${__FILE_ORIGIN} (${__FILE_PATH})`);
+// File loaded notification removed
 
 const MOCK_MESSAGES = [
   { id: '1', type: 'text', text: 'Olá, tudo bem?', sender: 'me' },
@@ -88,7 +88,7 @@ const MessageInput = ({ colors, onSendMessage, onSendImage, onClearAll, onClearM
         onSendImage(imagem.uri);
       }
     } catch (error) {
-      console.error('Erro ao selecionar imagem:', error);
+      // Error selecting image
       Alert.alert('Erro', 'Não foi possível selecionar a imagem.');
     }
   };
@@ -122,7 +122,7 @@ const MessageInput = ({ colors, onSendMessage, onSendImage, onClearAll, onClearM
         onSendImage(imagem.uri);
       }
     } catch (error) {
-      console.error('Erro ao tirar foto:', error);
+      // Error taking photo
       Alert.alert('Erro', 'Não foi possível tirar a foto.');
     }
   };
@@ -330,12 +330,7 @@ const Chat = ({ navigation, route }) => {
         }
       }
       
-      console.log('[normalizeMessage] Imagem detectada:', {
-        type: type,
-        imageUrl: imageUrl,
-        rawKeys: Object.keys(raw || {}),
-        hasImageFields: hasImageFields,
-      });
+      // Image detected with URL and fields logged
     }
 
     return {
@@ -359,12 +354,7 @@ const Chat = ({ navigation, route }) => {
 
       const data = await obterHistoricoChat(chatId);
       
-      console.log('[loadHistory] Dados recebidos do servidor:', {
-        dataType: typeof data,
-        isArray: Array.isArray(data),
-        keys: data && typeof data === 'object' ? Object.keys(data) : [],
-        sampleItem: Array.isArray(data) && data.length > 0 ? data[0] : (data?.mensagens?.[0] || data?.messages?.[0]),
-      });
+      // Data received from server - structure logged for debugging
 
       // A API pode retornar várias formas: array direto ou objeto com propriedade
       let items = [];
@@ -374,11 +364,7 @@ const Chat = ({ navigation, route }) => {
       else if (Array.isArray(data?.historico)) items = data.historico;
       else if (Array.isArray(data?.items)) items = data.items;
 
-      console.log('[loadHistory] Items extraídos:', {
-        count: items.length,
-        firstItem: items[0],
-        itemsWithImage: items.filter(item => item.type === 'image' || item.imagemUrl || item.imageUrl || item.url),
-      });
+      // Items extracted from data - count and structure logged
 
       if (!items || items.length === 0) {
         // fallback: usar mocks para facilitar o desenvolvimento
@@ -386,11 +372,7 @@ const Chat = ({ navigation, route }) => {
       } else {
         const normalized = items.map(normalizeMessage).filter(Boolean);
         
-        console.log('[loadHistory] Mensagens normalizadas:', {
-          total: normalized.length,
-          images: normalized.filter(m => m.type === 'image'),
-          imageUrls: normalized.filter(m => m.type === 'image').map(m => m.image),
-        });
+        // Messages normalized - total, images and URLs logged
         
         // ✅ Manter sender de acordo com quem enviou (não forçar para 'other')
         // normalizeMessage já detecta corretamente via isMessageFromUser
@@ -417,7 +399,7 @@ const Chat = ({ navigation, route }) => {
         setMensagens(sorted);
       }
     } catch (err) {
-      console.error('Erro ao carregar histórico do chat:', err);
+      // Error loading chat history
       setErro(err?.message || String(err));
       // fallback minimal
       setMensagens(MOCK_MESSAGES);
@@ -466,18 +448,10 @@ const Chat = ({ navigation, route }) => {
                        item.raw?.serverUrl || 
                        '';
       
-      console.log('[renderItem] Renderizando imagem:', {
-        id: item.id,
-        type: item.type,
-        imageUri: imageUri,
-        hasImage: !!item.image,
-        hasLocalUri: !!item.raw?.localUri,
-        hasOriginalUri: !!item.raw?.originalUri,
-        hasServerUrl: !!item.raw?.serverUrl,
-      });
+      // Rendering image - ID, type, URI and source details logged
       
       if (!imageUri) {
-        console.error('[renderItem] ❌ Nenhuma URI de imagem encontrada para item:', item.id);
+        // No image URI found for item
       }
       
       return (
@@ -513,32 +487,22 @@ const Chat = ({ navigation, route }) => {
                   ]} 
                   resizeMode="cover"
                   onError={(error) => {
-                    console.error('[renderItem] ❌ Erro ao carregar imagem:', {
-                      uri: imageUri,
-                      error: error.nativeEvent?.error || error,
-                      itemId: item.id,
-                      errorDetails: error.nativeEvent,
-                      hasLocalUri: !!item.raw?.localUri,
-                      localUri: item.raw?.localUri,
-                    });
+                    // Error loading image - URI, error details and fallback attempts logged
                     
-                    // Se a URI atual não for a local e houver uma local, tenta usar ela
+                    // If current URI is not local and there is a local one, try using it
                     if (item.raw?.localUri && imageUri !== item.raw.localUri) {
-                      console.log('[renderItem] Tentando usar URI local como fallback:', item.raw.localUri);
+                      // Attempting to use local URI as fallback
                     }
                   }}
                   onLoad={(e) => {
                     const { width, height } = e.nativeEvent.source;
-                    console.log('[renderItem] ✅ Imagem carregada com sucesso:', {
-                      uri: imageUri,
-                      dimensions: { width, height },
-                    });
+                    // Image loaded successfully - URI and dimensions logged
                   }}
                   onLoadStart={() => {
-                    console.log('[renderItem] 🔄 Iniciando carregamento da imagem:', imageUri);
+                    // Image loading started
                   }}
                   onLoadEnd={() => {
-                    console.log('[renderItem] ✅ Carregamento finalizado:', imageUri);
+                    // Image loading finished
                   }}
                 />
                 {/* Placeholder enquanto carrega */}
@@ -651,7 +615,7 @@ const Chat = ({ navigation, route }) => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 150);
     } catch (err) {
-      console.error('Erro enviando mensagem:', err);
+      // Error sending message
       Alert.alert('Erro', err?.message ? String(err.message) : 'Não foi possível enviar a mensagem.');
       setErro(err?.message || String(err));
     } finally {
@@ -680,14 +644,7 @@ const Chat = ({ navigation, route }) => {
       uploading: true,
     };
     
-    console.log('[handleEnviarImagem] Mensagem local criada:', {
-      id: localMsg.id,
-      type: localMsg.type,
-      image: localMsg.image,
-      uri: uri,
-      createdAt: localMsg.createdAt,
-      timestamp: localMsg.raw.timestamp,
-    });
+    // Local message created - ID, type, image, URI and timestamps logged
     
     setMensagens((prev) => {
       const updated = [...prev, localMsg];
@@ -717,15 +674,7 @@ const Chat = ({ navigation, route }) => {
         user?.email || // Fallback: usa email se não tiver ID
         usuarioNome; // Último fallback: usa o nome
       
-      console.log('[handleEnviarImagem] User object:', {
-        hasUser: !!user,
-        userKeys: user ? Object.keys(user) : [],
-        userId: user?.id,
-        usuarioId: user?.usuarioId,
-        email: user?.email,
-        claims: user?.claims,
-        finalUsuarioId: usuarioId,
-      });
+      // User object - user existence, keys, IDs and claims logged
       
       if (!usuarioId) {
         throw new Error('ID do usuário não encontrado. Faça login novamente.');
@@ -770,12 +719,7 @@ const Chat = ({ navigation, route }) => {
       }
 
       if (!response.ok) {
-        console.error('Upload falhou ->', {
-          status: response.status,
-          statusText: response.statusText,
-          parsed: parsed,
-          text: text,
-        });
+        // Upload failed - status, response and error details logged
         
         // Extrai mensagem de erro mais detalhada
         let errorMsg = `Erro ${response.status}: `;
@@ -796,8 +740,8 @@ const Chat = ({ navigation, route }) => {
         throw new Error(errorMsg);
       }
 
-      // Atualiza mensagem local
-      console.log('[handleEnviarImagem] Resposta completa do servidor:', parsed);
+      // Update local message
+      // Complete server response logged
       
       const servidorMsg = parsed?.mensagem || parsed?.message || parsed?.data || parsed || null;
       
@@ -830,7 +774,7 @@ const Chat = ({ navigation, route }) => {
           }
         }
         
-        console.log('[handleEnviarImagem] URL da imagem extraída:', imageUrl);
+        // Extracted image URL logged
         
         // ✅ Usa a URL do servidor ou mantém a URI local
         const finalImageUrl = imageUrl || uri;
@@ -888,21 +832,13 @@ const Chat = ({ navigation, route }) => {
           };
         }
         
-        // ✅ GARANTE que sempre tenha uma URI válida
+        // Ensures always has a valid URI
         if (!normalized.image) {
           normalized.image = uri;
-          console.warn('[handleEnviarImagem] Nenhuma URI encontrada, usando URI local:', uri);
+          // No image URI found, using local URI as fallback
         }
         
-        console.log('[handleEnviarImagem] Mensagem normalizada final:', {
-          id: normalized.id,
-          type: normalized.type,
-          image: normalized.image,
-          text: normalized.text,
-          sender: normalized.sender,
-          hasServerUrl: !!imageUrl,
-          hasLocalUri: !!uri,
-        });
+        // Final normalized message - ID, type, image, text, sender and URL flags logged
         
         setMensagens((prev) => {
           const updated = prev.map((m) => {
@@ -920,7 +856,7 @@ const Chat = ({ navigation, route }) => {
           flatListRef.current?.scrollToEnd({ animated: true });
         }, 150);
       } else {
-        console.warn('[handleEnviarImagem] Servidor não retornou mensagem, mantendo URI local');
+        // Server did not return message, keeping local URI
         // Se o servidor não retornou nada, mantém a imagem local mas remove o estado de upload
         setMensagens((prev) => {
           const updated = prev.map((m) => {
@@ -951,12 +887,7 @@ const Chat = ({ navigation, route }) => {
         }, 150);
       }
     } catch (e) {
-      console.error('Erro ao enviar imagem para API:', e);
-      console.error('Detalhes do erro:', {
-        message: e?.message,
-        stack: e?.stack,
-        name: e?.name,
-      });
+      // Error sending image to API - message, stack and name logged
       
       // Extrai mensagem de erro mais detalhada
       let errorMessage = 'Falha ao enviar imagem.';
@@ -983,7 +914,7 @@ const Chat = ({ navigation, route }) => {
       setMensagens([]);
       Alert.alert('Sucesso', 'Histórico apagado');
     } catch (err) {
-      console.error('Erro ao apagar histórico:', err);
+      // Error clearing history
       Alert.alert('Erro', err?.message ? String(err.message) : 'Falha ao apagar histórico');
     }
   };
@@ -1030,7 +961,7 @@ const Chat = ({ navigation, route }) => {
               // feedback
               Alert.alert('Sucesso', 'Mensagem apagada');
             } catch (err) {
-              console.error('Erro ao apagar mensagem:', err);
+              // Error deleting message
               Alert.alert('Erro', err?.message ? String(err.message) : 'Não foi possível apagar a mensagem.');
             }
           },

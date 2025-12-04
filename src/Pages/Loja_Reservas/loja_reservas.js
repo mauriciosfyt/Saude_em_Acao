@@ -74,7 +74,7 @@ const Reservas = ({ navigation }) => {
             // Converte o objeto de volta para o array de seções
             setReservasData(Object.values(formattedSections));
         } catch (error) {
-            console.error("Erro ao buscar reservas:", error);
+            // Erro ao buscar reservas — notificar usuário e limpar lista
             Alert.alert("Erro", "Não foi possível carregar suas reservas. Verifique a conexão.");
             setReservasData([]); // Limpa a lista em caso de erro
         } finally {

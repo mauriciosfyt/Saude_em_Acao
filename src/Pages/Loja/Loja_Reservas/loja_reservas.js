@@ -208,7 +208,6 @@ const Reservas = ({ navigation }) => {
                 setReservas(reservasAgrupadas);
 
             } catch (err) {
-                console.error("Erro ao buscar reservas:", err);
                 if (err.message === 'Network Error' || (err.message && err.message.includes('Network'))) {
                     setError('Falha de rede. Verifique sua conexão ou se a API está online.');
                 } else {

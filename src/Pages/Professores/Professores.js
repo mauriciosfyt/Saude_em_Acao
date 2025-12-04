@@ -79,7 +79,6 @@ const Professores = ({ navigation }) => {
         setCarregando(true);
         setErro(null);
         
-        console.log('📤 Carregando professores da API...');
         const dados = await obterProfessores();
         
         if (!mounted) return;
@@ -114,14 +113,11 @@ const Professores = ({ navigation }) => {
           });
 
           setProfessores(professoresMapeados);
-          console.log('✅ Professores carregados com sucesso:', professoresMapeados.length);
         } else {
           // Se não houver dados da API, usar fallback
-          console.log('⚠️ Nenhum professor retornado da API, usando dados locais');
           setProfessores(professoresFallback);
         }
       } catch (error) {
-        console.error('❌ Erro ao carregar professores:', error);
         setErro(error.message || 'Erro ao carregar professores');
         // Em caso de erro, usar dados de fallback
         setProfessores(professoresFallback);
@@ -189,19 +185,14 @@ const Professores = ({ navigation }) => {
         }
       }
     } catch (error) {
-      console.error('❌ Erro ao abrir WhatsApp:', error);
-      
-      // Tentar formato alternativo em caso de erro
+      // tentar formato alternativo em caso de erro
       try {
         const numeroLimpo = numero.replace(/[^\d]/g, '');
         const numeroFinal = numeroLimpo.startsWith('55') ? numeroLimpo : '55' + numeroLimpo;
         const urlAlternativa = `https://wa.me/${numeroFinal}`;
         await Linking.openURL(urlAlternativa);
       } catch (err) {
-        Alert.alert(
-          'Erro',
-          'Não foi possível abrir o WhatsApp. Verifique se o aplicativo está instalado.'
-        );
+        Alert.alert('Erro', 'Não foi possível abrir o WhatsApp. Verifique se o aplicativo está instalado.');
       }
     }
   };

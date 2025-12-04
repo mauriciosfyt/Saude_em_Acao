@@ -29,7 +29,7 @@ export const FavoritosProvider = ({ children }) => {
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
         if (raw) savedFromStorage = JSON.parse(raw);
       } catch (e) {
-        if (__DEV__) console.warn('Falha ao ler favoritos do AsyncStorage', e?.message || e);
+        // falha ao ler favoritos do AsyncStorage
       }
       if (!isAuthenticated) {
         // Se não estiver autenticado, limpa os favoritos
@@ -43,10 +43,6 @@ export const FavoritosProvider = ({ children }) => {
       try {
         if (!cancelled) {
           setLoading(true);
-        }
-        
-        if (__DEV__) {
-          console.log("Carregando favoritos da API...");
         }
         
         const dados = await obterFavoritos();
@@ -88,14 +84,10 @@ export const FavoritosProvider = ({ children }) => {
           })
           .filter(item => item && (item.id || item.produtoId)); // Remove itens inválidos
         
-        if (__DEV__) {
-          console.log("Favoritos carregados:", favoritosFormatados.length);
-        }
         
         if (!cancelled) {
           // Se não vier nada da API (dadosReais === null ou array vazio) usamos cache local salvo
           if ((!favoritosData || favoritosData.length === 0) && Array.isArray(savedFromStorage) && savedFromStorage.length > 0) {
-            if (__DEV__) console.log('Usando favoritos do cache local devido a falha na API');
             setUsingCache(true);
             setFavoritos(savedFromStorage);
           } else {
@@ -105,7 +97,7 @@ export const FavoritosProvider = ({ children }) => {
             try {
               AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(favoritosFormatados));
             } catch (e) {
-              if (__DEV__) console.warn('Falha ao salvar favoritos no AsyncStorage:', e?.message || e);
+              // falha ao salvar favoritos no AsyncStorage
             }
           }
 
@@ -121,11 +113,8 @@ export const FavoritosProvider = ({ children }) => {
         
         if (is404 || isNotFound) {
           // Endpoint não existe - mantém favoritos locais
-          if (__DEV__) {
-            console.log("Endpoint de favoritos não encontrado. Continuando com favoritos locais.");
-          }
-        } else if (__DEV__) {
-          console.warn("Erro ao carregar favoritos (mantendo locais):", error?.message || error);
+        } else {
+          // Erro ao carregar favoritos (mantendo locais)
         }
         // Não limpa os favoritos locais em caso de erro (mantemos o cache local)
       } finally {
@@ -144,21 +133,14 @@ export const FavoritosProvider = ({ children }) => {
   }, [isAuthenticated, authLoading]);
 
   const adicionarFavorito = useCallback(async (produto) => {
-    try {
+      try {
       // Validação: verifica se o produto é válido
       if (!produto) {
-        if (__DEV__) {
-          console.warn("Tentativa de adicionar favorito com produto inválido (undefined/null)");
-        }
         return;
       }
-
       // Extrai o ID do produto - sempre usa o ID para salvar na API
       const produtoId = produto.id || produto.produtoId;
           if (!produtoId) {
-        if (__DEV__) {
-          console.warn("Tentativa de adicionar favorito com produto sem ID:", produto);
-        }
         return;
       }
 
@@ -172,9 +154,6 @@ export const FavoritosProvider = ({ children }) => {
           return pId === produtoIdNormalizado;
         });
         if (jaExiste) {
-          if (__DEV__) {
-            console.log("Produto já está nos favoritos:", produtoId);
-          }
           return prev; // Não adiciona novamente
         }
 
@@ -190,7 +169,7 @@ export const FavoritosProvider = ({ children }) => {
         const novo = [...prev, produtoFormatado];
         // Persistir localmente (não bloquear a UI se falhar)
         AsyncStorage.setItem(FAVORITOS_STORAGE_KEY, JSON.stringify(novo)).catch((e) => {
-          if (__DEV__) console.warn('Falha ao persistir favorito no AsyncStorage:', e?.message || e);
+          // falha ao persistir favorito no AsyncStorage
         });
         return novo;
       });
@@ -201,7 +180,6 @@ export const FavoritosProvider = ({ children }) => {
         adicionarFavoritoAPI(produtoId)
           .then((res) => {
             if (res && res.fallback) {
-              if (__DEV__) console.warn('API de adicionar favorito retornou fallback — favorito mantido localmente');
               setUsingCache(true);
             } else {
               setUsingCache(false);
@@ -214,18 +192,11 @@ export const FavoritosProvider = ({ children }) => {
                             error?.message?.includes('not found') ||
                             error?.message?.includes('404');
           
-          if (!is404 && !isNotFound && __DEV__) {
-            console.warn("Erro ao sincronizar favorito com API (mantendo local):", error?.message || error);
-          }
           // Não reverte - mantém o favorito local mesmo se a API falhar
         });
       }
     } catch (error) {
-      // Captura qualquer erro inesperado
-      if (__DEV__) {
-        console.error("Erro inesperado ao adicionar favorito:", error);
-      }
-      // Não propaga o erro para não quebrar a UI
+      // Captura qualquer erro inesperado (não propaga para não quebrar a UI)
     }
   }, [isAuthenticated]);
 
@@ -233,9 +204,7 @@ export const FavoritosProvider = ({ children }) => {
     try {
       // Validação: verifica se o produtoId é válido
       if (!produtoId) {
-        if (__DEV__) {
-          console.warn("Tentativa de remover favorito com ID inválido");
-        }
+        // Attempt to remove favorite with invalid ID
         return Promise.resolve();
       }
 
@@ -255,16 +224,13 @@ export const FavoritosProvider = ({ children }) => {
         });
         // Persistir remoção local
         AsyncStorage.setItem(FAVORITOS_STORAGE_KEY, JSON.stringify(novo)).catch((e) => {
-          if (__DEV__) console.warn('Falha ao persistir remoção de favorito no AsyncStorage:', e?.message || e);
+          // falha ao persistir remoção de favorito no AsyncStorage
         });
         return novo;
       });
 
       // Se não encontrou o produto, já foi removido ou não existe
       if (!produtoRemovido) {
-        if (__DEV__) {
-          console.log("Produto não encontrado nos favoritos para remover:", produtoId);
-        }
         return Promise.resolve();
       }
 
@@ -276,29 +242,18 @@ export const FavoritosProvider = ({ children }) => {
         removerFavoritoAPI(produtoId)
           .then((res) => {
             if (res && res.fallback) {
-              if (__DEV__) console.warn('API de remover favorito retornou fallback — remoção mantida localmente');
               setUsingCache(true);
             } else {
               setUsingCache(false);
             }
           })
           .catch((error) => {
-          if (__DEV__) {
-            console.warn(
-              "Falha ao sincronizar remoção de favorito com a API (remoção local mantida):",
-              error?.message || error
-            );
-          }
           // Não reverte a remoção local — manter o produto fora da lista mesmo em falhas
         });
       }
 
       return Promise.resolve();
     } catch (error) {
-      // Captura qualquer erro inesperado
-      if (__DEV__) {
-        console.error("Erro inesperado ao remover favorito:", error);
-      }
       // Retorna uma Promise resolvida para não quebrar a UI
       return Promise.resolve();
     }

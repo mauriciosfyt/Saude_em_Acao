@@ -8,6 +8,7 @@ import {
   Image,
   StatusBar,
   Modal,
+  Vibration,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -203,11 +204,10 @@ const TreinoSexta = ({ navigation, route }) => {
       let treinoId = route?.params?.treinoId || null;
       
       // Se o treinoId for uma string composta (ex: "1_SEGUNDA_2"), extrair apenas o número inicial
-      if (treinoId && typeof treinoId === 'string' && treinoId.includes('_')) {
+        if (treinoId && typeof treinoId === 'string' && treinoId.includes('_')) {
         const match = treinoId.match(/^(\d+)/);
         if (match) {
           treinoId = match[1];
-          console.log('🔧 [TreinoTerca] ID extraído de string composta:', treinoId);
         }
       }
       
@@ -223,25 +223,31 @@ const TreinoSexta = ({ navigation, route }) => {
         const treinoKey = String(treinoId || 'Terça');
         salvarProgresso(treinoKey, selecionados);
       } catch (err) {
-        console.error('Erro ao salvar progresso localmente:', err);
+        // Falha ao salvar progresso localmente — não bloquear o fluxo
       }
 
       // Registrar treino na API se tiver treinoId
       if (treinoId) {
         try {
-          console.log('📤 [TreinoTerca] Registrando treino na API:', treinoId);
           const payload = {
             exercicios: selecionados,
             parcial: exerciciosConcluidos < totalExercicios,
           };
           await registrarTreinoRealizado(treinoId, payload);
-          console.log('✅ [TreinoTerca] Treino registrado com sucesso na API');
+          
+          // Executar vibração quando treino é concluído
+          if (exerciciosConcluidos === totalExercicios) {
+            try {
+              Vibration.vibrate([0, 200, 100, 200]);
+            } catch (vibError) {
+              // Vibrate not available — ignore
+            }
+          }
         } catch (error) {
-          console.error('❌ [TreinoTerca] Erro ao registrar treino na API:', error);
-          // Não bloquear o fluxo se a API falhar
+          // API falhou — não bloquear o fluxo
         }
       } else {
-        console.warn('⚠️ [TreinoTerca] TreinoId não disponível, não foi possível registrar na API');
+        // treinoId não disponível — nada a registrar remotamente
       }
 
       if (exerciciosConcluidos === totalExercicios) {
