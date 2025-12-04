@@ -70,6 +70,7 @@ const Loja = ({ navigation }) => {
         setError(null);
 
         // 1. Buscamos TODOS os produtos, SEM filtros (para evitar o erro 'isEnum()')
+        console.log("Buscando todos os produtos (sem filtro)...");
         const todosProdutosData = await obterProdutos(); 
 
         // 2. Formatamos os dados da API para bater com o que seu JSX espera
@@ -90,7 +91,7 @@ const Loja = ({ navigation }) => {
         setVerticalProducts(produtosFormatados.slice(5, 10));
 
       } catch (err) {
-        // Erro ao carregar dados da loja — propagar mensagem
+        console.error("Erro ao carregar dados da loja:", err);
         setError(err.message || "Não foi possível carregar os produtos.");
       } finally {
         setLoading(false);
@@ -130,14 +131,14 @@ const Loja = ({ navigation }) => {
               adicionarFavorito({ id: item.id, nome: item.name, preco: item.price, img: item.image });
             }
           } catch (e) {
-            // Erro ao alternar favorito (home) — ignorar
+            console.error('Erro ao alternar favorito (home):', e);
           }
         }}
       >
         <Ionicons
           name={(favoritos && favoritos.find((f) => String(f.id || f.produtoId) === String(item.id))) ? 'heart' : 'heart-outline'}
           size={20}
-          color={(favoritos && favoritos.find((f) => String(f.id || f.produtoId) === String(item.id))) ? '#ff4757' : COLORS.cinzaMedio}
+          color={(favoritos && favoritos.find((f) => String(f.id || f.produtoId) === String(item.id))) ? '#3b82f6' : COLORS.cinzaMedio}
         />
       </TouchableOpacity>
       <View style={styles.productContent}>

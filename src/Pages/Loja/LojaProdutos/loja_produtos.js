@@ -125,7 +125,7 @@ const LojaProdutos = ({ navigation, route }) => {
                         imagemUrlFinal = `${base}${sep}${imagemUrlFinal}`;
                     }
                 } catch (e) {
-                    // ignore image normalization errors
+                    console.warn('Erro ao normalizar URL da imagem:', e);
                 }
 
                 const produtoFormatado = {
@@ -149,6 +149,7 @@ const LojaProdutos = ({ navigation, route }) => {
                 }
 
             } catch (err) { 
+                console.error("Erro ao buscar produto por ID:", err);
                 setError(err.message || "Não foi possível carregar o produto.");
             } 
             finally { setLoading(false); }
@@ -255,14 +256,14 @@ const LojaProdutos = ({ navigation, route }) => {
                                         adicionarFavorito(produto);
                                     }
                                 } catch (e) {
-                                    // erro ao alternar favorito (ignorado)
+                                    console.error('Erro ao alternar favorito:', e);
                                 }
                             }}
                         >
                             {
                                 (favoritos && favoritos.find((f) => String(f.id || f.produtoId) === String(produto.id)))
-                                ? <Icon name="heart" size={22} color="#E24B4B" />
-                                : <Icon name="heart" size={22} color={theme.colors.icon} />
+                                    ? <Icon name="heart" size={22} color="#3b82f6" />
+                                    : <Icon name="heart" size={22} color={theme.colors.icon} />
                             }
                         </TouchableOpacity>
                         <TouchableOpacity style={[styles.iconButton, { marginTop: theme.spacing.small }]}>
