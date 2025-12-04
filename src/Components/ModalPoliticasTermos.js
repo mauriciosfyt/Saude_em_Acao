@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   Modal,
   View,
@@ -24,7 +24,6 @@ const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPol
   const { colors, isDark } = useTheme();
   const animacaoSubida = useRef(new Animated.Value(alturaTela)).current;
   const animacaoOpacidade = useRef(new Animated.Value(0)).current;
-  const [internalVisible, setInternalVisible] = useState(visivel);
   const [view, setView] = useState(tipo || 'selection');
 
   // evita usar driver nativo na web
@@ -32,55 +31,76 @@ const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPol
 
   // refs para controlar/limpar animações em andamento
   const animationsRef = useRef([]);
-  const mountedRef = useRef(true);
+  const timeoutRef = useRef(null);
 
+  // Sincroniza view quando o modal abre com um tipo específico
   useEffect(() => {
-    // sincroniza view quando o pai passar tipo (ex: abrir já na política ou termos)
-    if (tipo && visivel) {
+    if (visivel && tipo) {
       setView(tipo);
     }
-    return () => {
-      // cleanup ao desmontar: parar animações pendentes e evitar setState
-      mountedRef.current = false;
-      animationsRef.current.forEach(anim => anim && typeof anim.stop === 'function' && anim.stop());
-      animationsRef.current = [];
-    };
-  }, [tipo, visivel]);
+  }, [visivel, tipo]);
 
   // Reset view quando o modal fechar
   useEffect(() => {
-    if (!visivel) {
-      setView('selection');
-    }
-  }, [visivel]);
+    return () => {
+      // cleanup ao desmontar: parar animações e limpar timeouts
+      animationsRef.current.forEach(anim => {
+        if (anim && typeof anim.stop === 'function') {
+          anim.stop();
+        }
+      });
+      animationsRef.current = [];
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
-  // Controla montagem do Modal: mantém montado enquanto animações de saída rodam
+  // Controla animações de entrada/saída
   useEffect(() => {
-    // limpar animações anteriores
-    animationsRef.current.forEach(a => a && typeof a.stop === 'function' && a.stop());
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    animationsRef.current.forEach(a => {
+      if (a && typeof a.stop === 'function') a.stop();
+    });
     animationsRef.current = [];
 
     if (visivel) {
-      // montar antes de animar entrada
-      setInternalVisible(true);
-      const a1 = Animated.timing(animacaoSubida, { toValue: 0, duration: 300, useNativeDriver: useNative });
-      const a2 = Animated.timing(animacaoOpacidade, { toValue: 1, duration: 300, useNativeDriver: useNative });
+      // Animação de entrada
+      const a1 = Animated.timing(animacaoSubida, { 
+        toValue: 0, 
+        duration: 300, 
+        useNativeDriver: useNative 
+      });
+      const a2 = Animated.timing(animacaoOpacidade, { 
+        toValue: 1, 
+        duration: 300, 
+        useNativeDriver: useNative 
+      });
+      animationsRef.current = [a1, a2];
+      Animated.parallel([a1, a2]).start();
+    } else {
+      // Animação de saída
+      const a1 = Animated.timing(animacaoSubida, { 
+        toValue: alturaTela, 
+        duration: 300, 
+        useNativeDriver: useNative 
+      });
+      const a2 = Animated.timing(animacaoOpacidade, { 
+        toValue: 0, 
+        duration: 300, 
+        useNativeDriver: useNative 
+      });
       animationsRef.current = [a1, a2];
       Animated.parallel([a1, a2]).start(() => {
         animationsRef.current = [];
       });
-    } else if (internalVisible) {
-      // animação de saída: só desmonta quando terminar
-      const a1 = Animated.timing(animacaoSubida, { toValue: alturaTela, duration: 300, useNativeDriver: useNative });
-      const a2 = Animated.timing(animacaoOpacidade, { toValue: 0, duration: 300, useNativeDriver: useNative });
-      animationsRef.current = [a1, a2];
-      Animated.parallel([a1, a2]).start(() => {
-        animationsRef.current = [];
-        if (mountedRef.current) setInternalVisible(false);
-      });
+      // Reset view após modal fechar
+      setView(tipo || 'selection');
     }
   }, [visivel]);
-
 
 
   const renderizarConteudo = () => {
@@ -118,9 +138,9 @@ const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPol
     <ScrollView 
       key="politicas-scroll"
       style={{ flex: 1, backgroundColor: 'transparent' }}
-      contentContainerStyle={[stylesModal.conteudoScroll, { paddingBottom: 20, paddingHorizontal: 20 }]}
-      showsVerticalScrollIndicator={true}
-      nestedScrollEnabled={true}
+      contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 20 }}
+      scrollEventThrottle={16}
+      keyboardShouldPersistTaps="handled"
     >
       <View style={{ alignItems: 'center', marginBottom: 20 }}>
         {!logoError ? (
@@ -203,9 +223,9 @@ const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPol
     <ScrollView 
       key="termos-scroll"
       style={{ flex: 1, backgroundColor: 'transparent' }}
-      contentContainerStyle={[stylesModal.conteudoScroll, { paddingBottom: 20, paddingHorizontal: 20 }]}
-      showsVerticalScrollIndicator={true}
-      nestedScrollEnabled={true}
+      contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 20 }}
+      scrollEventThrottle={16}
+      keyboardShouldPersistTaps="handled"
     >
       <View style={{ alignItems: 'center', marginBottom: 20 }}>
         {!logoError ? (
@@ -312,7 +332,7 @@ const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPol
   return (
     <Modal
       transparent={true}
-      visible={internalVisible}
+      visible={visivel}
       onRequestClose={aoFechar}
       animationType="none"
     >
@@ -367,13 +387,15 @@ const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPol
             </View>
 
             {/* Conteúdo do Modal */}
-            <View style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-              {view === 'politicas' ? renderPoliticas() : view === 'termos' ? renderTermos() : (
-                <View style={[stylesModal.conteudoContainer, dynamic.conteudoContainer]}>
-                  {renderizarConteudo()}
-                </View>
-              )}
-            </View>
+            {view === 'politicas' ? (
+              renderPoliticas()
+            ) : view === 'termos' ? (
+              renderTermos()
+            ) : (
+              <View style={[stylesModal.conteudoContainer, dynamic.conteudoContainer, { flex: 1 }]}>
+                {renderizarConteudo()}
+              </View>
+            )}
 
             {/* Botão de concordar (aparece quando estiver visualizando conteúdo) */}
             {view !== 'selection' && (
@@ -381,10 +403,9 @@ const ModalPoliticasTermos = ({ visivel, tipo, aoFechar, aoConcordar, aoAbrirPol
                 <TouchableOpacity
                   style={[stylesModal.botaoConcordar, dynamic.botaoConcordar]}
                   onPress={() => {
-                    aoConcordar && aoConcordar();
-                    aoFechar && aoFechar();
-                    // retornar seleção caso o modal reabra posteriormente
-                    setView('selection');
+                    // Chamar callbacks e depois fechar o modal
+                    if (aoConcordar) aoConcordar();
+                    if (aoFechar) aoFechar();
                   }}
                 >
                   <Text style={[stylesModal.textoBotaoConcordar, dynamic.textoBotaoConcordar]}>Li, Concordo</Text>
