@@ -15,82 +15,47 @@ export const TreinosProvider = ({ children }) => {
   const [treinosIncompletos, setTreinosIncompletos] = useState(new Set());
   // Guarda progresso dos treinos por chave (pode ser treinoKey, data etc.)
   const [progressoTreinosMap, setProgressoTreinosMap] = useState({});
-
-  // Normaliza nomes de dia para uma forma canônica usada internamente
-  const normalizarDia = (dia) => {
-    if (!dia) return '';
-    const up = String(dia).toUpperCase();
-    if (up.includes('SEGUNDA')) return 'Segunda';
-    if (up.includes('TERCA') || up.includes('TERÇA')) return 'Terça';
-    if (up.includes('QUARTA')) return 'Quarta';
-    if (up.includes('QUINTA')) return 'Quinta';
-    if (up.includes('SEXTA')) return 'Sexta';
-    if (up.includes('SABADO') || up.includes('SÁBADO')) return 'Sábado';
-    if (up.includes('DOMINGO')) return 'Domingo';
-    return String(dia);
-  };
-
-  // Cria uma chave única para o treino baseada na data de hoje
-  const criarChaveTreino = (dia) => {
-    const hoje = new Date();
-    const ano = hoje.getFullYear();
-    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-    const data = String(hoje.getDate()).padStart(2, '0');
-    const dataPadrao = `${ano}-${mes}-${data}`;
-    const canon = normalizarDia(dia);
-    return `${dataPadrao}_${canon}`;
-  };
+  // Guarda últimas realizações locais para mostrar no Desempenho
+  const [ultimasRealizacoes, setUltimasRealizacoes] = useState([]);
+  // Guarda datas únicas (YYYY-MM-DD) dos dias que tiveram treino realizado
+  const [diasComTreinoRealizado, setDiasComTreinoRealizado] = useState(new Set());
 
   const marcarTreinoComoConcluido = (dia) => {
-    const chave = criarChaveTreino(dia);
-    console.log('DEBUG: marcarTreinoComoConcluido recebido:', dia, '->', chave);
     console.log('DEBUG: treinosConcluidos antes:', Array.from(treinosConcluidos));
     setTreinosConcluidos(prev => {
-      const novoSet = new Set(prev);
-      if (chave) novoSet.add(chave);
+      const novoSet = new Set([...prev, dia]);
       console.log('DEBUG: treinosConcluidos depois:', Array.from(novoSet));
       return novoSet;
     });
     // Remove do set de incompletos se estiver lá
     setTreinosIncompletos(prev => {
       const novoSet = new Set(prev);
-      if (chave) novoSet.delete(chave);
+      novoSet.delete(dia);
       return novoSet;
     });
   };
 
-  // Reseta os sets de treinos concluídos/incompletos (útil ao recarregar do servidor)
-  const resetarTreinos = () => {
-    if (__DEV__) console.log('DEBUG: resetando treinos concluidos e incompletos');
-    setTreinosConcluidos(new Set());
-    setTreinosIncompletos(new Set());
-  };
-
   const marcarTreinoComoIncompleto = (dia) => {
-    const chave = criarChaveTreino(dia);
-    console.log('DEBUG: marcando treino como incompleto recebido:', dia, '->', chave);
+    console.log('DEBUG: marcando treino como incompleto:', dia);
     setTreinosIncompletos(prev => {
-      const novoSet = new Set(prev);
-      if (chave) novoSet.add(chave);
+      const novoSet = new Set([...prev, dia]);
       console.log('DEBUG: treinosIncompletos depois:', Array.from(novoSet));
       return novoSet;
     });
     // Remove do set de concluídos se estiver lá
     setTreinosConcluidos(prev => {
       const novoSet = new Set(prev);
-      if (chave) novoSet.delete(chave);
+      novoSet.delete(dia);
       return novoSet;
     });
   };
 
   const isTreinoConcluido = (dia) => {
-    const chave = criarChaveTreino(dia);
-    return treinosConcluidos.has(chave);
+    return treinosConcluidos.has(dia);
   };
 
   const isTreinoIncompleto = (dia) => {
-    const chave = criarChaveTreino(dia);
-    return treinosIncompletos.has(chave);
+    return treinosIncompletos.has(dia);
   };
 
   // Salva o progresso para um treino específico (p. ex. lista de exercícios completados)
@@ -108,17 +73,98 @@ export const TreinosProvider = ({ children }) => {
     return progressoTreinosMap ? progressoTreinosMap[treinoKey] : undefined;
   };
 
+  // Registra localmente a realização de um treino (ids e nomes dos exercícios)
+  const registrarRealizacaoLocal = (treinoKey, exercicios = [], nomes = [], data = null) => {
+    try {
+      const dataRealizacao = data ? new Date(data) : new Date();
+      const registro = {
+        treinoKey: String(treinoKey || ''),
+        exercicios: Array.isArray(exercicios) ? exercicios : [],
+        nomes: Array.isArray(nomes) ? nomes : [],
+        data: dataRealizacao,
+      };
+      setUltimasRealizacoes(prev => {
+        // Mesclar registros existentes do mesmo treinoKey e mesma data (YYYY-MM-DD)
+        const dia = dataRealizacao.toISOString().split('T')[0];
+        const novoArray = [...prev];
+        let merged = false;
+
+        for (let i = 0; i < novoArray.length; i++) {
+          const r = novoArray[i];
+          if (!r) continue;
+          const rDia = new Date(r.data).toISOString().split('T')[0];
+          if (String(r.treinoKey) === String(registro.treinoKey) && rDia === dia) {
+            // Mesclar IDs de exercícios (únicos)
+            const ids = Array.from(new Set([...(Array.isArray(r.exercicios) ? r.exercicios : []), ...(Array.isArray(registro.exercicios) ? registro.exercicios : [])]));
+            // Mesclar nomes de exercícios (mantendo ordem, únicos)
+            const nomesExistentes = Array.isArray(r.nomes) ? r.nomes : [];
+            const novosNomes = Array.isArray(registro.nomes) ? registro.nomes : [];
+            const nomesUnicos = Array.from(new Set([...nomesExistentes, ...novosNomes]));
+
+            novoArray[i] = {
+              treinoKey: String(registro.treinoKey),
+              exercicios: ids,
+              nomes: nomesUnicos,
+              // manter a data mais recente para exibição
+              data: registro.data > new Date(r.data) ? registro.data : new Date(r.data),
+            };
+            merged = true;
+            break;
+          }
+        }
+
+        if (!merged) {
+          novoArray.unshift(registro);
+        }
+
+        // limitar a 20 registros para evitar crescimento infinito
+        return novoArray.slice(0, 20);
+      });
+      
+      // Registrar a data como dia com treino realizado (formato YYYY-MM-DD)
+      const diaFormatado = dataRealizacao.toISOString().split('T')[0];
+      setDiasComTreinoRealizado(prev => {
+        const novo = new Set(prev);
+        novo.add(diaFormatado);
+        return novo;
+      });
+      
+      // Também salvar como progresso (para compatibilidade)
+      if (registro.treinoKey) {
+        setProgressoTreinosMap(prev => ({ ...prev, [registro.treinoKey]: registro.exercicios }));
+      }
+      console.log('✅ [TreinosContext] Realização registrada:', { diaFormatado, exercicios: nomes });
+    } catch (err) {
+      console.error('❌ [TreinosContext] Erro ao registrar realização:', err);
+    }
+  };
+
+  const obterUltimasRealizacoes = () => {
+    return ultimasRealizacoes;
+  };
+
+  const obterDiasComTreinoRealizado = () => {
+    return Array.from(diasComTreinoRealizado);
+  };
+
+  const obterTotalDiasComTreinoRealizado = () => {
+    return diasComTreinoRealizado.size;
+  };
+
   const value = {
     treinosConcluidos,
     treinosIncompletos,
     progressoTreinos: progressoTreinosMap,
     marcarTreinoComoConcluido,
     marcarTreinoComoIncompleto,
-    resetarTreinos,
     isTreinoConcluido,
     isTreinoIncompleto,
     salvarProgresso,
     obterProgresso,
+    registrarRealizacaoLocal,
+    obterUltimasRealizacoes,
+    obterDiasComTreinoRealizado,
+    obterTotalDiasComTreinoRealizado,
   };
 
   return (
