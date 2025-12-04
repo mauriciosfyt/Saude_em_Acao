@@ -219,7 +219,7 @@ const Professores = ({ navigation }) => {
             navigation={navigation}
           />
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator size="large" color="#4A69BD" />
+            <ActivityIndicator size="large" color="#007bff" />
             <Text style={{ marginTop: 10, color: isDark ? '#FFF' : '#000' }}>
               Carregando professores...
             </Text>
