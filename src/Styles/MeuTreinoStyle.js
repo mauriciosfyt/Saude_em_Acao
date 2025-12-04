@@ -189,6 +189,52 @@ const createStyles = (isDark) => {
       marginRight: 5,
     },
 
+    // Estilos para quando não há treino
+    semTreinoContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 30,
+      paddingVertical: 60,
+    },
+
+    semTreinoTitulo: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      marginBottom: 16,
+      textAlign: 'center',
+    },
+
+    semTreinoDescricao: {
+      fontSize: 16,
+      lineHeight: 24,
+      textAlign: 'center',
+      marginBottom: 32,
+    },
+
+    contatarPersonalButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 24,
+      paddingVertical: 14,
+      borderRadius: 25,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...platformShadow({
+        boxShadow: 'rgba(64,92,186,0.3) 0px 6px 16px',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 4,
+      }),
+    },
+
+    contatarPersonalButtonText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+
     // Estilos do Modal
   menuOverlay: {
     flex: 1,
