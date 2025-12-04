@@ -117,6 +117,7 @@ const AdministrarTreino = () => {
       console.error('Erro ao duplicar treino:', err);
       toast.error('Erro ao duplicar treino. Tente novamente.', {
         className: 'custom-error-toast',
+        progressClassName: 'custom-error-progress-bar'
       });
     }
   };
@@ -145,6 +146,7 @@ const AdministrarTreino = () => {
       console.error('Erro ao remover treino:', err);
       toast.error(err.message || 'Erro ao remover treino. Tente novamente.', {
          className: 'custom-error-toast',
+         progressClassName: 'custom-error-progress-bar',
          autoClose: 3000
       });
     } finally {

@@ -79,6 +79,7 @@ const AdministrarAluno = () => {
     if (!alunoIdFinal) {
       toast.error('ID do aluno não encontrado. Tente novamente.', {
         className: 'custom-error-toast',
+        progressClassName: 'custom-error-progress-bar'
       });
       return;
     }
@@ -106,7 +107,8 @@ const AdministrarAluno = () => {
       // --- MENSAGEM DE ERRO (Estilo Excluido) ---
       toast.error('Erro ao associar treino no servidor.', {
          className: 'custom-error-toast', // Usa o estilo do Excluido.css
-         autoClose: 3000
+         autoClose: 3000,
+         progressClassName: 'custom-error-progress-bar'
       });
     }
     setModalOpen(false);
