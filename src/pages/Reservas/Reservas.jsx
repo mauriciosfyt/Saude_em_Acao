@@ -16,6 +16,12 @@ import Header from '../../components/header_loja';
 // A imagem estática que você usava (agora servirá como fallback)
 import imagemUrlFallback from '../../assets/IMG PRODUTO.jpg';
 
+// Imports do Toastify
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../components/Mensagem/Excluido.css'; // Seu CSS customizado para mensagens
+import '../../components/Mensagem/Editado.css'; // Seu CSS customizado para mensagens de sucesso
+
 // == HELPER FUNCTIONS ==
 // (Funções de formatarDataParaDia, mapearStatusUI, getStatusClassName e agruparPedidosPorData - mantidas como antes)
 // ---
@@ -159,12 +165,31 @@ const Reservas = () => {
     if (produtoId) {
       navigate(`/produto/${produtoId}`);
     } else {
-      alert('ID do produto não encontrado.');
+
+      toast.error('ID do produto não encontrado.', {
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
   
   const handleComprarNovamente = (produtoId) => {
-    alert(`(WIP) Adicionar produto ${produtoId} ao carrinho.`);
+
+    toast.info(`(WIP) Adicionar produto ${produtoId} ao carrinho.`, {
+      position: "top-right",
+      autoClose: 3000,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      className: "custom-edit-toast",
+      progressClassName: "custom-edit-progress-bar",
+    });
   };
 
   // NOVO: Função para lidar com a seleção de filtro no dropdown
@@ -186,6 +211,7 @@ const Reservas = () => {
 
   return (
     <>
+      <ToastContainer />
       <Header />
 
       <div className="pagina-reservas">

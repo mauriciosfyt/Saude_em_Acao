@@ -381,7 +381,7 @@
 
 /* Container para a mensagem de erro */
 .categoria-vitamina-error {
-  color: #721c24;
+  color: red;
   padding: 15px;
   border-radius: 4px;
   margin: 10px 0;

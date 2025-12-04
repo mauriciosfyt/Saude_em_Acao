@@ -155,7 +155,7 @@ function Home() {
           <div className="banner-app-container">
             {/* COLUNA ESQUERDA */}
             <div className="banner-text">
-              <h2>Saúde em ação app</h2>
+              <h2>Saúde em Ação App</h2>
               <h3>Seu aliado nos treinos!</h3>
               <ul>
                 <li>

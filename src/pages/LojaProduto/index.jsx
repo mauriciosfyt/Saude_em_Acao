@@ -8,6 +8,10 @@ import { getProdutoById } from "../../services/produtoService";
 import { useAuth } from "../../contexts/AuthContext";
 import "./LojaProduto.css";
 import { fixImageUrl } from "../../utils/image"; 
+// Importação atualizada para incluir o ToastContainer
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../../components/Mensagem/Excluido.css';
 
 const LojaProduto = () => {
   const { id } = useParams();
@@ -45,7 +49,7 @@ const LojaProduto = () => {
     fetchProduto();
   }, [id]); 
 
-  // --- FUNÇÃO DE RESERVA ATUALIZADA ---
+  // --- FUNÇÃO DE RESERVA CORRIGIDA ---
   const handleReservarClick = () => {
     if (!produto) return;
 
@@ -55,10 +59,22 @@ const LojaProduto = () => {
       navigate(`/Carrinho?add=${produto.id}`);
     } else {
       // 2. Usuário NÃO está logado:
-      // Mostra a mensagem que você pediu
-      alert('É necessário fazer login para reservar o produto. Você será redirecionado.');
-      // Manda para a Home
-      navigate('/');
+      // Dispara o toast com as classes do seu CSS (vermelho)
+      toast.error('É necessário fazer login para reservar o produto.', {
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+        position: "top-right",
+        autoClose: 4000, // Tempo ajustado para leitura
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
+      // Pequeno delay para garantir que o usuário leia a mensagem antes de sair da página
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
     }
   };
   // -----------------------------------
@@ -128,6 +144,9 @@ const LojaProduto = () => {
   // Renderiza o componente com os dados dinâmicos do produto
   return (
     <>
+      {/* Componente essencial para exibir os Toasts */}
+      <ToastContainer /> 
+      
       {isAuthenticated ? <Header_Login /> : <Header_nLogin />}
 
       <section className="product-hero">
