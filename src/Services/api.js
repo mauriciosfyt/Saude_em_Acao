@@ -239,6 +239,148 @@ export const obterHistoricoAnualExercicios = async (ano) => {
   }
 };
 
+// Obter desempenho (métricas) para o mês atual usando o endpoint anual
+export const obterDesempenhoMesAtual = async (ano) => {
+  try {
+    const hoje = new Date();
+    const mesIndex = hoje.getMonth(); // 0-11
+    const mesAtual = mesIndex + 1; // 1-12
+    const anoBusca = ano || hoje.getFullYear();
+
+    console.log('[API] obterDesempenhoMesAtual - buscando mês', mesAtual, 'de', anoBusca);
+
+    // Obter histórico anual e normalizar
+    const resp = await obterHistoricoAnualExercicios(anoBusca);
+    console.log('[API] resp bruta:', JSON.stringify(resp, null, 2));
+
+    if (!resp) {
+      console.warn('[API] resp é null/undefined');
+      return { dias: [], treinosRealizados: 0, treinosTotal: 0, dataUltimoTreino: null, itensBrutos: null };
+    }
+
+    // A API retorna { resumoMensal: [...], historicoDetalhado: [...] }
+    const resumoMensal = resp?.resumoMensal || [];
+    const historicoDetalhado = resp?.historicoDetalhado || [];
+
+    console.log('[API] resumoMensal.length:', resumoMensal.length);
+    console.log('[API] historicoDetalhado.length:', historicoDetalhado.length);
+
+    // Encontrar o mês atual no resumoMensal
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    const mesNome = meses[mesIndex];
+    const resumoMes = resumoMensal.find(r => r.mes === mesNome);
+
+    console.log('[API] mês procurado:', mesNome, 'encontrado:', !!resumoMes);
+    if (resumoMes) {
+      console.log('[API] resumoMes:', JSON.stringify(resumoMes, null, 2));
+    }
+
+    // Contar treinos realizados no mês atual a partir do historicoDetalhado
+    // Agrupar por data para contar quantos dias tiveram treino
+    const diasComTreino = new Set();
+    const treinosRealizadosList = historicoDetalhado.filter(h => {
+      try {
+        // dataRealizacao vem como "04/12/2025 02:14"
+        const partes = h.dataRealizacao?.split(' ') || [];
+        const dataParte = partes[0]; // "04/12/2025"
+        
+        if (!dataParte) return false;
+        
+        const [dia, mes, ano] = dataParte.split('/');
+        const mesNum = parseInt(mes);
+        const anoNum = parseInt(ano);
+        
+        // Filtrar apenas o mês e ano atual
+        if (mesNum === mesAtual && anoNum === hoje.getFullYear()) {
+          diasComTreino.add(dataParte); // usar data como chave única
+          return true;
+        }
+        return false;
+      } catch (e) {
+        console.warn('[API] erro ao processar dataRealizacao:', h.dataRealizacao, e);
+        return false;
+      }
+    });
+
+    const treinosRealizados = diasComTreino.size; // número de dias com treino
+    
+    console.log('[API] dias com treino:', treinosRealizados);
+    console.log('[API] treinos realizados encontrados:', treinosRealizadosList.length);
+
+    // Total planejado: usar totalExercicios do mês ou fallback para historicoDetalhado.length
+    let treinosTotal = resumoMes?.totalExercicios || treinosRealizadosList.length || 0;
+    
+    console.log('[API] treinosTotal:', treinosTotal);
+
+    // Data do último treino realizado - ordenar por data decrescente
+    let dataUltimoTreino = null;
+    if (treinosRealizadosList.length > 0) {
+      // helper: parsear 'DD/MM/YYYY HH:mm' ou 'DD/MM/YYYY' em Date
+      const parseBRDateTime = (br) => {
+        if (!br) return null;
+        try {
+          const parts = br.split(' ');
+          const datePart = parts[0]; // '04/12/2025'
+          const timePart = parts[1] || '00:00'; // '02:14'
+          const [day, month, year] = datePart.split('/').map(s => parseInt(s, 10));
+          const [hour, minute] = timePart.split(':').map(s => parseInt(s, 10));
+          if (!day || !month || !year) return null;
+          return new Date(year, month - 1, day, hour || 0, minute || 0);
+        } catch (e) {
+          return null;
+        }
+      };
+
+      // Ordenar corretamente usando parseBRDateTime
+      const sorted = treinosRealizadosList.sort((a, b) => {
+        const da = parseBRDateTime(a.dataRealizacao) || new Date(0);
+        const db = parseBRDateTime(b.dataRealizacao) || new Date(0);
+        return db - da;
+      });
+      const ultimoExercicio = sorted[0];
+
+      // Extrair apenas a data (sem hora) no formato DD/MM/YYYY
+      const dataComHora = ultimoExercicio.dataRealizacao; // "04/12/2025 02:14"
+      const dataParte = dataComHora ? dataComHora.split(' ')[0] : null; // "04/12/2025"
+      dataUltimoTreino = dataParte;
+
+      console.log('[API] último treino data (BR):', dataUltimoTreino);
+    }
+
+    // Criar array de dias normalizados para o calendário
+    const dias = Array.from(diasComTreino).map(dataBR => {
+      // dataBR vem como "04/12/2025"
+      const [dia, mes, ano] = dataBR.split('/');
+      const dateISO = `${ano}-${mes}-${dia}`; // "2025-12-04"
+      return {
+        date: dateISO,
+        realizado: true,
+        dataBR: dataBR,
+        raw: { dataRealizacao: dataBR }
+      };
+    });
+
+    console.log('[API] dias normalizados:', dias.length);
+
+    const result = {
+      dias: dias,
+      treinosRealizados: treinosRealizados,
+      treinosTotal: treinosTotal,
+      dataUltimoTreino: dataUltimoTreino,
+      itensBrutos: resp,
+    };
+    
+    console.log('[API] obterDesempenhoMesAtual resultado final:', JSON.stringify(result, null, 2));
+    
+    return result;
+  } catch (error) {
+    console.error('[API] obterDesempenhoMesAtual falhou com erro:', error);
+    console.error('[API] stack:', error?.stack);
+    return { dias: [], treinosRealizados: 0, treinosTotal: 0, dataUltimoTreino: null, itensBrutos: null };
+  }
+};
+
 // Registrar treino realizado
 export const registrarTreinoRealizado = async (treinoId, payload = {}) => {
   try {
