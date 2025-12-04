@@ -97,7 +97,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 2000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -145,7 +145,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
             className: "custom-error-toast",
             progressClassName: "custom-error-progress-bar",
             position: "top-right",
-            autoClose: 5000,
+            autoClose: 2000,
         });
         return;
     }
@@ -156,7 +156,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
             className: "custom-error-toast",
             progressClassName: "custom-error-progress-bar",
             position: "top-right",
-            autoClose: 5000,
+            autoClose: 2000,
         });
         return;
     }
@@ -174,7 +174,7 @@ const FormularioProduto = ({ onFormSubmit, onCancel }) => {
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 2000,
       });
       return;
     }
