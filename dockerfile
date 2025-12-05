@@ -8,10 +8,11 @@ ARG VITE_API_BASE_URL
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 RUN npm run build
 
-# Production stage: serve with nginx
-FROM nginx:stable-alpine AS runner
-COPY --from=builder /app/dist /usr/share/nginx/html
-# Copy custom nginx config (provides SPA fallback to index.html)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Production stage
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY package*.json ./
+RUN npm ci --only=production
+EXPOSE 3000
+CMD ["node", "-e", "require('http').createServer((req, res) => { const fs = require('fs'); const path = require('path'); let filePath = path.join(__dirname, 'dist', req.url === '/' ? 'index.html' : req.url); if (!path.extname(filePath)) filePath = path.join(__dirname, 'dist', 'index.html'); fs.readFile(filePath, (err, data) => { if (err) { res.writeHead(404); res.end('Not found'); } else { res.writeHead(200, {'Content-Type': 'text/html'}); res.end(data); } }); }).listen(3000, () => console.log('Server running on port 3000'));"]
