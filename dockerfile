@@ -26,13 +26,13 @@ ENV PORT=8085
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 # Copy only necessary files from builder
-COPY --from=builder --chown=appuser:appgroup /app/.next ./.next
-COPY --from=builder --chown=appuser:appgroup /app/public ./public
+COPY --from=builder --chown=appuser:appgroup /app/dist ./dist
 COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
 COPY --from=builder --chown=appuser:appgroup /app/package.json ./package.json
-# Optional: copy next.config.js or other runtime files if present
-COPY --from=builder --chown=appuser:appgroup /app/next.config.js ./next.config.js
+
+# Install serve to run the Vite app
+RUN npm install -g serve
 
 USER appuser
-EXPOSE 8085
-CMD ["npm", "start"]
+EXPOSE 80
+CMD ["serve", "-s", "dist", "-l", "80"]

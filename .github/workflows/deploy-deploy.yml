@@ -55,5 +55,5 @@ jobs:
             --restart always \
             --name saudeemacao-web \
             --user saudeemacao \
-            -p 8085:8085 \
+            -p 80:80 \
             ${{ env.IMAGE_NAME }}:latest
