@@ -54,5 +54,5 @@ jobs:
           sudo docker run -d \
             --restart always \
             --name saudeemacao-web \
-            -p 80:80 \
+            -p 3000:3000 \
             ${{ env.IMAGE_NAME }}:latest

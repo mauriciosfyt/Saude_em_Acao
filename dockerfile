@@ -20,7 +20,7 @@ ENV VITE_API_URL=${VITE_API_URL}
 FROM node:18-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=8085
+ENV PORT=3000
 
 # Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
@@ -34,5 +34,5 @@ COPY --from=builder --chown=appuser:appgroup /app/package.json ./package.json
 RUN npm install -g serve
 
 USER appuser
-EXPOSE 80
-CMD ["serve", "-s", "dist", "-l", "80"]
+EXPOSE 3000
+CMD ["serve", "-s", "dist", "-l", "3000"]
