@@ -47,7 +47,7 @@ RUN chown -R saudeemacao:saudeemacao /usr/share/nginx/html && \
 # Copy nginx config for SPA routing
 RUN cat > /etc/nginx/conf.d/default.conf << 'EOF'
 server {
-    listen 8080;
+    listen 80;
     server_name _;
 
     root /usr/share/nginx/html;
@@ -76,7 +76,7 @@ EOF
 # User for container
 USER saudeemacao:saudeemacao
 
-EXPOSE 8080
+EXPOSE 80
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
