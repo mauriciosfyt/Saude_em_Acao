@@ -43,15 +43,15 @@ jobs:
     steps:
       - name: Stop and remove old container
         run: |
-          docker stop saudeemacao-web || true
-          docker rm saudeemacao-web || true
+          sudo docker stop saudeemacao-web || true
+          sudo docker rm saudeemacao-web || true
 
       - name: Pull latest image
-        run: docker pull ${{ env.IMAGE_NAME }}:latest
+        run: sudo docker pull ${{ env.IMAGE_NAME }}:latest
 
       - name: Run container
         run: |
-          docker run -d \
+          sudo docker run -d \
             --restart always \
             --name saudeemacao-web \
             --user saudeemacao \
