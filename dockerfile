@@ -31,11 +31,24 @@ FROM nginx:alpine
 # Install curl for health checks
 RUN apk add --no-cache curl
 
+# Create saudeemacao user
+RUN addgroup -S saudeemacao && adduser -S saudeemacao -G saudeemacao
+
 # Copy built application from builder
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx config
+# Set permissions
+RUN chown -R saudeemacao:saudeemacao /usr/share/nginx/html && \
+    chown -R saudeemacao:saudeemacao /var/cache/nginx && \
+    chown -R saudeemacao:saudeemacao /var/log/nginx && \
+    touch /var/run/nginx.pid && \
+    chown -R saudeemacao:saudeemacao /var/run/nginx.pid
+
+# Copy nginx config for SPA routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# User for container
+USER saudeemacao:saudeemacao
 
 EXPOSE 8080
 
