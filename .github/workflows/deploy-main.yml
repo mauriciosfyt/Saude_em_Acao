@@ -49,5 +49,5 @@ jobs:
             --restart always \
             --name saudeemacao-web \
             --network saudeemacao-net \
-            -p 80:80 \
+            -p 3000:80 \
             saudeemacao/saudeemacao-web:latest
