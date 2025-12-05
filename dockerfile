@@ -1,15 +1,9 @@
 # Builder image: install dependencies
 FROM node:18-alpine AS deps
 WORKDIR /app
-COPY package*.json package-lock*.json yarn.lock pnpm-lock.yaml ./
+COPY package.json package-lock.json* ./
 RUN set -eux; \
-  if [ -f pnpm-lock.yaml ]; then \
-    npm install -g pnpm && pnpm install --frozen-lockfile; \
-  elif [ -f yarn.lock ]; then \
-    npm install -g yarn && yarn install --frozen-lockfile; \
-  else \
-    npm ci; \
-  fi
+  npm ci
 
 # Build step: compile the Next.js app
 FROM node:18-alpine AS builder
