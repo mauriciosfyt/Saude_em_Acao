@@ -86,13 +86,16 @@ public class SegurancaFilterChain {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        // AS ORIGENS PERMITIDAS FORAM ATUALIZADAS AQUI
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:4200",
                 "http://localhost:5173",
                 "http://localhost:8080",
                 "http://127.0.0.1:5500",
-                "http://100.30.34.6:8080"
+                "http://100.30.34.6:8080",
+                "null",
+                "http://23.22.153.89"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
