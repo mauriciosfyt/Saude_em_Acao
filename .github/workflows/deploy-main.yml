@@ -49,48 +49,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e
-            echo "🚀 Starting deployment..."
-            
-            # Login to container registry
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            
-            # Pull latest image
-            echo "📦 Pulling image: ${{ steps.tag.outputs.image_tag }}"
-            docker pull ${{ steps.tag.outputs.image_tag }}
-            
-            # Stop and remove old container
-            echo "🛑 Stopping old container..."
-            docker stop saude-em-acao || true
-            docker rm saude-em-acao || true
-            
-            # Start new container
-            echo "▶️  Starting new container..."
-            docker run -d \
-              --name saude-em-acao \
-              -p 3000:3000 \
-              --restart unless-stopped \
-              --env VITE_API_URL=${{ env.VITE_API_URL }} \
-              ${{ steps.tag.outputs.image_tag }}
-            
-            # Verify deployment
-            echo "✅ Waiting for container to be ready..."
-            sleep 5
-            
-            if docker ps | grep -q saude-em-acao; then
-              echo "✨ Container is running successfully!"
-              docker ps | grep saude-em-acao
-            else
-              echo "❌ Container failed to start"
-              docker logs saude-em-acao || true
-              exit 1
-            fi
-            
-            echo "🎉 Deploy completed successfully!"
+      - name: Build completed
+        run: echo "✅ Docker image built and pushed successfully to ${{ steps.tag.outputs.image_tag }}"
