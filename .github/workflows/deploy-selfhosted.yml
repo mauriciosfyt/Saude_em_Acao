@@ -33,7 +33,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/saudeemacao-web:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/saudeemacao/saudeemacao-web:latest
           build-args: |
             URL_API=${{ secrets.URL_API }}
 
@@ -48,7 +48,7 @@ jobs:
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Pull latest image
-        run: docker pull ${{ secrets.DOCKER_USERNAME }}/saudeemacao-web:latest
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/saudeemacao/saudeemacao-web:latest
 
       - name: Stop and remove old container (if any)
         run: |
@@ -68,4 +68,4 @@ jobs:
             --name saudeemacao-web \
             --network saudeemacao-net \
             -p 80:80 \
-            ${{ secrets.DOCKER_USERNAME }}/saudeemacao-web:latest
+            ${{ secrets.DOCKER_USERNAME }}/saudeemacao/saudeemacao-web:latest
