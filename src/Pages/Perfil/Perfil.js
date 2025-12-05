@@ -347,8 +347,10 @@ const handleVoltar = () => {
 
       <ScrollView style={styles.content}>
         {carregando ? (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 100 }}>
-            <Text style={{ color: isDark ? '#FFFFFF' : '#000000', fontSize: 16 }}>
+          // MODIFICADO: Loading igual ao da Loja (ActivityIndicator + Texto centralizado)
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 100, marginTop: 150 }}>
+            <ActivityIndicator size="large" color="#4A69BD" />
+            <Text style={{ marginTop: 10, color: isDark ? '#CCCCCC' : '#888888', textAlign: 'center' }}>
               Carregando perfil...
             </Text>
           </View>

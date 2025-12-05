@@ -70,7 +70,6 @@ const Loja = ({ navigation }) => {
         setError(null);
 
         // 1. Buscamos TODOS os produtos, SEM filtros (para evitar o erro 'isEnum()')
-        console.log("Buscando todos os produtos (sem filtro)...");
         const todosProdutosData = await obterProdutos(); 
 
         // 2. Formatamos os dados da API para bater com o que seu JSX espera

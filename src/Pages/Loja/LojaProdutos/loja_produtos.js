@@ -13,6 +13,7 @@ import { obterProdutoPorId } from '../../../Services/api';
 import api from '../../../Services/api';
 import { useCart } from '../../../context/CartContext'; 
 import { useFavoritos } from '../../../context/FavoritosContext';
+import { COLORS, SPACING, FONTS, BORDERS } from '../../../constants/constants';
 
 // --- ADICIONADO: Lógica de Variações (do seu index.jsx - fonte 79) ---
 const CATEGORIAS_PRODUTO = [
@@ -196,7 +197,7 @@ const LojaProdutos = ({ navigation, route }) => {
             <SafeAreaView style={styles.safeArea}>
                 <HeaderLoja navigation={navigation} searchText={searchText} setSearchText={setSearchText} />
                 <View style={[styles.scrollContent, { flex: 1, justifyContent: 'center', alignItems: 'center' }]}>
-                    <ActivityIndicator size="large" color={theme.colors.primary} />
+                    <ActivityIndicator size="large" color={COLORS.primary || '#007bff'} />
                     <Text style={{ marginTop: 10, color: theme.colors.placeholder }}>Carregando...</Text>
                 </View>
                 <BottomNavBar navigation={navigation} activeScreen="LojaProdutos" />

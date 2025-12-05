@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Modal, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Modal, Alert, ActivityIndicator } from "react-native"; // ADICIONADO: ActivityIndicator
 import { Ionicons } from "@expo/vector-icons";
 import createStyles from "../../Styles/MeuPlanoStyles";
 import { useTheme } from "../../context/ThemeContext";
@@ -110,8 +110,10 @@ const Plano = ({ navigation }) => {
       {/* Conteúdo principal */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {carregando ? (
-          <View style={{ padding: 20, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={[{ color: colors.textSecondary, fontSize: 16 }]}>
+          // MODIFICADO: Loading style igual ao da Loja (ActivityIndicator + Texto centralizado)
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, minHeight: 300 }}>
+            <ActivityIndicator size="large" color="#405CBA" />
+            <Text style={[{ marginTop: 10, color: colors.textSecondary, textAlign: 'center', fontSize: 16 }]}>
               Carregando dados do plano...
             </Text>
           </View>

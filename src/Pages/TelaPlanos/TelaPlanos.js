@@ -116,7 +116,7 @@ const TelaPlanos = ({ navigation }) => {
             { color: plano.id === "gold" ? "#fbbf24" : (isDark ? '#C7C7C7' : "#6b7280") },
           ]}
         >
-          Por apenas
+       A partir de
         </Text>
 
         {/* Preço */}
