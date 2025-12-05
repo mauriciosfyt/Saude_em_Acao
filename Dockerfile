@@ -29,7 +29,7 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Expõe a porta que a sua aplicação Spring usa (definida no application.properties)
-EXPOSE 8085
+EXPOSE 8080
 
 # Comando para iniciar a aplicação quando o contêiner for executado
 ENTRYPOINT ["java", "-jar", "app.jar"]
