@@ -1,50 +1,14 @@
-# =========================
-# STAGE 1 — BUILDER
-# =========================
-FROM node:20-alpine AS builder
-
+# Estágio de Build
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Build args para variáveis de ambiente (injeta em tempo de build)
-ARG VITE_API_BASE_URL
+# Declarar que aceitamos esse argumento na hora do build
+ARG VITE_KNOW_API_URL
+ARG VITE_API_URL
 
-# Passando para o build do Vite
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+# Transformar o argumento em variável de ambiente para o processo de build do Node
+ENV VITE_KNOW_API_URL=${VITE_KNOW_API_URL}
+ENV VITE_API_URL=${VITE_API_URL}
 
-# Copiar package.json e instalar dependências
+# Copiar arquivos de dependência primeiro (cache layer)
 COPY package*.json ./
-RUN npm install --frozen-lockfile
-
-# Copiar fonte e fazer build
-COPY . .
-RUN npm run build
-
-# =========================
-# STAGE 2 — RUNTIME
-# =========================
-FROM node:20-alpine AS runner
-
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV PORT=8080
-ENV HOSTNAME=0.0.0.0
-
-# Criar usuário não-root para segurança
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# Instalar serve globalmente para servir arquivos estáticos
-RUN npm install -g serve
-
-# Copiar build do stage anterior
-COPY --from=builder --chown=appuser:appgroup /app/dist ./dist
-
-# Alternar para usuário não-root
-USER appuser
-
-EXPOSE 8080
-
-# Servir a SPA na porta 8080 com fallback para index.html
-# -s: single page application mode (redireciona rotas para index.html)
-# -l: listen port
-CMD ["serve", "-s", "dist", "-l", "8080"]

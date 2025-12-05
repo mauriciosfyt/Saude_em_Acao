@@ -1,7 +1,7 @@
 // services/produtoService.js
 
 // URL base da nossa API
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://23.22.153.89') + '/api';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://23.22.153.89:8080') + '/api';
 const API_URL = `${API_BASE_URL}/produtos`;
 
 // Função para obter o token de autenticação
