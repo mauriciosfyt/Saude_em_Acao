@@ -1,8 +1,8 @@
 // URL base da nossa API para endpoints de usuário.
-// Em produção, defina VITE_API_URL no GitHub Actions (ex: http://23.22.153.89:8080)
-// Se a variável não estiver definida, usamos http://23.22.153.89:8080/api como fallback.
+// Em produção, defina VITE_API_BASE_URL na Vercel (ex: https://saudeemacao.onrender.com)
+// Se a variável não estiver definida, usamos o caminho relativo '/api' (funciona com o rewrite do Vercel).
 // Força a base URL do backend (caso a variável de ambiente não exista)
-export const API_URL = (import.meta.env.VITE_API_URL || 'http://23.22.153.89:8080') + '/api';
+export const API_URL = (import.meta.env.VITE_API_BASE_URL || 'http://23.22.153.89') + '/api';
 
 
 // --- Funções Auxiliares ---

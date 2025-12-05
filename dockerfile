@@ -1,35 +1,41 @@
-# Estágio de Build
+# Stage 1: Build - Compile React com Vite
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Declarar que aceitamos esse argumento na hora do build
-ARG VITE_API_URL
+# Copy package files
+COPY package*.json package-lock*.json ./
 
-# Transformar o argumento em variável de ambiente para o processo de build do Node
-ENV VITE_API_URL=${VITE_API_URL}
-
-# Copiar arquivos de dependência primeiro (cache layer)
-COPY package*.json ./
+# Install dependencies
 RUN npm ci
 
-# Copiar o resto do código
+# Copy source code
 COPY . .
 
-# Construir o projeto (Aqui o Vite pega a variável e crava no JS)
+# Build with Vite (injeta VITE_API_URL em tempo de build)
+ARG VITE_API_URL=http://23.22.153.89:3000
+ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
-# Estágio de Execução (Runner)
+# Stage 2: Runtime - Serve com servidor estático
 FROM node:18-alpine AS runner
 WORKDIR /app
 
-# Instalar 'serve' globalmente
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Create non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Install serve para servir arquivos estáticos
 RUN npm install -g serve
 
-# Copiar apenas a pasta dist gerada no estágio anterior
-COPY --from=builder /app/dist ./dist
+# Copy built files from builder
+COPY --from=builder --chown=appuser:appgroup /app/dist ./dist
 
-# Expor a porta 8080
-EXPOSE 8080
+USER appuser
+EXPOSE 3000
 
-# Rodar o serve na porta 8080 (single page application mode)
-CMD ["serve", "-s", "dist", "-l", "8080"]
+# Serve os arquivos estáticos na porta 3000
+# -s flag: serve single page application (redireciona para index.html)
+# -l flag: listen port
+CMD ["serve", "-s", "dist", "-l", "3000"]
