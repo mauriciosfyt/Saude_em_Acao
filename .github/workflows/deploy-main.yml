@@ -38,16 +38,42 @@ jobs:
         id: tag
         run: echo "image_tag=$(echo ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-${{ github.sha }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
-      - name: Build and push Docker image
+      - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          push: false
+          load: true
           tags: ${{ steps.tag.outputs.image_tag }}
           build-args: |
             VITE_API_URL=${{ env.VITE_API_URL }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
-      - name: Build completed
-        run: echo "✅ Docker image built and pushed successfully to ${{ steps.tag.outputs.image_tag }}"
+      - name: Run Docker container
+        run: |
+          echo "🚀 Starting container..."
+          
+          # Stop and remove old container
+          docker stop saude-em-acao || true
+          docker rm saude-em-acao || true
+          
+          # Run new container
+          docker run -d \
+            --name saude-em-acao \
+            -p 3000:3000 \
+            --restart unless-stopped \
+            ${{ steps.tag.outputs.image_tag }}
+          
+          # Verify deployment
+          echo "✅ Waiting for container to be ready..."
+          sleep 5
+          
+          if docker ps | grep -q saude-em-acao; then
+            echo "✨ Container is running successfully!"
+            docker ps | grep saude-em-acao
+          else
+            echo "❌ Container failed to start"
+            docker logs saude-em-acao || true
+            exit 1
+          fi
+          
+          echo "🎉 Deploy completed successfully!"
