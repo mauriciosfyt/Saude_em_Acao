@@ -4,14 +4,13 @@ WORKDIR /app
 COPY package*.json package-lock*.json ./
 RUN npm ci
 COPY . .
-RUN --mount=type=secret,id=VITE_API_BASE_URL \
-    VITE_API_BASE_URL=$(cat /run/secrets/VITE_API_BASE_URL) \
-    npm run build
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 
 # Production stage: serve with node
 FROM node:18-alpine
 WORKDIR /app
 RUN npm install -g serve
 COPY --from=builder /app/dist ./dist
-EXPOSE 80
-CMD ["serve", "-s", "dist", "-l", "80"]
+EXPOSE 8080
+CMD ["serve", "-s", "dist", "-l", "8080"]
