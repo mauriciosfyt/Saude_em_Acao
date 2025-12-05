@@ -1,41 +1,50 @@
-# Stage 1: Build - Compile React com Vite
-FROM node:18-alpine AS builder
+# =========================
+# STAGE 1 — BUILDER
+# =========================
+FROM node:20-alpine AS builder
+
 WORKDIR /app
 
-# Copy package files
-COPY package*.json package-lock*.json ./
+# Build args para variáveis de ambiente (injeta em tempo de build)
+ARG VITE_API_BASE_URL
 
-# Install dependencies
-RUN npm ci
+# Passando para o build do Vite
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
-# Copy source code
+# Copiar package.json e instalar dependências
+COPY package*.json ./
+RUN npm install --frozen-lockfile
+
+# Copiar fonte e fazer build
 COPY . .
-
-# Build with Vite (injeta VITE_API_URL em tempo de build)
-ARG VITE_API_URL=http://23.22.153.89:3000
-ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
-# Stage 2: Runtime - Serve com servidor estático
-FROM node:18-alpine AS runner
+# =========================
+# STAGE 2 — RUNTIME
+# =========================
+FROM node:20-alpine AS runner
+
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=8080
+ENV HOSTNAME=0.0.0.0
 
-# Create non-root user
+# Criar usuário não-root para segurança
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Install serve para servir arquivos estáticos
+# Instalar serve globalmente para servir arquivos estáticos
 RUN npm install -g serve
 
-# Copy built files from builder
+# Copiar build do stage anterior
 COPY --from=builder --chown=appuser:appgroup /app/dist ./dist
 
+# Alternar para usuário não-root
 USER appuser
-EXPOSE 3000
 
-# Serve os arquivos estáticos na porta 3000
-# -s flag: serve single page application (redireciona para index.html)
-# -l flag: listen port
-CMD ["serve", "-s", "dist", "-l", "3000"]
+EXPOSE 8080
+
+# Servir a SPA na porta 8080 com fallback para index.html
+# -s: single page application mode (redireciona rotas para index.html)
+# -l: listen port
+CMD ["serve", "-s", "dist", "-l", "8080"]

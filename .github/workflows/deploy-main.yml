@@ -1,25 +1,18 @@
-name: Deploy to EC2
+name: Build and Deploy Saúde em Ação Web
 
 on:
   push:
     branches:
-      - main
       - Front-Web
   workflow_dispatch:
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  VITE_API_URL: ${{ secrets.VITE_API_URL }}
+  IMAGE_NAME: saude-em-acao-web
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     
-    permissions:
-      contents: read
-      packages: write
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,53 +20,67 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Container Registry
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Generate image tag
-        id: tag
-        run: echo "image_tag=$(echo ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}-${{ github.sha }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
-
-      - name: Build Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: false
-          load: true
-          tags: ${{ steps.tag.outputs.image_tag }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           build-args: |
-            VITE_API_URL=${{ env.VITE_API_URL }}
+            VITE_API_BASE_URL=${{ secrets.VITE_API_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Run Docker container
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    
+    steps:
+      - name: Create Docker network (if not exists)
         run: |
-          echo "🚀 Starting container..."
-          
-          # Stop and remove old container
-          docker stop saude-em-acao || true
-          docker rm saude-em-acao || true
-          
-          # Run new container
+          if ! docker network inspect saude-acao-net &> /dev/null; then
+            docker network create saude-acao-net
+          fi
+
+      - name: Stop and remove old container (if running)
+        run: |
+          docker stop saude-em-acao-web || true
+          docker rm saude-em-acao-web || true
+
+      - name: Pull latest image from Docker Hub
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Run frontend container
+        run: |
           docker run -d \
-            --name saude-em-acao \
-            -p 3000:3000 \
-            --restart unless-stopped \
-            ${{ steps.tag.outputs.image_tag }}
-          
-          # Verify deployment
-          echo "✅ Waiting for container to be ready..."
-          sleep 5
-          
-          if docker ps | grep -q saude-em-acao; then
-            echo "✨ Container is running successfully!"
-            docker ps | grep saude-em-acao
+            --restart always \
+            --name saude-em-acao-web \
+            --network saude-acao-net \
+            -p 8080:8080 \
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Verify container is running
+        run: |
+          sleep 2
+          if docker ps | grep -q saude-em-acao-web; then
+            echo "✅ Frontend container is running successfully"
+            docker ps | grep saude-em-acao-web
           else
             echo "❌ Container failed to start"
-            docker logs saude-em-acao || true
+            docker logs saude-em-acao-web || true
             exit 1
           fi
-          
-          echo "🎉 Deploy completed successfully!"
+
+      - name: Health check
+        run: |
+          echo "🔍 Checking application health..."
+          sleep 3
+          curl -s http://localhost:8080 | head -c 100 && echo "" || echo "⚠️ Note: Application may still be starting"
