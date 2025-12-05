@@ -6,7 +6,7 @@ import * as SecureStore from 'expo-secure-store';
 
 // MUDANÇA: Importar o 'setAuthToken' do seu arquivo api.js
 // (Assumindo que ele está em ../services/api.js)
-import { setAuthToken } from '../Services/api'; 
+import { setAuthToken, obterMeuPerfil } from '../Services/api'; 
 
 const AuthContext = createContext();
 
@@ -38,6 +38,40 @@ function parseJwtSafe(token) {
     // parseJwtSafe failed - error message logged in development
     return null;
   }
+}
+
+// Determina flags úteis a partir das claims do token
+function determineRoleFlags(claims) {
+  if (!claims || typeof claims !== 'object') {
+    return { isAdmin: false, isGold: false, isProfessor: false };
+  }
+
+  const rawRole = (claims.role || claims.perfil || claims.tipo || null);
+  const rolesArray = Array.isArray(claims.roles) ? claims.roles : (typeof claims.roles === 'string' ? [claims.roles] : []);
+
+  const planoCandidate = (claims.plano || claims.plan || claims.subscription?.plan || claims.plano_usuario || null);
+
+  // Normalize to UPPERCASE because backend returns roles/plans em MAIÚSCULAS
+  const normalize = (v) => (typeof v === 'string' ? v.toUpperCase() : '');
+
+  const isAdmin = [rawRole, ...(rolesArray || [])].some(r => {
+    const n = normalize(r);
+    return n === 'ADMIN' || n === 'ADM' || n === 'ADMINISTRATOR';
+  });
+
+  const isProfessor = [rawRole, ...(rolesArray || [])].some(r => {
+    const n = normalize(r);
+    return n === 'PROFESSOR' || n === 'PROF' || n === 'PERSONAL' || n === 'PERSONAL TRAINER';
+  });
+
+  const isGold = normalize(planoCandidate) === 'GOLD' || [rawRole, ...rolesArray].some(r => normalize(r) === 'GOLD') || normalize(claims?.subscription) === 'GOLD';
+
+  // Também aceitar flags booleanas se existirem
+  if (claims.isAdmin === true || claims.adm === true) return { isAdmin: true, isGold, isProfessor };
+  if (claims.isGold === true) return { isAdmin, isGold: true, isProfessor };
+  if (claims.isProfessor === true) return { isAdmin, isGold, isProfessor: true };
+
+  return { isAdmin, isGold, isProfessor };
 }
 
 export const useAuth = () => {
@@ -83,11 +117,41 @@ export const AuthProvider = ({ children }) => {
 
           // Extrair claims do JWT (se possível) para obter role/roles
           const claims = parseJwtSafe(token);
+          // DEBUG: mostrar claims para depuração (remova em produção)
+          try { console.log('[Auth] bootstrapAuth claims:', claims); } catch (e) {}
           const role = claims?.role || claims?.perfil || claims?.tipo || claims?.roles || null;
+
+          // Determinar flags (isAdmin / isGold / isProfessor) automaticamente
+          const { isAdmin, isGold, isProfessor } = determineRoleFlags(claims);
+          // DEBUG: mostrar flags calculadas no bootstrap
+          try { console.log('[Auth] bootstrapAuth determined flags:', { isAdmin, isGold, isProfessor }); } catch (e) {}
+
+          // Se as flags não vieram no token, tentar buscar no endpoint /api/meu-perfil
+          let finalIsAdmin = isAdmin;
+          let finalIsGold = isGold;
+          let finalIsProfessor = isProfessor;
+          if (!isAdmin && !isGold && !isProfessor) {
+            try {
+              const perfil = await obterMeuPerfil();
+              try { console.log('[Auth] perfil from API:', perfil); } catch (e) {}
+              // verificar campos comuns no perfil
+              const perfilPlano = perfil?.plano || perfil?.plan || perfil?.subscription?.plan || perfil?.plano_usuario || perfil?.planoNome || perfil?.planName || null;
+              const perfilRole = perfil?.role || perfil?.perfil || perfil?.tipo || null;
+              const perfilNorm = (v) => (typeof v === 'string' ? v.toUpperCase() : '');
+              if (perfilPlano && perfilNorm(perfilPlano) === 'GOLD') finalIsGold = true;
+              if (perfilRole) {
+                const normRole = perfilNorm(perfilRole);
+                if (normRole === 'ADMIN' || normRole === 'ADM') finalIsAdmin = true;
+                if (normRole === 'PROFESSOR' || normRole === 'PROF' || normRole === 'PERSONAL' || normRole === 'PERSONAL TRAINER') finalIsProfessor = true;
+              }
+            } catch (e) {
+              // falha ao obter perfil — ignorar e manter flags como estavam
+            }
+          }
 
           // Atualiza o estado da aplicação com dados completos do usuário
           setIsAuthenticated(true);
-          setUser({ token, email: email || 'no-email', claims, role });
+          setUser({ token, email: email || 'no-email', claims, role, isAdmin: finalIsAdmin, isGold: finalIsGold, isProfessor: finalIsProfessor });
         } else {
           // No JWT token found
           setIsAuthenticated(false);
@@ -146,13 +210,45 @@ export const AuthProvider = ({ children }) => {
       setAuthToken(token);
 
       // Tentar extrair claims do JWT para pegar a role
+      // Tentar extrair claims do JWT para pegar a role
       const claims = parseJwtSafe(token);
+      // DEBUG: mostrar claims no login para depuração (remova em produção)
+      try { console.log('[Auth] login claims:', claims); } catch (e) {}
       const role = claims?.role || claims?.perfil || claims?.tipo || claims?.roles || null;
 
+      // Determinar flags (isAdmin / isGold / isProfessor) automaticamente
+      const { isAdmin, isGold, isProfessor } = determineRoleFlags(claims);
+      // DEBUG: mostrar flags calculadas
+      try { console.log('[Auth] determined flags:', { isAdmin, isGold, isProfessor }); } catch (e) {}
+      // Se as flags não vieram no token, tentar buscar no endpoint /api/meu-perfil
+      let finalIsAdmin = isAdmin;
+      let finalIsGold = isGold;
+      let finalIsProfessor = isProfessor;
+      if (!isAdmin && !isGold && !isProfessor) {
+        try {
+          const perfil = await obterMeuPerfil();
+          try { console.log('[Auth] perfil from API (login):', perfil); } catch (e) {}
+          const perfilPlano = perfil?.plano || perfil?.plan || perfil?.subscription?.plan || perfil?.plano_usuario || perfil?.planoNome || perfil?.planName || null;
+          const perfilRole = perfil?.role || perfil?.perfil || perfil?.tipo || null;
+          const perfilNorm = (v) => (typeof v === 'string' ? v.toUpperCase() : '');
+          if (perfilPlano && perfilNorm(perfilPlano) === 'GOLD') finalIsGold = true;
+          if (perfilRole) {
+            const normRole = perfilNorm(perfilRole);
+            if (normRole === 'ADMIN' || normRole === 'ADM') finalIsAdmin = true;
+            if (normRole === 'PROFESSOR' || normRole === 'PROF' || normRole === 'PERSONAL' || normRole === 'PERSONAL TRAINER') finalIsProfessor = true;
+          }
+        } catch (e) {
+          // falha ao obter perfil — ignorar
+        }
+      }
+
       // Atualiza o estado com o objeto completo (útil para regras de UI)
-      const fullUser = typeof userData === 'object' ? { ...userData, token, email, claims, role } : { token, email, claims, role };
+      const fullUser = typeof userData === 'object'
+        ? { ...userData, token, email, claims, role, isAdmin: finalIsAdmin, isGold: finalIsGold, isProfessor: finalIsProfessor }
+        : { token, email, claims, role, isAdmin: finalIsAdmin, isGold: finalIsGold, isProfessor: finalIsProfessor };
+      const userWithFlags = { ...fullUser, isAdmin: finalIsAdmin, isGold: finalIsGold, isProfessor: finalIsProfessor };
       setIsAuthenticated(true);
-      setUser(fullUser);
+      setUser(userWithFlags);
 
       // Login completed successfully - authentication, token and email logged
 
@@ -189,7 +285,12 @@ export const AuthProvider = ({ children }) => {
     login,
     logout
   };
-
+  // Expor helpers úteis para verificação rápida de permissões
+  value.isAdmin = () => !!(user && user.isAdmin);
+  value.isGold = () => !!(user && user.isGold);
+  value.isProfessor = () => !!(user && user.isProfessor);
+  value.isGoldOrAdmin = () => !!(user && (user.isGold || user.isAdmin));
+  value.isGoldOrAdminOrProfessor = () => !!(user && (user.isGold || user.isAdmin || user.isProfessor));
   return (
     <AuthContext.Provider value={value}>
       {children}
