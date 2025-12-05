@@ -3,9 +3,9 @@
 
 import axios from 'axios';
 
-// Usa variável de ambiente Vite (defina VITE_API_BASE_URL em produção se desejar)
+// Usa variável de ambiente Vite (defina KNOW_API_URL em produção se desejar)
 // Se não definida, usa caminho relativo (''), permitindo que o rewrite/proxy trate as requisições.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = import.meta.env.KNOW_API_URL || '';
 
 // Instância axios central
 const api = axios.create({

@@ -8,7 +8,7 @@ export default defineConfig({
     // Proxy /api requests to the backend to avoid CORS during development
     proxy: {
       '/api': {
-        target: 'http://23.22.153.89',
+        target: 'http://23.22.153.89:8080',
         changeOrigin: true,
         secure: false,
       },
