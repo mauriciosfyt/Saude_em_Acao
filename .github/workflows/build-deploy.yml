@@ -34,7 +34,7 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}:latest,${{ env.IMAGE_NAME }}:${{ github.sha }}
           build-args: |
-            KNOW_API_URL=${{ secrets.KNOW_API_URL }}
+            VITE_KNOW_API_URL=${{ secrets.VITE_KNOW_API_URL }}
 
   deploy:
     needs: build-and-push
