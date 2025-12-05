@@ -19,7 +19,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            --build-arg URL_API="${{ secrets.URL_API }}" \
+            --build-arg VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL }}" \
             -t saudeemacao/saudeemacao-web:latest .
 
       - name: Push Docker image
