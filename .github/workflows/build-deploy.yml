@@ -43,22 +43,22 @@ jobs:
     steps:
       - name: Create Docker network
         run: |
-          docker network inspect saudeemacao-network >/dev/null 2>&1 || \
-          docker network create saudeemacao-network
+          sudo docker network inspect saudeemacao-network >/dev/null 2>&1 || \
+          sudo docker network create saudeemacao-network
         continue-on-error: true
 
       - name: Stop and remove old container
         run: |
-          docker stop saudeemacao-web 2>/dev/null || true
-          docker rm saudeemacao-web 2>/dev/null || true
+          sudo docker stop saudeemacao-web 2>/dev/null || true
+          sudo docker rm saudeemacao-web 2>/dev/null || true
         continue-on-error: true
 
       - name: Pull latest image
-        run: docker pull ${{ env.IMAGE_NAME }}:latest
+        run: sudo docker pull ${{ env.IMAGE_NAME }}:latest
 
       - name: Run new container
         run: |
-          docker run -d \
+          sudo docker run -d \
             --name saudeemacao-web \
             --network saudeemacao-network \
             -p 8080:8080 \
@@ -67,4 +67,4 @@ jobs:
       - name: Verify deployment
         run: |
           sleep 5
-          docker ps | grep saudeemacao-web || exit 1
+          sudo docker ps | grep saudeemacao-web || exit 1
