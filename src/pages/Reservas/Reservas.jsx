@@ -163,7 +163,7 @@ const Reservas = () => {
   // Funções de clique (sem alteração)
   const handleVerProduto = (produtoId) => {
     if (produtoId) {
-      navigate(`/produto/${produtoId}`);
+      navigate(`/LojaProduto/${produtoId}`);
     } else {
 
       toast.error('ID do produto não encontrado.', {
@@ -180,16 +180,20 @@ const Reservas = () => {
   };
   
   const handleComprarNovamente = (produtoId) => {
-
-    toast.info(`(WIP) Adicionar produto ${produtoId} ao carrinho.`, {
-      position: "top-right",
-      autoClose: 3000,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      className: "custom-edit-toast",
-      progressClassName: "custom-edit-progress-bar",
-    });
+    if (produtoId) {
+      navigate(`/Carrinho?add=${produtoId}`);
+    } else {
+      toast.error('ID do produto não encontrado.', {
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
   };
 
   // NOVO: Função para lidar com a seleção de filtro no dropdown
@@ -269,7 +273,6 @@ const Reservas = () => {
               <section key={data} className="grupo-data">
                 <header className="grupo-header">
                   <span className="data-label">{data}</span>
-                  <button className="botao-adicionar-todos">Adicionar todos ao carrinho</button>
                 </header>
                 
                 <div className="lista-de-itens">
