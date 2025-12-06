@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/logo_dia.png";
 import "./styles.css";
 import { useAuth } from "../../contexts/AuthContext";
@@ -13,6 +13,7 @@ import ModalAlterarSenha from "../modal_login/ModalAlterarSenha";
 
 function HomeHeader() {
   const { isAuthenticated, logout } = useAuth();
+  const location = useLocation();
   const [showModal, setShowModal] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showRecoverModal, setShowRecoverModal] = useState(false);
@@ -82,6 +83,14 @@ function HomeHeader() {
     setCode(["", "", "", ""]);
   };
 
+  // Função para verificar se um link está ativo
+  const isNavActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
   return (
     <>
       <header className="header">
@@ -103,11 +112,11 @@ function HomeHeader() {
       {/* Menu horizontal */}
       <nav className="nav-links">
         <div className="nav-center">
-          <Link to="/">Home</Link>
-          <Link to="/Loja">Loja</Link>
+          <Link to="/" className={isNavActive('/') ? 'nav-link-active' : ''}>Home</Link>
+          <Link to="/Loja" className={isNavActive('/Loja') ? 'nav-link-active' : ''}>Loja</Link>
           <Link to="/" state={{ scrollTo: 'planos' }}>Planos</Link>
-          <Link to="/Professores">Personal</Link>
-          <Link to="/SobreNos">Sobre nós</Link>
+          <Link to="/Professores" className={isNavActive('/Professores') ? 'nav-link-active' : ''}>Personal</Link>
+          <Link to="/SobreNos" className={isNavActive('/SobreNos') ? 'nav-link-active' : ''}>Sobre nós</Link>
         </div>
       </nav>
 

@@ -1,12 +1,13 @@
 // src/components/HeaderUser/index.jsx
 import React from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import "./HeaderUser.css";
 import { FaShoppingCart, FaUser } from "react-icons/fa";
 import logo from "../../assets/logo_dia.png";
 
 const HeaderUser = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Obtém o token de forma robusta
   const getRawTokenFromLocalStorage = () => {
@@ -117,6 +118,39 @@ const HeaderUser = () => {
     navigate(target);
   };
 
+  // Obtém o perfil do usuário logado
+  const getPerfilUsuario = () => {
+    const raw = getRawTokenFromLocalStorage();
+    const token = normalizeToken(raw);
+
+    if (!token) return null;
+
+    const payload = decodeJwtPayload(token);
+    if (!payload) return null;
+
+    const profileFieldCandidates = [
+      payload.perfil,
+      payload.role,
+      payload.roles,
+      payload.profile,
+      payload.userRole,
+      payload.tipo,
+    ];
+
+    let perfil = null;
+    for (const p of profileFieldCandidates) {
+      if (!p) continue;
+      perfil = Array.isArray(p) ? String(p[0]).toUpperCase() : String(p).toUpperCase();
+      break;
+    }
+
+    if (!perfil && payload.user && payload.user.perfil) {
+      perfil = String(payload.user.perfil).toUpperCase();
+    }
+
+    return perfil;
+  };
+
   // Rola até a seção "planos" da Home
   const handleScrollToPlanos = (e) => {
     e.preventDefault();
@@ -129,6 +163,14 @@ const HeaderUser = () => {
     } else {
       navigate("/", { state: { scrollTo: "planos" } });
     }
+  };
+
+  // Função para verificar se um link está ativo
+  const isNavActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
   };
 
   return (
@@ -156,23 +198,25 @@ const HeaderUser = () => {
             <FaUser className="icon" />
           </button>
 
-          {/* Carrinho */}
-          <Link to="/Carrinho" aria-label="Carrinho" title="Carrinho" className="icon-link">
-            <FaShoppingCart className="icon" />
-          </Link>
+          {/* Carrinho - escondido para PROFESSOR e ADMIN */}
+          {!['PROFESSOR', 'PROFESSORAL', 'PROFESSOR_PERSONAL', 'PERSONAL', 'ADMIN'].includes(getPerfilUsuario()) && (
+            <Link to="/Carrinho" aria-label="Carrinho" title="Carrinho" className="icon-link">
+              <FaShoppingCart className="icon" />
+            </Link>
+          )}
         </div>
       </header>
 
       {/* NAVBAR */}
       <nav className="nav-links">
         <div className="nav-center">
-          <Link to="/">Home</Link>
-          <Link to="/Loja">Loja</Link>
+          <Link to="/" className={isNavActive('/') ? 'nav-link-active' : ''}>Home</Link>
+          <Link to="/Loja" className={isNavActive('/Loja') ? 'nav-link-active' : ''}>Loja</Link>
           <Link to="#" onClick={handleScrollToPlanos}>
             Planos
           </Link>
-          <Link to="/Professores">Personal</Link>
-          <Link to="/SobreNos">Sobre nós</Link>
+          <Link to="/Professores" className={isNavActive('/Professores') ? 'nav-link-active' : ''}>Personal</Link>
+          <Link to="/SobreNos" className={isNavActive('/SobreNos') ? 'nav-link-active' : ''}>Sobre nós</Link>
         </div>
       </nav>
     </>

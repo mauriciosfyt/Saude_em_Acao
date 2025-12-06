@@ -79,6 +79,31 @@
   color: #000;
   text-decoration: none;
   font-weight: 500;
+  position: relative;
+  padding-bottom: 5px;
+}
+
+.nav-center a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background-color: #004DFF;
+  transition: width 0.3s ease;
+}
+
+.nav-center a:hover::after {
+  width: 100%;
+}
+
+.nav-center a.nav-link-active {
+  color: #004DFF;
+}
+
+.nav-center a.nav-link-active::after {
+  width: 100%;
 }
 
 @media (max-width: 480px) {

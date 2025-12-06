@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import "../header_loja_nLogin/Header_Login.css";
 import { useAuth } from "../../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { FaShoppingCart, FaUser, FaSearch } from "react-icons/fa";
 import logo from "../../assets/logo_dia.png";
@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 const Header = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 799);
   
   // --- ADIÇÃO 1: Estado para controlar o valor da barra de pesquisa ---
@@ -146,6 +147,47 @@ const Header = () => {
   };
   // ---------------------------------------------------
 
+  // Obtém o perfil do usuário logado
+  const getPerfilUsuario = () => {
+    const raw = getRawTokenFromLocalStorage();
+    const token = normalizeToken(raw);
+
+    if (!token) return null;
+
+    const payload = decodeJwtPayload(token);
+    if (!payload) return null;
+
+    const profileFieldCandidates = [
+      payload.perfil,
+      payload.role,
+      payload.roles,
+      payload.profile,
+      payload.userRole,
+      payload.tipo,
+    ];
+
+    let perfil = null;
+    for (const p of profileFieldCandidates) {
+      if (!p) continue;
+      perfil = Array.isArray(p) ? String(p[0]).toUpperCase() : String(p).toUpperCase();
+      break;
+    }
+
+    if (!perfil && payload.user && payload.user.perfil) {
+      perfil = String(payload.user.perfil).toUpperCase();
+    }
+
+    return perfil;
+  };
+
+  // Função para verificar se um link está ativo
+  const isNavActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
   return (
     <>
       {/* Cabeçalho principal */}
@@ -175,9 +217,12 @@ const Header = () => {
                 <FaUser className="icon" />
               </button>
 
-              <Link to="/Carrinho">
-              <FaShoppingCart className="icon" />
-              </Link>
+              {/* Carrinho - escondido para PROFESSOR e ADMIN */}
+              {!['PROFESSOR', 'PROFESSORAL', 'PROFESSOR_PERSONAL', 'PERSONAL', 'ADMIN'].includes(getPerfilUsuario()) && (
+                <Link to="/Carrinho">
+                  <FaShoppingCart className="icon" />
+                </Link>
+              )}
             </div>
 
             {/* --- MUDANÇA (Mobile): "div" virou "form" --- */}
@@ -231,9 +276,12 @@ const Header = () => {
                 <FaUser className="icon" />
               </button>
 
-              <Link to="/Carrinho">
-              <FaShoppingCart className="icon" />
-              </Link>
+              {/* Carrinho - escondido para PROFESSOR e ADMIN */}
+              {!['PROFESSOR', 'PROFESSORAL', 'PROFESSOR_PERSONAL', 'PERSONAL', 'ADMIN'].includes(getPerfilUsuario()) && (
+                <Link to="/Carrinho">
+                  <FaShoppingCart className="icon" />
+                </Link>
+              )}
             </div>
           </>
         )}
@@ -242,12 +290,14 @@ const Header = () => {
       {/* Navegação secundária */}
       <nav className="nav-links">
         <div className="nav-center">
-          <Link to="/">Home</Link>
-          <Link to="/Reservas">Reservas</Link>
-          <Link to="/CategoriaWhey">Whey</Link>
-          <Link to="/CategoriaCreatina">Creatina</Link>
-          <Link to="/CategoriaVitaminas">Vitaminas</Link>
-          <Link to="/CategoriaCamisa">Camisetas</Link>
+          <Link to="/" className={isNavActive('/') ? 'nav-link-active' : ''}>Home</Link>
+          {!['PROFESSOR', 'PROFESSORAL', 'PROFESSOR_PERSONAL', 'PERSONAL', 'ADMIN'].includes(getPerfilUsuario()) && (
+            <Link to="/Reservas" className={isNavActive('/Reservas') ? 'nav-link-active' : ''}>Reservas</Link>
+          )}
+          <Link to="/CategoriaWhey" className={isNavActive('/CategoriaWhey') ? 'nav-link-active' : ''}>Whey</Link>
+          <Link to="/CategoriaCreatina" className={isNavActive('/CategoriaCreatina') ? 'nav-link-active' : ''}>Creatina</Link>
+          <Link to="/CategoriaVitaminas" className={isNavActive('/CategoriaVitaminas') ? 'nav-link-active' : ''}>Vitaminas</Link>
+          <Link to="/CategoriaCamisa" className={isNavActive('/CategoriaCamisa') ? 'nav-link-active' : ''}>Camisetas</Link>
         </div>
       </nav>
     </>

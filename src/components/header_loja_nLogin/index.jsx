@@ -5,7 +5,7 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import logo from "../../assets/logo_dia.png";
 import { useAuth } from "../../contexts/AuthContext";
 // --- ADIÇÃO 1: Importar Link e useNavigate ---
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 // Importando os modais refatorados (nomes corrigidos sem espaços)
 import ModalLogin from "../../components/modal_login/ModalLogin";
@@ -17,7 +17,8 @@ import ModalAlterarSenha from "../../components/modal_login/ModalAlterarSenha";
 const Header_nLogin = () => {
   const { isAuthenticated, logout } = useAuth();
   // --- ADIÇÃO 2: Instanciar o useNavigate ---
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 799);
   const [showModal, setShowModal] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
@@ -94,6 +95,14 @@ const Header_nLogin = () => {
     }
   };
   // -------------------------------------------------
+
+  // Função para verificar se um link está ativo
+  const isNavActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <>
@@ -212,11 +221,11 @@ const Header_nLogin = () => {
       {/* Navegação secundária (Sem alterações) */}
       <nav className="nav-links">
         <div className="nav-center">
-          <Link to="/">Home</Link>
-          <Link to="/CategoriaWhey">Whey</Link>
-          <Link to="/CategoriaCreatina">Creatina</Link>
-          <Link to="/CategoriaVitaminas">Vitaminas</Link>
-          <Link to="/CategoriaCamisa">Camisetas</Link>
+          <Link to="/" className={isNavActive('/') ? 'nav-link-active' : ''}>Home</Link>
+          <Link to="/CategoriaWhey" className={isNavActive('/CategoriaWhey') ? 'nav-link-active' : ''}>Whey</Link>
+          <Link to="/CategoriaCreatina" className={isNavActive('/CategoriaCreatina') ? 'nav-link-active' : ''}>Creatina</Link>
+          <Link to="/CategoriaVitaminas" className={isNavActive('/CategoriaVitaminas') ? 'nav-link-active' : ''}>Vitaminas</Link>
+          <Link to="/CategoriaCamisa" className={isNavActive('/CategoriaCamisa') ? 'nav-link-active' : ''}>Camisetas</Link>
         </div>
       </nav>
     </>
