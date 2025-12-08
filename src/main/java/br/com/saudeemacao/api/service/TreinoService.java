@@ -49,7 +49,7 @@ public class TreinoService {
                 .responsavel(responsavel)
                 .tipoDeTreino(dto.getTipoDeTreino())
                 .nivel(dto.getNivel())
-                .sexo(dto.getSexo())
+                .genero(dto.getGenero())
                 .idadeMinima(dto.getIdadeMinima())
                 .idadeMaxima(dto.getIdadeMaxima())
                 .exerciciosPorDia(exerciciosPorDia)
@@ -72,7 +72,7 @@ public class TreinoService {
         treinoExistente.setNome(dto.getNome());
         treinoExistente.setTipoDeTreino(dto.getTipoDeTreino());
         treinoExistente.setNivel(dto.getNivel());
-        treinoExistente.setSexo(dto.getSexo());
+        treinoExistente.setGenero(dto.getGenero());
         treinoExistente.setIdadeMinima(dto.getIdadeMinima());
         treinoExistente.setIdadeMaxima(dto.getIdadeMaxima());
         treinoExistente.setExerciciosPorDia(exerciciosAtualizados);
@@ -401,7 +401,7 @@ public class TreinoService {
                 treino.getNome(),
                 treino.getTipoDeTreino(),
                 treino.getNivel(),
-                treino.getSexo(),
+                treino.getGenero(),
                 treino.getIdadeMinima(),
                 treino.getIdadeMaxima(),
                 responsavelDTO,

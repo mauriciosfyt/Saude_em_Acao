@@ -1,7 +1,7 @@
 package br.com.saudeemacao.api.dto;
 
+import br.com.saudeemacao.api.model.EnumTreino.ENivel;
 import br.com.saudeemacao.api.model.Usuario;
-import br.com.saudeemacao.api.model.EnumUsuario.ENivelAtividade;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
 import lombok.AllArgsConstructor;
@@ -29,7 +29,7 @@ public class UsuarioPerfilDTO {
     private Integer peso;
     private Double altura;
     private String objetivo;
-    private ENivelAtividade nivelAtividade;
+    private ENivel nivelAtividade;
 
 
     public UsuarioPerfilDTO(Usuario usuario) {

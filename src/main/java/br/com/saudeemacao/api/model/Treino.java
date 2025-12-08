@@ -2,9 +2,7 @@ package br.com.saudeemacao.api.model;
 
 import br.com.saudeemacao.api.model.EnumTreino.EDiaDaSemana;
 import br.com.saudeemacao.api.model.EnumTreino.ENivel;
-import br.com.saudeemacao.api.model.EnumTreino.ESexo;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import br.com.saudeemacao.api.model.EnumTreino.EGenero;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -43,8 +41,8 @@ public class Treino {
     @NotNull(message = "O nível do treino é obrigatório.")
     private ENivel nivel;
 
-    @NotNull(message = "O sexo alvo do treino é obrigatório.")
-    private ESexo sexo;
+    @NotNull(message = "O público-alvo (gênero) do treino é obrigatório.")
+    private EGenero genero;
 
     @NotNull(message = "A idade mínima é obrigatória.")
     @Positive(message = "A idade mínima deve ser um valor positivo.")

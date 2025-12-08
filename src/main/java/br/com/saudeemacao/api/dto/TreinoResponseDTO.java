@@ -2,7 +2,7 @@ package br.com.saudeemacao.api.dto;
 
 import br.com.saudeemacao.api.model.EnumTreino.EDiaDaSemana;
 import br.com.saudeemacao.api.model.EnumTreino.ENivel;
-import br.com.saudeemacao.api.model.EnumTreino.ESexo;
+import br.com.saudeemacao.api.model.EnumTreino.EGenero;
 import br.com.saudeemacao.api.model.Exercicio;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,10 +20,10 @@ public class TreinoResponseDTO {
     private String nome;
     private String tipoDeTreino;
     private ENivel nivel;
-    private ESexo sexo;
+    private EGenero sexo;
     private Integer idadeMinima;
     private Integer idadeMaxima;
-    private ResponsavelDTO responsavel; // Campo alterado para o DTO específico
+    private ResponsavelDTO responsavel;
     private Map<EDiaDaSemana, List<Exercicio>> exerciciosPorDia;
 
 }

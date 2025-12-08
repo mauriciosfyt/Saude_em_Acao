@@ -30,8 +30,4 @@ public class LimpezaTokenService {
         }
     }
 
-    public void limparTokensExpiradosManualmente() {
-        log.info("Iniciando limpeza manual de tokens...");
-        limparTokensAntigos();
-    }
 }

@@ -1,7 +1,7 @@
 package br.com.saudeemacao.api.model;
 
-import br.com.saudeemacao.api.model.EnumTreino.ESexo;
-import br.com.saudeemacao.api.model.EnumUsuario.ENivelAtividade;
+import br.com.saudeemacao.api.model.EnumTreino.EGenero;
+import br.com.saudeemacao.api.model.EnumTreino.ENivel;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
 import br.com.saudeemacao.api.model.EnumUsuario.EStatus;
@@ -84,9 +84,10 @@ public class Usuario implements UserDetails {
     @Size(min = 5, max = 200, message = "O campo objetivo deve ter entre 5 e 200 caracteres.")
     private String objetivo;
 
-    private ENivelAtividade nivelAtividade;
+    private ENivel nivelAtividade;
 
-    private ESexo sexo;
+    @NotNull(message = "Gênero é obrigatório")
+    private EGenero genero;
 
     private EStatus statusPlano;
     private LocalDateTime dataInicioPlano;

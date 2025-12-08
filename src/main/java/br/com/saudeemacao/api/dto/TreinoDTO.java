@@ -2,7 +2,7 @@ package br.com.saudeemacao.api.dto;
 
 import br.com.saudeemacao.api.model.EnumTreino.EDiaDaSemana;
 import br.com.saudeemacao.api.model.EnumTreino.ENivel;
-import br.com.saudeemacao.api.model.EnumTreino.ESexo;
+import br.com.saudeemacao.api.model.EnumTreino.EGenero;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -24,8 +24,8 @@ public class TreinoDTO {
     @NotNull(message = "O nível do treino é obrigatório.")
     private ENivel nivel;
 
-    @NotNull(message = "O sexo alvo do treino é obrigatório.")
-    private ESexo sexo;
+    @NotNull(message = "O gênero alvo do treino é obrigatório.")
+    private EGenero genero;
 
     @NotNull(message = "A idade mínima é obrigatória.")
     @Positive(message = "A idade mínima deve ser um valor positivo.")

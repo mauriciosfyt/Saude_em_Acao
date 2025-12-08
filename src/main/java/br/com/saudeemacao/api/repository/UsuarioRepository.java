@@ -18,12 +18,6 @@ public interface UsuarioRepository extends MongoRepository<Usuario, String> {
 
     Optional<Usuario> findByTelefone(String telefone);
 
-    boolean existsByEmail(String email);
-
-    boolean existsByCpf(String cpf);
-
-    boolean existsByTelefone(String telefone);
-
     @Query("{ 'perfil': ?0 }")
     List<Usuario> findByPerfil(EPerfil perfil);
 
