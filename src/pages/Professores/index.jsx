@@ -2,17 +2,35 @@ import React, { useEffect, useState } from "react";
 import Header_nLogin from "../../components/header_nLogin";
 import HeaderUser from "../../components/header";
 import Footer from "../../components/footer";
+import ModalLoginNecessario from "../../components/ModalLoginNecessario";
+import ModalLogin from "../../components/modal_login/ModalLogin";
+import ModalCodigo from "../../components/modal_login/ModalCodigo";
+import ModalRecuperarSenha from "../../components/modal_login/ModalRecuperarSenha";
+import ModalCodigoRecuperacao from "../../components/modal_login/ModalCodigoRecuperacao";
+import ModalAlterarSenha from "../../components/modal_login/ModalAlterarSenha";
 import "./Pprofs.css";
 import { FaWhatsapp } from "react-icons/fa";
 import banner from "../../assets/banners/banner_profs.png";
 import { getAllProfessores } from "../../services/usuarioService";
 import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Equipe() {
     const { isAuthenticated, loading: authLoading } = useAuth();
+    const navigate = useNavigate();
     const [membros, setMembros] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showModalLogin, setShowModalLogin] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [showCodeModal, setShowCodeModal] = useState(false);
+    const [showRecoverModal, setShowRecoverModal] = useState(false);
+    const [showRecoverCodeModal, setShowRecoverCodeModal] = useState(false);
+    const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+    const [code, setCode] = useState(["", "", "", "", ""]);
+    const [loginEmail, setLoginEmail] = useState("");
+    const [recoverEmail, setRecoverEmail] = useState("");
+    const [recoverToken, setRecoverToken] = useState("");
 
     useEffect(() => {
         const fetchProfessores = async () => {
@@ -29,6 +47,52 @@ export default function Equipe() {
         };
         fetchProfessores();
     }, []);
+
+    // Verifica autenticação e mostra modal se não autenticado
+    useEffect(() => {
+        if (!authLoading && !isAuthenticated) {
+            setShowModalLogin(true);
+        }
+    }, [authLoading, isAuthenticated]);
+
+    const handleCodeChange = (value, idx) => {
+        if (value.length > 1) return;
+        const sanitized = value.replace(/[^0-9a-zA-Z]/g, "").toUpperCase();
+        const newCode = [...code];
+        newCode[idx] = sanitized;
+        setCode(newCode);
+        if (sanitized && idx < 4) {
+            document.getElementById(`code-input-${idx + 1}`)?.focus();
+        }
+    };
+
+    const handleLogin = (emailParam) => {
+        if (emailParam) setLoginEmail(emailParam);
+        setShowModal(false);
+        setShowCodeModal(true);
+    };
+
+    const handleRecover = (emailParam, _data) => {
+        if (emailParam) setRecoverEmail(emailParam);
+        setShowRecoverModal(false);
+        setShowRecoverCodeModal(true);
+        setCode(["", "", "", "", ""]);
+    };
+
+    const handleValidateRecoverCode = (_email, token) => {
+        if (token) setRecoverToken(token);
+        setShowRecoverCodeModal(false);
+        setShowChangePasswordModal(true);
+    };
+
+    const closeAllModals = () => {
+        setShowModal(false);
+        setShowCodeModal(false);
+        setShowRecoverModal(false);
+        setShowRecoverCodeModal(false);
+        setShowChangePasswordModal(false);
+        setCode(["", "", "", ""]);
+    };
 
     // Normaliza URLs de imagem: força https quando possível para evitar Mixed Content
     const fixImageUrl = (url) => {
@@ -62,6 +126,61 @@ export default function Equipe() {
     return (
         <div className="equipe-container">
             {isAuthenticated ? <HeaderUser /> : <Header_nLogin />}
+
+            {showModalLogin && (
+                <ModalLoginNecessario 
+                    onClose={() => setShowModalLogin(false)}
+                />
+            )}
+
+            {showModal && (
+                <ModalLogin
+                    onClose={closeAllModals}
+                    onLogin={handleLogin}
+                    onRecover={() => {
+                        setShowModal(false);
+                        setShowRecoverModal(true);
+                    }}
+                />
+            )}
+
+            {showCodeModal && (
+                <ModalCodigo
+                    code={code}
+                    email={loginEmail}
+                    onClose={() => setShowCodeModal(false)}
+                    onChange={handleCodeChange}
+                />
+            )}
+
+            {showRecoverModal && (
+                <ModalRecuperarSenha
+                    onClose={() => setShowRecoverModal(false)}
+                    onSend={handleRecover}
+                />
+            )}
+
+            {showRecoverCodeModal && (
+                <ModalCodigoRecuperacao
+                    code={code}
+                    email={recoverEmail}
+                    onClose={() => setShowRecoverCodeModal(false)}
+                    onChange={handleCodeChange}
+                    onValidate={handleValidateRecoverCode}
+                />
+            )}
+
+            {showChangePasswordModal && (
+                <ModalAlterarSenha
+                    onClose={() => setShowChangePasswordModal(false)}
+                    token={recoverToken}
+                    onChangePassword={() => {}}
+                    onOpenLogin={() => {
+                        setShowChangePasswordModal(false);
+                        setShowModal(true);
+                    }}
+                />
+            )}
 
             {/* Banner principal com gradiente igual ao Sobre Nós */}
             <main className="profs-container">
