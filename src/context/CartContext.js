@@ -38,8 +38,45 @@ export const CartProvider = ({ children }) => {
                         AsyncStorage.getItem(userCartKey)
                     ]);
                     
-                    const guestCart = guestJSON ? JSON.parse(guestJSON) : [];
-                    const userCart = userJSON ? JSON.parse(userJSON) : [];
+                    const guestCartRaw = guestJSON ? JSON.parse(guestJSON) : [];
+                    const userCartRaw = userJSON ? JSON.parse(userJSON) : [];
+
+                    // Normaliza itens antigos que podem ter campos formatados (ex: "R$ 12,00")
+                    const normalizeLoadedItem = (it) => {
+                        if (!it) return null;
+                        const normalizePrice = (p) => {
+                            if (p === undefined || p === null) return 0;
+                            if (typeof p === 'number' && !isNaN(p)) return p;
+                            if (typeof p === 'string') {
+                                let s = p.replace(/R\$|\s/g, '').replace(/\./g, '').replace(/,/g, '.');
+                                const n = parseFloat(s);
+                                return isNaN(n) ? 0 : n;
+                            }
+                            return 0;
+                        };
+
+                        const normalizeImage = (img) => {
+                            if (!img) return null;
+                            if (typeof img === 'object' && img.uri) return img;
+                            if (typeof img === 'string') return { uri: img };
+                            return null;
+                        };
+
+                        return {
+                            productName: it.productName || it.nome || it.title || 'Produto',
+                            categoria: it.categoria,
+                            id: it.id,
+                            price: normalizePrice(it.price ?? it.preco ?? it.precoFormatado),
+                            image: normalizeImage(it.image ?? it.img ?? it.imagem ?? it.imagemUrl),
+                            quantity: Number.isFinite(Number(it.quantity)) ? Number(it.quantity) : 1,
+                            selected: typeof it.selected === 'boolean' ? it.selected : true,
+                            variationValue: it.variationValue ?? null,
+                            cartItemId: it.cartItemId ?? `${it.id}-${it.variationValue ?? 'null'}-${Date.now()}`,
+                        };
+                    };
+
+                    const guestCart = guestCartRaw.map(normalizeLoadedItem).filter(Boolean);
+                    const userCart = userCartRaw.map(normalizeLoadedItem).filter(Boolean);
 
                     if (guestCart.length > 0) {
                         // --- Lógica de Migração ---
@@ -56,10 +93,12 @@ export const CartProvider = ({ children }) => {
                         });
 
                         const combinedCart = Array.from(combinedMap.values());
-                        
-                        await AsyncStorage.setItem(userCartKey, JSON.stringify(combinedCart));
+
+                        // Garantir normalização antes de salvar
+                        const combinedNormalized = combinedCart.map(normalizeLoadedItem).filter(Boolean);
+                        await AsyncStorage.setItem(userCartKey, JSON.stringify(combinedNormalized));
                         await AsyncStorage.removeItem(GUEST_CART_KEY); 
-                        setCartItems(combinedCart);
+                        setCartItems(combinedNormalized);
                         // carrinho migrado para usuário
                     } else {
                         // Sem carrinho de convidado, apenas carrega o do usuário
@@ -69,7 +108,8 @@ export const CartProvider = ({ children }) => {
                 } else {
                     // Convidado: Apenas carrega o carrinho de convidado
                     const guestJSON = await AsyncStorage.getItem(GUEST_CART_KEY);
-                    setCartItems(guestJSON ? JSON.parse(guestJSON) : []);
+                    const loaded = guestJSON ? JSON.parse(guestJSON) : [];
+                    setCartItems(loaded.map(normalizeLoadedItem).filter(Boolean));
                     // carrinho de convidado carregado
                 }
             } catch (e) {
@@ -122,22 +162,44 @@ export const CartProvider = ({ children }) => {
             // --- CORREÇÃO APLICADA AQUI ---
             // Removemos o 'uuidv4()' e usamos um ID simples
             const idUnicoCarrinho = `${produto.id}-${String(variationValue)}-${Date.now()}`;
-            // ---------------------------------
-            
-            const novoItem = {
-                // Campos que corrigimos antes
-                productName: produto.nome,
-                categoria: produto.categoria,
 
-                // Campos originais
+            // Normalizar preço: aceita número, string com vírgula, string formatada 'R$ 12,00', etc.
+            const normalizePrice = (p) => {
+                if (p === undefined || p === null) return 0;
+                if (typeof p === 'number' && !isNaN(p)) return p;
+                if (typeof p === 'string') {
+                    // Remover prefixo 'R$', espaços e pontos de milhar, trocar vírgula por ponto
+                    let s = p.replace(/R\$|\s/g, '').replace(/\./g, '').replace(/,/g, '.');
+                    const n = parseFloat(s);
+                    return isNaN(n) ? 0 : n;
+                }
+                return 0;
+            };
+
+            // Normalizar imagem: aceitar {uri:...} ou string
+            const normalizeImage = (img) => {
+                if (!img) return null;
+                // Se já for um objeto com uri, retorna como está
+                if (typeof img === 'object' && img.uri) return img;
+                // Se for string, monta { uri }
+                if (typeof img === 'string') return { uri: img };
+                return null;
+            };
+
+            const priceNormalized = normalizePrice(produto.preco ?? produto.price ?? produto.precoFormatado ?? produto.precoFormatadoBr);
+            // Tenta várias chaves possíveis para a imagem
+            const imageCandidate = produto.img ?? produto.imagem ?? produto.image ?? produto.imagemUrl ?? produto.imagemUrl;
+            const imageNormalized = normalizeImage(imageCandidate);
+
+            const novoItem = {
+                productName: produto.nome || produto.productName || produto.title || 'Produto',
+                categoria: produto.categoria,
                 id: produto.id,
-                price: produto.preco,
-                image: { uri: produto.img }, 
+                price: priceNormalized,
+                image: imageNormalized,
                 quantity: 1,
                 selected: true,
                 variationValue: variationValue,
-                
-                // --- CORREÇÃO APLICADA AQUI ---
                 cartItemId: idUnicoCarrinho,
             };
 
