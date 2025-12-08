@@ -221,8 +221,12 @@ const LojaCarrinho = ({ navigation }) => {
   };
 
   // Calcular total (Sua lógica original)
+  // Garantir que item.price é um número (converter de string se necessário)
   const selectedItems = cartItems.filter(item => item.selected);
-  const total = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const total = selectedItems.reduce((sum, item) => {
+    const preco = typeof item.price === 'string' ? parseFloat(item.price) : (item.price || 0);
+    return sum + (preco * item.quantity);
+  }, 0);
   const totalItems = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
 
   // --- 5. RENDERIZAÇÃO ---
@@ -275,7 +279,7 @@ const LojaCarrinho = ({ navigation }) => {
                 </View>
               </TouchableOpacity>
               
-              <Image source={item.image} style={styles.productImage} />
+              <Image source={item.image || require('../../../../assets/banner_whey.png')} style={styles.productImage} />
               
               <View style={styles.productInfo}>
                 <Text style={styles.productName}>{item.productName}</Text>
@@ -285,7 +289,9 @@ const LojaCarrinho = ({ navigation }) => {
                     <Text style={styles.productVariation}>{item.variationValue}</Text>
                 )}
 
-                <Text style={styles.productPrice}>R${item.price.toFixed(2)}</Text>
+                <Text style={styles.productPrice}>
+                  R$ {(typeof item.price === 'string' ? parseFloat(item.price) : (item.price || 0)).toFixed(2)}
+                </Text>
               </View>
             </View>
 
@@ -331,7 +337,7 @@ const LojaCarrinho = ({ navigation }) => {
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Produtos ({totalItems})</Text>
-            <Text style={styles.summaryTotal}>Total: R${total.toFixed(2)}</Text>
+            <Text style={styles.summaryTotal}>Total: R$ {total.toFixed(2)}</Text>
           </View>
           
           <View style={styles.actionButtonsContainer}>
