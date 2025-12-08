@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -34,14 +33,14 @@ public class SegurancaFilterChain {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // REGRA 1: ROTAS PÚBLICAS (Nenhuma autenticação necessária)
+                        // REGRA 1: ROTAS PÚBLICAS
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/aluno").permitAll() // Permitir auto-cadastro de alunos
+                        .requestMatchers(HttpMethod.POST, "/api/aluno").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/treinos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/treinos/{id}").permitAll()
 
-                        // REGRA 2: ROTAS DE ALUNO (Requerem perfil ALUNO)
+                        // REGRA 2: ROTAS DE ALUNO
                         .requestMatchers(HttpMethod.POST, "/api/reservas").hasRole("ALUNO")
                         .requestMatchers(HttpMethod.GET, "/api/reservas/minhas").hasRole("ALUNO")
                         .requestMatchers(HttpMethod.POST, "/api/treinos/{id}/realizar").hasRole("ALUNO")
@@ -55,7 +54,7 @@ public class SegurancaFilterChain {
                         .requestMatchers(HttpMethod.GET, "/api/aluno").hasAnyRole("ADMIN", "PROFESSOR")
                         .requestMatchers(HttpMethod.GET, "/api/aluno/{id}").hasAnyRole("ADMIN", "PROFESSOR")
 
-                        // REGRA 4: ROTAS EXCLUSIVAS DE ADMIN (Requerem perfil ADMIN)
+                        // REGRA 4: ROTAS EXCLUSIVAS DE ADMIN
                         .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/produtos").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/produtos/{id}").hasRole("ADMIN")
@@ -86,7 +85,8 @@ public class SegurancaFilterChain {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // AS ORIGENS PERMITIDAS FORAM ATUALIZADAS AQUI
+
+        // Mantive suas origens originais
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:4200",
@@ -95,8 +95,9 @@ public class SegurancaFilterChain {
                 "http://127.0.0.1:5500",
                 "http://100.30.34.6:3000"
         ));
+
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
-        configuration.setAllowedHeaders(List.of(""));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
