@@ -1,16 +1,69 @@
+// Cancela uma reserva pelo ID (Aluno ou Admin)
+export const cancelarReserva = async (reservaId) => {
+  try {
+    if (!reservaId) throw new Error('ID da reserva é obrigatório para cancelar.');
+    const response = await api.patch(`/api/reservas/${reservaId}/cancelar`);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) throw error.response.data;
+    throw error;
+  }
+};
 // src/services/api.js (Versão Mobile)
 
 import axios from 'axios';
 
 // MUDANÇA: 'import.meta.env' não existe no Expo.
-// Como suas rotas principais já usam o IP absoluto (http://23.22.153.89),
-// podemos definir a baseURL diretamente para a raiz da API.
-const API_BASE_URL = 'http://34.205.11.57'; // <-- DEFINA SEU IP DA API AQUI
+// Definimos uma lista de bases para permitir fallback se um IP estiver inacessível.
+const API_BASE_URLS = ['http://34.205.11.57', 'http://98.92.159.66']; // ordem: preferencial, fallback(s)
+let currentBaseIndex = 0;
 
-// Instância axios central
+// Instância axios central (usa a base atual)
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE_URLS[currentBaseIndex],
+  timeout: 15000,
 });
+
+// Helpers para gerenciar as bases em runtime
+export const setApiBase = (index) => {
+  if (index >= 0 && index < API_BASE_URLS.length) {
+    currentBaseIndex = index;
+    api.defaults.baseURL = API_BASE_URLS[currentBaseIndex];
+  }
+};
+
+export const addApiBase = (url) => {
+  if (typeof url === 'string' && url && !API_BASE_URLS.includes(url)) {
+    API_BASE_URLS.push(url);
+  }
+};
+
+// Interceptor simples: em caso de erro de rede ou 5xx, tenta o próximo base (uma vez)
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config || {};
+    if (!originalRequest._retry) {
+      const status = error.response?.status;
+      const isServerError = status >= 500 && status < 600;
+      const isNetworkError = !error.response;
+      if ((isNetworkError || isServerError) && API_BASE_URLS.length > 1) {
+        originalRequest._retry = true;
+        const nextIndex = (currentBaseIndex + 1) % API_BASE_URLS.length;
+        if (nextIndex !== currentBaseIndex) {
+          setApiBase(nextIndex);
+          originalRequest.baseURL = API_BASE_URLS[currentBaseIndex];
+          try {
+            return api(originalRequest);
+          } catch (e) {
+            // se falhar, propagar o erro original abaixo
+          }
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Helper para configurar token (PERFEITO, NENHUMA MUDANÇA NECESSÁRIA)
 export const setAuthToken = (token) => {

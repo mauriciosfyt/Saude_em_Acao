@@ -19,7 +19,7 @@ import BottomNavBar from '../../../Components/Footer_loja/BottomNavBar';
 import { COLORS, SPACING, FONTS, BORDERS } from '../../../constants/constants'
 
 // --- 1. IMPORTAR API E CONTEXTO ---
-import { obterMinhasReservas } from '../../../Services/api'; 
+import { obterMinhasReservas, cancelarReserva } from '../../../Services/api'; 
 import { useCart } from '../../../context/CartContext'; 
 
 // --- Função platformShadow ---
@@ -232,6 +232,84 @@ const Reservas = ({ navigation }) => {
         Alert.alert("Sucesso!", `${item.nome} foi adicionado ao carrinho.`);
     };
 
+
+    // --- Função para cancelar reserva ---
+    const [cancelandoId, setCancelandoId] = useState(null);
+    const handleCancelarReserva = async (item) => {
+        if (!item || !item.idUnicoLista) return;
+        Alert.alert(
+            'Cancelar Reserva',
+            'Tem certeza que deseja cancelar esta reserva?',
+            [
+                { text: 'Não', style: 'cancel' },
+                {
+                    text: 'Sim',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setCancelandoId(item.idUnicoLista);
+                        try {
+                            // O idReservaItem é o id da reserva (não do produto)
+                            const idReserva = item.idUnicoLista.split('-')[0];
+                            await cancelarReserva(idReserva);
+                            Alert.alert('Reserva cancelada', 'Sua reserva foi cancelada com sucesso.');
+                            // Atualiza lista
+                            // Recarrega reservas
+                            setLoading(true);
+                            setError(null);
+                            const dataApi = await obterMinhasReservas();
+                            // ...repete lógica de formatação já usada no useEffect
+                            const listaBruta = Array.isArray(dataApi?.content) 
+                                ? dataApi.content 
+                                : Array.isArray(dataApi) 
+                                ? dataApi 
+                                : [];
+                            const reservasFormatadas = listaBruta.map(reserva => {
+                                const dataApi = reserva?.dataReserva || reserva?.dataSolicitacao || reserva?.data || reserva?.criadoEm || reserva?.createdAt;
+                                const dataFormatada = new Date(dataApi).toLocaleDateString('pt-BR');
+                                const statusApi = (reserva.status || '').toUpperCase();
+                                const statusTratado = mapearStatusUI(statusApi);
+                                const nome = reserva?.produto?.nome || reserva?.produtoNome || reserva?.nome || 'Produto indisponível';
+                                const img = reserva?.produto?.img || reserva?.produto?.imagem || reserva?.img || reserva?.imagem || '';
+                                const idProduto = reserva?.produto?.id || reserva?.produtoId; 
+                                const idReservaItem = reserva?.id; 
+                                return {
+                                    id: idProduto, 
+                                    idUnicoLista: `${idReservaItem}-${idProduto || 'item'}`,
+                                    nome: nome,
+                                    img: img, 
+                                    imagem: img ? { uri: img } : require('../../../../assets/icon.png'), 
+                                    status: statusTratado,
+                                    dataString: dataFormatada,
+                                    dataOrdenacao: dataApi ? new Date(dataApi) : new Date(0),
+                                };
+                            });
+                            reservasFormatadas.sort((a, b) => b.dataOrdenacao - a.dataOrdenacao);
+                            const reservasAgrupadas = reservasFormatadas.reduce((acc, item) => {
+                                const data = item.dataString;
+                                const secaoExistente = acc.find(s => s.title === data);
+                                if (secaoExistente) {
+                                    secaoExistente.data.push(item);
+                                } else {
+                                    acc.push({
+                                        title: data,
+                                        data: [item],
+                                    });
+                                }
+                                return acc;
+                            }, []);
+                            setReservas(reservasAgrupadas);
+                        } catch (err) {
+                            Alert.alert('Erro ao cancelar', err?.message || 'Não foi possível cancelar a reserva.');
+                        } finally {
+                            setCancelandoId(null);
+                            setLoading(false);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     // --- Componente de Item da Lista (renderItem) ---
     const renderItem = ({ item }) => (
         <View style={styles.card}>
@@ -241,8 +319,7 @@ const Reservas = ({ navigation }) => {
                 defaultSource={require('../../../../assets/icon.png')} 
             />
             <View style={styles.cardInfo}>
-                {/* A cor é aplicada dinamicamente aqui */}
-                <Text style={[styles.cardStatus, { color: getStatusColor(item.status) }]}>
+                <Text style={[styles.cardStatus, { color: getStatusColor(item.status) }]}> 
                     {item.status}
                 </Text>
                 <Text style={styles.cardName}>{item.nome}</Text>
@@ -261,11 +338,32 @@ const Reservas = ({ navigation }) => {
                     <Text style={styles.primaryButtonText}>Ver produto</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
-                    style={styles.secondaryButton}
+                    style={[styles.secondaryButton, { alignSelf: 'stretch' }]}
                     onPress={() => handleComprarNovamente(item)} 
                 >
                     <Text style={styles.secondaryButtonText}>Comprar novamente</Text>
                 </TouchableOpacity>
+                {/* Botão Cancelar Reserva */}
+                {item.status !== 'Cancelado' && (
+                    <TouchableOpacity
+                        style={[
+                            styles.secondaryButton,
+                            {
+                                borderColor: theme.colors.statusCancelada,
+                                marginTop: 8,
+                                alignSelf: 'stretch',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            },
+                        ]}
+                        onPress={() => handleCancelarReserva(item)}
+                        disabled={cancelandoId === item.idUnicoLista}
+                    >
+                        <Text style={[styles.secondaryButtonText, { color: theme.colors.statusCancelada, fontWeight: 'bold' }]}> 
+                            {cancelandoId === item.idUnicoLista ? 'Cancelando...' : 'Cancelar Reserva'}
+                        </Text>
+                    </TouchableOpacity>
+                )}
             </View>
         </View>
     );
@@ -411,6 +509,24 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     cardInfo: {
+            cancelButton: {
+                marginTop: 8,
+                backgroundColor: theme.colors.white,
+                borderRadius: 6,
+                borderWidth: 1.5,
+                borderColor: theme.colors.statusCancelada,
+                paddingVertical: 5,
+                paddingHorizontal: 12,
+                alignItems: 'center',
+                width: '100%',
+            },
+            cancelButtonText: {
+                color: theme.colors.statusCancelada,
+                fontSize: theme.fontSize.xsmall,
+                fontWeight: 'bold',
+                textAlign: 'center',
+                width: '100%',
+            },
         flex: 1,
     },
     cardStatus: {
