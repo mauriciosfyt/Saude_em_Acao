@@ -2,7 +2,7 @@
 // Em produção, defina VITE_API_BASE_URL na Vercel (ex: https://saudeemacao.onrender.com)
 // Se a variável não estiver definida, usamos o caminho relativo '/api' (funciona com o rewrite do Vercel).
 // Força a base URL do backend (caso a variável de ambiente não exista)
-export const API_URL = (import.meta.env.VITE_API_URL || 'http://54.144.210.178:8080') + '/api';
+export const API_URL = (import.meta.env.VITE_API_URL || 'http://52.91.126.52:8080') + '/api';
 
 
 // --- Funções Auxiliares ---
@@ -78,21 +78,140 @@ export const createAluno = async (dadosFormulario) => {
 export async function getAllAlunos() { // Remover o parâmetro token
   try {
     const token = getAuthToken(); // Usar a função interna
-    const response = await fetch(`${API_URL}/aluno`, {
+    
+    console.log('🔍 Iniciando getAllAlunos...');
+    console.log('🔑 Token existe:', !!token);
+    console.log('📍 API_URL:', API_URL);
+    
+    if (!token) {
+      throw new Error('Token de autenticação não encontrado. Faça login novamente.');
+    }
+
+    // Tenta primeiro sem incluir dados aninhados
+    const response = await fetch(`${API_URL}/aluno?exclude=treino`, {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
     });
 
+    console.log('📡 Status da resposta:', response.status);
+    console.log('📡 Status text:', response.statusText);
+
     if (!response.ok) {
-      throw new Error(`Erro HTTP ${response.status}`);
+      // Se falhar com o parâmetro exclude, tenta sem ele
+      console.log('⚠️ Falhou com exclude=treino, tentando sem parâmetro...');
+      const retryResponse = await fetch(`${API_URL}/aluno`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('📡 Status da resposta (retry):', retryResponse.status);
+
+      if (!retryResponse.ok) {
+        let errorBody = '';
+        try {
+          errorBody = await retryResponse.text();
+          console.log('❌ Corpo da resposta de erro:', errorBody);
+        } catch (e) {
+          console.log('❌ Não foi possível ler o corpo do erro');
+        }
+        
+        throw new Error(`Erro HTTP ${retryResponse.status}: ${errorBody || 'Sem detalhes'}`);
+      }
+
+      const data = await retryResponse.json();
+      console.log('✅ Resposta bruta da API (retry):', data);
+      return processarAlunos(data);
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log('✅ Resposta bruta da API:', data);
+    const processed = processarAlunos(data);
+    try {
+      // Salva em cache para fallback caso o backend falhe no futuro
+      localStorage.setItem('alunos_cache', JSON.stringify(processed));
+    } catch (e) {
+      console.warn('⚠️ Não foi possível gravar cache de alunos:', e.message);
+    }
+    return processed;
   } catch (error) {
-    console.error('Erro em getAllAlunos:', error);
-    throw new Error('Falha ao buscar alunos.');
+    console.error('❌ Erro em getAllAlunos:', error.message);
+
+    // Tenta usar o cache local se disponível
+    try {
+      const cached = localStorage.getItem('alunos_cache');
+      if (cached) {
+        console.warn('⚠️ Usando cache local de alunos devido a erro na API.');
+        const parsed = JSON.parse(cached);
+        return parsed;
+      }
+    } catch (e) {
+      console.warn('⚠️ Falha ao ler cache de alunos:', e.message);
+    }
+
+    // Se não houver cache, propaga o erro para o caller tratar (com mensagem na UI)
+    throw error;
   }
+}
+
+// Função auxiliar para processar alunos
+function processarAlunos(data) {
+  console.log('📊 Tipo de resposta:', Array.isArray(data) ? 'Array' : typeof data);
+  
+  // Se a resposta for um array, filtra alunos com problemas
+  if (Array.isArray(data)) {
+    const alunosValidos = data.filter((aluno, index) => {
+      try {
+        // Valida se o aluno tem dados básicos
+        if (!aluno) {
+          console.warn(`⚠️ Aluno no índice ${index} é null/undefined`);
+          return false;
+        }
+        
+        // Tratamento para diferentes formatos que o backend pode retornar em 'treino'
+        // 1) objeto válido -> tenta garantir que tenha id
+        // 2) booleano (true/false) -> normaliza removendo o objeto e marcando flag
+        // 3) outros valores inesperados -> remove para evitar erros
+        if (aluno.treino !== undefined && aluno.treino !== null) {
+          const t = aluno.treino;
+          // se veio como booleano (ex: true/false), normaliza
+          if (typeof t === 'boolean') {
+            aluno.hasTreino = !!t; // indica presença, mas sem detalhes
+            aluno.treino = null;
+          } else if (typeof t === 'object') {
+            // se for objeto, assegura que tenha id; caso contrário, limpa treino
+            if (!t.id && !t.getId) {
+              console.warn(`⚠️ Aluno ${aluno.email || aluno.id || 'unknown'} tem treino inválido, removendo...`);
+              aluno.treino = null;
+            }
+          } else {
+            console.warn(`⚠️ Aluno ${aluno.email || aluno.id || 'unknown'} retornou treino em formato inesperado (${typeof t}), removendo...`);
+            aluno.treino = null;
+          }
+        }
+        
+        return true;
+      } catch (e) {
+        console.warn(`⚠️ Erro ao validar aluno no índice ${index}:`, e.message);
+        return false;
+      }
+    });
+    
+    if (alunosValidos.length < data.length) {
+      console.log(`📊 Filtrados ${data.length - alunosValidos.length} aluno(s) com dados inválidos`);
+    }
+    console.log(`📊 Total de alunos válidos: ${alunosValidos.length}`);
+    
+    return alunosValidos;
+  }
+  
+  // Se não for um array, retorna como está
+  return data;
 }
 
 /**

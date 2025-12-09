@@ -3,8 +3,8 @@ const getAuthToken = () => {
   return sessionStorage.getItem('token') || localStorage.getItem('authToken') || null;
 };
 
-// 2. Centralizei a URL base
-const API_BASE_URL = 'http://54.144.210.178:8080/api';
+// 2. Centralizei a URL base - agora com /api correto
+const API_BASE_URL = 'http://52.91.126.52/api';
 
 const RESERVAS_STATS_URL = `${API_BASE_URL}/reservas/stats`;
 const RESERVAS_LIST_URL = `${API_BASE_URL}/reservas`;
@@ -38,6 +38,7 @@ export async function fetchReservaStats(params = {}) {
 /**
  * Busca lista de reservas (Admin)
  * (MODIFICADO PARA USAR FETCH)
+ * Retorna array vazio se falhar ao invés de lançar erro
  */
 export async function fetchReservas(params = {}) {
   try {
@@ -55,8 +56,8 @@ export async function fetchReservas(params = {}) {
     if (!response.ok) throw new Error(await response.text());
     return await response.json();
   } catch (error) {
-    console.error("❌ Erro em fetchReservas:", error);
-    throw error;
+    console.warn("⚠️ Reservas indisponíveis (backend offline)"); // Apenas aviso, sem erro vermelho
+    return []; // Retorna array vazio ao invés de lançar erro
   }
 }
 

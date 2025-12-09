@@ -1,5 +1,5 @@
 // URL base da nossa API
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://54.144.210.178:8080') + '/api';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://52.91.126.52:8080') + '/api';
 const API_URL = `${API_BASE_URL}/treinos`;
 
 // Função para obter o token de autenticação
