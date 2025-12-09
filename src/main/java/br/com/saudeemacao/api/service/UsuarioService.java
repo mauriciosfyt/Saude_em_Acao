@@ -98,13 +98,15 @@ public class UsuarioService {
         Usuario responsavel = repo.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário responsável (admin/professor) não encontrado."));
 
-        // == LÓGICA DE GÊNERO ATUALIZADA (SEM UNISSEX) ==
+        // == LÓGICA DE GÊNERO ATUALIZADA (USANDO 'OUTRO') ==
         if (aluno.getGenero() == null) {
             throw new IllegalArgumentException("O gênero do aluno não está cadastrado, não é possível validar a compatibilidade do treino.");
         }
 
-        // Como removemos 'UNISSEX', a validação agora é estrita.
-        // O gênero do treino deve ser exatamente igual ao do aluno.
+        // Validação Estrita: O treino deve ser EXATAMENTE do mesmo gênero do aluno.
+        // MASCULINO = MASCULINO
+        // FEMININO = FEMININO
+        // OUTRO = OUTRO
         boolean isGeneroCompativel = treino.getGenero() == aluno.getGenero();
 
         if (!isGeneroCompativel) {
@@ -129,7 +131,7 @@ public class UsuarioService {
             aluno.setTreinosAtribuidos(new ArrayList<>());
         }
 
-        // Evita duplicidade de treino na lista
+        // Evita duplicidade
         boolean jaPossuiTreino = aluno.getTreinosAtribuidos().stream()
                 .anyMatch(t -> t.getId().equals(treino.getId()));
 

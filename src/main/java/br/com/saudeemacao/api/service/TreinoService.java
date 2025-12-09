@@ -4,6 +4,7 @@ import br.com.saudeemacao.api.dto.*;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
 import br.com.saudeemacao.api.model.*;
 import br.com.saudeemacao.api.model.EnumTreino.EDiaDaSemana;
+import br.com.saudeemacao.api.model.EnumTreino.EGenero;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
 import br.com.saudeemacao.api.repository.HistoricoTreinoRepository;
