@@ -4,7 +4,7 @@ const getAuthToken = () => {
 };
 
 // 2. Centralizei a URL base
-const API_BASE_URL = 'http://98.92.159.66/api';
+const API_BASE_URL = 'http://54.144.210.178:8080/api';
 
 const RESERVAS_STATS_URL = `${API_BASE_URL}/reservas/stats`;
 const RESERVAS_LIST_URL = `${API_BASE_URL}/reservas`;
