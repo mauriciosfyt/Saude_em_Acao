@@ -55,7 +55,7 @@ const MessageInput = ({ colors, onSendMessage, onSendImage, onClearAll, onClearM
 
   const solicitarPermissoes = async () => {
     if (!canSend) {
-      Alert.alert('Permissão negada', 'Apenas usuários com papel ADMIN ou PERSONAL podem enviar mensagens neste chat.');
+      Alert.alert('Permissão negada', 'Apenas usuários com papel ADMIN, PROFESSOR ou PERSONAL podem enviar mensagens neste chat.');
       return;
     }
     if (Platform.OS !== 'web') {
@@ -96,7 +96,7 @@ const MessageInput = ({ colors, onSendMessage, onSendImage, onClearAll, onClearM
 
   const tirarFoto = async () => {
     if (!canSend) {
-      Alert.alert('Permissão negada', 'Apenas usuários com papel ADMIN ou PERSONAL podem enviar imagens neste chat.');
+      Alert.alert('Permissão negada', 'Apenas usuários com papel ADMIN, PROFESSOR ou PERSONAL podem enviar imagens neste chat.');
       return;
     }
     if (Platform.OS !== 'web') {
@@ -209,11 +209,11 @@ const Chat = ({ navigation, route }) => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
   // Determina se o usuário atual tem permissão de chat
-  // Agora a regra é baseada na Role da API: 'ADMIN' e 'PERSONAL' podem enviar e apagar mensagens
+  // Agora a regra é baseada na Role da API: 'ADMIN', 'PROFESSOR' e 'PERSONAL' podem enviar e apagar mensagens
   const hasChatPermissionByRole = (u) => {
     if (!u) return false;
 
-    const allowed = ['ADMIN', 'PERSONAL'];
+    const allowed = ['ADMIN', 'PERSONAL', 'PROFESSOR', 'PROF'];
 
     // 1) campo único 'role' (string)
     const roleField = u?.role || u?.perfil || u?.tipo || u?.profile;
@@ -232,7 +232,9 @@ const Chat = ({ navigation, route }) => {
 
     // 3) flags booleanas (compatibilidade com versões antigas)
     if (typeof u?.isAdmin === 'boolean' && u.isAdmin) return true;
+    if (typeof u?.isProfessor === 'boolean' && u.isProfessor) return true;
     if (typeof u?.admin === 'boolean' && u.admin) return true;
+    if (typeof u?.professor === 'boolean' && u.professor) return true;
 
     // nenhum critério encontrou correspondência
     return false;
