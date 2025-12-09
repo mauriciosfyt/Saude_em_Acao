@@ -15,7 +15,7 @@ import axios from 'axios';
 
 // MUDANÇA: 'import.meta.env' não existe no Expo.
 // Definimos uma lista de bases para permitir fallback se um IP estiver inacessível.
-const API_BASE_URLS = ['http://34.205.11.57', 'http://98.92.159.66']; // ordem: preferencial, fallback(s)
+const API_BASE_URLS = ['http://54.144.210.178']; // ordem: preferencial, fallback(s)
 let currentBaseIndex = 0;
 
 // Instância axios central (usa a base atual)
@@ -718,6 +718,18 @@ export const enviarImagemChat = async (chatId, uriOrData, remetente) => {
           const resp = await api.post(path, formData);
           if (resp?.data) return resp.data;
         } catch (err) {
+          // Debug: registrar status e corpo retornado pelo servidor para cada tentativa
+          try {
+            console.warn('enviarImagemChat: tentativa falhou', {
+              path,
+              key,
+              message: err?.message,
+              status: err?.response?.status,
+              data: err?.response?.data,
+            });
+          } catch (logErr) {
+            // evitar lançar se o console.warn falhar
+          }
           continue;
         }
       }
@@ -733,6 +745,14 @@ export const enviarImagemChat = async (chatId, uriOrData, remetente) => {
 
     throw new Error('Falha ao enviar imagem: nenhum endpoint aceitou a imagem');
   } catch (error) {
+    // Log final para ajudar diagnóstico localmente
+    try {
+      console.error('enviarImagemChat: erro final', {
+        message: error?.message,
+        status: error?.response?.status,
+        data: error?.response?.data,
+      });
+    } catch (e) {}
     if (error.response && error.response.data) throw error.response.data;
     throw error;
   }
