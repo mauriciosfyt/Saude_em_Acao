@@ -119,17 +119,6 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/aluno/{alunoId}/treino/{treinoId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR')")
-    public ResponseEntity<Void> removerTreinoAtribuido(
-            @PathVariable String alunoId,
-            @PathVariable String treinoId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        usuarioService.removerTreinoDoAluno(alunoId, treinoId, userDetails);
-        return ResponseEntity.noContent().build();
-    }
-
     // == ADMINS ==
     @PostMapping("/admin")
     public ResponseEntity<Usuario> criarAdmin(@Valid @RequestBody UsuarioCreateDTO dto) {

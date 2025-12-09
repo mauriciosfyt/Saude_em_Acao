@@ -57,7 +57,7 @@ public class UsuarioService {
         usuario.setPerfil(EPerfil.ALUNO);
         usuario.setPlano(dto.getPlano());
 
-        // Atualizado para usar EGenero
+        // Gênero
         if (dto.getGenero() != null) {
             usuario.setGenero(dto.getGenero());
         }
@@ -75,6 +75,20 @@ public class UsuarioService {
         }
 
         return repo.save(usuario);
+    }
+
+    private void validarECarregarDadosPlanoGold(AlunoCreateDTO dto, Usuario usuario) {
+        // Validação usa Genero e ENivel
+        if (dto.getGenero() == null || dto.getIdade() == null || dto.getPeso() == null || dto.getAltura() == null ||
+                dto.getObjetivo() == null || dto.getObjetivo().isBlank() || dto.getNivelAtividade() == null) {
+            throw new IllegalArgumentException("Para o plano Gold, os campos: gênero, idade, peso, altura, objetivo e nível de atividade são obrigatórios.");
+        }
+        usuario.setGenero(dto.getGenero());
+        usuario.setIdade(dto.getIdade());
+        usuario.setPeso(dto.getPeso());
+        usuario.setAltura(dto.getAltura());
+        usuario.setObjetivo(dto.getObjetivo());
+        usuario.setNivelAtividade(dto.getNivelAtividade()); // Assumindo que o DTO agora retorna ENivel
     }
 
     public Usuario criarProfessor(ProfessorCreateDTO dto) throws IOException {
@@ -107,21 +121,8 @@ public class UsuarioService {
         return repo.save(usuario);
     }
 
-    private void validarECarregarDadosPlanoGold(AlunoCreateDTO dto, Usuario usuario) {
-        if (dto.getGenero() == null || dto.getIdade() == null || dto.getPeso() == null || dto.getAltura() == null ||
-                dto.getObjetivo() == null || dto.getObjetivo().isBlank() || dto.getNivelAtividade() == null) {
-            throw new IllegalArgumentException("Para o plano Gold, os campos: gênero, idade, peso, altura, objetivo e nível de atividade são obrigatórios.");
-        }
-        usuario.setGenero(dto.getGenero()); // Atualizado
-        usuario.setIdade(dto.getIdade());
-        usuario.setPeso(dto.getPeso());
-        usuario.setAltura(dto.getAltura());
-        usuario.setObjetivo(dto.getObjetivo());
-        usuario.setNivelAtividade(dto.getNivelAtividade());
-    }
-
     // ===================================================================================
-    // GESTÃO DE TREINOS (ATRIBUIÇÃO, REMOÇÃO E CONSULTA)
+    // ATRIBUIÇÃO DE TREINO
     // ===================================================================================
 
     public void atribuirTreinoParaAluno(String alunoId, String treinoId, UserDetails userDetails) {
@@ -135,80 +136,47 @@ public class UsuarioService {
         Usuario responsavel = repo.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário responsável (admin/professor) não encontrado."));
 
-        // == VALIDAÇÃO DE GÊNERO (INCLUSIVA) ==
+        // Validação de Gênero (UNISSEX ou Igual)
         if (aluno.getGenero() == null) {
             throw new IllegalArgumentException("O gênero do aluno não está cadastrado, não é possível validar o treino.");
         }
 
-        // Permite se o treino for UNISSEX ou se os gêneros forem idênticos
-        boolean isGeneroCompativel = treino.getGenero() == EGenero.UNISSEX ||
-                treino.getGenero() == aluno.getGenero();
+        boolean compativel = (treino.getGenero() == EGenero.UNISSEX) || (treino.getGenero() == aluno.getGenero());
 
-        if (!isGeneroCompativel) {
+        if (!compativel) {
             throw new IllegalArgumentException(
-                    String.format("Incompatibilidade: Este treino é destinado ao público %s e o aluno se identifica como %s. " +
-                                    "Para atribuir, utilize um treino UNISSEX ou correspondente.",
+                    String.format("Este treino é destinado ao público %s e não pode ser atribuído a este aluno (%s).",
                             treino.getGenero(), aluno.getGenero())
             );
         }
 
         // Validação de Idade
         if (aluno.getIdade() == null) {
-            throw new IllegalArgumentException("A idade do aluno não está cadastrada, não é possível validar a faixa etária do treino.");
+            throw new IllegalArgumentException("A idade do aluno não está cadastrada.");
         }
         if (aluno.getIdade() < treino.getIdadeMinima() || aluno.getIdade() > treino.getIdadeMaxima()) {
             throw new IllegalArgumentException(
-                    String.format("A idade do aluno (%d) está fora da faixa etária recomendada para este treino (%d-%d anos).",
+                    String.format("A idade do aluno (%d) está fora da faixa etária recomendada (%d-%d anos).",
                             aluno.getIdade(), treino.getIdadeMinima(), treino.getIdadeMaxima())
             );
         }
 
-        // Inicializa lista se nula
         if (aluno.getTreinosAtribuidos() == null) {
             aluno.setTreinosAtribuidos(new ArrayList<>());
         }
 
-        // Verifica duplicidade
-        boolean jaPossui = aluno.getTreinosAtribuidos().stream()
-                .anyMatch(t -> t.getId().equals(treinoId));
-
-        if (jaPossui) {
-            throw new IllegalArgumentException("Este treino já está atribuído a este aluno.");
-        }
-
-        // Adiciona à lista (não substitui os anteriores, permitindo múltiplos treinos)
+        // MANTIDO: Sistema antigo -> Limpa a lista antes de adicionar (1 treino por vez)
+        aluno.getTreinosAtribuidos().clear();
         aluno.getTreinosAtribuidos().add(treino);
 
         repo.save(aluno);
 
-        // Notificação
         emailService.notificarAlunoNovoTreinoAtribuido(
                 aluno.getEmail(),
                 aluno.getNome(),
                 treino.getNome(),
                 responsavel.getNome()
         );
-    }
-
-    /**
-     * Remove um treino específico da lista de treinos atribuídos ao aluno.
-     */
-    public void removerTreinoDoAluno(String alunoId, String treinoId, UserDetails userDetails) {
-        Usuario aluno = repo.findById(alunoId)
-                .filter(u -> u.getPerfil() == EPerfil.ALUNO)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Aluno não encontrado com ID: " + alunoId));
-
-        if (aluno.getTreinosAtribuidos() == null || aluno.getTreinosAtribuidos().isEmpty()) {
-            throw new RecursoNaoEncontradoException("Este aluno não possui treinos atribuídos para remover.");
-        }
-
-        boolean removeu = aluno.getTreinosAtribuidos().removeIf(treino -> treino.getId().equals(treinoId));
-
-        if (!removeu) {
-            throw new RecursoNaoEncontradoException("Treino com ID " + treinoId + " não está vinculado a este aluno.");
-        }
-
-        repo.save(aluno);
     }
 
     public List<MeuTreinoDTO> buscarMeusTreinosAtribuidos(UserDetails userDetails) {
@@ -233,7 +201,7 @@ public class UsuarioService {
     }
 
     // ===================================================================================
-    // ATUALIZAÇÃO E CONSULTA DE USUÁRIOS
+    // UPDATE E CONSULTAS
     // ===================================================================================
 
     public Usuario atualizarUsuario(String id, UsuarioUpdateDTO dto, EPerfil perfilEsperado) throws IOException {
@@ -266,7 +234,6 @@ public class UsuarioService {
             usuarioExistente.setSenha(passwordEncoder.encode(dto.getSenha()));
         }
 
-        // Lógica de atualização de plano
         if (dto.getPlano() != null && usuarioExistente.getPerfil() == EPerfil.ALUNO) {
             boolean eraGold = usuarioExistente.getPlano() == EPlano.GOLD;
             boolean virouGold = dto.getPlano() == EPlano.GOLD;
@@ -281,13 +248,14 @@ public class UsuarioService {
         }
 
         if (usuarioExistente.getPlano() == EPlano.GOLD) {
-            // Nota: Se UsuarioUpdateDTO não tiver o campo 'genero', essa atualização não ocorrerá.
-            // Se tiver, adicione: if (dto.getGenero() != null) usuarioExistente.setGenero(dto.getGenero());
+            // Nota: Se você adicionar o campo genero no UpdateDTO, use:
+            // if (dto.getGenero() != null) usuarioExistente.setGenero(dto.getGenero());
 
             if (dto.getIdade() != null) usuarioExistente.setIdade(dto.getIdade());
             if (dto.getPeso() != null) usuarioExistente.setPeso(dto.getPeso());
             if (dto.getAltura() != null) usuarioExistente.setAltura(dto.getAltura());
             if (dto.getObjetivo() != null) usuarioExistente.setObjetivo(dto.getObjetivo());
+            // Usa ENivel agora
             if (dto.getNivelAtividade() != null) usuarioExistente.setNivelAtividade(dto.getNivelAtividade());
         }
 
@@ -367,7 +335,7 @@ public class UsuarioService {
     }
 
     // ===================================================================================
-    // GESTÃO DE PLANO GOLD (Renovação e Detalhes)
+    // RENOVAÇÃO E DETALHES
     // ===================================================================================
 
     public PlanoGoldDetalhesDTO buscarDetalhesPlanoGold(UserDetails userDetails) {
@@ -415,10 +383,6 @@ public class UsuarioService {
                 .build();
     }
 
-    // ===================================================================================
-    // EXCLUSÃO E SENHA
-    // ===================================================================================
-
     public void excluirPorId(String id) {
         if (!repo.existsById(id)) {
             throw new RecursoNaoEncontradoException("Usuário não encontrado com ID: " + id);
@@ -457,10 +421,6 @@ public class UsuarioService {
         usuario.setSenha(passwordEncoder.encode(novaSenha));
         return repo.save(usuario);
     }
-
-    // ===================================================================================
-    // MÉTODOS AUXILIARES E CONVERSORES
-    // ===================================================================================
 
     private String calcularDuracao(LocalDateTime dataInicio) {
         if (dataInicio == null) {
@@ -541,21 +501,9 @@ public class UsuarioService {
         }
     }
 
+    // MANTIDO: Retorno original com BOOLEAN
     private UsuarioSaidaDTO toUsuarioSaidaDTO(Usuario usuario) {
-        // Conversão dos treinos para DTO Resumo
-        List<TreinoResumoDTO> treinosResumo = new ArrayList<>();
-
-        if (usuario.getTreinosAtribuidos() != null) {
-            treinosResumo = usuario.getTreinosAtribuidos().stream()
-                    .map(t -> new TreinoResumoDTO(
-                            t.getId(),
-                            t.getNome(),
-                            t.getTipoDeTreino(),
-                            t.getNivel(),
-                            t.getResponsavel() != null ? t.getResponsavel().getNome() : "Professor Removido"
-                    ))
-                    .collect(Collectors.toList());
-        }
+        boolean possuiTreino = usuario.getTreinosAtribuidos() != null && !usuario.getTreinosAtribuidos().isEmpty();
 
         return new UsuarioSaidaDTO(
                 usuario.getId(),
@@ -570,8 +518,8 @@ public class UsuarioService {
                 usuario.getPeso(),
                 usuario.getAltura(),
                 usuario.getObjetivo(),
-                usuario.getNivelAtividade(),
-                treinosResumo
+                usuario.getNivelAtividade(), // MANTIDO: Agora retorna o tipo ENivel
+                possuiTreino // MANTIDO: boolean
         );
     }
 }

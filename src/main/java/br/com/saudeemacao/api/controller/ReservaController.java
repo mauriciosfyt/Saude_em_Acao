@@ -1,10 +1,12 @@
 package br.com.saudeemacao.api.controller;
 
+import br.com.saudeemacao.api.dto.ReservaAnaliseDTO; // Certifique-se de que este arquivo existe
 import br.com.saudeemacao.api.dto.ReservaSolicitacaoDTO;
 import br.com.saudeemacao.api.dto.ReservaStatsDTO;
 import br.com.saudeemacao.api.model.EnumReserva.EStatusReserva;
 import br.com.saudeemacao.api.model.Reserva;
 import br.com.saudeemacao.api.service.ReservaService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,7 +16,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reservas")
@@ -51,14 +52,10 @@ public class ReservaController {
     }
 
     @PatchMapping("/{id}/rejeitar")
-    public ResponseEntity<Reserva> rejeitarReserva(
-            @PathVariable String id,
-            @RequestBody(required = false) Map<String, String> payload) {
-
-        String motivo = (payload != null && payload.get("motivo") != null && !payload.get("motivo").isBlank())
-                ? payload.get("motivo")
+    public ResponseEntity<Reserva> rejeitarReserva(@PathVariable String id, @RequestBody(required = false) ReservaAnaliseDTO dto) {
+        String motivo = (dto != null && dto.getMotivo() != null && !dto.getMotivo().isBlank())
+                ? dto.getMotivo()
                 : "A solicitação não pôde ser atendida no momento.";
-
         return ResponseEntity.ok(reservaService.rejeitarReserva(id, motivo));
     }
 
