@@ -22,6 +22,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   obterHistoricoChat,
   enviarMensagemChat,
+  enviarImagemChat,
   setAuthToken,
   apagarMensagemChat,
   apagarHistoricoChat,
@@ -680,64 +681,22 @@ const Chat = ({ navigation, route }) => {
         throw new Error('ID do usuário não encontrado. Faça login novamente.');
       }
       
-      const url = `http://23.22.153.89/api/chat/enviar-imagem`;
-
-      // 🔹 Corrige a URI (Android e iOS)
+      // Ajusta a URI do arquivo para Android se necessário
       let fileUri = uri;
       if (Platform.OS === 'android' && !uri.startsWith('file://') && !uri.startsWith('content://')) {
         fileUri = 'file://' + uri;
       }
 
-      // 🔹 Cria o FormData corretamente - arquivo PRIMEIRO
-      const formData = new FormData();
-      
-      // ✅ Adiciona o arquivo primeiro (alguns servidores exigem isso)
-      formData.append('file', {
-        uri: fileUri,
-        name: `foto_${Date.now()}.jpg`,
-        type: 'image/jpeg',
-      });
-      
-      // ✅ Depois adiciona os outros campos - garantindo que sejam strings
-      formData.append('usuarioId', String(usuarioId));
-      formData.append('chatId', String(chatId));
-      formData.append('legenda', '');
+      // Garante que o axios do `api` possua o token de autorização
+      if (token) setAuthToken(token);
 
-      // ⚠️ IMPORTANTE: não adicione manualmente Content-Type
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
-      });
-
-      const text = await response.text();
+      // Usa a função centralizada de envio (usa axios, baseURL e interceptors)
       let parsed;
       try {
-        parsed = text ? JSON.parse(text) : null;
-      } catch {
-        parsed = text;
-      }
-
-      if (!response.ok) {
-        // Upload failed - status, response and error details logged
-        
-        // Extrai mensagem de erro mais detalhada
-        let errorMsg = `Erro ${response.status}: `;
-        if (parsed?.message) {
-          errorMsg += parsed.message;
-        } else if (parsed?.error) {
-          errorMsg += parsed.error;
-        } else if (parsed?.parsed) {
-          errorMsg += parsed.parsed;
-        } else if (typeof parsed === 'string') {
-          errorMsg += parsed;
-        } else if (text) {
-          errorMsg += text;
-        } else {
-          errorMsg += 'Falha no upload de imagem';
-        }
-        
-        throw new Error(errorMsg);
+        parsed = await enviarImagemChat(chatId, fileUri, usuarioNome);
+      } catch (err) {
+        // Propaga erro para ser tratado abaixo (mantemos a lógica de apresentação)
+        throw err;
       }
 
       // Update local message
