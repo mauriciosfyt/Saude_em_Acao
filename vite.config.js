@@ -5,13 +5,13 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   define: {
-    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://23.22.153.89:8080'),
+    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://98.92.159.66'),
   },
   server: {
     // Proxy /api requests to the backend to avoid CORS during development
     proxy: {
       '/api': {
-        target: 'http://23.22.153.89:8080',
+        target: 'http://98.92.159.66',
         changeOrigin: true,
         secure: false,
       },
