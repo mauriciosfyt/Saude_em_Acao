@@ -4,7 +4,6 @@ import br.com.saudeemacao.api.dto.*;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
 import br.com.saudeemacao.api.model.Treino;
 import br.com.saudeemacao.api.model.Usuario;
-import br.com.saudeemacao.api.model.EnumTreino.EGenero; // Importante para a validação
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
 import br.com.saudeemacao.api.model.EnumUsuario.EStatus;
@@ -99,14 +98,14 @@ public class UsuarioService {
         Usuario responsavel = repo.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário responsável (admin/professor) não encontrado."));
 
-        // VALIDAÇÃO DE GÊNERO ATUALIZADA
+        // == LÓGICA DE GÊNERO ATUALIZADA (SEM UNISSEX) ==
         if (aluno.getGenero() == null) {
             throw new IllegalArgumentException("O gênero do aluno não está cadastrado, não é possível validar a compatibilidade do treino.");
         }
 
-        // Permite atribuição se o treino for UNISSEX ou se o gênero for idêntico
-        boolean isGeneroCompativel = treino.getGenero() == EGenero.UNISSEX ||
-                treino.getGenero() == aluno.getGenero();
+        // Como removemos 'UNISSEX', a validação agora é estrita.
+        // O gênero do treino deve ser exatamente igual ao do aluno.
+        boolean isGeneroCompativel = treino.getGenero() == aluno.getGenero();
 
         if (!isGeneroCompativel) {
             throw new IllegalArgumentException(
@@ -130,7 +129,7 @@ public class UsuarioService {
             aluno.setTreinosAtribuidos(new ArrayList<>());
         }
 
-        // Evitar duplicidade de treinos (Opcional, mas boa prática)
+        // Evita duplicidade de treino na lista
         boolean jaPossuiTreino = aluno.getTreinosAtribuidos().stream()
                 .anyMatch(t -> t.getId().equals(treino.getId()));
 

@@ -4,16 +4,14 @@ import br.com.saudeemacao.api.dto.*;
 import br.com.saudeemacao.api.exception.RecursoNaoEncontradoException;
 import br.com.saudeemacao.api.model.*;
 import br.com.saudeemacao.api.model.EnumTreino.EDiaDaSemana;
-import br.com.saudeemacao.api.model.EnumTreino.EGenero;
-import br.com.saudeemacao.api.model.EnumTreino.ENivel;
 import br.com.saudeemacao.api.model.EnumUsuario.EPerfil;
 import br.com.saudeemacao.api.model.EnumUsuario.EPlano;
 import br.com.saudeemacao.api.repository.HistoricoTreinoRepository;
 import br.com.saudeemacao.api.repository.TreinoRepository;
 import br.com.saudeemacao.api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId; // Necessário para operar com IDs no MongoTemplate
-import org.springframework.data.mongodb.core.MongoTemplate; // Importante para a query de limpeza
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.access.AccessDeniedException;
@@ -40,7 +38,7 @@ public class TreinoService {
     private final HistoricoTreinoRepository historicoTreinoRepository;
     private final CloudinaryService cloudinaryService;
     private final EmailService emailService;
-    private final MongoTemplate mongoTemplate; // Injeção necessária para operação eficiente de busca/limpeza
+    private final MongoTemplate mongoTemplate;
 
     private Usuario getUsuarioAutenticado(UserDetails userDetails) {
         return usuarioRepository.findByEmail(userDetails.getUsername())
@@ -179,7 +177,6 @@ public class TreinoService {
         return treinoRepository.findByResponsavelId(responsavelId);
     }
 
-    // MÉTODO ATUALIZADO PARA GARANTIR INTEGRIDADE REFERENCIAL
     public void deletarTreino(String id, UserDetails userDetails) {
         Treino treinoExistente = buscarPorId(id);
         Usuario usuarioAutenticado = getUsuarioAutenticado(userDetails);
@@ -189,7 +186,7 @@ public class TreinoService {
             throw new SecurityException("Você não tem permissão para deletar este treino.");
         }
 
-        // 1. Limpeza de Imagens no Cloudinary
+        // Limpeza de imagens
         if (treinoExistente.getExerciciosPorDia() != null) {
             treinoExistente.getExerciciosPorDia().values().stream()
                     .flatMap(List::stream)
@@ -198,21 +195,17 @@ public class TreinoService {
                     .forEach(this::deletarImagemSeguro);
         }
 
-        // 2. Limpeza de Referências nos Alunos (CORREÇÃO DE BUG: Dangling References)
-        // Busca todos os usuários que possuem este treino na lista 'treinosAtribuidos'
-        // Utilizando MongoTemplate para buscar pelo ID dentro do DBRef da lista.
+        // Limpeza de Referências (Integridade)
         Query query = Query.query(Criteria.where("treinosAtribuidos.$id").is(new ObjectId(id)));
         List<Usuario> alunosComTreino = mongoTemplate.find(query, Usuario.class);
 
         for (Usuario aluno : alunosComTreino) {
-            // Remove o treino da lista do aluno
             boolean removido = aluno.getTreinosAtribuidos().removeIf(t -> t.getId().equals(id));
             if (removido) {
                 usuarioRepository.save(aluno);
             }
         }
 
-        // 3. Deleta o treino da coleção
         treinoRepository.deleteById(id);
     }
 
