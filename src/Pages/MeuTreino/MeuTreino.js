@@ -161,16 +161,10 @@ const MeuTreino = ({ navigation }) => {
           if (mountedRef.current) setDesempenhoMap(novoMapa);
           } catch (errDes) { /* Erro ao obter desempenho semanal — ignorar */ }
       } else {
-        // fallback local (sem dados da API)
-        setTreinos([
-          { id: 0, dia: 'Domingo', grupos: '• Descanso', imagem: require('../../../assets/banner_whey.png') },
-          { id: 1, dia: 'Segunda-Feira', grupos: '• Peito • Tríceps', imagem: require('../../../assets/banner_whey.png') },
-          { id: 2, dia: 'Terça-Feira', grupos: '• Costas • Bíceps', imagem: require('../../../assets/banner_creatina.png') },
-          { id: 3, dia: 'Quarta-Feira', grupos: '• Perna completo', imagem: require('../../../assets/banner_vitaminas.png') },
-          { id: 4, dia: 'Quinta-Feira', grupos: '• Cardio • Ombro', imagem: require('../../../assets/banner_roupas.jpg') },
-          { id: 5, dia: 'Sexta-Feira', grupos: '• Abdômen • Costas', imagem: require('../../../assets/banner_camisas.png') },
-          { id: 6, dia: 'Sábado', grupos: '• Alongamento', imagem: require('../../../assets/banner_camisas.png') },
-        ]);
+        // Não preencher com dados mocados por padrão — mostrar estado vazio para novos usuários.
+        // Se quiser habilitar mocks apenas em desenvolvimento, altere para
+        // `if (__DEV__) setTreinos([...mockData])`.
+        setTreinos([]);
       }
     } catch (error) {
       try { const errMsg = error?.message || (typeof error === 'string' ? error : JSON.stringify(error)); /* Erro ao carregar treinos: */ } catch (e) { /* Erro ao carregar treinos (não serializável) */ }
