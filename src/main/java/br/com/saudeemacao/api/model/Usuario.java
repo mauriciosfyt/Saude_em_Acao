@@ -86,7 +86,6 @@ public class Usuario implements UserDetails {
 
     private ENivel nivelAtividade;
 
-    @NotNull(message = "Gênero é obrigatório")
     private EGenero genero;
 
     private EStatus statusPlano;

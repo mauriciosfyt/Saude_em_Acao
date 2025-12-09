@@ -1,9 +1,10 @@
 package br.com.saudeemacao.api.dto;
 import br.com.saudeemacao.api.model.EnumTreino.ENivel;
 import br.com.saudeemacao.api.model.EnumUsuario.*;
+import org.springframework.data.annotation.Id;
 
 public record UsuarioSaidaDTO(
-        String id,
+        @Id String id,
         String nome,
         String email,
         String cpf,
@@ -15,6 +16,7 @@ public record UsuarioSaidaDTO(
         Integer peso,
         Double altura,
         String objetivo,
-        ENivel nivelAtividade, // Voltou ao original
-        boolean possuiTreino // Voltou ao original
-) {}
+        ENivel nivelAtividade,
+        boolean possuiTreino
+) {
+}

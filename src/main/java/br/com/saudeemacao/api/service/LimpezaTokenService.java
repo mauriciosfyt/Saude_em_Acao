@@ -29,5 +29,4 @@ public class LimpezaTokenService {
             log.error("Erro ao limpar tokens antigos: {}", e.getMessage());
         }
     }
-
 }

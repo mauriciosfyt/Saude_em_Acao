@@ -6,7 +6,6 @@ import br.com.saudeemacao.api.dto.ReservaStatsDTO;
 import br.com.saudeemacao.api.model.EnumReserva.EStatusReserva;
 import br.com.saudeemacao.api.model.Reserva;
 import br.com.saudeemacao.api.service.ReservaService;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -41,7 +41,7 @@ public class Treino {
     @NotNull(message = "O nível do treino é obrigatório.")
     private ENivel nivel;
 
-    @NotNull(message = "O público-alvo (gênero) do treino é obrigatório.")
+    @NotNull(message = "O sexo alvo do treino é obrigatório.")
     private EGenero genero;
 
     @NotNull(message = "A idade mínima é obrigatória.")

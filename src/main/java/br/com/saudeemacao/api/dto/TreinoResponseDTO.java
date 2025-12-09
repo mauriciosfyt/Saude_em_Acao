@@ -20,7 +20,7 @@ public class TreinoResponseDTO {
     private String nome;
     private String tipoDeTreino;
     private ENivel nivel;
-    private EGenero sexo;
+    private EGenero genero;
     private Integer idadeMinima;
     private Integer idadeMaxima;
     private ResponsavelDTO responsavel;
