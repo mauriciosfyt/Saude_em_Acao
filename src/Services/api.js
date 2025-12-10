@@ -15,7 +15,7 @@ import axios from 'axios';
 
 // MUDANÇA: 'import.meta.env' não existe no Expo.
 // Definimos uma lista de bases para permitir fallback se um IP estiver inacessível.
-const API_BASE_URLS = ['http://54.144.210.178']; // ordem: preferencial, fallback(s)
+const API_BASE_URLS = ['http://52.91.126.52']; // ordem: preferencial, fallback(s)
 let currentBaseIndex = 0;
 
 // Instância axios central (usa a base atual)
