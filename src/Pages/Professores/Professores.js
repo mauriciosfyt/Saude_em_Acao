@@ -17,48 +17,8 @@ import createStyles from '../../Styles/ProfessoresStyles';
 import { useTheme } from '../../context/ThemeContext';
 import { obterProfessores } from '../../Services/api';
 
-// 1. Importando o novo componente de header
-import HeaderProfessores from '../../Components/header_professores/HeaderProfessores'; // Ajuste o caminho se necessário
-
-// Dados de fallback caso a API não retorne dados
-const professoresFallback = [
-  {
-    id: 1,
-    nome: 'Carlos Moura',
-    foto: require('../../../assets/professoresImg/prof1.jpeg'),
-    whatsapp: '',
-  },
-  {
-    id: 2,
-    nome: 'Ana Schmidt',
-    foto: require('../../../assets/professoresImg/prof2.jpeg'),
-    whatsapp: '',
-  },
-  {
-    id: 3,
-    nome: 'Ricardo Lima',
-    foto: require('../../../assets/professoresImg/prof3.jpeg'),
-    whatsapp: '',
-  },
-  {
-    id: 4,
-    nome: 'Bruno Alves',
-    foto: require('../../../assets/professoresImg/prof4.jpeg'),
-    whatsapp: '',
-  },
-  {
-    id: 5,
-    nome: 'Juliana Costa',
-    foto: require('../../../assets/professoresImg/prof5.jpeg'),
-    whatsapp: '',
-  },
-  {
-    id: 6,
-    nome: 'Fernando Dias',
-    foto: require('../../../assets/professoresImg/prof6.jpeg'),
-    whatsapp: '',
-  },
-];
+// Importando o componente de header
+import HeaderProfessores from '../../Components/header_professores/HeaderProfessores';
 
 const Professores = ({ navigation }) => {
   const colorScheme = useColorScheme();
@@ -83,44 +43,40 @@ const Professores = ({ navigation }) => {
         
         if (!mounted) return;
 
-        if (Array.isArray(dados) && dados.length > 0) {
-          // Mapear resposta da API para o formato esperado pela UI
-          const professoresMapeados = dados.map((prof, idx) => {
-            // Mapear foto da API ou usar fallback local
-            let foto = null;
-            if (prof.foto || prof.imagem) {
-              // Se a API retornar URL da imagem
-              foto = { uri: prof.foto || prof.imagem };
-            } else {
-              // Usar imagens locais como fallback baseado no índice
-              const fotosLocais = [
-                require('../../../assets/professoresImg/prof1.jpeg'),
-                require('../../../assets/professoresImg/prof2.jpeg'),
-                require('../../../assets/professoresImg/prof3.jpeg'),
-                require('../../../assets/professoresImg/prof4.jpeg'),
-                require('../../../assets/professoresImg/prof5.jpeg'),
-                require('../../../assets/professoresImg/prof6.jpeg'),
-              ];
-              foto = fotosLocais[idx % fotosLocais.length];
+        // Lógica alinhada com o index.jsx (Web)
+        // Verifica se é array direto ou se vem dentro de 'content' (paginação Spring Boot, etc)
+        const listaBruta = Array.isArray(dados) ? dados : (dados.content || []);
+
+        if (listaBruta.length > 0) {
+          const professoresMapeados = listaBruta.map((prof, idx) => {
+            
+            // Prioriza fotoPerfil (igual web), fallback para avatar ou foto
+            let urlFoto = prof.fotoPerfil || prof.avatar || prof.foto || prof.imagem;
+            
+            // Correção de URL (Http -> Https) se necessário, similar ao fixImageUrl da web
+            if (urlFoto && urlFoto.startsWith('http://')) {
+              urlFoto = urlFoto.replace('http://', 'https://');
             }
 
             return {
-              id: prof.id || idx + 1,
-              nome: prof.nome || `Professor ${idx + 1}`,
-              foto: foto,
-              whatsapp: prof.whatsapp || prof.telefone || prof.contato || '',
+              id: prof.id || idx,
+              // Prioriza nome, fallback para username
+              nome: prof.nome || prof.username || `Professor ${idx + 1}`,
+              // Se tiver URL, monta objeto uri. Se não, null (tratado no render)
+              foto: urlFoto ? { uri: urlFoto } : null,
+              // Prioriza telefone (web), fallback para whatsapp/phone
+              whatsapp: prof.telefone || prof.whatsapp || prof.phone || prof.contato || '',
             };
           });
 
           setProfessores(professoresMapeados);
         } else {
-          // Se não houver dados da API, usar fallback
-          setProfessores(professoresFallback);
+          setProfessores([]);
         }
       } catch (error) {
+        console.error("Erro ao buscar professores:", error);
         setErro(error.message || 'Erro ao carregar professores');
-        // Em caso de erro, usar dados de fallback
-        setProfessores(professoresFallback);
+        setProfessores([]);
       } finally {
         if (mounted) {
           setCarregando(false);
@@ -134,6 +90,7 @@ const Professores = ({ navigation }) => {
       mounted = false;
     };
   }, []);
+
   // Função para abrir o WhatsApp
   const openWhatsApp = async (numero) => {
     if (!numero || numero.trim() === '') {
@@ -142,62 +99,46 @@ const Professores = ({ navigation }) => {
     }
 
     try {
-      // Formatar número: remover espaços, parênteses, hífens e outros caracteres
-      // Manter apenas dígitos e o sinal de +
+      // Formatar número: remover caracteres não numéricos
       let numeroFormatado = numero.replace(/[^\d+]/g, '');
       
-      // Se não começar com +, assumir que é número brasileiro e adicionar +55
+      // Lógica para garantir DDI +55 se não houver
       if (!numeroFormatado.startsWith('+')) {
-        // Se começar com 0, remover o 0
         if (numeroFormatado.startsWith('0')) {
           numeroFormatado = numeroFormatado.substring(1);
         }
-        // Se começar com 55, adicionar +
-        if (numeroFormatado.startsWith('55')) {
-          numeroFormatado = '+' + numeroFormatado;
-        } else {
-          // Assumir número brasileiro sem código do país
+        if (!numeroFormatado.startsWith('55')) {
+           // Assume Brasil se não tiver código de país
           numeroFormatado = '+55' + numeroFormatado;
+        } else {
+           // Se já começa com 55 mas não tem +, adiciona +
+          numeroFormatado = '+' + numeroFormatado;
         }
       }
 
-      // Remover o + para o formato do WhatsApp
       const numeroWhatsApp = numeroFormatado.replace('+', '');
-      
-      // URLs para diferentes plataformas
       const urlAndroid = `whatsapp://send?phone=${numeroWhatsApp}`;
       const urlIOS = `https://wa.me/${numeroWhatsApp}`;
-      const urlWeb = `https://wa.me/${numeroWhatsApp}`;
       
-      // Tentar abrir no Android primeiro
       const supported = await Linking.canOpenURL(urlAndroid);
       
       if (supported) {
         await Linking.openURL(urlAndroid);
       } else {
-        // Se não funcionar no Android, tentar formato iOS/Web
-        const supportedIOS = await Linking.canOpenURL(urlIOS);
-        if (supportedIOS) {
-          await Linking.openURL(urlIOS);
-        } else {
-          // Última tentativa: formato web
-          await Linking.openURL(urlWeb);
-        }
+        await Linking.openURL(urlIOS);
       }
     } catch (error) {
-      // tentar formato alternativo em caso de erro
+      // Tentativa final genérica
       try {
         const numeroLimpo = numero.replace(/[^\d]/g, '');
         const numeroFinal = numeroLimpo.startsWith('55') ? numeroLimpo : '55' + numeroLimpo;
-        const urlAlternativa = `https://wa.me/${numeroFinal}`;
-        await Linking.openURL(urlAlternativa);
+        await Linking.openURL(`https://wa.me/${numeroFinal}`);
       } catch (err) {
-        Alert.alert('Erro', 'Não foi possível abrir o WhatsApp. Verifique se o aplicativo está instalado.');
+        Alert.alert('Erro', 'Não foi possível abrir o WhatsApp.');
       }
     }
   };
 
-  // Renderizar loading
   if (carregando) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -228,14 +169,11 @@ const Professores = ({ navigation }) => {
 
       <View style={styles.container}>
         
-        {/* 2. Usando o novo componente de header */}
         <HeaderProfessores
           title="Equipe Saúde em Ação"
           onBackPress={() => navigation.goBack()}
-          navigation={navigation} // <-- VOCÊ PRECISA PASSAR A PROP AQUI
+          navigation={navigation}
         />
-
-        {/* O código JSX do header e do título que estavam aqui foram movidos para o componente */}
 
         <ScrollView 
           showsVerticalScrollIndicator={false}
@@ -244,7 +182,7 @@ const Professores = ({ navigation }) => {
           {erro && (
             <View style={{ padding: 16, backgroundColor: '#ffebee', borderRadius: 8, margin: 16 }}>
               <Text style={{ color: '#c62828', textAlign: 'center' }}>
-                ⚠️ {erro} (Usando dados locais)
+                ⚠️ {erro}
               </Text>
             </View>
           )}
@@ -253,7 +191,12 @@ const Professores = ({ navigation }) => {
             {professores.length > 0 ? (
               professores.map((prof) => (
                 <View key={prof.id} style={styles.card}>
-                  <Image source={prof.foto} style={styles.profileImage} />
+                  <Image 
+                    // Se tiver foto da API usa, senão usa um placeholder genérico (prof1 como padrão)
+                    source={prof.foto ? prof.foto : require('../../../assets/professoresImg/prof1.jpeg')} 
+                    style={styles.profileImage} 
+                    resizeMode="cover"
+                  />
                   <Text style={styles.professorName}>{prof.nome}</Text>
                   <TouchableOpacity
                     style={styles.whatsappButton}
@@ -268,11 +211,13 @@ const Professores = ({ navigation }) => {
                 </View>
               ))
             ) : (
-              <View style={{ padding: 20, alignItems: 'center' }}>
-                <Text style={{ color: isDark ? '#FFF' : '#000' }}>
-                  Nenhum professor encontrado.
-                </Text>
-              </View>
+              !erro && (
+                <View style={{ padding: 20, alignItems: 'center' }}>
+                  <Text style={{ color: isDark ? '#FFF' : '#000' }}>
+                    Nenhum professor encontrado.
+                  </Text>
+                </View>
+              )
             )}
           </View>
         </ScrollView>
