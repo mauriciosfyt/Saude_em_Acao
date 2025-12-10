@@ -12,9 +12,11 @@ import java.util.Map;
 @Service
 public class CloudinaryService {
 
-    private static final long MAX_FILE_SIZE = 30 * 1024 * 1024;
+    private static final long MAX_FILE_SIZE = 100 * 1024 * 1024;
+
     private static final String[] ALLOWED_CONTENT_TYPES = {
-            "image/jpeg", "image/png", "image/gif", "image/webp"
+            "image/jpeg", "image/png", "image/gif", "image/webp",
+            "video/mp4", "video/webm", "video/quicktime", "video/x-msvideo" // Adicionados formatos de vídeo
     };
 
     @Autowired
@@ -26,19 +28,23 @@ public class CloudinaryService {
         }
 
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("A imagem de perfil deve ter no máximo 30 MB.");
-        }
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("O arquivo excede o tamanho máximo permitido de 30MB");
+            throw new IllegalArgumentException("O arquivo excede o tamanho máximo permitido de 100MB");
         }
 
-        if (!isContentTypeAllowed(file.getContentType())) {
-            throw new IllegalArgumentException("Tipo de arquivo não suportado. Use JPEG, PNG, GIF ou WEBP");
+        String contentType = file.getContentType();
+        if (!isContentTypeAllowed(contentType)) {
+            throw new IllegalArgumentException("Tipo de arquivo não suportado. Aceitamos apenas Imagens e Vídeos.");
         }
 
         try {
-            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-            return uploadResult.get("url").toString();
+            // "resource_type", "auto" é crucial!
+            // Ele permite que o Cloudinary detecte se é imagem ou vídeo automaticamente.
+            Map params = ObjectUtils.asMap(
+                    "resource_type", "auto"
+            );
+
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+            return uploadResult.get("secure_url").toString();
         } catch (IOException e) {
             throw new IOException("Falha ao fazer upload do arquivo: " + e.getMessage(), e);
         }
