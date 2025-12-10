@@ -92,9 +92,7 @@ public class SegurancaFilterChain {
                 "http://localhost:4200",
                 "http://localhost:5173",
                 "http://localhost:8080",
-                "http://18.214.165.142:3000",
-                "null"
-
+                "http://18.214.165.142:3000"
         ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
