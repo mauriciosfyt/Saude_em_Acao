@@ -56,13 +56,27 @@ const MeuTreino = ({ navigation }) => {
         ];
         const expanded = [];
         dados.forEach((t, idx) => {
-          const baseImage = t.imagem ? { uri: t.imagem } : [
-            require("../../../assets/banner_whey.png"),
-            require("../../../assets/banner_creatina.png"),
-            require("../../../assets/banner_vitaminas.png"),
-            require("../../../assets/banner_roupas.jpg"),
-            require("../../../assets/banner_camisas.png"),
-          ][idx % 5];
+          const defaultImages = [
+            require("../../../assets/funcional.jpg"),
+            require("../../../assets/banner_bike.jpg"),
+            require("../../../assets/banner_corrida.jpg"),
+            require("../../../assets/banner_circuito.jpg"),
+            require("../../../assets/thayfit.jpg"),
+          ];
+
+          const dayImageMap = {
+            'SEGUNDA': require("../../../assets/funcional.jpg"),
+            'TERCA': require("../../../assets/banner_bike.jpg"),
+            'TERÇA': require("../../../assets/banner_bike.jpg"),
+            'QUARTA': require("../../../assets/banner_corrida.jpg"),
+            'QUINTA': require("../../../assets/banner_circuito.jpg"),
+            'SEXTA': require("../../../assets/thayfit.jpg"),
+            'SABADO': require("../../../assets/banner_bike.jpg"),
+            'SÁBADO': require("../../../assets/banner_bike.jpg"),
+            'DOMINGO': require("../../../assets/funcional.jpg"),
+          };
+
+          const baseImageDefault = t.imagem ? { uri: t.imagem } : defaultImages[idx % defaultImages.length];
 
           const dayFullMap = {
             'SEGUNDA': 'Segunda','TERCA': 'Terça','TERÇA': 'Terça','QUARTA': 'Quarta','QUINTA': 'Quinta','SEXTA': 'Sexta','SABADO': 'Sábado','SÁBADO': 'Sábado'
@@ -72,12 +86,13 @@ const MeuTreino = ({ navigation }) => {
             Object.keys(t.exerciciosPorDia).forEach((k, kidx) => {
               const up = String(k).toUpperCase();
               const diaLabel = dayFullMap[up] || (k[0].toUpperCase() + k.slice(1).toLowerCase());
+              const imgForDay = t.imagem ? { uri: t.imagem } : (dayImageMap[up] || defaultImages[(idx + kidx) % defaultImages.length]);
               expanded.push({
                 id: `${t.id || idx + 1}_${up}_${kidx}`,
                 treinoId: t.id || t.treinoId || t._id || null,
                 dia: diaLabel,
                 grupos: Array.isArray(t.exerciciosPorDia[k]) ? `• ${t.exerciciosPorDia[k].map(e => e.nome).join(' • ')}` : (t.grupos || ''),
-                imagem: baseImage,
+                imagem: imgForDay,
                 exercicios: t.exerciciosPorDia[k],
               });
             });
