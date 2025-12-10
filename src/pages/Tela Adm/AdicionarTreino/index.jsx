@@ -226,22 +226,24 @@ export default function AdicionarTreino() {
     return mapa[nivel] || nivel;
   };
 
-  // Função para converter sexo para o formato da API
-  const converterSexoParaAPI = (sexo) => {
+  // Função para converter gênero para o formato da API
+  const converterSexoParaAPI = (Genero) => {
     const mapa = {
       'Masculino': 'MASCULINO',
-      'Feminino': 'FEMININO'
+      'Feminino': 'FEMININO',
+      'Outro': 'OUTRO'
     };
-    return mapa[sexo] || sexo.toUpperCase();
+    return mapa[Genero] || Genero.toUpperCase();
   };
 
-  // Função para converter sexo da API para o formato da UI
-  const converterSexoDaAPI = (sexo) => {
+  // Função para converter gênero da API para o formato da UI
+  const converterSexoDaAPI = (Genero) => {
     const mapa = {
       'MASCULINO': 'Masculino',
-      'FEMININO': 'Feminino'
+      'FEMININO': 'Feminino',
+      'OUTRO': 'Outro'
     };
-    return mapa[sexo] || sexo;
+    return mapa[Genero] || Genero;
   };
 
   // Funções para manipulação de imagem
@@ -366,7 +368,6 @@ export default function AdicionarTreino() {
         try {
           setLoading(true);
           const treinoData = await getTreinoById(treinoId);
-          console.debug('treinoData recebido (GET):', treinoData);
 
           // Preencher formulário com dados do treino
           if (treinoData) {
@@ -791,7 +792,7 @@ export default function AdicionarTreino() {
         nome: formData.nome.trim(),
         tipoDeTreino: formData.tipoTreino.trim(),
         nivel: converterNivelParaAPI(formData.nivel),
-        sexo: converterSexoParaAPI(formData.sexo),
+        genero: converterSexoParaAPI(formData.sexo),
         idadeMinima: idadeMinima,
         idadeMaxima: idadeMaxima,
         exerciciosPorDia: exerciciosPorDiaPayload,
@@ -922,14 +923,15 @@ export default function AdicionarTreino() {
                 </select>
               </div>
               <div className="adicionartreino-form-field">
-                <label htmlFor="sexo">Sexo</label>
+                <label htmlFor="genero">Gênero</label>
                 <select
-                  id="sexo"
+                  id="genero"
                   value={formData.sexo}
                   onChange={(e) => setFormData(prev => ({ ...prev, sexo: e.target.value }))}
                 >
                   <option>Masculino</option>
                   <option>Feminino</option>
+                  <option>Outro</option>
                 </select>
               </div>
             </div>

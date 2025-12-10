@@ -44,13 +44,36 @@ const GerenciarAlunos = () => {
     try {
       setLoading(true);
       setError('');
-      console.log(' Token sendo usado:', user?.token);
+      console.log('🔐 Iniciando busca de alunos...');
+      console.log('👤 Usuário:', user);
+      console.log('🔑 Token existe:', !!user?.token);
+      
       const alunosData = await getAllAlunos();
-      console.log(' Dados recebidos:', alunosData);
+      console.log('✅ Dados recebidos:', alunosData);
       setAlunos(alunosData);
     } catch (err) {
-      console.error(' Erro ao carregar alunos:', err);
-      setError('Erro ao carregar lista de alunos. Verifique sua conexão e permissões.');
+      console.error('❌ Erro ao carregar alunos:', err.message);
+      
+      // Mensagem de erro mais específica
+      let mensagem = 'Erro ao carregar lista de alunos.';
+      
+      if (err.message.includes('Treino.getId()') || err.message.includes('treino')) {
+        mensagem = '⚠️ Erro no servidor: O backend precisa de correção para retornar alunos (problema com campo Treino null). Entre em contato com o administrador.';
+      } else if (err.message.includes('400')) {
+        mensagem = 'Erro 400: O servidor retornou um erro. Verifique se há dados consistentes na base.';
+      } else if (err.message.includes('401')) {
+        mensagem = 'Erro 401: Não autorizado. Faça login novamente.';
+      } else if (err.message.includes('403')) {
+        mensagem = 'Erro 403: Acesso negado. Você não tem permissão para acessar esta página.';
+      } else if (err.message.includes('Token')) {
+        mensagem = 'Token de autenticação não encontrado. Faça login novamente.';
+      } else {
+        mensagem = err.message || 'Erro ao carregar lista de alunos.';
+      }
+      
+      setError(mensagem);
+      // Exibe lista vazia em vez de quebrar completamente
+      setAlunos([]);
     } finally {
       setLoading(false);
     }

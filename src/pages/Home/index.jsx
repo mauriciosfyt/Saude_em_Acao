@@ -2,7 +2,7 @@
 import "./styles.css";
 import banner_home from "../../assets/banners/banner_home.svg";
 import img_abaixo_banner from "../../assets/img_home.jpeg";
-import QRcode from "../../assets/QRcode.jpg";
+import QRcode from "../../assets/QRcode.png";
 import modalidade1 from "../../assets/banners/thayfit.jpg";
 import modalidade2 from "../../assets/banners/pilates.jpg";
 import modalidade3 from "../../assets/banners/funcional.jpg";
@@ -173,7 +173,7 @@ function Home() {
               </ul>
               <div className="qr-section">
                 <a href={"https://drive.google.com/drive/folders/14QIwecSJWc-K1gIv1NrkElDX8_nzp-nv?usp=drive_link"} target="_blank" rel="noopener noreferrer">
-                  <img src={QRcode} alt="QR Code" style={{ cursor: "pointer" }} />
+                  <img src={QRcode} alt="QR Code" style={{ cursor: "pointer", backgroundColor: "#fff" }} />
                 </a>
               </div>
             </div>

@@ -120,7 +120,7 @@ export default function implementarTreino() {
     responsavel: '',
     tipoTreino: 'Musculação',
     nivel: 'Iniciante',
-    sexo: 'Masculino',
+    sexo: 'MASCULINO',
     idadeMin: 15,
     idadeMax: 30
   });
@@ -224,23 +224,33 @@ export default function implementarTreino() {
     return mapa[nivel] || nivel;
   };
 
-  // Função para converter sexo para o formato da API
-  const converterSexoParaAPI = (sexo) => {
-    const mapa = {
-      'Masculino': 'MASCULINO',
-      'Feminino': 'FEMININO'
-    };
-    return mapa[sexo] || sexo.toUpperCase();
+  // Normaliza qualquer input de gênero para o enum da API (MASCULINO/FEMININO/OUTRO)
+  const normalizeGeneroToAPI = (input) => {
+    if (!input && input !== 0) return '';
+    const s = String(input).trim().toUpperCase();
+    if (s === 'MASCULINO' || s === 'M') return 'MASCULINO';
+    if (s === 'FEMININO' || s === 'F') return 'FEMININO';
+    if (s === 'OUTRO' || s === 'OUTROS' || s === 'O') return 'OUTRO';
+    // suportar labels em pt-br
+    if (s === 'MASCULINO' || s === 'MASCULINO') return 'MASCULINO';
+    if (s === 'FEMININO' || s === 'FEMININO') return 'FEMININO';
+    // fallback: se já for algo uppercase use como está, senão transformar para uppercase
+    return s;
   };
 
-  // Função para converter sexo da API para o formato da UI
-  const converterSexoDaAPI = (sexo) => {
+  // Função para converter enum da API para rótulo de UI
+  const mapAPIToLabel = (genero) => {
     const mapa = {
       'MASCULINO': 'Masculino',
-      'FEMININO': 'Feminino'
+      'FEMININO': 'Feminino',
+      'OUTRO': 'Outro'
     };
-    return mapa[sexo] || sexo;
+    return mapa[genero] || genero;
   };
+
+  // Função para converter para API (compatível se já for enum)
+  const converterSexoParaAPI = (genero) => normalizeGeneroToAPI(genero);
+
 
   // Funções para manipulação de imagem
   const handleImagemClick = (exerciseId) => {
@@ -389,7 +399,7 @@ export default function implementarTreino() {
                 responsavel: responsavelNome,
                 tipoTreino: treinoData.tipoDeTreino || treinoData.tipoTreino || treinoData.tipo || 'Musculação',
                 nivel: converterNivelDaAPI(treinoData.nivel) || 'Iniciante',
-                sexo: converterSexoDaAPI(treinoData.sexo) || 'Masculino',
+                sexo: normalizeGeneroToAPI(treinoData.sexo || treinoData.genero) || 'MASCULINO',
                 idadeMin: treinoData.idadeMinima || treinoData.idadeMin || 15,
                 idadeMax: treinoData.idadeMaxima || treinoData.idadeMax || 30
               });
@@ -534,7 +544,7 @@ export default function implementarTreino() {
           responsavel: responsavelNome,
           tipoTreino: treinoData.tipoDeTreino || treinoData.tipoTreino || treinoData.tipo || 'Musculação',
           nivel: converterNivelDaAPI(treinoData.nivel) || 'Iniciante',
-          sexo: converterSexoDaAPI(treinoData.sexo) || 'Masculino',
+          sexo: normalizeGeneroToAPI(treinoData.sexo || treinoData.genero) || 'MASCULINO',
           idadeMin: treinoData.idadeMinima || treinoData.idadeMin || 15,
           idadeMax: treinoData.idadeMaxima || treinoData.idadeMax || 30
         });
@@ -793,7 +803,7 @@ export default function implementarTreino() {
         nome: formData.nome.trim(),
         tipoDeTreino: formData.tipoTreino.trim(),
         nivel: converterNivelParaAPI(formData.nivel),
-        sexo: converterSexoParaAPI(formData.sexo),
+        genero: converterSexoParaAPI(formData.sexo),
         idadeMinima: idadeMinima,
         idadeMaxima: idadeMaxima,
         // Envia a estrutura por dia (obrigatória para o backend)
@@ -819,7 +829,7 @@ export default function implementarTreino() {
         });
       }
       
-      navigate('/GerenciarTreino');
+      navigate('/AdministrarTreino');
     } catch (error) {
       console.error('Erro ao salvar treino:', error);
       toast.error(error.message || 'Erro ao salvar treino. Tente novamente.', {
@@ -835,7 +845,7 @@ export default function implementarTreino() {
   // Função para cancelar
   const handleCancelar = () => {
     if (window.confirm('Tem certeza que deseja cancelar? As alterações não salvas serão perdidas.')) {
-      navigate('/GerenciarTreino');
+      navigate('/AdministrarTreino');
     }
   };
 
@@ -907,14 +917,15 @@ export default function implementarTreino() {
                   </select>
                 </div>
                 <div className="adicionartreino-form-field">
-                  <label htmlFor="sexo">Sexo</label>
-                  <select 
-                    id="sexo" 
+                  <label htmlFor="genero">Gênero</label>
+                  <select
+                    id="genero" 
                     value={formData.sexo}
                     onChange={(e) => setFormData(prev => ({ ...prev, sexo: e.target.value }))}
                   >
-                    <option>Masculino</option>
-                    <option>Feminino</option>
+                    <option value="MASCULINO">Masculino</option>
+                    <option value="FEMININO">Feminino</option>
+                    <option value="OUTRO">Outro</option>
                   </select>
                 </div>
               </div>

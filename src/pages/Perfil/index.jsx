@@ -6,7 +6,7 @@ import perfilPhoto from "../../assets/icones/icone Perfil 100x100.png";
 import './Perfil.css'; // Importa o CSS corrigido
 import performLogout from "../../components/LogoutButton/LogoutButton";
 import { getMeuPerfil, API_URL } from "../../services/usuarioService";
-import { getMeusTreinos } from "../../services/treinoService";
+import { getMeusTreinos, getDesempenhoSemanal } from "../../services/treinoService";
 import { fixImageUrl } from "../../utils/image";
 import { FaTimesCircle } from 'react-icons/fa';
 
@@ -36,10 +36,140 @@ const Perfil = () => {
     perfil: "ALUNO",
     plano: "",
     dataUltimoTreino: "",
-    nivelAtividade: ""
+    nivelAtividade: "",
+    treinosFeitos: 0,
+    ultimoTreino: "",
+    desempenhoSemanal: []
   });
 
   const [profileImage, setProfileImage] = useState(perfilPhoto);
+
+  // Helper robusto: procura recursivamente qualquer campo que pareça data (ISO, DD/MM/YYYY, timestamp)
+  const formatDateForLast = (obj) => {
+    if (!obj) return '';
+
+    const tryFormat = (val) => {
+      if (val === null || val === undefined) return null;
+      // numbers: timestamp (seconds or millis)
+      if (typeof val === 'number') {
+        // seconds -> ms
+        const maybe = val > 1e12 ? new Date(val) : new Date(val * 1000);
+        if (!isNaN(maybe.getTime())) return maybe.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      }
+      // strings
+      if (typeof val === 'string') {
+        const s = val.trim();
+        if (!s) return null;
+        // Already BR format
+        const br = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+        if (br) return s;
+        // ISO-like
+        const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (iso) {
+          const d = new Date(s);
+          if (!isNaN(d.getTime())) return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+        // contains T
+        if (s.includes('T')) {
+          const d = new Date(s);
+          if (!isNaN(d.getTime())) return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+        // numeric string timestamp
+        const num = Number(s);
+        if (!isNaN(num) && num > 0) {
+          const maybe = num > 1e12 ? new Date(num) : new Date(num * 1000);
+          if (!isNaN(maybe.getTime())) return maybe.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+      }
+      return null;
+    };
+
+    const seen = new Set();
+    const stack = [obj];
+    while (stack.length) {
+      const cur = stack.pop();
+      if (!cur || seen.has(cur)) continue;
+      seen.add(cur);
+      if (typeof cur === 'object' && !Array.isArray(cur)) {
+        for (const k of Object.keys(cur)) {
+          try {
+            const v = cur[k];
+            const parsed = tryFormat(v);
+            if (parsed) return parsed;
+            if (typeof v === 'object' && v !== null) stack.push(v);
+          } catch (e) {
+            // ignore property access errors
+          }
+        }
+      } else if (Array.isArray(cur)) {
+        for (const it of cur) {
+          const parsed = tryFormat(it);
+          if (parsed) return parsed;
+          if (typeof it === 'object' && it !== null) stack.push(it);
+        }
+      } else {
+        const parsed = tryFormat(cur);
+        if (parsed) return parsed;
+      }
+    }
+
+    return '';
+  };
+
+  // Compute summary (count, last, mapped) from API retorno de desempenho
+  const computeDesempenhoFromApi = (desempenho) => {
+    const arr = Array.isArray(desempenho) ? desempenho : (desempenho?.data || desempenho?.content || desempenho?.items || []);
+    let mapped = [];
+    let count = 0;
+    let last = '';
+    if (Array.isArray(arr) && arr.length > 0 && arr[0].hasOwnProperty('dia')) {
+      const dias = arr.map(d => ({ dia: (d.dia || d.day || '').toString().toUpperCase(), realizado: !!d.realizado }));
+      count = dias.filter(d => d.realizado).length;
+      const weekdayMap = { 'DOMINGO':0,'SEGUNDA':1,'TERCA':2,'TERÇA':2,'QUARTA':3,'QUINTA':4,'SEXTA':5,'SABADO':6,'SÁBADO':6 };
+      const weekdayOrder = ['SABADO','SEXTA','QUINTA','QUARTA','TERCA','SEGUNDA','DOMINGO'];
+      let found = null;
+      for (const wd of weekdayOrder) {
+        const item = dias.find(d => d.dia === wd && d.realizado);
+        if (item) { found = item; break; }
+      }
+      if (found) {
+        const now = new Date();
+        const monday = new Date(now);
+        const dayIndex = (now.getDay() + 6) % 7;
+        monday.setDate(now.getDate() - dayIndex);
+        const targetIndex = weekdayMap[found.dia];
+        if (typeof targetIndex === 'number') {
+          const targetDate = new Date(monday);
+          const offset = targetIndex === 0 ? 6 : (targetIndex - 1);
+          targetDate.setDate(monday.getDate() + offset);
+          last = targetDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+      }
+      mapped = arr;
+    } else {
+      mapped = (Array.isArray(arr) ? arr : []).map((it, idx) => {
+        const nome = it.nome || it.titulo || it.title || it.name || `Treino ${idx + 1}`;
+        const dateFormatted = formatDateFromItem(it) || formatDateFromItem(it?.raw) || '';
+        return { id: it.id || it._id || idx, nome, dateFormatted };
+      });
+      count = Array.isArray(mapped) ? mapped.length : 0;
+      try {
+        const withDates = mapped.filter(m => m.dateFormatted);
+        if (withDates.length > 0) {
+          const sorted = withDates.sort((a,b)=>{
+            const pa = a.dateFormatted.split('/').reverse().join('-');
+            const pb = b.dateFormatted.split('/').reverse().join('-');
+            return new Date(pa) - new Date(pb);
+          });
+          const lastItem = sorted[sorted.length - 1];
+          last = lastItem?.dateFormatted || lastItem?.nome || '';
+        } else if (mapped.length > 0) {
+          last = mapped[0].nome || '';
+        }
+      } catch (e) { last = '' }
+    }
+    return { count, last, mapped };
+  };
 
   // Função para buscar o token salvo e decodificá-lo
   const getDecodedToken = () => {
@@ -150,6 +280,16 @@ const Perfil = () => {
                 setUserData(prev => ({ ...prev, treinosAtribuidos: arr }));
               }
             }
+            // Também tenta buscar desempenho semanal (quantidade de treinos e último treino)
+            try {
+              const desempenho = await getDesempenhoSemanal();
+              if (desempenho) {
+                const summary = computeDesempenhoFromApi(desempenho);
+                setUserData(prev => ({ ...prev, treinosFeitos: summary.count, ultimoTreino: summary.last }));
+              }
+            } catch (e) {
+              console.warn('Não foi possível carregar desempenho semanal:', e);
+            }
           } catch (e) {
             console.warn('Não foi possível carregar meus treinos:', e);
           }
@@ -232,6 +372,17 @@ const Perfil = () => {
                 setUserData(prev => ({ ...prev, treinosAtribuidos: arr }));
               }
             }
+            // Busca também desempenho semanal para preencher o card "Meu Desempenho"
+            try {
+              const desempenho = await getDesempenhoSemanal();
+              if (desempenho) {
+                const summary = computeDesempenhoFromApi(desempenho);
+                setUserData(prev => ({ ...prev, treinosFeitos: summary.count, ultimoTreino: summary.last }));
+              }
+            } catch (e) {
+              console.warn('Não foi possível carregar desempenho semanal:', e);
+            }
+            
           } catch (e) {
             console.warn('Não foi possível carregar meus treinos:', e);
           }
@@ -252,6 +403,131 @@ const Perfil = () => {
 
   // chave do plano em minúsculas (usada para condições de exibição)
   const planKey = (userData.plano || userData.perfil || '').toString().toLowerCase();
+
+  // Helper: tenta extrair uma data de vários possíveis campos e retorna string formatada DD/MM/YYYY
+  const formatDateFromItem = (item) => {
+    if (!item) return '';
+    const candidates = [
+      item.data,
+      item.date,
+      item.dataRealizacao,
+      item.data_realizacao,
+      item.realizadoEm,
+      item.realizado_em,
+      item.createdAt,
+      item.created_at,
+      item.dataUltimoTreino,
+      item.ultimoTreino,
+      item.ultimo_treino,
+      item.timestamp,
+      item.time
+    ];
+
+    for (let c of candidates) {
+      if (!c) continue;
+      // já pode vir formatado em DD/MM/YYYY
+      const s = String(c);
+      const brMatch = s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+      if (brMatch) return s;
+      const maybeISO = s.split('T')[0];
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      }
+      // try parsing YYYY-MM-DD
+      const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (isoMatch) {
+        try {
+          const dd = new Date(s);
+          if (!isNaN(dd.getTime())) return dd.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        } catch (e) {}
+      }
+    }
+    return '';
+  };
+
+  // Sempre tentar buscar desempenho semanal (lista + datas) ao montar o componente
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const desempenho = await getDesempenhoSemanal();
+        if (!desempenho) return;
+
+        const arr = Array.isArray(desempenho)
+          ? desempenho
+          : (desempenho.data || desempenho.content || desempenho.items || []);
+        // Special handling: some APIs return an array of weekdays with 'dia' and 'realizado'
+        let mapped = [];
+        let count = 0;
+        let last = '';
+        if (Array.isArray(arr) && arr.length > 0 && arr[0].hasOwnProperty('dia')) {
+          // count realizados
+          const dias = arr.map(d => ({ dia: (d.dia || d.day || '').toString().toUpperCase(), realizado: !!d.realizado }));
+          count = dias.filter(d => d.realizado).length;
+          // find the most recent realizado in the week (prefer later in week)
+          const order = ['DOMINGO','SEGUNDA','TERCA','TERCA','TERÇA','QUARTA','QUINTA','SEXTA','SABADO','SÁBADO','SABADO'];
+          // normalize mapping to weekday index: Sunday=0, Monday=1... Saturday=6
+          const weekdayMap = { 'DOMINGO':0,'SEGUNDA':1,'TERCA':2,'TERÇA':2,'QUARTA':3,'QUINTA':4,'SEXTA':5,'SABADO':6,'SÁBADO':6 };
+
+          // find last realizado by scanning days in reverse order (Saturday -> Sunday)
+          const weekdayOrder = ['SABADO','SEXTA','QUINTA','QUARTA','TERCA','SEGUNDA','DOMINGO'];
+          let found = null;
+          for (const wd of weekdayOrder) {
+            const item = dias.find(d => d.dia === wd && d.realizado);
+            if (item) { found = item; break; }
+          }
+
+          if (found) {
+            // compute date for this weekday in current week
+            const now = new Date();
+            // get Monday of current week
+            const monday = new Date(now);
+            const dayIndex = (now.getDay() + 6) % 7; // 0..6 where 0=Monday
+            monday.setDate(now.getDate() - dayIndex);
+            const targetIndex = weekdayMap[found.dia];
+            if (typeof targetIndex === 'number') {
+              // convert monday-based to target date
+              const targetDate = new Date(monday);
+              // monday is index 0 in this scheme, but our weekdayMap uses Sunday=0, Monday=1
+              // compute offset from monday: if targetIndex==0 (Sunday) offset = 6
+              const offset = targetIndex === 0 ? 6 : (targetIndex - 1);
+              targetDate.setDate(monday.getDate() + offset);
+              last = targetDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            }
+          }
+          // keep desempenhoSemanal as original array for potential use
+          mapped = arr;
+        } else {
+          mapped = (Array.isArray(arr) ? arr : []).map((it, idx) => {
+            const nome = it.nome || it.titulo || it.title || it.name || `Treino ${idx + 1}`;
+            const dateFormatted = formatDateFromItem(it) || formatDateFromItem(it?.raw) || '';
+            return { id: it.id || it._id || idx, nome, dateFormatted };
+          });
+          count = Array.isArray(mapped) ? mapped.length : 0;
+          try {
+            const withDates = mapped.filter(m => m.dateFormatted);
+            if (withDates.length > 0) {
+              const sorted = withDates.sort((a,b)=>{
+                const pa = a.dateFormatted.split('/').reverse().join('-');
+                const pb = b.dateFormatted.split('/').reverse().join('-');
+                return new Date(pa) - new Date(pb);
+              });
+              const lastItem = sorted[sorted.length - 1];
+              last = lastItem?.dateFormatted || lastItem?.nome || '';
+            } else if (mapped.length > 0) {
+              last = mapped[0].nome || '';
+            }
+          } catch (e) { last = '' }
+        }
+
+        if (mounted) setUserData(prev => ({ ...prev, treinosFeitos: count, ultimoTreino: last, desempenhoSemanal: mapped }));
+      } catch (e) {
+        console.warn('Erro ao buscar desempenho semanal (useEffect dedicado):', e);
+      }
+    })();
+    return () => { mounted = false };
+  }, []);
 
   return (
     <div>
@@ -302,6 +578,8 @@ const Perfil = () => {
                 </div>
               </div>
             )}
+
+            {/* desempenhoSemanal data kept in state but not rendered here (kept for functionality) */}
 
             {/* Card "Plano Black" com os novos ícones SVG */}
             {/* Plano: exibe os recursos conforme o plano do usuário (mocked) */}
@@ -359,6 +637,8 @@ const Perfil = () => {
           </div>
         </section>
       </main>
+
+      {/* debug temporário removido */}
 
       <div className="perfil-wave">
         <svg viewBox="0 0 1440 320" preserveAspectRatio="none">

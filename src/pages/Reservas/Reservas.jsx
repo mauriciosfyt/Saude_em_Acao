@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Importa seu serviço da API
-import { fetchMinhasReservas } from '../../services/reservasService'; // Ajuste o caminho se necessário
+import { fetchMinhasReservas, cancelarReserva } from '../../services/reservasService'; // Ajuste o caminho se necessário
 
 // Importa o utilitário de imagem
 import { fixImageUrl } from '../../utils/image'; // Ajuste o caminho se necessário
@@ -15,16 +15,20 @@ import Header from '../../components/header_loja';
 
 // A imagem estática que você usava (agora servirá como fallback)
 import imagemUrlFallback from '../../assets/IMG PRODUTO.jpg';
+import logoEmpresa from '../../assets/logo.png'; // Ajuste o caminho se necessário
 
 // Imports do Toastify
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../components/Mensagem/Excluido.css'; // Seu CSS customizado para mensagens
 import '../../components/Mensagem/Editado.css'; // Seu CSS customizado para mensagens de sucesso
+import '../../components/Mensagem/Sucesso.css'; // Seu CSS customizado para mensagens de sucesso
+import '../../components/Mensagem/Cancelado.css'; // Import do seu CSS de Cancelado
+
+// Importação do Modal de Confirmação
+import ModalConfirmacao from '../../components/ModalConfirmacao/ModalConfirmacao';
 
 // == HELPER FUNCTIONS ==
-// (Funções de formatarDataParaDia, mapearStatusUI, getStatusClassName e agruparPedidosPorData - mantidas como antes)
-// ---
 const agruparPedidosPorData = (pedidos) => {
   return pedidos.reduce((acc, pedido) => {
     const data = pedido.data;
@@ -44,7 +48,6 @@ const formatarDataParaDia = (isoString) => {
     return 'Data Inválida';
   }
 };
-// --- Em Reservas.jsx ---
 
 const getStatusClassName = (status) => {
   switch (status) {
@@ -52,7 +55,6 @@ const getStatusClassName = (status) => {
     case 'Aprovado': return 'status-aprovado'; 
     case 'Retirado': return 'status-retirado'; 
     case 'Cancelado': return 'status-cancelado';
-    // ADICIONE ESTA LINHA:
     case 'Concluida': return 'status-concluida'; 
     default: return '';
   }
@@ -68,12 +70,10 @@ const mapearStatusUI = (apiStatus) => {
       return 'Aprovado';
     case 'RETIRADO':
       return 'Retirado';
-    // ADICIONE ESTE BLOCO:
     case 'CONCLUIDA':
     case 'CONCLUIDO':
     case 'COMPLETED':
       return 'Retirado';
-    // -------------------
     case 'CANCELADA': 
     case 'CANCELADO':
     case 'REJEITADO':
@@ -98,10 +98,30 @@ const Reservas = () => {
   // Estado para o filtro de status
   const [statusFiltro, setStatusFiltro] = useState('Todos'); // 'Todos' é o padrão
 
-  // NOVO: Estado para controlar a visibilidade do dropdown de filtro
+  // Estado para controlar a visibilidade do dropdown de filtro
   const [filtroAberto, setFiltroAberto] = useState(false);
 
-  // useEffect para buscar os dados da API (sem alteração)
+  // Estados para controlar o Modal de Confirmação
+  const [modalAberto, setModalAberto] = useState(false);
+  const [reservaSelecionada, setReservaSelecionada] = useState(null);
+
+  // useEffect para travar o scroll da página quando o modal estiver aberto
+  useEffect(() => {
+    if (modalAberto) {
+      // Trava o scroll
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Libera o scroll
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup: garante que o scroll seja liberado se o componente desmontar
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [modalAberto]);
+
+  // useEffect para buscar os dados da API
   useEffect(() => {
     const carregarReservas = async () => {
       try {
@@ -123,9 +143,9 @@ const Reservas = () => {
     };
 
     carregarReservas();
-  }, []); // O array vazio [] faz com que rode apenas uma vez
+  }, []); 
 
-  // useMemo para processar e filtrar os dados da API (lógica interna sem alteração)
+  // useMemo para processar e filtrar os dados da API
   const pedidosProcessados = useMemo(() => {
     // 1. Normalizar dados
     const pedidosFormatados = reservasApi.map(r => {
@@ -155,17 +175,16 @@ const Reservas = () => {
     // 3. Agrupar
     return agruparPedidosPorData(pedidosFiltrados);
 
-  }, [reservasApi, termoBusca, statusFiltro]); // Dependências corretas
+  }, [reservasApi, termoBusca, statusFiltro]); 
 
   // Lógica original para ordenar as datas
   const datasOrdenadas = Object.keys(pedidosProcessados).sort((a, b) => new Date(b.split('/').reverse().join('-')) - new Date(a.split('/').reverse().join('-')));
 
-  // Funções de clique (sem alteração)
+  // Funções de clique
   const handleVerProduto = (produtoId) => {
     if (produtoId) {
       navigate(`/LojaProduto/${produtoId}`);
     } else {
-
       toast.error('ID do produto não encontrado.', {
         className: "custom-error-toast",
         progressClassName: "custom-error-progress-bar",
@@ -196,13 +215,73 @@ const Reservas = () => {
     }
   };
 
-  // NOVO: Função para lidar com a seleção de filtro no dropdown
-  const handleFiltroClick = (status) => {
-    setStatusFiltro(status); // Define o filtro
-    setFiltroAberto(false); // Fecha o dropdown
+  // Função para abrir o modal e salvar o ID
+  const handleAbrirModalCancelamento = (reservaId) => {
+    if (!reservaId) return toast.error('ID da reserva não encontrado.');
+    setReservaSelecionada(reservaId);
+    setModalAberto(true);
   };
 
-  // Lista de filtros a serem exibidos no dropdown
+  // Função para fechar o modal
+  const handleFecharModal = () => {
+    setModalAberto(false);
+    setReservaSelecionada(null);
+  };
+
+  // Executa o cancelamento após confirmação no Modal
+  const confirmarCancelamento = async () => {
+    if (!reservaSelecionada) return;
+
+    // 1. FECHA O MODAL IMEDIATAMENTE
+    handleFecharModal();
+
+    // 2. Toast de Carregando
+    const idToast = toast.loading("Processando cancelamento...", { position: "top-right" });
+
+    try {
+      await cancelarReserva(reservaSelecionada);
+
+      // 3. ATUALIZAÇÃO DO ESTADO CORRIGIDA
+      // Usamos String() para garantir que a comparação de ID (que pode vir como número ou texto) funcione
+      setReservasApi(prev => prev.map(r => {
+        if (String(r?.id) === String(reservaSelecionada)) {
+          return { ...r, status: 'CANCELADO' }; // Atualiza para o status que seu mapeador entende
+        }
+        return r;
+      }));
+
+      // 4. ATUALIZA o toast para SUCESSO
+      toast.update(idToast, {
+        render: "Reserva cancelada com sucesso.",
+        type: "success",
+        isLoading: false,
+        autoClose: 2000,
+        className: "custom-success-toast", 
+        progressClassName: "Toastify__progress-bar--success",
+        icon: true 
+      });
+
+    } catch (err) {
+      console.error('Erro ao cancelar reserva:', err);
+      
+      // Se der erro, atualiza o toast para erro
+      toast.update(idToast, {
+        render: "Falha ao cancelar a reserva. Tente novamente.",
+        type: "error",
+        isLoading: false,
+        autoClose: 2000,
+        className: "custom-error-toast",
+        progressClassName: "custom-error-progress-bar",
+      });
+    }
+  };
+
+  // Função para lidar com a seleção de filtro no dropdown
+  const handleFiltroClick = (status) => {
+    setStatusFiltro(status); 
+    setFiltroAberto(false); 
+  };
+
   const filtrosStatus = ['Todos', 'Em Análise', 'Aprovado', 'Retirado', 'Cancelado'];
 
   useEffect(() => {
@@ -218,23 +297,32 @@ const Reservas = () => {
       <ToastContainer />
       <Header />
 
+      {/* Modal de Confirmação */}
+      <ModalConfirmacao 
+        isOpen={modalAberto}
+        onClose={handleFecharModal}
+        onConfirm={confirmarCancelamento}
+        title="Cancelar Reserva"
+        message="Tem certeza que deseja cancelar esta reserva? Esta ação não pode ser desfeita."
+        logoSrc={logoEmpresa}
+        confirmLabel="Sim, cancelar"
+        cancelLabel="Voltar"
+      />
+
       <div className="pagina-reservas">
         <main className="main-content">
           <div className="container-barra-busca">
             <BarraDeBusca
               valorBusca={termoBusca}
               aoAlterarValor={setTermoBusca}
-              // ATUALIZADO: Agora abre/fecha o dropdown
               aoClicarFiltro={() => setFiltroAberto(prev => !prev)}
             />
             
-            {/* NOVO: Dropdown de Filtro (condicional) */}
             {filtroAberto && (
               <div className="reservas-filtro-dropdown">
                 {filtrosStatus.map(status => (
                   <button
                     key={status}
-                    // ATUALIZADO: Mostra qual item está ativo
                     className={`filtro-dropdown-item ${statusFiltro === status ? 'active' : ''}`}
                     onClick={() => handleFiltroClick(status)}
                   >
@@ -245,20 +333,16 @@ const Reservas = () => {
             )}
           </div>
 
-          {/* REMOVIDO: O container antigo .reservas-filtro-container foi removido daqui */}
-
           <div className="container-pedidos">
-            {/* Feedback de Carregamento e Erro */}
-
-{isLoading && ( 
-  <div className="reservas-loading" style={{ padding: '80px 0' }}>
-    <div className="loading-spinner"></div>
-    <span>Carregando suas reservas...</span>
-  </div>
-)}
+            {isLoading && ( 
+              <div className="reservas-loading" style={{ padding: '80px 0' }}>
+                <div className="loading-spinner"></div>
+                <span>Carregando suas reservas...</span>
+              </div>
+            )}
+            
             {error && <p className="erro-mensagem" style={{color: 'red', textAlign: 'center'}}>{error}</p>}
             
-            {/* Mensagem de 'nenhum pedido' agora considera os filtros */}
             {!isLoading && !error && datasOrdenadas.length === 0 && (
               <p style={{textAlign: 'center', margin: '2rem 0'}}>
                 {(termoBusca || statusFiltro !== 'Todos')
@@ -268,7 +352,6 @@ const Reservas = () => {
               </p>
             )}
 
-            {/* Renderização dos pedidos (sem alteração) */}
             {!isLoading && !error && datasOrdenadas.map(data => (
               <section key={data} className="grupo-data">
                 <header className="grupo-header">
@@ -305,6 +388,14 @@ const Reservas = () => {
                         >
                           Comprar novamente
                         </button>
+                        {(pedido.status === 'Em Análise' || pedido.status === 'Aprovado') && (
+                          <button
+                            className="botao-cancelar-reserva"
+                            onClick={() => handleAbrirModalCancelamento(pedido.id)}
+                          >
+                            Cancelar reserva
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -313,9 +404,8 @@ const Reservas = () => {
             ))}
           </div>
 
-          {/* Seção promocional (Mantida intacta) */}
           <div className="container-promocional">
-            {/* ...código dos cards promocionais... */}
+            {/* Cards promocionais */}
           </div>
         </main>
       </div>

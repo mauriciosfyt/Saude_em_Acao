@@ -175,7 +175,9 @@ const GerenciarTreino = () => {
     
     const tags = [];
     if (treino.tipoTreino || treino.tipo) tags.push(treino.tipoTreino || treino.tipo);
-    if (treino.sexo) tags.push(treino.sexo === 'MASCULINO' ? 'Masculino' : 'Feminino');
+    if (treino.Genero) {
+      tags.push(treino.Genero === 'MASCULINO' ? 'Masculino' : 'Feminino');
+    }
     
     if (treino.idadeMin && treino.idadeMax) {
       tags.push(`De ${treino.idadeMin} a ${treino.idadeMax} anos`);

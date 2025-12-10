@@ -88,6 +88,25 @@
   border-bottom-color: #007bff;
 }
 
+/* Estilizar selects para acompanhar os inputs (borda inferior e foco azul) */
+.personal-form-group select {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 2px solid #ced4da;
+  font-size: 1em;
+  background-color: transparent;
+  transition: border-color 0.3s ease;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.personal-form-group select:focus {
+  outline: none;
+  border-bottom-color: #007bff;
+}
+
 .personal-action-buttons {
   display: flex;
   justify-content: flex-end;

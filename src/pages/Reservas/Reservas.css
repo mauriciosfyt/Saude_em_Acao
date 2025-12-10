@@ -124,6 +124,27 @@
 
 .botao-ver-produto { background-color: #004DFF; border-color: #004DFF; color: white; }
 .botao-comprar-novamente { background-color: #fff; border-color: #004DFF; color: #004DFF; }
+/* Botão de cancelar reserva (visível em status EM_ANALISE / APROVADA) */
+.botao-cancelar-reserva {
+  background-color: #fff;
+  border-color: #dc3545;
+  color: #dc3545;
+  border-width: 1px;
+  border-style: solid;
+  transition: background-color 150ms ease, color 150ms ease, transform 120ms ease;
+}
+.botao-cancelar-reserva:hover {
+  background-color: #dc3545;
+  color: #fff;
+  transform: translateY(-2px);
+}
+.botao-cancelar-reserva:active {
+  transform: translateY(0);
+}
+.botao-cancelar-reserva:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(220,53,69,0.12);
+}
 
 
 /* =================================================================== */

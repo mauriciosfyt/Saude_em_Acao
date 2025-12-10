@@ -3,6 +3,7 @@ import './AdministrarAluno.css';
 import MenuPersonal from '../../../components/MenuPersonal/MenuPersonal'
 import { Link } from 'react-router-dom';
 import ModalGerenciarTreino from '../../../pages/Tela Adm/GerenciarAluno/ModalGerenciarTreino';
+import { formatGenero } from '../../../utils/genero';
 // --- Importação da função da API ---
 import { getAllAlunos, updateAluno } from '../../../services/usuarioService';
 
@@ -91,27 +92,11 @@ const AdministrarAluno = () => {
       return next;
     });
 
-    // Tenta persistir no backend
-    try {
-      await updateAluno(alunoIdFinal, { treinoId: treino.id });
-      console.log('Treino associado ao aluno via API com sucesso (personal)');
-      
-      // --- MENSAGEM DE SUCESSO ---
-      toast.success('Treino associado com sucesso!', {
-        className: 'custom-success-toast', // Usa o estilo do Sucesso.css
-        autoClose: 2000,
-      });
-
-    } catch (err) {
-      console.warn('Falha ao salvar associação de treino no servidor (personal), persistido localmente.', err);
-      
-      // --- MENSAGEM DE ERRO (Estilo Excluido) ---
-      toast.error('Erro ao associar treino no servidor.', {
-         className: 'custom-error-toast', // Usa o estilo do Excluido.css
-         autoClose: 2000,
-         progressClassName: 'custom-error-progress-bar'
-      });
-    }
+    // Observação: a persistência no backend já é feita pelo modal
+    // através de `patchAddTreinoToAluno` antes de chamar este callback.
+    // Evitamos aqui uma segunda chamada `PUT /aluno/{id}` que envia
+    // JSON e pode causar erro 500 "Content-Type 'application/json' is not supported".
+    console.log('Persistência no backend delegada ao modal (PATCH). Associação local salva.');
     setModalOpen(false);
     setSelectedAluno(null);
   };
@@ -159,6 +144,7 @@ const AdministrarAluno = () => {
               <tr>
                 <th>Nome:</th>
                 <th>Email</th>
+                <th>      </th>
                 <th>Função</th>
                 <th>Treino</th>
               </tr>
@@ -181,6 +167,7 @@ const AdministrarAluno = () => {
                     <tr key={aluno.id}>
                       <td>{aluno.nome || 'N/A'}</td>
                       <td>{aluno.email || 'N/A'}</td>
+                      <td>{formatGenero(aluno.genero || aluno.sexo)}</td>
                       <td>{aluno.perfil || 'Aluno'}</td>
                       <td>
                         {aluno.plano === 'GOLD' ? (

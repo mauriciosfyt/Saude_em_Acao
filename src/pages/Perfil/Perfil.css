@@ -111,6 +111,11 @@
   margin-bottom: 2px;
 }
 
+/* Novo estilo: label à direita do número */
+
+/* Revertido: mantemos o estilo original onde o label fica abaixo do número */
+/* .perfil-treinos-feitos e .perfil-info-label já definidos acima */
+
 .perfil-info-label {
   font-size: 18px;
   color: #ccc;

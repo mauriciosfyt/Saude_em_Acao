@@ -52,7 +52,7 @@ const AdicionarAluno = () => {
     senha: '',
     confirmarSenha: '',
     idade: '',
-    sexo: '', // Novo campo adicionado ao estado
+    sexo: '', // Campo de gênero (armazenado internamente como sexo, enviado como genero)
     peso: '',
     altura: '', 
     objetivo: '',
@@ -103,9 +103,9 @@ const AdicionarAluno = () => {
     const planoExigeDadosExtras = formData.plano === 'GOLD';
     
     if (planoExigeDadosExtras) {
-      // Adicionada validação para o campo sexo
+      // Adicionada validação para o campo gênero
       if (!formData.idade || !formData.sexo || !formData.peso || !formData.altura || !formData.objetivo || !formData.nivelAtividade) {
-        toast.warn('Para o plano GOLD, os campos: idade, sexo, peso, altura, objetivo e nível de atividade são obrigatórios.');
+        toast.warn('Para o plano GOLD, os campos: idade, gênero, peso, altura, objetivo e nível de atividade são obrigatórios.');
         return;
       }
     }
@@ -139,7 +139,8 @@ const AdicionarAluno = () => {
 
     if (planoExigeDadosExtras) {
       dadosFormulario.append('idade', formData.idade);
-      dadosFormulario.append('sexo', formData.sexo); // Adicionado ao FormData
+      // O backend espera o campo como 'genero' (enum EGenero). Enviamos o valor selecionado em 'sexo'.
+      dadosFormulario.append('genero', formData.sexo);
       dadosFormulario.append('peso', formData.peso);
       dadosFormulario.append('altura', formData.altura); 
       dadosFormulario.append('objetivo', formData.objetivo);
@@ -242,19 +243,20 @@ const AdicionarAluno = () => {
                     <input type="number" id="idade" name="idade" value={formData.idade} onChange={handleChange} placeholder="Ex: 25" required />
                   </div>
 
-                  {/* --- NOVO CAMPO: SEXO --- */}
+                  {/* --- NOVO CAMPO: GÊNERO --- */}
                   <div className="aluno-form-group">
-                    <label htmlFor="sexo">Sexo</label>
-                    <select 
-                      id="sexo" 
-                      name="sexo" 
-                      value={formData.sexo} 
-                      onChange={handleChange} 
+                    <label htmlFor="genero">Gênero</label>
+                    <select
+                      id="genero"
+                      name="sexo"
+                      value={formData.sexo}
+                      onChange={handleChange}
                       required
                     >
                       <option value="" disabled>Selecione</option>
                       <option value="MASCULINO">Masculino</option>
                       <option value="FEMININO">Feminino</option>
+                      <option value="OUTRO">Outros</option>
                     </select>
                   </div>
                   {/* --- FIM DO NOVO CAMPO --- */}

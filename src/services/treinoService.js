@@ -1,10 +1,16 @@
 // URL base da nossa API
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://52.91.126.52:8080') + '/api';
-const API_URL = `${API_BASE_URL}/treinos`;
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://52.91.126.52');
+const API_URL = `${API_BASE_URL}/api/treinos`;
 
 // Função para obter o token de autenticação
 const getAuthToken = () => {
-  return sessionStorage.getItem('token') || localStorage.getItem('authToken') || null;
+  // Aceita token em sessionStorage 'token' ou em localStorage sob chaves comuns
+  return (
+    sessionStorage.getItem('token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('authToken') ||
+    null
+  );
 };
 
 // ====================================================================
@@ -174,8 +180,7 @@ export const createTreino = async (treinoData) => {
 
     const formData = treinoData instanceof FormData ? treinoData : buildTreinoFormData(treinoData);
 
-    console.debug('--- FormData (enviado) ---');
-    console.debug(debugFormDataEntries(formData));
+    // FormData prepared for envio (debug removed in production)
 
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -211,9 +216,7 @@ export const updateTreino = async (id, treinoData) => {
     // Constrói FormData da mesma forma que createTreino (inclui tratamento para dias vazios)
     const formData = treinoData instanceof FormData ? treinoData : buildTreinoFormData(treinoData);
 
-    // DEBUG opcional
-    console.debug('--- Update FormData (enviado) ---');
-    console.debug(debugFormDataEntries(formData));
+    // Update FormData prepared for envio (debug removed in production)
 
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'PUT',

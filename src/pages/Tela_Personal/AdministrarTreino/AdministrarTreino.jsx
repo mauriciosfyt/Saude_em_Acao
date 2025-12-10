@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './AdministrarTreino.css'; 
 import MenuPersonal from '../../../components/MenuPersonal/MenuPersonal';
 import { getAllTreinos, deleteTreino, getTreinoById } from '../../../services/treinoService';
+import { formatGenero } from '../../../utils/genero';
 
 // --- IMPORTAÇÕES DO TOASTIFY ---
 import { ToastContainer, toast } from 'react-toastify';
@@ -170,7 +171,10 @@ const AdministrarTreino = () => {
     const tags = [];
     if (treino.tipoTreino || treino.tipo) tags.push(treino.tipoTreino || treino.tipo);
 
-    if (treino.sexo) tags.push(treino.sexo === 'MASCULINO' ? 'Masculino' : 'Feminino');
+    const generoVal = treino.sexo || treino.genero;
+    if (generoVal) {
+      tags.push(formatGenero(generoVal));
+    }
 
     if (treino.idadeMin && treino.idadeMax) {
       tags.push(`De ${treino.idadeMin} a ${treino.idadeMax} anos`);

@@ -9,6 +9,7 @@ import { createProfessor } from '../../../services/usuarioService'; // Importar 
 
 // --- REACT TOASTIFY ---
 import { ToastContainer, toast } from 'react-toastify';
+import { EGenero } from '../../../utils/EGenero';
 
 import '../../../components/Mensagem/Sucesso.css'; // Importação do CSS personalizado do Toast
 import '../../../components/Mensagem/Excluido.css'; // Seu CSS customizado para mensagens
@@ -60,6 +61,7 @@ const AdicionarPersonal = () => {
     telefone: '',
     senha: '',
     confirmarSenha: '',
+    genero: '',
   });
 
   // --- ADIÇÕES DE LÓGICA PARA IMAGEM ---
@@ -113,11 +115,13 @@ const AdicionarPersonal = () => {
     const dadosFormulario = new FormData();
     
     // 2. Adicionar os campos de texto
+
     dadosFormulario.append('nome', formData.nome);
     dadosFormulario.append('email', formData.email);
     dadosFormulario.append('cpf', formData.cpf);
     dadosFormulario.append('telefone', formData.telefone);
     dadosFormulario.append('senha', formData.senha);
+    dadosFormulario.append('genero', formData.genero);
 
     // 3. Adicionar o arquivo de imagem (se existir)
     // O nome 'fotoPerfil' é um palpite; deve ser o nome que a sua API espera
@@ -209,6 +213,22 @@ const AdicionarPersonal = () => {
                 <label htmlFor="telefone">Telefone</label>
                 <input type="tel" id="telefone" name="telefone" value={formData.telefone} onChange={handleChange} required />
               </div>
+              <div className="personal-form-group">
+                <label htmlFor="genero">Gênero</label>
+                <select
+                  id="genero"
+                  name="genero"
+                  value={formData.genero}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>Selecione</option>
+                  <option value={EGenero.MASCULINO}>Masculino</option>
+                  <option value={EGenero.FEMININO}>Feminino</option>
+                  <option value={EGenero.OUTRO}>Outro</option>
+                </select>
+              </div>
+
               <div className="personal-form-group">
                 <label htmlFor="senha">Senha</label>
                 <div className="password-input-wrapper">

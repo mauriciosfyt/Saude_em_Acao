@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import './ModalGerenciarTreino.css';
 import { getAllTreinos } from '../../../services/treinoService';
+import { formatGenero } from '../../../utils/genero';
 import { patchAddTreinoToAluno } from '../../../services/usuarioService';
 import { toast, ToastContainer } from 'react-toastify'; // Removendo ToastContainer daqui
 import 'react-toastify/dist/ReactToastify.css'; // ADICIONADO CSS padrão
@@ -110,11 +111,9 @@ const ModalGerenciarTreino = ({ open, onClose, aluno, alunoId, onChoose }) => {
     if (treino.tipoDeTreino || treino.tipoTreino || treino.tipo) {
       tags.push(treino.tipoDeTreino || treino.tipoTreino || treino.tipo);
     }
-    if (treino.sexo) {
-      const sexoTexto = treino.sexo === 'MASCULINO' ? 'Masculino' : 
-                       treino.sexo === 'FEMININO' ? 'Feminino' : 
-                       treino.sexo;
-      tags.push(sexoTexto);
+    const generoVal = treino.sexo || treino.genero;
+    if (generoVal) {
+      tags.push(formatGenero(generoVal));
     }
     if (treino.idadeMinima || treino.idadeMin) {
       const idadeMin = treino.idadeMinima || treino.idadeMin;

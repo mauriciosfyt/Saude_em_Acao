@@ -80,7 +80,7 @@ const PerfilAdm = () => {
       try {
         // --- BUSCA EM PARALELO (Velocidade Máxima) ---
         const perfilPromise = getMeuPerfil();
-        const dadosPromise = Promise.all([getAllProdutos(), fetchReservas()]);
+        const dadosPromise = Promise.allSettled([getAllProdutos(), fetchReservas()]);
 
         // 1. Processa Perfil e Imagem
         const perfilCompleto = await perfilPromise;
@@ -108,8 +108,12 @@ const PerfilAdm = () => {
             }
         }
 
-        // 2. Processa Estatísticas (Produtos e Reservas)
-        const [produtosData, reservasData] = await dadosPromise;
+        // 2. Processa Estatísticas (Produtos e Reservas) - Com tratamento robusto
+        const resultados = await dadosPromise;
+        
+        // Extrai dados apenas se a requisição foi bem-sucedida
+        const produtosData = resultados[0].status === 'fulfilled' ? resultados[0].value : [];
+        const reservasData = resultados[1].status === 'fulfilled' ? resultados[1].value : [];
 
         let listaReservas = [];
         if (Array.isArray(reservasData)) {
