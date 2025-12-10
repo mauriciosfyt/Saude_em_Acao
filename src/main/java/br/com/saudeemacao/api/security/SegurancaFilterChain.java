@@ -92,7 +92,9 @@ public class SegurancaFilterChain {
                 "http://localhost:4200",
                 "http://localhost:5173",
                 "http://localhost:8080",
-                "http://18.214.165.142:3000"
+                "http://18.214.165.142:3000",
+                "null",
+                "http://52.91.126.52"
 
         ));
 
