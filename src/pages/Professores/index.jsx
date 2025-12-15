@@ -22,6 +22,7 @@ export default function Equipe() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showModalLogin, setShowModalLogin] = useState(false);
+    const [modalReason, setModalReason] = useState('not_logged');
     const [showModal, setShowModal] = useState(false);
     const [showCodeModal, setShowCodeModal] = useState(false);
     const [showRecoverModal, setShowRecoverModal] = useState(false);
@@ -50,9 +51,26 @@ export default function Equipe() {
 
     // Verifica autenticação e mostra modal se não autenticado
     useEffect(() => {
-        if (!authLoading && !isAuthenticated) {
+        if (authLoading) return; // aguardando verificação de auth
+
+        // Obtém o plano do usuário salvo em localStorage (ou sessionStorage como fallback)
+        const rawPlano = localStorage.getItem('userPlano') || sessionStorage.getItem('userPlano') || '';
+            const planoNormalized = String(rawPlano).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+        if (!isAuthenticated) {
+            setModalReason('not_logged');
             setShowModalLogin(true);
+            return;
         }
+
+        // Se o usuário está logado, mas possui plano Básico ou Essencial, mostra modal explicando plano insuficiente
+            if (planoNormalized.includes('basico') || planoNormalized.includes('essencial')) {
+            setModalReason('plan_insufficient');
+            setShowModalLogin(true);
+            return;
+        }
+
+        setShowModalLogin(false);
     }, [authLoading, isAuthenticated]);
 
     const handleCodeChange = (value, idx) => {
@@ -130,6 +148,7 @@ export default function Equipe() {
             {showModalLogin && (
                 <ModalLoginNecessario 
                     onClose={() => setShowModalLogin(false)}
+                    reason={modalReason}
                 />
             )}
 
@@ -204,7 +223,6 @@ export default function Equipe() {
             {/* Lista de membros */}
             <div className="equipe-grid">
                 {loading && <div style={{ padding: 40 }}>Carregando professores...</div>}
-                {error && <div style={{ color: 'red', padding: 20 }}>Erro: {error}</div>}
                 {!loading && !error && membros.length === 0 && <div style={{ padding: 20 }}>Nenhum professor encontrado.</div>}
                 {!loading && !error && membros.map((m, index) => (
                     <div className="equipe-card" key={m.id || index}>

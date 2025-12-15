@@ -156,3 +156,8 @@
     font-size: 0.9rem;
   }
 }
+
+/* Prevent body scroll when a modal is shown */
+body.modal-open {
+  overflow: hidden;
+}
